@@ -3,37 +3,20 @@
 public sealed class Schema
 {
     /// <summary>
-    /// 线体编号
+    /// 通道名称。
     /// </summary>
     [NotNull]
-    public string? Line { get; set; }
+    public string? ChannelName { get; set; }
 
     /// <summary>
-    /// 线体名称
+    /// 设备名称。
     /// </summary>
     [NotNull]
-    public string? LineName { get; set; }
+    public string? DeviceName { get; set; }
 
     /// <summary>
-    /// 工站编号，每条产线工站编号唯一。
+    /// 标记组名称。
     /// </summary>
     [NotNull]
-    public string? Station { get; set; }
-
-    /// <summary>
-    /// 工站名称
-    /// </summary>
-    [NotNull]
-    public string? StationName { get; set; }
-
-    /// <summary>
-    /// 设备主机（IP地址）。
-    /// </summary>
-    [NotNull]
-    public string? Host { get; set; }
-
-    /// <summary>
-    /// 设备网络端口，0 表示会按驱动默认端口设置。
-    /// </summary>
-    public int Port { get; set; }
+    public string? TagGroupName { get; set; }
 }
