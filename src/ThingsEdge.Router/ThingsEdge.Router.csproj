@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.1.4.563" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ThingsEdge.Common\ThingsEdge.Common.csproj" />
+    <ProjectReference Include="..\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
