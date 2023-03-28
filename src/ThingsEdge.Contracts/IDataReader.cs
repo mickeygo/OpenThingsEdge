@@ -1,9 +1,15 @@
 ﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
-/// 数据读取
+/// 读取加载数据接口。
 /// </summary>
 public interface IDataReader
 {
-    Task<T> ReadAsync<T>(string tag);
+    /// <summary>
+    /// 读取数据。
+    /// </summary>
+    /// <param name="schema">标记 schema。</param>
+    /// <param name="tags">要读取数据的标记集合。</param>
+    /// <returns></returns>
+    Task<List<PayloadData>> ReadAsync(Schema schema, IEnumerable<string> tags);
 }

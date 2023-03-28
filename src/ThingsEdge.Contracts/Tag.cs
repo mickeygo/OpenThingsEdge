@@ -64,7 +64,7 @@ public sealed class Tag : IEquatable<Tag>
     /// <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着发送。
     /// </summary>
     [NotNull]
-    public List<Tag>? NormalTags { get; set; } = new List<Tag>();
+    public List<Tag>? NormalTags { get; set; } = new();
 
     /// <summary>
     /// 标记是否为数组对象。

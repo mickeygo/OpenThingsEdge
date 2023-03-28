@@ -23,5 +23,5 @@ public sealed class ChannelInfo
     /// 设备集合。
     /// </summary>
     [NotNull]
-    public List<DeviceInfo> Devices { get; set; } = new List<DeviceInfo>();
+    public List<DeviceInfo> Devices { get; set; } = new();
 }

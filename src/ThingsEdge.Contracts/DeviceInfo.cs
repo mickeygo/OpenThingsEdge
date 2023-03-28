@@ -35,5 +35,5 @@ public sealed class DeviceInfo
     /// 标记组集合。
     /// </summary>
     [NotNull]
-    public List<TagGroup>? TagGroups { get; set; } = new List<TagGroup>();
+    public List<TagGroup>? TagGroups { get; set; } = new();
 }

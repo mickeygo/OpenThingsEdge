@@ -17,5 +17,5 @@ public sealed class TagGroup
     /// 标记集合。
     /// </summary>
     [NotNull]
-    public List<Tag>? Tags { get; set; } = new List<Tag>();
+    public List<Tag>? Tags { get; set; } = new();
 }
