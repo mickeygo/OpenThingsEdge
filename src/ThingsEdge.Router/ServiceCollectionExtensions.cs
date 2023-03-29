@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Router.Transport.RESTful;
+﻿using ThingsEdge.Router.Transport.MQTT;
+using ThingsEdge.Router.Transport.RESTful;
 
 namespace ThingsEdge.Router;
 
@@ -44,8 +45,16 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
-    public static IServiceCollection AddMQTTClient(this IServiceCollection services)
+    public static IServiceCollection AddMQTTClient(this IServiceCollection services, IConfiguration configuration, string mqtt = "MQTT")
     {
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(typeof(ServiceCollectionExtensions).Assembly);
+        });
+
+        services.Configure<MQTTClientOptions>(configuration.GetSection(mqtt));
+        services.AddHostedService<MQTTHostedService>();
+
         return services;
     }
 }

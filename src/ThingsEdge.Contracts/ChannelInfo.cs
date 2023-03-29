@@ -20,6 +20,12 @@ public sealed class ChannelInfo
     public DriverModel Model { get; set; }
 
     /// <summary>
+    /// 标记要旨，可用于设置重要信息。
+    /// </summary>
+    [NotNull]
+    public string? Keynote { get; set; } = string.Empty;
+
+    /// <summary>
     /// 设备集合。
     /// </summary>
     [NotNull]

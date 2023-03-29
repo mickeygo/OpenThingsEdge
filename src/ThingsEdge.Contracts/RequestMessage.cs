@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
-/// 加载数据上下文对象。
+/// 请求消息。
 /// </summary>
-public sealed class PayloadContext
+public sealed class RequestMessage
 {
     /// <summary>
     /// 加载的数据头。

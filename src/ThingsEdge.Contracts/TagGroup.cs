@@ -14,6 +14,12 @@ public sealed class TagGroup
     public string? Name { get; set; }
 
     /// <summary>
+    /// 标记要旨，可用于设置重要信息。
+    /// </summary>
+    [NotNull]
+    public string? Keynote { get; set; } = string.Empty;
+
+    /// <summary>
     /// 标记集合。
     /// </summary>
     [NotNull]

@@ -4,9 +4,17 @@ using MQTTnet.Extensions.ManagedClient;
 
 namespace ThingsEdge.Router.Transport.MQTT;
 
+/// <summary>
+/// MQTT Client 工厂
+/// </summary>
 public static class MQTTClientFactory
 {
-    public static IMQTTClientProvider Create(MQTTClientOptions options)
+    /// <summary>
+    /// 创建
+    /// </summary>
+    /// <param name="options">参数选项。</param>
+    /// <returns></returns>
+    public static IMQTTClient Create(MQTTClientOptions options)
     {
         MqttFactory mqttFactory = new();
         var managedMqttClient = mqttFactory.CreateManagedMqttClient();
@@ -18,7 +26,7 @@ public static class MQTTClientFactory
             .WithClientOptions(mqttClientOptions)
             .Build();
 
-        return new MQTTClientProvider(managedMqttClient, managedMqttClientOptions);
+        return new MQTTClient(managedMqttClient, managedMqttClientOptions);
     }
 }
 

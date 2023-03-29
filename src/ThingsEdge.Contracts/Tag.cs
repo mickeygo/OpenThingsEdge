@@ -3,7 +3,7 @@
 /// <summary>
 /// 标记。
 /// </summary>
-public sealed class Tag : IEquatable<Tag>
+public sealed class Tag
 {
     public int Id { get; set; }
 
@@ -78,23 +78,4 @@ public sealed class Tag : IEquatable<Tag>
                 && DataType != DataType.S7WString
                 && Length > 0;
     }
-
-    #region override
-
-    public bool Equals(Tag? other)
-    {
-        return other != null && Equals(other.Name, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Tag obj2 && Equals(obj2);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Name);
-    }
-
-    #endregion
 }

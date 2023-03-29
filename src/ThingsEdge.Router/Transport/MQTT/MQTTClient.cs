@@ -4,13 +4,13 @@ using MQTTnet.Protocol;
 
 namespace ThingsEdge.Router.Transport.MQTT;
 
-internal sealed class MQTTClientProvider : IMQTTClientProvider
+internal sealed class MQTTClient : IMQTTClient
 {
     private readonly ManagedMqttClientOptions _managedMqttClientOptions;
 
     public IManagedMqttClient ManagedMqttClient { get; }
 
-    public MQTTClientProvider(IManagedMqttClient managedMqttClient, ManagedMqttClientOptions managedMqttClientOptions)
+    public MQTTClient(IManagedMqttClient managedMqttClient, ManagedMqttClientOptions managedMqttClientOptions)
     {
         ManagedMqttClient = managedMqttClient;
         _managedMqttClientOptions = managedMqttClientOptions;

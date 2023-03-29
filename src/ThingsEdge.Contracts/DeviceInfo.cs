@@ -32,6 +32,12 @@ public sealed class DeviceInfo
     public int Port { get; set; }
 
     /// <summary>
+    /// 标记要旨，可用于设置重要信息。
+    /// </summary>
+    [NotNull]
+    public string? Keynote { get; set; } = string.Empty;
+
+    /// <summary>
     /// 标记组集合。
     /// </summary>
     [NotNull]

@@ -2,7 +2,7 @@
 
 namespace ThingsEdge.Router.Transport.MQTT;
 
-public interface IMQTTClientProvider : IDisposable
+public interface IMQTTClient : IDisposable
 {
     /// <summary>
     /// MQTT 客户端
