@@ -6,8 +6,6 @@ using DInt = System.Int32;
 using Real = System.Single;
 using LReal = System.Double;
 
-using OneOf;
-
 namespace ThingsEdge.Contracts;
 
 public static class PayloadDataExtensions
@@ -40,11 +38,12 @@ public static class PayloadDataExtensions
             t15 => Arr2Str(t15),
             t16 => Arr2Str(t16)
             );
+    }
 
-        static string Arr2Str<T>(T[] items)
-        {
-            return $"[{string.Join(",", items)}]";
-        }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string Arr2Str<T>(T[] items)
+    {
+        return $"[{string.Join(",", items)}]";
     }
 
     /// <summary>

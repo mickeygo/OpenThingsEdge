@@ -5,15 +5,17 @@
 /// </summary>
 internal sealed class MQTTHostedService : IHostedService
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IMQTTMessageReceivedHandler _msgRecevHandler;
     private readonly MQTTClientOptions _mqttClientOptions;
     private readonly ILogger _logger;
 
     private IMQTTClient? _mqttClient;
 
-    public MQTTHostedService(IServiceProvider serviceProvider, IOptions<MQTTClientOptions> mqttClientOptions, ILogger<MQTTHostedService> logger)
+    public MQTTHostedService(IMQTTMessageReceivedHandler msgRecevHandler, 
+        IOptions<MQTTClientOptions> mqttClientOptions, 
+        ILogger<MQTTHostedService> logger)
     {
-        _serviceProvider = serviceProvider;
+        _msgRecevHandler = msgRecevHandler;
         _mqttClientOptions = mqttClientOptions.Value;
         _logger = logger;
     }
@@ -23,9 +25,9 @@ internal sealed class MQTTHostedService : IHostedService
         _mqttClient = MQTTClientFactory.Create(_mqttClientOptions);
         _mqttClient.ManagedMqttClient.ApplicationMessageReceivedAsync += async (args) =>
         {
-            var handler = _serviceProvider.GetRequiredService<IMQTTMessageReceivedHandler>();
-            await handler.HandleAsync(args, cancellationToken);
+            await _msgRecevHandler.HandleAsync(args, cancellationToken);
         };
+
         await _mqttClient.StartAsync();
     }
 

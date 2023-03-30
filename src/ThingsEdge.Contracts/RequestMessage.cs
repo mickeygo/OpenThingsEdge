@@ -16,7 +16,7 @@ public sealed class RequestMessage
     /// </summary>
     /// <remarks>注：加载的标记数据集合会包含触发的标记数据。</remarks>
     [NotNull]
-    public List<PayloadData>? Values { get; set; }
+    public List<PayloadData>? Values { get; set; } = new();
 
     /// <summary>
     /// 通过标记获取指定是加载数据，如果没有找到则返回 null。

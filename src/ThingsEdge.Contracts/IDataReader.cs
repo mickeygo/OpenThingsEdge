@@ -11,5 +11,5 @@ public interface IDataReader
     /// <param name="schema">标记 schema。</param>
     /// <param name="tags">要读取数据的标记集合。</param>
     /// <returns></returns>
-    Task<List<PayloadData>> ReadAsync(Schema schema, IEnumerable<string> tags);
+    Task<List<DataReadResult>> ReadAsync(Schema schema, IEnumerable<string> tags);
 }

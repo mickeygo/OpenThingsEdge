@@ -5,6 +5,13 @@
 /// </summary>
 public sealed class ForwarderContext
 {
+    private readonly static AsyncLocal<ForwarderContext> _context = new();
+
+    /// <summary>
+    /// 当前数据传输上下文对象。
+    /// </summary>
+    public static ForwarderContext? Current => _context.Value;
+
     public RequestMessage Request { get; }
 
     public ResponseMessage Response { get; }
@@ -13,5 +20,10 @@ public sealed class ForwarderContext
     {
         Request = request;
         Response = response;
+    }
+    
+    public void SetContext(ForwarderContext context)
+    {
+        _context.Value = context;
     }
 }
