@@ -21,20 +21,20 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
         var topic = args.ApplicationMessage.Topic;
         var body = Encoding.UTF8.GetString(args.ApplicationMessage.CorrelationData);
 
-        MQTTRequestMessageResult msgResult;
+        MQTTRequestMessageResult reqResult;
         try
         {
             // 发送请求给唯一处理者。
             // 第三方需要有接口处理该消息。
-            msgResult = await _mediator.Send(new MQTTRequestMessage(topic, body), cancellationToken);
-            if (!msgResult.IsSuccess)
+            reqResult = await _mediator.Send(new MQTTRequestMessage(topic, body), cancellationToken);
+            if (!reqResult.IsSuccess())
             {
                 return;
             }
 
             // TODO: 将数据发送给远程服务。
 
-            if (msgResult.AutoAcknowledge)
+            if (reqResult.AutoAcknowledge)
             {
                 await args.AcknowledgeAsync(cancellationToken);
             }
@@ -45,12 +45,12 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
             return;
         }
 
-        if (msgResult.RequestMessage != null)
+        if (reqResult.RequestMessage != null)
         {
             try
             {
                 // 广播消息给所有订阅者。
-                await _mediator.Publish(new NotificationMessage(msgResult.RequestMessage), cancellationToken);
+                await _mediator.Publish(new NotificationMessage(reqResult.RequestMessage), cancellationToken);
             }
             catch (Exception ex)
             {

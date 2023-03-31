@@ -22,4 +22,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\ThingsEdge.Common\ThingsEdge.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -73,9 +73,7 @@ public sealed class Tag
     /// <returns></returns>
     public bool IsArray()
     {
-        return DataType != DataType.String
-                && DataType != DataType.S7String
-                && DataType != DataType.S7WString
-                && Length > 0;
+        return Length > 0
+           && DataType is not (DataType.S7String or DataType.S7String or DataType.S7WString);
     }
 }

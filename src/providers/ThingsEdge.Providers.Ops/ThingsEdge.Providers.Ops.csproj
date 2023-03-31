@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OneOf.Extended" Version="3.0.243" />
+    <PackageReference Include="Ops.Exchange" Version="0.4.93" />
   </ItemGroup>
 
 </Project>

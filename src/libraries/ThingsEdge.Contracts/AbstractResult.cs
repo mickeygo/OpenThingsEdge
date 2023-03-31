@@ -19,7 +19,7 @@ public class AbstractResult
     /// 返回是否成功。
     /// </summary>
     /// <returns></returns>
-    public bool IsSuccess()
+    public virtual bool IsSuccess()
     {
         return Code == 0;
     }

@@ -10,6 +10,9 @@ public sealed class MQTTRequestMessageResult : AbstractResult
     /// </summary>
     public RequestMessage? RequestMessage { get; set; }
 
+    /// <summary>
+    /// Schema
+    /// </summary>
     public List<Schema>? Schemas { get; set; }
 
     /// <summary>

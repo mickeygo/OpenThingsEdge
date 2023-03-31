@@ -16,8 +16,4 @@
     <ProjectReference Include="..\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Handlers\" />
-  </ItemGroup>
-
 </Project>

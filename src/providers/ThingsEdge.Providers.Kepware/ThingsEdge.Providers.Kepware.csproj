@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
+    <ProjectReference Include="..\..\libraries\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
