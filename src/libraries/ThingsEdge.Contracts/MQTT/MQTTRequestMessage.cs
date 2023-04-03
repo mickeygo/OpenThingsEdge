@@ -7,6 +7,8 @@
 /// </summary>
 public sealed class MQTTRequestMessage : IRequest<MQTTRequestMessageResult>
 {
+    public string ClientId { get; }
+
     /// <summary>
     /// 消息 Topic。
     /// </summary>
@@ -17,8 +19,9 @@ public sealed class MQTTRequestMessage : IRequest<MQTTRequestMessageResult>
     /// </summary>
     public string Body { get; }
 
-    public MQTTRequestMessage(string topic, string body)
+    public MQTTRequestMessage(string clientId, string topic, string body)
     {
+        ClientId = clientId;
         Topic = topic;
         Body = body;
     }

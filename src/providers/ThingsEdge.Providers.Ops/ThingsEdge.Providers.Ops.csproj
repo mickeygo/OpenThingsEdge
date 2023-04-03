@@ -10,4 +10,8 @@
     <PackageReference Include="Ops.Exchange" Version="0.4.93" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\libraries\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

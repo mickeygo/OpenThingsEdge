@@ -1,4 +1,4 @@
-﻿namespace Ops.Contrib.Kepware.IotGateway.RESTful;
+﻿namespace ThingsEdge.Providers.Kepware.IotGateway.RESTful;
 
 /// <summary>
 /// REST 服务端

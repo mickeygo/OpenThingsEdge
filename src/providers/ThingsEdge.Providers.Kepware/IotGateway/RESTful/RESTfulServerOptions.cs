@@ -1,4 +1,4 @@
-﻿namespace Ops.Contrib.Kepware.IotGateway.RESTful;
+﻿namespace ThingsEdge.Providers.Kepware.IotGateway.RESTful;
 
 /// <summary>
 /// RESTful 服务端参数选项。
@@ -20,7 +20,12 @@ public sealed class RESTfulServerOptions
     /// <summary>
     /// 凭证路径。
     /// </summary>
-    public string? CertificatePath { get; set; }
+    public string? CertFileName { get; set; }
+
+    /// <summary>
+    /// 凭证密码，没有可以为 null。
+    /// </summary>
+    public string? CertPassword { get; set; }
 
     /// <summary>
     /// 是否禁用凭证检测（https），默认为 true。

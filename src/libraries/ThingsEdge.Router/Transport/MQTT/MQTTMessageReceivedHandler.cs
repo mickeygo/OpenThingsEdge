@@ -18,22 +18,23 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
 
     public async Task HandleAsync(MqttApplicationMessageReceivedEventArgs args, CancellationToken cancellationToken)
     {
+        var clientId = args.ClientId;
         var topic = args.ApplicationMessage.Topic;
-        var body = Encoding.UTF8.GetString(args.ApplicationMessage.CorrelationData);
+        var body = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
 
         MQTTRequestMessageResult reqResult;
         try
         {
             // 发送请求给唯一处理者。
             // 第三方需要有接口处理该消息。
-            reqResult = await _mediator.Send(new MQTTRequestMessage(topic, body), cancellationToken);
+            reqResult = await _mediator.Send(new MQTTRequestMessage(clientId, topic, body), cancellationToken);
             if (!reqResult.IsSuccess())
             {
                 return;
             }
 
-            // TODO: 将数据发送给远程服务。
-
+            // TODO: 将数据统一处理。
+            
             if (reqResult.AutoAcknowledge)
             {
                 await args.AcknowledgeAsync(cancellationToken);

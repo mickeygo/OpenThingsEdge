@@ -1,0 +1,9 @@
+﻿@page "/"
+@namespace ThingsEdge.Server.Pages
+@using ThingsEdge.Server.Global
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+
+<component type="typeof(ThingsEdge.Server.App)" render-mode="ServerPrerendered" />

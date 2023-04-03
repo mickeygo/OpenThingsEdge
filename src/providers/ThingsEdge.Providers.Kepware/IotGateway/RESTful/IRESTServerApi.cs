@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Adapter.Kepware.IotGateway.RESTful;
+﻿namespace ThingsEdge.Providers.Kepware.IotGateway.RESTful;
 
 /// <summary>
 /// IotGateway RESTful API 接口。

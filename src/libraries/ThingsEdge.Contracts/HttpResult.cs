@@ -5,5 +5,4 @@
 /// </summary>
 public sealed class HttpResult : AbstractResult<ResponseMessage>
 {
-
 }
