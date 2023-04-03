@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddIotGatewayRESTfulServer(this IServiceCollection services)
     {
-        services.AddHttpClient(RESTServer.HttpClientName, (sp, httpClient) =>
+        services.AddHttpClient(DefaultRESTServer.HttpClientName, (sp, httpClient) =>
         {
             var options = sp.GetRequiredService<IOptions<RESTfulServerOptions>>().Value;
             httpClient.BaseAddress = new Uri($"{options.RESTServerBaseAddress}/iotgateway");
@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
             }
         });
 
-        services.AddTransient<IRESTServerApi, RESTServer>();
+        services.AddTransient<IRESTServerApi, DefaultRESTServer>();
 
         return services;
     }

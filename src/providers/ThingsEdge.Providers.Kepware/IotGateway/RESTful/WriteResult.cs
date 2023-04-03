@@ -8,7 +8,7 @@ public sealed class WriteResultCollection
     [NotNull]
     public List<WriteResult>? WriteResults { get; set; }
 
-    public bool IsOk(string tag)
+    public bool IsSuccess(string tag)
     {
         return WriteResults.FirstOrDefault(s => s.Id == tag)?.S == true;
     }

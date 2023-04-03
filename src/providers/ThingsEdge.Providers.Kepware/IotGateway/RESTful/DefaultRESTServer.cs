@@ -3,14 +3,14 @@
 /// <summary>
 /// REST 服务端
 /// </summary>
-internal sealed class RESTServer : IRESTServerApi
+internal sealed class DefaultRESTServer : IRESTServerApi
 {
-    public const string HttpClientName = "IotGatewayRESTServerApi";
+    public const string HttpClientName = "KepwareIotGatewayRESTServerApi";
 
     private readonly IHttpClientFactory _httpClientFactory = null!;
     private readonly ILogger _logger = null!;
 
-    public RESTServer(IHttpClientFactory httpClientFactory, ILogger<RESTServer> logger)
+    public DefaultRESTServer(IHttpClientFactory httpClientFactory, ILogger<DefaultRESTServer> logger)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;

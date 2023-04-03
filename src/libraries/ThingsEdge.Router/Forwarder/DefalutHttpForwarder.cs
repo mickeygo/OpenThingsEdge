@@ -15,10 +15,12 @@ internal sealed class DefalutHttpForwarder : IHttpForwarder
     {
         var httpClient = _httpClientFactory.CreateClient("ThingsEdge.Router.RESTfulClient");
         var resp = await httpClient.PostAsJsonAsync("/api/edge", message, cancellationToken);
-        if (resp.IsSuccessStatusCode)
+        if (!resp.IsSuccessStatusCode)
         {
 
         }
+
+
         throw new NotImplementedException();
     }
 }

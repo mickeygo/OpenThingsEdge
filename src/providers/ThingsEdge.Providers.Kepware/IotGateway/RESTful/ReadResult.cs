@@ -58,7 +58,7 @@ public sealed class ReadData
         return (false, false);
     }
 
-    public (bool ok, bool[] value) GetArrayBoolean()
+    public (bool ok, bool[] value) GetBooleanArray()
     {
         throw new NotImplementedException();
     }
@@ -68,7 +68,7 @@ public sealed class ReadData
         throw new NotImplementedException();
     }
 
-    public (bool ok, byte[] value) GetArrayByte()
+    public (bool ok, byte[] value) GetByteArray()
     {
         throw new NotImplementedException();
     }
@@ -83,7 +83,7 @@ public sealed class ReadData
         return (false, 0);
     }
 
-    public (bool ok, int[] value) GetArrayInt32()
+    public (bool ok, int[] value) GetInt32Array()
     {
         throw new NotImplementedException();
     }
@@ -98,7 +98,7 @@ public sealed class ReadData
         return (false, 0);
     }
 
-    public (bool ok, long[] value) GetArrayInt64()
+    public (bool ok, long[] value) GetInt64Array()
     {
         throw new NotImplementedException();
     }
@@ -113,7 +113,7 @@ public sealed class ReadData
         return (false, 0);
     }
 
-    public (bool ok, double[] value) GetArrayDouble()
+    public (bool ok, double[] value) GetDoubleArray()
     {
         throw new NotImplementedException();
     }

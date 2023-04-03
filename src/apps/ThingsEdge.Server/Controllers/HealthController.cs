@@ -4,14 +4,17 @@ using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace ThingsEdge.Server.Controllers;
 
+/// <summary>
+/// 健康检测接口
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [AllowAnonymous]
-public class EdgeController : Controller
+public class HealthController : Controller
 {
-    [HttpPost]
+    [HttpGet, HttpPost]
     [Route("")]
-    public IActionResult Post()
+    public IActionResult Index()
     {
         return Ok();
     }
