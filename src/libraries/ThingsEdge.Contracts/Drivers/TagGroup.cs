@@ -5,6 +5,9 @@
 /// </summary>
 public sealed class TagGroup
 {
+    /// <summary>
+    /// 唯一值。
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -20,7 +23,7 @@ public sealed class TagGroup
     public string? Keynote { get; set; } = string.Empty;
 
     /// <summary>
-    /// 标记集合。
+    /// 隶属于分组的标记集合。
     /// </summary>
     [NotNull]
     public List<Tag>? Tags { get; set; } = new();

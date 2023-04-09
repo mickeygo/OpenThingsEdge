@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.Common.Storage;
 
-public interface IDbStorage
+public interface IDbStorage : IDisposable
 {
     List<T> GetAll<T>();
 

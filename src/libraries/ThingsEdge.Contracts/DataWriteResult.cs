@@ -10,4 +10,14 @@ public sealed class DataWriteResult : AbstractResult
     /// </summary>
     [NotNull]
     public string? Tag { get; set; }
+
+    public static DataWriteResult From(string tag, int code = 0, string err = "")
+    {
+        return new DataWriteResult
+        {
+            Code = code,
+            ErrorMessage = err,
+            Tag = tag,
+        };
+    }
 }

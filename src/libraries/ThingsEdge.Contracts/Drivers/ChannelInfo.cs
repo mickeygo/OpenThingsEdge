@@ -5,6 +5,9 @@
 /// </summary>
 public sealed class ChannelInfo
 {
+    /// <summary>
+    /// 唯一值。
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>

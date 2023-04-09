@@ -13,5 +13,8 @@ public interface IEngine : IDisposable
     /// <returns></returns>
     Task StartAsync();
 
+    /// <summary>
+    /// 引擎停止。
+    /// </summary>
     void Stop();
 }

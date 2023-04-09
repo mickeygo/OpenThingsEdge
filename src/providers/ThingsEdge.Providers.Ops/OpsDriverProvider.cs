@@ -1,23 +1,31 @@
-﻿namespace ThingsEdge.Providers.Ops;
+﻿using ThingsEdge.Providers.Ops.Exchange;
+
+namespace ThingsEdge.Providers.Ops;
 
 public sealed class OpsDriverProvider : IDriverProvider
 {
+    private readonly IEngine _engine;
+    private readonly IDataCommand _command;
+
     public bool IsEngine => true;
 
-    public OpsDriverProvider()
+    public OpsDriverProvider(IEngine engine, IDataCommand command)
     {
-        
+        _engine = engine;
+        _command = command;
+
     }
 
-    public IDataCommand Command => throw new NotImplementedException();
+    public IDataCommand Command => _command;
 
-    public Task RunAsync()
+    public async Task RunAsync()
     {
-        throw new NotImplementedException();
+        await _engine.StartAsync();
     }
 
     public Task ShutdownAsync()
     {
-        throw new NotImplementedException();
+        _engine.Stop();
+        return Task.CompletedTask;
     }
 }

@@ -1,7 +1,15 @@
 ﻿using Ops.Communication.Core.Net;
+using Ops.Communication.Modbus;
+using Ops.Communication.Profinet.AllenBradley;
+using Ops.Communication.Profinet.Melsec;
+using Ops.Communication.Profinet.Omron;
+using Ops.Communication.Profinet.Siemens;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
+/// <summary>
+/// 驱动连接器管理者。
+/// </summary>
 public sealed class DriverConnectorManager : IDisposable
 {
     private readonly Dictionary<string, DriverConnector> _connectors = new(); // Key 为设备编号
@@ -19,18 +27,18 @@ public sealed class DriverConnectorManager : IDisposable
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
-    /// <param name="id">设备Id</param>
+    /// <param name="name">设备名称</param>
     /// <returns></returns>
-    public DriverConnector this[string id] => _connectors[id];
+    public DriverConnector this[string name] => _connectors[name];
 
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
-    /// <param name="id">设备Id</param>
+    /// <param name="name">设备名称</param>
     /// <returns></returns>
-    public DriverConnector? GetConnector(string id)
+    public DriverConnector? GetConnector(string name)
     {
-        if (_connectors.TryGetValue(id, out var connector))
+        if (_connectors.TryGetValue(name, out var connector))
         {
             return connector;
         }
@@ -44,6 +52,42 @@ public sealed class DriverConnectorManager : IDisposable
     public IReadOnlyCollection<DriverConnector> GetAllDriver()
     {
         return _connectors.Values;
+    }
+
+    /// <summary>
+    /// 加载驱动。
+    /// </summary>
+    /// <param name="deviceInfos"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void Load(IEnumerable<DeviceInfo> deviceInfos)
+    {
+        foreach (var deviceInfo in deviceInfos)
+        {
+            NetworkDeviceBase driverNet = deviceInfo.Model switch
+            {
+                DeviceModel.ModbusTcp => new ModbusTcpNet(deviceInfo.Host),
+                DeviceModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host),
+                DeviceModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host),
+                DeviceModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host),
+                DeviceModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host),
+                DeviceModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host),
+                DeviceModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host),
+                DeviceModel.Melsec_CIP => new MelsecCipNet(deviceInfo.Host),
+                DeviceModel.Melsec_A1E => new MelsecA1ENet(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.Omron_FinsTcp => new OmronFinsNet(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.Omron_CipNet => new OmronCipNet(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.Omron_HostLinkOverTcp => new OmronHostLinkOverTcp(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.Omron_HostLinkCModeOverTcp => new OmronHostLinkCModeOverTcp(deviceInfo.Host, deviceInfo.Port),
+                DeviceModel.AllenBradley_CIP => new AllenBradleyNet(deviceInfo.Host),
+                _ => throw new NotImplementedException(),
+            };
+
+            // 设置 SocketKeepAliveTime 心跳时间
+            driverNet.SocketKeepAliveTime = 60_000;
+            _connectors.Add(deviceInfo.Name, new DriverConnector(deviceInfo.Name, deviceInfo.Host, deviceInfo.Port, driverNet));
+        }
     }
 
     /// <summary>
@@ -91,7 +135,8 @@ public sealed class DriverConnectorManager : IDisposable
 
             // 开启心跳检测
             var state = new WeakReference<DriverConnectorManager>(this);
-            _heartbeatTimer = new Timer(Heartbeat, state, 1000, 2000); // 2s 监听一次能否 ping 通服务器
+            var period = _connectors.Count * 1_000;
+            _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 按设备数量设定监听时长
         }
     }
 
@@ -112,6 +157,9 @@ public sealed class DriverConnectorManager : IDisposable
         }
     }
 
+    /// <summary>
+    /// 重启驱动状态。
+    /// </summary>
     public void Restart()
     {
         lock (SyncLock)
@@ -185,16 +233,16 @@ public sealed class DriverConnectorManager : IDisposable
             {
                 try
                 {
-                    connector.Available = networkDevice.PingIpAddress() == IPStatus.Success;
+                    connector.Available = networkDevice.PingIpAddress(700) == IPStatus.Success;
                     if (connector.Available)
                     {
                         _ = networkDevice.ConnectServer();
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     connector.Available = false;
-                    //
+                    _logger.LogError(ex, "[DriverConnectorManager] Ping 驱动服务器出现异常。");
                 }
             }
         }

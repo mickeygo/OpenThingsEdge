@@ -5,6 +5,9 @@
 /// </summary>
 public sealed class DeviceInfo
 {
+    /// <summary>
+    /// 唯一值。
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -42,4 +45,20 @@ public sealed class DeviceInfo
     /// </summary>
     [NotNull]
     public List<TagGroup>? TagGroups { get; set; } = new();
+
+    /// <summary>
+    /// 隶属于设备的标记集合。
+    /// </summary>
+    [NotNull]
+    public List<Tag>? Tags { get; set; } = new();
+
+    /// <summary>
+    /// 从所有标记分组中获取指定标识的标记集合。
+    /// </summary>
+    /// <param name="flag">标识</param>
+    /// <returns></returns>
+    public List<Tag> GetTagsFromGroups(TagFlag flag)
+    {
+        return TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag)).ToList();
+    }
 }

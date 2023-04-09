@@ -2,7 +2,7 @@
 
 namespace ThingsEdge.Common.Storage;
 
-internal class LiteDbStorage : IDbStorage
+internal sealed class LiteDbStorage : IDbStorage
 {
     private readonly ILiteDatabase _database;
 
@@ -51,5 +51,10 @@ internal class LiteDbStorage : IDbStorage
     {
         var col = _database.GetCollection<T>();
         return col.Delete(id);
+    }
+
+    public void Dispose()
+    {
+        _database.Dispose();
     }
 }

@@ -22,6 +22,8 @@ internal sealed class MQTTHostedService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("MQTT Host 服务开启");
+
         _mqttClient = MQTTClientFactory.Create(_mqttClientOptions);
         _mqttClient.ManagedMqttClient.ApplicationMessageReceivedAsync += async (args) =>
         {
@@ -35,6 +37,8 @@ internal sealed class MQTTHostedService : IHostedService
     {
         if (_mqttClient != null)
         {
+            _logger.LogInformation("MQTT Host 服务停止");
+
             await _mqttClient.StopAsync();
             _mqttClient.Dispose();
         }

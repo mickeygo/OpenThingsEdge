@@ -4,10 +4,13 @@ using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace ThingsEdge.Server.Controllers;
 
+/// <summary>
+/// IOT 网关接口。
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [AllowAnonymous]
-public class EdgeController : Controller
+public class IoTGatewayController : Controller
 {
     [HttpPost]
     [Route("")]

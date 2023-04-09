@@ -13,14 +13,32 @@ internal sealed class DefalutHttpForwarder : IHttpForwarder
 
     public async Task<HttpResult> SendAsync(RequestMessage message, CancellationToken cancellationToken)
     {
+        var httpResult = new HttpResult();
         var httpClient = _httpClientFactory.CreateClient("ThingsEdge.Router.RESTfulClient");
-        var resp = await httpClient.PostAsJsonAsync("/api/edge", message, cancellationToken);
-        if (!resp.IsSuccessStatusCode)
-        {
 
+        try
+        {
+            var resp = await httpClient.PostAsJsonAsync("/api/iotgateway", message, cancellationToken);
+            if (!resp.IsSuccessStatusCode)
+            {
+                httpResult.Code = 2;
+                httpResult.ErrorMessage = $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}";
+                return httpResult;
+            }
+
+            var ret = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>(cancellationToken: cancellationToken);
+            httpResult.Data = new ResponseMessage
+            {
+                Schema = message.Schema,
+                CallbackItems = ret,
+            };
+        }
+        catch (Exception ex)
+        {
+            httpResult.Code = 2;
+            httpResult.ErrorMessage = $"调用 HTTP 服务出错，错误：{ex.Message}";
         }
 
-
-        throw new NotImplementedException();
+        return httpResult;
     }
 }

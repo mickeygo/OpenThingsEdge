@@ -11,7 +11,7 @@ public interface IDataCommand
     bool CanWrite { get; }
 
     /// <summary>
-    /// 读取数据。
+    /// 从设备中读取数据。
     /// </summary>
     /// <param name="schema">标记 schema。</param>
     /// <param name="tags">要读取数据的标记集合。</param>
@@ -19,7 +19,7 @@ public interface IDataCommand
     Task<List<DataReadResult>> ReadAsync(DeviceSchema schema, IEnumerable<TagData> tags);
 
     /// <summary>
-    /// 写入数据。
+    /// 向设备写入数据。
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="schema">标记 schema。</param>

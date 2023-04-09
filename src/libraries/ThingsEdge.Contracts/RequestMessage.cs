@@ -16,7 +16,7 @@ public sealed class RequestMessage
     /// </summary>
     /// <remarks>注：加载的标记数据集合会包含触发的标记数据。</remarks>
     [NotNull]
-    public List<PayloadData>? Values { get; set; } = new();
+    public List<PayloadData>? Values { get; } = new();
 
     /// <summary>
     /// 通过标记获取指定是加载数据，如果没有找到则返回 null。
@@ -25,7 +25,7 @@ public sealed class RequestMessage
     /// <returns></returns>
     public PayloadData? GetData(string tag)
     {
-        return Values!.FirstOrDefault(x => tag.Equals(x.Tag, StringComparison.OrdinalIgnoreCase));
+        return Values!.FirstOrDefault(x => tag.Equals(x.TagName, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -35,5 +35,18 @@ public sealed class RequestMessage
     public PayloadData Self()
     {
         return Values[0];
+    }
+
+    /// <summary>
+    /// 获取除标记触发点以外子集合的所有数据。
+    /// </summary>
+    /// <returns></returns>
+    public List<PayloadData> Children()
+    {
+        if (Values.Count == 1)
+        {
+            return new(0);
+        }
+        return Values.Skip(1).ToList();
     }
 }

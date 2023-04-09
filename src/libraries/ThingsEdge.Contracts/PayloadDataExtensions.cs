@@ -14,8 +14,9 @@ public static class PayloadDataExtensions
     /// 获取 <see cref="DataType.String"/> 或 <see cref="DataType.S7String"/> 或 <see cref="DataType.S7WString"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
-    /// <remarks>注：对于非字符串数据，会转换为字符串；对于数组数据，会转换为 "[item0,item1,item2,item3,...]" 格式。</remarks>
+    /// <remarks>注：对于非字符串数据，会转换为字符串；对于数组数据，进行 JSON 序列化。</remarks>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static string GetString(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -40,17 +41,12 @@ public static class PayloadDataExtensions
             );
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string Arr2Str<T>(T[] items)
-    {
-        return $"[{string.Join(",", items)}]";
-    }
-
     /// <summary>
     /// 获取 <see cref="DataType.Bit"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Bit GetBit(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -62,6 +58,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static byte GetByte(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -73,6 +70,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Word GetWord(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -84,6 +82,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static DWord GetDWord(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -95,6 +94,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Int GetInt(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -106,6 +106,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static DInt GetDInt(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -117,6 +118,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Real GetReal(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -128,6 +130,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static LReal GetLReal(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -139,7 +142,8 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
-    public static Bit[] GetBoolArray(this PayloadData payload)
+    /// <exception cref="FormatException"></exception>
+    public static Bit[] GetBitArray(this PayloadData payload)
     {
         var v = payload.GetValue();
         return v.AsT9;
@@ -150,6 +154,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static byte[] GetByteArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -161,6 +166,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Word[] GetWordArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -172,6 +178,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static DWord[] GetDWordArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -183,6 +190,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Int[] GetIntArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -194,6 +202,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static DInt[] GetDIntArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -205,6 +214,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static Real[] GetRealArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -216,6 +226,7 @@ public static class PayloadDataExtensions
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public static LReal[] GetDRealArray(this PayloadData payload)
     {
         var v = payload.GetValue();
@@ -224,11 +235,13 @@ public static class PayloadDataExtensions
 
     private static OneOf<string, Bit, byte, Word, DWord, Int, DInt, Real, LReal, Bit[], byte[], Word[], DWord[], Int[], DInt[], Real[], LReal[]> GetValue(this PayloadData payload)
     {
-        if (!payload.Value.GetType().IsArray)
+        // 单值
+        if (payload.Length == 0) // payload.Value.GetType().IsArray
         {
             switch (payload.DataType)
             {
-                case DataType.Byte: return (byte)payload.Value;
+                case DataType.Bit: return (Bit)payload.Value;
+                case DataType.Byte: return ((byte[])payload.Value)[0]; // byte 都为数组
                 case DataType.Word: return (Word)payload.Value;
                 case DataType.DWord: return (DWord)payload.Value;
                 case DataType.Int: return (Int)payload.Value;
@@ -236,10 +249,11 @@ public static class PayloadDataExtensions
                 case DataType.Real: return (Real)payload.Value;
                 case DataType.LReal: return (LReal)payload.Value;
                 case DataType.String or DataType.S7String or DataType.S7WString: return (string)payload.Value;
-                default: throw new NotImplementedException();
+                default: throw new FormatException();
             }
         }
 
+        // 数组
         switch (payload.DataType)
         {
             case DataType.Bit: return (Bit[])payload.Value;
@@ -250,8 +264,14 @@ public static class PayloadDataExtensions
             case DataType.DInt: return (DInt[])payload.Value;
             case DataType.Real: return (Real[])payload.Value;
             case DataType.LReal: return (LReal[])payload.Value;
-            case DataType.String or DataType.S7String or DataType.S7WString: return $"[{string.Join(",", (string[])payload.Value)}]";
-            default: throw new NotImplementedException();
+            case DataType.String or DataType.S7String or DataType.S7WString: return Arr2Str((string[])payload.Value);
+            default: throw new FormatException();
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string Arr2Str<T>(T[] items)
+    {
+        return JsonSerializer.Serialize(items);
     }
 }

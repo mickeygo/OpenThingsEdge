@@ -13,6 +13,7 @@ public sealed class ResponseMessage
 
     /// <summary>
     /// 数据回写集合。
+    /// Key 为标记名称，Value 为值。
     /// </summary>
     [NotNull]
     public Dictionary<string, object>? CallbackItems { get; set; } = new();
