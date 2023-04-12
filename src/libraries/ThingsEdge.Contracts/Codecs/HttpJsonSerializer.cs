@@ -41,6 +41,7 @@ public sealed class HttpJsonSerializer : IHttpJsonSerializer
     /// <typeparam name="T">要转换的基元类型</typeparam>
     /// <param name="jsonElement">Json 元素</param>
     /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     private static T JsonObjectTo<T>(JsonElement jsonElement)
     {
         object? obj = null;

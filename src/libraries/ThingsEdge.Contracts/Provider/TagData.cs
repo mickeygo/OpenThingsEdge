@@ -6,6 +6,12 @@
 public sealed class TagData
 {
     /// <summary>
+    /// 标记唯一 Id。
+    /// </summary>
+    [NotNull]
+    public string? TagId { get; set; }
+
+    /// <summary>
     /// 标记名称
     /// </summary>
     [NotNull]
@@ -48,6 +54,7 @@ public sealed class TagData
     {
         return new TagData
         {
+            TagId = tag.TagId,
             Name = tag.Name,
             Address = tag.Address,
             Length = tag.Length,

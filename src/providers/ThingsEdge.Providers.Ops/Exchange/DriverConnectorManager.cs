@@ -59,34 +59,34 @@ public sealed class DriverConnectorManager : IDisposable
     /// </summary>
     /// <param name="deviceInfos"></param>
     /// <exception cref="NotImplementedException"></exception>
-    public void Load(IEnumerable<DeviceInfo> deviceInfos)
+    public void Load(IEnumerable<Device> deviceInfos)
     {
         foreach (var deviceInfo in deviceInfos)
         {
             NetworkDeviceBase driverNet = deviceInfo.Model switch
             {
-                DeviceModel.ModbusTcp => new ModbusTcpNet(deviceInfo.Host),
-                DeviceModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host),
-                DeviceModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host),
-                DeviceModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host),
-                DeviceModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host),
-                DeviceModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host),
-                DeviceModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host),
-                DeviceModel.Melsec_CIP => new MelsecCipNet(deviceInfo.Host),
-                DeviceModel.Melsec_A1E => new MelsecA1ENet(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.Omron_FinsTcp => new OmronFinsNet(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.Omron_CipNet => new OmronCipNet(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.Omron_HostLinkOverTcp => new OmronHostLinkOverTcp(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.Omron_HostLinkCModeOverTcp => new OmronHostLinkCModeOverTcp(deviceInfo.Host, deviceInfo.Port),
-                DeviceModel.AllenBradley_CIP => new AllenBradleyNet(deviceInfo.Host),
+                DriverModel.ModbusTcp => new ModbusTcpNet(deviceInfo.Host),
+                DriverModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host),
+                DriverModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host),
+                DriverModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host),
+                DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host),
+                DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host),
+                DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host),
+                DriverModel.Melsec_CIP => new MelsecCipNet(deviceInfo.Host),
+                DriverModel.Melsec_A1E => new MelsecA1ENet(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Omron_FinsTcp => new OmronFinsNet(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Omron_CipNet => new OmronCipNet(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Omron_HostLinkOverTcp => new OmronHostLinkOverTcp(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Omron_HostLinkCModeOverTcp => new OmronHostLinkCModeOverTcp(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.AllenBradley_CIP => new AllenBradleyNet(deviceInfo.Host),
                 _ => throw new NotImplementedException(),
             };
 
             // 设置 SocketKeepAliveTime 心跳时间
             driverNet.SocketKeepAliveTime = 60_000;
-            _connectors.Add(deviceInfo.Name, new DriverConnector(deviceInfo.Name, deviceInfo.Host, deviceInfo.Port, driverNet));
+            _connectors.Add(deviceInfo.Name, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, deviceInfo.Port, driverNet));
         }
     }
 

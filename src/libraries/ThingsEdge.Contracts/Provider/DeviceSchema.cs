@@ -15,7 +15,7 @@ public sealed class DeviceSchema
     /// 设备型号。如 S7-200、S7-1200、S7-1500 等。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public DeviceModel Model { get; set; }
+    public DriverModel Model { get; set; }
 
     /// <summary>
     /// 服务器地址。

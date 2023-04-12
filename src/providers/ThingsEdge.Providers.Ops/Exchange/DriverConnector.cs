@@ -50,7 +50,7 @@ public enum DriverStatus
 public sealed class DriverConnector
 {
     /// <summary>
-    /// 连接ID, 与设备编号 一致
+    /// 连接ID, 与设备ID一致。
     /// </summary>
     [NotNull]
     public string? Id { get; }

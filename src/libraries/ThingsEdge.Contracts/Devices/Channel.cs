@@ -3,12 +3,12 @@
 /// <summary>
 /// 数据通道。一个通道对应一种PLC驱动。
 /// </summary>
-public sealed class ChannelInfo
+public sealed class Channel
 {
     /// <summary>
-    /// 唯一值。
+    /// 全局唯一值。
     /// </summary>
-    public int Id { get; set; }
+    public string ChannelId { get; set; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
     /// 通道名称。
@@ -20,7 +20,7 @@ public sealed class ChannelInfo
     /// 驱动类型。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public DriverModel Model { get; set; }
+    public ChannelModel Model { get; set; }
 
     /// <summary>
     /// 标记要旨，可用于设置重要信息。
@@ -32,5 +32,5 @@ public sealed class ChannelInfo
     /// 设备集合。
     /// </summary>
     [NotNull]
-    public List<DeviceInfo> Devices { get; set; } = new();
+    public List<Device> Devices { get; set; } = new();
 }

@@ -3,12 +3,12 @@
 /// <summary>
 /// 设备信息。一种设备对应指定通道中的一种PLC型号。
 /// </summary>
-public sealed class DeviceInfo
+public sealed class Device
 {
     /// <summary>
-    /// 唯一值。
+    /// 全局唯一值。
     /// </summary>
-    public int Id { get; set; }
+    public string DeviceId { get; set; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
     /// 设备名称。
@@ -17,10 +17,10 @@ public sealed class DeviceInfo
     public string? Name { get; set; }
 
     /// <summary>
-    /// 设备型号。如 S7-200、S7-1200、S7-1500 等。
+    /// 设备驱动型号。如 S7-200、S7-1200、S7-1500 等。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public DeviceModel Model { get; set; }
+    public DriverModel Model { get; set; }
 
     /// <summary>
     /// 服务器地址。

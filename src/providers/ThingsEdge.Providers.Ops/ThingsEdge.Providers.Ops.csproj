@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DeepEqual" Version="4.2.1" />
     <PackageReference Include="Ops.Communication" Version="0.4.93" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\libraries\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
+    <ProjectReference Include="..\..\libraries\ThingsEdge.Router\ThingsEdge.Router.csproj" />
   </ItemGroup>
 
 </Project>

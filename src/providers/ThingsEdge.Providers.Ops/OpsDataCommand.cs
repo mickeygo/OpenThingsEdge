@@ -26,6 +26,7 @@ public sealed class OpsDataCommand : IDataCommand
         {
             var tag0 = new Tag
             {
+                TagId = tag.TagId,
                 Name = tag.Name,
                 Address = tag.Address,
                 Length = tag.Length,
@@ -54,6 +55,7 @@ public sealed class OpsDataCommand : IDataCommand
 
         PayloadData data = new()
         {
+            TagId = tag.TagId,
             TagName = tag.Name,
             Address = tag.Address,
             Length = tag.Length,

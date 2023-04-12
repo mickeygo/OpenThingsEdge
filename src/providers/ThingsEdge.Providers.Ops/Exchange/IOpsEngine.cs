@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.Providers.Ops.Exchange;
 
-public interface IEngine : IDisposable
+public interface IOpsEngine : IDisposable
 {
     /// <summary>
     /// 获取运行状态，是否正在运行中。

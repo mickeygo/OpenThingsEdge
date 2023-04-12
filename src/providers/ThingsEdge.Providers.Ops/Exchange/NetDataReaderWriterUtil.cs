@@ -19,7 +19,15 @@ internal static class NetDataReaderWriterUtil
     {
         bool ok = false;
         string errMessage = string.Empty;
-        var payloadData = new PayloadData { TagName = tag.Name, Address = tag.Address, Length = tag.Length, DataType = tag.DataType, Keynote = tag.Keynote };
+        var payloadData = new PayloadData
+        {
+            TagId = tag.TagId,
+            TagName = tag.Name,
+            Address = tag.Address,
+            Length = tag.Length,
+            DataType = tag.DataType,
+            Keynote = tag.Keynote,
+        };
         switch (tag.DataType)
         {
             case DataType.Bit:
@@ -255,6 +263,115 @@ internal static class NetDataReaderWriterUtil
                 else
                 {
                     operateResult = await driver.WriteAsync(data.Address, data.Value.ToString());
+                }
+                break;
+        }
+
+        return (operateResult.IsSuccess, operateResult.Message);
+    }
+
+    /// <summary>
+    /// 写入数据。
+    /// </summary>
+    /// <param name="driver">驱动器。</param>
+    /// <param name="tag">要写入的标记。</param>
+    /// <param name="data">要写入的数据。</param>
+    /// <returns></returns>
+    /// <remarks>要写入的数据必须与标记的数据类型匹配，或是可转换为标记设定的类型。</remarks>
+    /// <exception cref="FormatException"></exception>
+    /// <exception cref="InvalidCastException"></exception>
+    /// <exception cref="OverflowException"></exception>
+    public static async Task<(bool ok, string err)> WriteSingleAsync(IReadWriteNet driver, Tag tag, object data)
+    {
+        OperateResult operateResult;
+        switch (tag.DataType)
+        {
+            case DataType.Bit:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToBoolean(data));
+                }
+                break;
+            case DataType.Byte:
+                byte[] bytes = tag.Length > 0 ? (byte[])data : new byte[] { Convert.ToByte(data) };
+                operateResult = await driver.WriteAsync(tag.Address, bytes);
+                break;
+            case DataType.Word:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToUInt16(data));
+                }
+                break;
+            case DataType.DWord:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToUInt32(data));
+                }
+                break;
+            case DataType.Int:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToInt16(data));
+                }
+                break;
+            case DataType.DInt:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToInt32(data));
+                }
+                break;
+            case DataType.Real:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToSingle(data));
+                }
+                break;
+            case DataType.LReal:
+                if (tag.Length > 0)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, Convert.ToDouble(data));
+                }
+                break;
+            case DataType.String or DataType.S7String:
+                operateResult = await driver.WriteAsync(tag.Address, data.ToString());
+                break;
+            case DataType.S7WString:
+            default:
+                if (driver is SiemensS7Net driver2)
+                {
+                    operateResult = await driver2.WriteWStringAsync(tag.Address, data.ToString());
+                }
+                else
+                {
+                    operateResult = await driver.WriteAsync(tag.Address, data.ToString());
                 }
                 break;
         }

@@ -4,12 +4,12 @@ namespace ThingsEdge.Providers.Ops;
 
 public sealed class OpsDriverProvider : IDriverProvider
 {
-    private readonly IEngine _engine;
+    private readonly IOpsEngine _engine;
     private readonly IDataCommand _command;
 
     public bool IsEngine => true;
 
-    public OpsDriverProvider(IEngine engine, IDataCommand command)
+    public OpsDriverProvider(IOpsEngine engine, IDataCommand command)
     {
         _engine = engine;
         _command = command;

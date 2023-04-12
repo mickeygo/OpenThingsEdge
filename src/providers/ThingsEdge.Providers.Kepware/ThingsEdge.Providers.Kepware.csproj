@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\libraries\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
+    <ProjectReference Include="..\..\libraries\ThingsEdge.Router\ThingsEdge.Router.csproj" />
   </ItemGroup>
 
 </Project>

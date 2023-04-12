@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Router.Forwarder;
+﻿using ThingsEdge.Router.Configuration;
+
+namespace ThingsEdge.Router.Forwarder;
 
 public sealed class HealthHttpForwarder
 {
@@ -13,11 +15,11 @@ public sealed class HealthHttpForwarder
 
     public async Task<bool> CheckAsync(CancellationToken cancellationToken)
     {
-        var httpClient = _httpClientFactory.CreateClient("ThingsEdge.Router.RESTfulClient");
+        var httpClient = _httpClientFactory.CreateClient(ForwarderConstants.HttpClientName);
        
         try
         {
-            var resp = await httpClient.GetAsync("/api/health", cancellationToken);
+            var resp = await httpClient.GetAsync(ForwarderConstants.HealthRequestUri, cancellationToken);
             if (!resp.IsSuccessStatusCode)
             {
                 return false;

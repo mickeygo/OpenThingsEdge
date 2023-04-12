@@ -14,8 +14,10 @@ builder.Services.AddMasaBlazor(builder =>
     });
 }).AddI18nForServer("wwwroot/i18n");
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddGlobalForServer();
 
+// 自定义服务配置
 builder.Host.UseWindowsService(); // 可设置为 Window Service。
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => 
     loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration)); // 使用 Serilog，并从配置文件中读取配置。
@@ -25,12 +27,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+
 }
 else
 {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    // app.UseHsts();
 }
 
 app.UseHttpsRedirection();

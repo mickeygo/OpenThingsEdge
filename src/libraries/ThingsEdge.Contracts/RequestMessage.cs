@@ -6,10 +6,21 @@
 public sealed class RequestMessage
 {
     /// <summary>
+    /// 请求消息的 Id，可用于追踪。
+    /// </summary>
+    [NotNull]
+    public string RequestId { get; init; } = Guid.NewGuid().ToString("N");
+
+    /// <summary>
     /// 加载的数据头。
     /// </summary>
     [NotNull]
-    public Schema? Schema { get; set; }
+    public Schema? Schema { get; init; }
+
+    /// <summary>
+    /// 标识。
+    /// </summary>
+    public TagFlag Flag { get; init; }
 
     /// <summary>
     /// 加载的数据集合。
@@ -21,11 +32,11 @@ public sealed class RequestMessage
     /// <summary>
     /// 通过标记获取指定是加载数据，如果没有找到则返回 null。
     /// </summary>
-    /// <param name="tag">标记，不区分大小写</param>
+    /// <param name="tagName">标记名称，不区分大小写</param>
     /// <returns></returns>
-    public PayloadData? GetData(string tag)
+    public PayloadData? GetData(string tagName)
     {
-        return Values!.FirstOrDefault(x => tag.Equals(x.TagName, StringComparison.OrdinalIgnoreCase));
+        return Values!.FirstOrDefault(x => tagName.Equals(x.TagName, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -41,11 +52,11 @@ public sealed class RequestMessage
     /// 获取除标记触发点以外子集合的所有数据。
     /// </summary>
     /// <returns></returns>
-    public List<PayloadData> Children()
+    public IReadOnlyList<PayloadData> Children()
     {
         if (Values.Count == 1)
         {
-            return new(0);
+            return Array.Empty<PayloadData>();
         }
         return Values.Skip(1).ToList();
     }

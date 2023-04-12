@@ -6,6 +6,12 @@
 public sealed class PayloadData
 {
     /// <summary>
+    /// 标记唯一Id。
+    /// </summary>
+    [NotNull]
+    public string? TagId { get; set; }
+
+    /// <summary>
     /// Tag 标记名称。
     /// </summary>
     [NotNull]

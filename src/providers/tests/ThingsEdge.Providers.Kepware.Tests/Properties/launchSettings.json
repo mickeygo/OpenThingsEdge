@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ThingsEdge.Providers.Kepware.Tests": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:53258;http://localhost:53260"
+    }
+  }
+}

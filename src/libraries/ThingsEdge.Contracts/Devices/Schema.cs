@@ -17,6 +17,6 @@ public sealed class Schema
     /// <summary>
     /// 标记组名称。
     /// </summary>
-    [NotNull]
+    /// <remarks>若标记隶属于设备，那么标记组可为空。</remarks>
     public string? TagGroupName { get; set; }
 }

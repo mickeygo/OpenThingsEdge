@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
-/// 设备型号，如西门子1200、西门子1500、三菱、欧姆龙FinsTcp、AB CIP等。
+/// 设备驱动型号，如西门子1200、西门子1500、三菱、欧姆龙FinsTcp、AB CIP等。
 /// </summary>
-public enum DeviceModel
+public enum DriverModel
 {
     ModbusTcp = 1,
 

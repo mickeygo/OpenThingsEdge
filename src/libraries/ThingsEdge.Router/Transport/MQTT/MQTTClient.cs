@@ -1,6 +1,4 @@
-﻿using MQTTnet;
-using MQTTnet.Extensions.ManagedClient;
-using MQTTnet.Protocol;
+﻿using MQTTnet.Extensions.ManagedClient;
 
 namespace ThingsEdge.Router.Transport.MQTT;
 
@@ -16,15 +14,12 @@ internal sealed class MQTTClient : IMQTTClient
         _managedMqttClientOptions = managedMqttClientOptions;
     }
 
-    public async Task SubcribeAsync(string[] topics, MqttQualityOfServiceLevel qualityOfServiceLevel = MqttQualityOfServiceLevel.AtMostOnce)
-    {
-        var topicFilters = topics.Select(s => new MqttTopicFilterBuilder().WithTopic(s).WithQualityOfServiceLevel(qualityOfServiceLevel).Build()).ToList();
-        await ManagedMqttClient.SubscribeAsync(topicFilters);
-    }
-
     public async Task StartAsync()
     {
-        await ManagedMqttClient.StartAsync(_managedMqttClientOptions);
+        if (!ManagedMqttClient.IsStarted)
+        {
+            await ManagedMqttClient.StartAsync(_managedMqttClientOptions);
+        }
     }
 
     public async Task StopAsync(bool cleanDisconnect = true)

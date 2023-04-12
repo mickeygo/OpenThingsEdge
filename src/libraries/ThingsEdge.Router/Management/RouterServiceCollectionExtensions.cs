@@ -1,10 +1,24 @@
-﻿using ThingsEdge.Router.Transport.MQTT;
+﻿using ThingsEdge.Router.Configuration;
+using ThingsEdge.Router.Transport.MQTT;
 using ThingsEdge.Router.Transport.RESTful;
 
 namespace ThingsEdge.Router;
 
-public static class ServiceCollectionExtensions
+/// <summary>
+/// Extensions for <see cref="IServiceCollection"/>
+/// </summary>
+public static class RouterServiceCollectionExtensions
 {
+    /// <summary>
+    /// 添加 ThingsEdge 路由。
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddThingsEdgeRouter(this IServiceCollection services)
+    {
+        return services;
+    }
+
     /// <summary>
     /// 添加 RESTful Client 服务。
     /// </summary>
@@ -12,7 +26,7 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddRESTfulClient(this IServiceCollection services)
     {
-        services.AddHttpClient("ThingsEdge.Router.RESTfulClient", (sp, httpClient) =>
+        services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
         {
             var options = sp.GetRequiredService<IOptions<RESTfulClientOptions>>().Value;
             httpClient.BaseAddress = new Uri($"{options.RESTClientBaseAddress}");
@@ -49,7 +63,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblies(typeof(ServiceCollectionExtensions).Assembly);
+            cfg.RegisterServicesFromAssemblies(typeof(RouterServiceCollectionExtensions).Assembly);
         });
 
         services.Configure<MQTTClientOptions>(configuration.GetSection(mqtt));

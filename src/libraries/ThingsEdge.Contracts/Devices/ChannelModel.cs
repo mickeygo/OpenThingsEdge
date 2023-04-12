@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
-/// 驱动模型。
+/// Channel 模型。
 /// </summary>
-public enum DriverModel
+public enum ChannelModel
 {
     Modbus = 1,
 

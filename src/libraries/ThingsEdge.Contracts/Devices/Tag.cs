@@ -6,9 +6,9 @@
 public sealed class Tag
 {
     /// <summary>
-    /// 唯一值。
+    /// 全局唯一值。
     /// </summary>
-    public int Id { get; set; }
+    public string TagId { get; set; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
     /// 标记名称
