@@ -1,15 +1,15 @@
-﻿using ThingsEdge.Common.Storage;
-
-namespace ThingsEdge.Router.Management;
+﻿namespace ThingsEdge.Router.Devices;
 
 internal sealed class DefaultDeviceManager : IDeviceManager
 {
     public const string CacheName = "ThingsEdge.Device.Cache";
 
+    private readonly IDeviceSource _deviceSource;
     private readonly IMemoryCache _cache;
 
-    public DefaultDeviceManager(IMemoryCache cache)
+    public DefaultDeviceManager(IDeviceSource deviceSource, IMemoryCache cache)
     {
+        _deviceSource = deviceSource;
         _cache = cache;
     }
 
@@ -17,10 +17,7 @@ internal sealed class DefaultDeviceManager : IDeviceManager
     {
         return _cache.GetOrCreate(CacheName, entry =>
         {
-            using var resp = DbManager.Create();
-            return resp.Query<Channel>()
-                    .Include(s => s.Devices)
-                    .ToList();
+            return _deviceSource.GetChannels();
         }) ?? new(0);
     }
 

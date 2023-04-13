@@ -1,9 +1,11 @@
-﻿namespace ThingsEdge.Providers.Ops.Exchange;
+﻿using ThingsEdge.Router;
+
+namespace ThingsEdge.Providers.Ops.Exchange;
 
 /// <summary>
 /// 信息采集引擎。
 /// </summary>
-public sealed class OpsEngine : IOpsEngine
+public sealed class OpsExchange : IExchange
 {
     private CancellationTokenSource? _cts = new();
 
@@ -13,11 +15,11 @@ public sealed class OpsEngine : IOpsEngine
     private readonly OpsConfig _opsConfig;
     private readonly ILogger _logger;
 
-    public OpsEngine(IDeviceManager deviceManager,
+    public OpsExchange(IDeviceManager deviceManager,
         DriverConnectorManager driverConnectorManager,
         IMessagePusher messagePusher,
         IOptionsMonitor<OpsConfig> opsConfig,
-        ILogger<OpsEngine> logger)
+        ILogger<OpsExchange> logger)
     {
         _deviceManager = deviceManager;
         _messagePusher = messagePusher;
@@ -81,7 +83,7 @@ public sealed class OpsEngine : IOpsEngine
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
 
-                    if (_cts != null)
+                    if (_cts == null)
                     {
                         break;
                     }
@@ -91,17 +93,36 @@ public sealed class OpsEngine : IOpsEngine
                         continue;
                     }
 
-                    var result = await connector.Driver.ReadBoolAsync(tag.Address);
-                    if (!result.IsSuccess)
+                    // 心跳标记数据类型必须为 bool 或 int16
+                    if (tag.DataType == DataType.Bit)
                     {
-                        _logger.LogError($"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{result.Message}");
+                        var result = await connector.Driver.ReadBoolAsync(tag.Address);
+                        if (!result.IsSuccess)
+                        {
+                            _logger.LogError($"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{result.Message}");
 
-                        continue;
+                            continue;
+                        }
+
+                        if (result.Content)
+                        {
+                            await connector.Driver.WriteAsync(tag.Address, false);
+                        }
                     }
-
-                    if (result.Content)
+                    else if (tag.DataType == DataType.Int)
                     {
-                        await connector.Driver.WriteAsync(tag.Address, false);
+                        var result = await connector.Driver.ReadInt16Async(tag.Address);
+                        if (!result.IsSuccess)
+                        {
+                            _logger.LogError($"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{result.Message}");
+
+                            continue;
+                        }
+
+                        if (result.Content == 1)
+                        {
+                            await connector.Driver.WriteAsync(tag.Address, (short)0);
+                        }
                     }
                 }
                 catch (OperationCanceledException)
@@ -153,16 +174,15 @@ public sealed class OpsEngine : IOpsEngine
 
                         // 校验触发标记
                         var state = data.GetInt();
-                        if (state == 1)
-                        {
-                            // 检测标记状态是否有变动
-                            if (ValueCacheFactory.CompareAndSwap(tag.TagId, state))
-                            {
-                                continue;
-                            }
 
+                        // 检测标记状态是否有变动
+                        if (!ValueCacheFactory.CompareAndSwap(tag.TagId, state))
+                        {
                             // 推送数据
-                            await _messagePusher.PushAsync(connector, device, tag, data, _cts.Token);
+                            if (state == 1)
+                            {
+                                await _messagePusher.PushAsync(connector, device, tag, data, _cts.Token);
+                            }
                         }
                     }
                     catch (OperationCanceledException)
@@ -259,8 +279,7 @@ public sealed class OpsEngine : IOpsEngine
                             continue;
                         }
 
-                        // 推送数据
-                        await _messagePusher.PushAsync(connector, device, tag, null, _cts.Token);
+                        // TODO: 记录数据
                     }
                     catch (OperationCanceledException)
                     {
@@ -277,6 +296,7 @@ public sealed class OpsEngine : IOpsEngine
             {
                 int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
                 bool isOn = false; // 开关开启状态
+                DateTime lastestTime = DateTime.Now;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
                     try
@@ -293,42 +313,63 @@ public sealed class OpsEngine : IOpsEngine
                             continue;
                         }
 
-                        // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var (ok, data, _) = await connector.ReadAsync(tag);
-                        if (ok)
+                        // 处于 off 状态，刷新最近一次进入的时间
+                        if (!isOn)
                         {
-                            if (data.GetBit())
+                            lastestTime = DateTime.Now;
+                        }
+
+                        var (ok, data, _) = await connector.ReadAsync(tag);
+
+                        // 读取成功且开关处于 on 状态，发送开启动作信号。
+                        if (ok && data.GetBit())
+                        {
+                            // 在本身处于关闭状态，才执行开启动作。
+                            if (!isOn)
                             {
-                                // On信号，若本身处于关闭状态，则执行开启动作。
-                                if (!isOn)
+                                if (_cts != null)
                                 {
-                                    if (_cts != null)
-                                    {
-                                        // TODO: 发送 On 信号
+                                    // TODO: 发送 On 信号开始标识
 
-                                    }
-
-                                    // 开关开启时，发送信号，让子任务执行。
-                                    mre.Set();
-                                    isOn = true;
                                 }
+
+                                // 开关开启时，发送信号，让子任务执行。
+                                mre.Set();
+                                isOn = true;
                             }
                             else
                             {
-                                // Off信号，若本身处于开启状态，则执行关闭动作。
-                                if (isOn)
+                                // 考虑设备在工作中发送意外中断，信号没有切换到 off 状态的场景（设备没有主动切换）。
+                                // 可设置超时时长，开关信号连续处于开启状态时间不能超过多久。
+                                if ((DateTime.Now - lastestTime).TotalSeconds > _opsConfig.AllowedSwitchOnlineMaxSeconds)
                                 {
                                     if (_cts != null)
                                     {
-                                        // TODO: 发送 Off 信号
+                                        // TODO: 发送 Off 信号结束标识
 
                                     }
 
-                                    // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                                     mre.Reset();
                                     isOn = false;
                                 }
                             }
+
+                            // 跳转
+                            continue;
+                        }
+
+                        // 若读取失败，或是开关处于 off 状态，则发送关闭动作信号（防止因设备未掉线，而读取失败导致一直发送数据）。
+                        if (isOn)
+                        {
+                            if (_cts != null)
+                            {
+                                // TODO: 发送 Off 信号结束标识
+
+                            }
+
+                            // 读取失败或开关关闭时，重置信号，让子任务阻塞。
+                            mre.Reset();
+                            isOn = false;
                         }
                     }
                     catch (OperationCanceledException)
@@ -343,14 +384,16 @@ public sealed class OpsEngine : IOpsEngine
                 // 任务取消后，无论什么情况都发送信号，确保让子任务也能退出
                 mre.Set();
 
-                // TODO: 考虑如何安全调用 mre.Dispose()
+                // 考虑如何安全调用 mre.Dispose()
+                await Task.Delay(10);
+                mre.Dispose();
             });
         }
 
         return Task.CompletedTask;
     }
 
-    public void Stop()
+    public async Task ShutdownAsync()
     {
         if (!IsRuning)
         {
@@ -366,7 +409,7 @@ public sealed class OpsEngine : IOpsEngine
             cts.Dispose();
         }
 
-        Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult(); // 阻塞 500ms
+        await Task.Delay(500); // 阻塞 500ms
         _driverConnectorManager.Close();
 
         _logger.LogInformation("[Engine] 引擎停止");
@@ -374,6 +417,6 @@ public sealed class OpsEngine : IOpsEngine
 
     public void Dispose()
     {
-        Stop();
+        ShutdownAsync().ConfigureAwait(false).GetAwaiter().GetResult();
     }
 }

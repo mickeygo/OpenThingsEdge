@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Router;
 
 namespace ThingsEdge.Providers.Ops;
 
@@ -11,11 +12,11 @@ public static class ServiceCollectionExtensions
     /// <param name="configuration">配置。</param>
     /// <param name="name">配置节点名称。</param>
     /// <returns></returns>
-    public static IServiceCollection AddOps(this IServiceCollection services, IConfiguration configuration, string name = "Ops")
+    public static IServiceCollection AddOpsProvider(this IServiceCollection services, IConfiguration configuration, string name = "Ops")
     {
         services.Configure<OpsConfig>(configuration.GetSection(name));
 
-        services.AddSingleton<IOpsEngine, OpsEngine>();
+        services.AddSingleton<IExchange, OpsExchange>();
         services.AddSingleton<DriverConnectorManager>();
         services.AddSingleton<IMessagePusher, MessagePusher>();
 

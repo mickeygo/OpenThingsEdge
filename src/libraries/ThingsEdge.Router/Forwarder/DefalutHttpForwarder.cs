@@ -13,28 +13,35 @@ internal sealed class DefalutHttpForwarder : IHttpForwarder
         _logger = logger;
     }
 
-    public async Task<HttpResult> SendAsync(RequestMessage message, CancellationToken cancellationToken = default)
+    public async Task<HttpResult> SendAsync(string requestUri, RequestMessage message, CancellationToken cancellationToken = default)
     {
         var httpClient = _httpClientFactory.CreateClient(ForwarderConstants.HttpClientName);
         int timeout = 5000;
         try
         {
+            // TODO: 记录请求的数据。
+            _logger.LogInformation(JsonSerializer.Serialize(message));
+
             var cts0 = new CancellationTokenSource(timeout); // 设置超时时间。
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts0.Token);
 
             // 注：虽然后做超时处理，但数据接收端还是要做幂等处理来预防重复数据。
-            var resp = await httpClient.PostAsJsonAsync(ForwarderConstants.RequestUri, message, cts.Token);
+            var resp = await httpClient.PostAsJsonAsync(requestUri, message, cts.Token);
             if (!resp.IsSuccessStatusCode)
             {
                 return HttpResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}");
             }
 
-            var ret = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>(cancellationToken: cts.Token);
+            var ret = await resp.Content.ReadFromJsonAsync<HttpResponseResult>(cancellationToken: cts.Token);
             var respMessage = new ResponseMessage
             {
                 Request = message,
-                CallbackItems = ret ?? new(0),
+                State = ret?.Code ?? 0,
+                CallbackItems = ret?.Data ?? new(0),
             };
+
+            // TODO: 记录响应的数据
+            _logger.LogInformation(JsonSerializer.Serialize(ret));
 
             return HttpResult.FromOk(respMessage);
         }

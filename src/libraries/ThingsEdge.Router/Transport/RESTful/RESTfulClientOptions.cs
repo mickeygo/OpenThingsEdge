@@ -9,7 +9,7 @@ public sealed class RESTfulClientOptions
     /// REST 客户端基地址。
     /// </summary>
     [NotNull]
-    public string? RESTClientBaseAddress { get; set; }
+    public string? RESTClientBaseAddress { get; set; } = "https://localhost:7214";
 
     public string? UserName { get; set; }
 

@@ -20,6 +20,7 @@ public sealed class RequestMessage
     /// <summary>
     /// 标识。
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public TagFlag Flag { get; init; }
 
     /// <summary>

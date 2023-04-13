@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ThingsEdge.Contracts;
+using ThingsEdge.Router;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace ThingsEdge.Server.Controllers;
@@ -12,10 +14,34 @@ namespace ThingsEdge.Server.Controllers;
 [AllowAnonymous]
 public class IoTGatewayController : Controller
 {
-    [HttpPost]
-    [Route("")]
-    public IActionResult Post()
+    private readonly IExchange _exchange;
+
+    public IoTGatewayController(IExchange exchange)
     {
-        return Ok();
+        _exchange = exchange;
+    }
+
+    [HttpGet]
+    [Route("start")]
+    public async Task<IActionResult> Start()
+    {
+        await _exchange.StartAsync();
+        return Ok("Exchange started.");
+    }
+
+    [HttpPost]
+    [Route("notice")]
+    public IActionResult Notice()
+    {
+        var ret = new HttpResponseResult();
+        return Json(ret);
+    }
+
+    [HttpPost]
+    [Route("trigger")]
+    public IActionResult Trigger()
+    {
+        var ret = new HttpResponseResult();
+        return Json(ret);
     }
 }

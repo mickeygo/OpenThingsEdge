@@ -86,7 +86,7 @@ public sealed class DriverConnectorManager : IDisposable
 
             // 设置 SocketKeepAliveTime 心跳时间
             driverNet.SocketKeepAliveTime = 60_000;
-            _connectors.Add(deviceInfo.Name, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, deviceInfo.Port, driverNet));
+            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, deviceInfo.Port, driverNet));
         }
     }
 
@@ -117,7 +117,8 @@ public sealed class DriverConnectorManager : IDisposable
                         if (ipStatus == IPStatus.Success)
                         {
                             connector.Available = true;
-                            _ = await networkDevice.ConnectServerAsync();
+                            var ret = await networkDevice.ConnectServerAsync();
+                            connector.ConnectedStatus = ret.IsSuccess ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
                         }
                         else
                         {
@@ -135,8 +136,8 @@ public sealed class DriverConnectorManager : IDisposable
 
             // 开启心跳检测
             var state = new WeakReference<DriverConnectorManager>(this);
-            var period = _connectors.Count * 1_000;
-            _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 按设备数量设定监听时长
+            var period = _connectors.Count * 5_000; // 注意时间间隔，太短会导致异常
+            _heartbeatTimer = new Timer(Heartbeat, state, 5000, period); // 按设备数量设定监听时长
         }
     }
 
@@ -236,7 +237,11 @@ public sealed class DriverConnectorManager : IDisposable
                     connector.Available = networkDevice.PingIpAddress(700) == IPStatus.Success;
                     if (connector.Available)
                     {
-                        _ = networkDevice.ConnectServer();
+                        var ret = networkDevice.ConnectServer();
+                        if (ret.IsSuccess)
+                        {
+                            connector.ConnectedStatus = ConnectionStatus.Connected;
+                        }
                     }
                 }
                 catch (Exception ex)

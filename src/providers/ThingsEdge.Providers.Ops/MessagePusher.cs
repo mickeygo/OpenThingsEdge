@@ -47,8 +47,16 @@ public sealed class MessagePusher : IMessagePusher
             message.Values.Add(data!);
         }
 
-        // 推送消息。
-        var result = await _httpForwarder.SendAsync(message, cancellationToken);
+        // 只有 trigger 和 notice 两种数据向后推送。
+        var requestUri = tag.Flag switch
+        {
+            TagFlag.Trigger => "/api/iotgateway/trigger",
+            TagFlag.Notice => "/api/iotgateway/notice",
+            _ => throw new InvalidOperationException(),
+        };
+
+        // 发送消息。
+        var result = await _httpForwarder.SendAsync(requestUri, message, cancellationToken);
         if (!result.IsSuccess())
         {
             // TODO: 推送失败日志
@@ -56,14 +64,14 @@ public sealed class MessagePusher : IMessagePusher
             return;
         }
 
-        // 非触发数据。
+        // 非触发数据，没有回写数据。
         if (tag.Flag != TagFlag.Trigger)
         {
             return;
         }
 
         // 连接器已断开。
-        if (connector.CanConnect)
+        if (!connector.CanConnect)
         {
             return;
         }
@@ -94,7 +102,7 @@ public sealed class MessagePusher : IMessagePusher
         }
 
         // 回写标记状态。
-        int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data.TagCode;
+        int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data.State;
         var (ok3, err3) = await connector.WriteAsync(tag, tagCode);
         if (!ok3)
         {

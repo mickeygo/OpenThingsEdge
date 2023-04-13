@@ -38,6 +38,7 @@ public sealed class PayloadData
     /// <summary>
     /// 数据类型。
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public DataType DataType { get; set; }
 
     /// <summary>

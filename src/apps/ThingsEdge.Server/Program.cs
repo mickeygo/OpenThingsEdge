@@ -1,4 +1,6 @@
 using Serilog;
+using ThingsEdge.Router;
+using ThingsEdge.Providers.Ops;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +19,10 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddGlobalForServer();
 
-// 自定义服务配置
+// 自定义服务配置 
+builder.Services.AddThingsEdgeRouter();
+builder.Services.AddOpsProvider(builder.Configuration);
+
 builder.Host.UseWindowsService(); // 可设置为 Window Service。
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => 
     loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration)); // 使用 Serilog，并从配置文件中读取配置。

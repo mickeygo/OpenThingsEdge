@@ -1,4 +1,6 @@
 ﻿using ThingsEdge.Router.Configuration;
+using ThingsEdge.Router.Devices;
+using ThingsEdge.Router.Forwarder;
 using ThingsEdge.Router.Transport.MQTT;
 using ThingsEdge.Router.Transport.RESTful;
 
@@ -16,6 +18,12 @@ public static class RouterServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddThingsEdgeRouter(this IServiceCollection services)
     {
+        services.AddSingleton<IDeviceSource, FileDeviceSource>();
+        services.AddSingleton<IDeviceManager, DefaultDeviceManager>();
+        services.AddSingleton<IHttpForwarder, DefalutHttpForwarder>();
+
+        services.AddRESTfulClient();
+
         return services;
     }
 
