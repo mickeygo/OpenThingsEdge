@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Contracts;
+﻿using ThingsEdge.Contracts.Devices;
+
+namespace ThingsEdge.Contracts;
 
 /// <summary>
 /// 响应消息。
@@ -14,7 +16,7 @@ public sealed class ResponseMessage
     /// <summary>
     /// 标记 Code，对于由 <see cref="TagFlag.Trigger"/> 触发的数据回写时会根据此码设置设备值。
     /// </summary>
-    public int State { get; set; }
+    public int State { get; init; }
 
     /// <summary>
     /// 数据回写集合。

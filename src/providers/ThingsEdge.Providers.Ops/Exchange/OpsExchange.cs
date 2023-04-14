@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Router;
+﻿using ThingsEdge.Contracts.Devices;
+using ThingsEdge.Router;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -99,7 +100,8 @@ public sealed class OpsExchange : IExchange
                         var result = await connector.Driver.ReadBoolAsync(tag.Address);
                         if (!result.IsSuccess)
                         {
-                            _logger.LogError($"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{result.Message}");
+                            _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
+                                device.Name, tag.Name, tag.Address, result.Message);
 
                             continue;
                         }
@@ -114,7 +116,8 @@ public sealed class OpsExchange : IExchange
                         var result = await connector.Driver.ReadInt16Async(tag.Address);
                         if (!result.IsSuccess)
                         {
-                            _logger.LogError($"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{result.Message}");
+                            _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
+                                device.Name, tag.Name, tag.Address, result.Message);
 
                             continue;
                         }
@@ -130,7 +133,8 @@ public sealed class OpsExchange : IExchange
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"[Engine] Heartbeat 数据处理异常，设备：{device.Name}，变量：{tag.Name}, 地址：{tag.Address}");
+                    _logger.LogError(ex, "[Engine] Heartbeat 数据处理异常，设备：{device.Name}，变量：{tag.Name}, 地址：{tag.Address}",
+                        device.Name, tag.Name, tag.Address);
                 }
             }
         });
@@ -167,7 +171,8 @@ public sealed class OpsExchange : IExchange
                         var (ok, data, err) = await connector.ReadAsync(tag); // short 类型
                         if (!ok)
                         {
-                            _logger.LogError($"[Engine] Trigger 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}");
+                            _logger.LogError("[Engine] Trigger 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
+                                device.Name, tag.Name, tag.Address, err);
 
                             continue;
                         }
@@ -190,7 +195,8 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Engine] Trigger 数据处理异常，设备：{device.Name}，变量：{tag.Name}, 地址：{tag.Address}");
+                        _logger.LogError(ex, "[Engine] Trigger 数据处理异常，设备：{DeviceName}，变量：{TagName}, 地址：{TagAddress}", 
+                            device.Name, tag.Name, tag.Address);
                     }
                 }
             });
@@ -228,7 +234,8 @@ public sealed class OpsExchange : IExchange
                         var (ok, data, err) = await connector.ReadAsync(tag);
                         if (!ok)
                         {
-                            _logger.LogError($"[Engine] Notice 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}");
+                            _logger.LogError("[Engine] Notice 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}", 
+                                device.Name, tag.Name, tag.Address, err);
 
                             continue;
                         }
@@ -241,7 +248,8 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Engine] Notice 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}");
+                        _logger.LogError(ex, "[Engine] Notice 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}", 
+                            device.Name, tag.Name, tag.Address);
                     }
                 }
             });
@@ -286,7 +294,8 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Engine] Switch 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}");
+                        _logger.LogError(ex, "[Engine] Switch 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
+                            device.Name, tag.Name, tag.Address);
                     }
                 }
             });
@@ -377,7 +386,8 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Engine] Switch 开关数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}");
+                        _logger.LogError(ex, "[Engine] Switch 开关数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
+                            device.Name, tag.Name, tag.Address);
                     }
                 }
 

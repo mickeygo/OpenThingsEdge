@@ -1,4 +1,5 @@
 ﻿using MQTTnet.Client;
+using ThingsEdge.Contracts.MQTT;
 
 namespace ThingsEdge.Router.Transport.MQTT;
 

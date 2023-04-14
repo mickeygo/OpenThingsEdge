@@ -6,6 +6,8 @@ using DInt = System.Int32;
 using Real = System.Single;
 using LReal = System.Double;
 
+using ThingsEdge.Contracts.Devices;
+
 namespace ThingsEdge.Contracts;
 
 public static class PayloadDataExtensions
@@ -238,35 +240,35 @@ public static class PayloadDataExtensions
         // 单值
         if (payload.Length == 0) // payload.Value.GetType().IsArray
         {
-            switch (payload.DataType)
+            return payload.DataType switch
             {
-                case DataType.Bit: return (Bit)payload.Value;
-                case DataType.Byte: return ((byte[])payload.Value)[0]; // byte 都为数组
-                case DataType.Word: return (Word)payload.Value;
-                case DataType.DWord: return (DWord)payload.Value;
-                case DataType.Int: return (Int)payload.Value;
-                case DataType.DInt: return (DInt)payload.Value;
-                case DataType.Real: return (Real)payload.Value;
-                case DataType.LReal: return (LReal)payload.Value;
-                case DataType.String or DataType.S7String or DataType.S7WString: return (string)payload.Value;
-                default: throw new FormatException();
-            }
+                DataType.Bit => (Bit)payload.Value,
+                DataType.Byte => ((byte[])payload.Value)[0],// byte 都为数组
+                DataType.Word => (Word)payload.Value,
+                DataType.DWord => (DWord)payload.Value,
+                DataType.Int => (Int)payload.Value,
+                DataType.DInt => (DInt)payload.Value,
+                DataType.Real => (Real)payload.Value,
+                DataType.LReal => (LReal)payload.Value,
+                DataType.String or DataType.S7String or DataType.S7WString => (string)payload.Value,
+                _ => throw new FormatException(),
+            };
         }
 
         // 数组
-        switch (payload.DataType)
+        return payload.DataType switch
         {
-            case DataType.Bit: return (Bit[])payload.Value;
-            case DataType.Byte: return (byte[])payload.Value;
-            case DataType.Word: return (Word[])payload.Value;
-            case DataType.DWord: return (DWord[])payload.Value;
-            case DataType.Int: return (Int[])payload.Value;
-            case DataType.DInt: return (DInt[])payload.Value;
-            case DataType.Real: return (Real[])payload.Value;
-            case DataType.LReal: return (LReal[])payload.Value;
-            case DataType.String or DataType.S7String or DataType.S7WString: return Arr2Str((string[])payload.Value);
-            default: throw new FormatException();
-        }
+            DataType.Bit => (Bit[])payload.Value,
+            DataType.Byte => (byte[])payload.Value,
+            DataType.Word => (Word[])payload.Value,
+            DataType.DWord => (DWord[])payload.Value,
+            DataType.Int => (Int[])payload.Value,
+            DataType.DInt => (DInt[])payload.Value,
+            DataType.Real => (Real[])payload.Value,
+            DataType.LReal => (LReal[])payload.Value,
+            DataType.String or DataType.S7String or DataType.S7WString => Arr2Str((string[])payload.Value),
+            _ => throw new FormatException(),
+        };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts.MQTT;
 
 /// <summary>
 /// 表示是由MQTT产生的请求数据。
@@ -7,17 +7,23 @@
 /// </summary>
 public sealed class MQTTRequestMessage : IRequest<MQTTRequestMessageResult>
 {
-    public string ClientId { get; }
+    /// <summary>
+    /// 唯一客户端Id。
+    /// </summary>
+    [NotNull]
+    public string? ClientId { get; init; }
 
     /// <summary>
     /// 消息 Topic。
     /// </summary>
-    public string Topic { get; }
+    [NotNull]
+    public string? Topic { get; init; }
 
     /// <summary>
     /// 接收到的消息。
     /// </summary>
-    public string Body { get; }
+    [NotNull]
+    public string? Body { get; init; }
 
     public MQTTRequestMessage(string clientId, string topic, string body)
     {

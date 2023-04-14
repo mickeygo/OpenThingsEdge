@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Contracts;
+﻿using ThingsEdge.Contracts.Devices;
+
+namespace ThingsEdge.Contracts;
 
 /// <summary>
 /// 设备管理。

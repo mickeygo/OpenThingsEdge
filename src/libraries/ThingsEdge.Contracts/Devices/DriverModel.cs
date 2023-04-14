@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts.Devices;
 
 /// <summary>
 /// 设备驱动型号，如西门子1200、西门子1500、三菱、欧姆龙FinsTcp、AB CIP等。

@@ -39,7 +39,7 @@ public class IoTGatewayController : Controller
 
     [HttpPost]
     [Route("trigger")]
-    public IActionResult Trigger()
+    public IActionResult Trigger(RequestMessage message)
     {
         var ret = new HttpResponseResult();
         return Json(ret);

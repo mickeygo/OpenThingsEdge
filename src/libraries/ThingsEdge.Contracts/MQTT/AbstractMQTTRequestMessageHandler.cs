@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Contracts;
+﻿using ThingsEdge.Contracts.MQTT;
+
+namespace ThingsEdge.Contracts;
 
 /// <summary>
 /// MQTT请求消息处理抽象类。

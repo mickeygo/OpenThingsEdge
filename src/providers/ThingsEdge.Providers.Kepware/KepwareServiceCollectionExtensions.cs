@@ -2,7 +2,7 @@
 
 namespace ThingsEdge.Providers.Kepware;
 
-public static class ServiceCollectionExtensions
+public static class KepwareServiceCollectionExtensions
 {
     /// <summary>
     /// 添加 Kepware IotGateway RESTful Server 服务。

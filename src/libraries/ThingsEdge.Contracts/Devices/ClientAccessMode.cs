@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts.Devices;
 
 /// <summary>
 /// 客户端访问模式。

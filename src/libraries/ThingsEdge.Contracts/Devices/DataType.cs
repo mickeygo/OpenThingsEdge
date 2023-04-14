@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts.Devices;
 
 /// <summary>
 /// 数据类型。
@@ -9,7 +9,7 @@ public enum DataType
     /// Bool 类型 <see cref="bool"/>
     /// </summary>
     Bit = 1,
-    
+
     /// <summary>
     /// 字节 <see cref="byte"/>
     /// </summary>

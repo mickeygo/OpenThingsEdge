@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Router.Devices;
+﻿using ThingsEdge.Contracts.Devices;
+
+namespace ThingsEdge.Router.Devices;
 
 internal sealed class DefaultDeviceManager : IDeviceManager
 {

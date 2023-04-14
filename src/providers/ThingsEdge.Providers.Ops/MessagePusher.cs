@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Providers.Ops.Exchange;
+﻿using ThingsEdge.Contracts.Devices;
+using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Router.Forwarder;
 
 namespace ThingsEdge.Providers.Ops;
@@ -40,7 +41,8 @@ public sealed class MessagePusher : IMessagePusher
             var (ok, data, err) = await connector.ReadAsync(normalTag);
             if (!ok)
             {
-                _logger.LogError($"读取子标记值失败，设备：{message.Schema.DeviceName}，标记：{tag.Name}，地址：{tag.Address}, 错误：{err}");
+                _logger.LogError("读取子标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
+                    message.Schema.DeviceName, tag.Name, tag.Address, err);
                 continue;
             }
 
@@ -60,7 +62,8 @@ public sealed class MessagePusher : IMessagePusher
         if (!result.IsSuccess())
         {
             // TODO: 推送失败日志
-            _logger.LogError($"推送消息失败，设备：{message.Schema.DeviceName}，标记：{tag.Name}，地址：{tag.Address}, 错误：{result.ErrorMessage}");
+            _logger.LogError("推送消息失败，设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
+                message.Schema.DeviceName, tag.Name, tag.Address, result.ErrorMessage);
             return;
         }
 
@@ -85,16 +88,18 @@ public sealed class MessagePusher : IMessagePusher
             Tag? tag2 = (tagGroup?.Tags ?? device.Tags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
             if (tag2 == null)
             {
-                _logger.LogError($"地址表中没有找到要回写的标记，设备：{message.Schema.DeviceName}，标记：{tag.Name}，地址：{tag.Address}, 回写标记：{tagName}");
+                _logger.LogError("地址表中没有找到要回写的标记，设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 回写标记: {TagName}",
+                    message.Schema.DeviceName, tag.Name, tag.Address, tagName);
 
                 hasError = true;
                 break;
             }
 
-            var (ok2, err2) = await connector.WriteAsync(tag2!, tagValue);
+            var (ok2, err2) = await connector.WriteAsync(tag2!, tagValue!);
             if (!ok2)
             {
-                _logger.LogError($"回写标记数据失败，设备：{message.Schema.DeviceName}，标记：{tag2!.Name}，地址：{tag2.Address}, 错误：{err2}");
+                _logger.LogError("回写标记数据失败, 设备: {DeviceName},标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
+                    message.Schema.DeviceName, tag2!.Name, tag2.Address, err2);
 
                 hasError = true;
                 break;
@@ -106,7 +111,8 @@ public sealed class MessagePusher : IMessagePusher
         var (ok3, err3) = await connector.WriteAsync(tag, tagCode);
         if (!ok3)
         {
-            _logger.LogError($"回写触发标记状态失败，设备：{message.Schema.DeviceName}，标记：{tag.Name}，地址：{tag.Address}, 错误：{err3}");
+            _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}", 
+                message.Schema.DeviceName, tag.Name, tag.Address, err3);
             return;
         }
     }
