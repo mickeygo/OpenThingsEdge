@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Contracts.Devices;
+using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
@@ -10,20 +11,20 @@ public sealed class OpsExchange : IExchange
 {
     private CancellationTokenSource? _cts = new();
 
+    private readonly IMediator _mediator;
     private readonly IDeviceManager _deviceManager;
     private readonly DriverConnectorManager _driverConnectorManager;
-    private readonly IMessagePusher _messagePusher;
     private readonly OpsConfig _opsConfig;
     private readonly ILogger _logger;
 
-    public OpsExchange(IDeviceManager deviceManager,
+    public OpsExchange(IMediator mediator,
+        IDeviceManager deviceManager,
         DriverConnectorManager driverConnectorManager,
-        IMessagePusher messagePusher,
         IOptionsMonitor<OpsConfig> opsConfig,
         ILogger<OpsExchange> logger)
     {
+        _mediator = mediator;
         _deviceManager = deviceManager;
-        _messagePusher = messagePusher;
         _driverConnectorManager = driverConnectorManager;
         _opsConfig = opsConfig.CurrentValue;
         _logger = logger;
@@ -162,6 +163,8 @@ public sealed class OpsExchange : IExchange
                             break;
                         }
 
+                        var cts1 = _cts;
+
                         if (!connector.CanConnect)
                         {
                             continue;
@@ -186,7 +189,7 @@ public sealed class OpsExchange : IExchange
                             // 推送数据
                             if (state == 1)
                             {
-                                await _messagePusher.PushAsync(connector, device, tag, data, _cts.Token);
+                                await _mediator.Publish(new TriggerEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token);
                             }
                         }
                     }
@@ -225,6 +228,8 @@ public sealed class OpsExchange : IExchange
                             break;
                         }
 
+                        var cts1 = _cts;
+
                         if (!connector.CanConnect)
                         {
                             continue;
@@ -241,7 +246,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 推送数据
-                        await _messagePusher.PushAsync(connector, device, tag, data, _cts.Token);
+                        await _mediator.Publish(new NoticeEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token);
                     }
                     catch (OperationCanceledException)
                     {
@@ -264,9 +269,8 @@ public sealed class OpsExchange : IExchange
         var tags = device!.GetTagsFromGroups(TagFlag.Switch);
         foreach (var tag in tags)
         {
-            object syncLock = new();
             ManualResetEvent mre = new(false); // 手动事件
-
+           
             // 开关绑定的数据
             _ = Task.Run(async () =>
             {
@@ -282,12 +286,15 @@ public sealed class OpsExchange : IExchange
                             break;
                         }
 
+                        var cts1 = _cts;
+
                         if (!connector.CanConnect)
                         {
                             continue;
                         }
 
-                        // TODO: 记录数据
+                        // 记录数据
+                        await _mediator.Publish(new SwitchEvent { Connector = connector, Device = device, Tag = tag }, cts1.Token);
                     }
                     catch (OperationCanceledException)
                     {
@@ -304,8 +311,8 @@ public sealed class OpsExchange : IExchange
             _ = Task.Run(async () =>
             {
                 int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
-                bool isOn = false; // 开关开启状态
                 DateTime lastestTime = DateTime.Now;
+                bool isOn = false; // 开关开启状态
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
                     try
@@ -316,6 +323,8 @@ public sealed class OpsExchange : IExchange
                         {
                             break;
                         }
+
+                        var cts1 = _cts;
 
                         if (!connector.CanConnect)
                         {
@@ -330,21 +339,33 @@ public sealed class OpsExchange : IExchange
 
                         var (ok, data, _) = await connector.ReadAsync(tag);
 
+                        // 开关标记数据类型必须为 bool 或 int16
+                        bool on = tag.DataType switch
+                        {
+                            DataType.Bit => data.GetBit(),
+                            DataType.Int => data.GetInt() == 1,
+                            _ => throw new NotSupportedException(),
+                        };
+
                         // 读取成功且开关处于 on 状态，发送开启动作信号。
-                        if (ok && data.GetBit())
+                        if (ok && on)
                         {
                             // 在本身处于关闭状态，才执行开启动作。
                             if (!isOn)
                             {
-                                if (_cts != null)
+                                // 发送 On 信号结束标识
+                                await _mediator.Publish(new SwitchEvent
                                 {
-                                    // TODO: 发送 On 信号开始标识
-
-                                }
+                                    Connector = connector,
+                                    Device = device,
+                                    Tag = tag,
+                                    State = SwitchState.On,
+                                    IsSwitchSignal = true,
+                                }, cts1.Token);
 
                                 // 开关开启时，发送信号，让子任务执行。
-                                mre.Set();
                                 isOn = true;
+                                mre.Set();
                             }
                             else
                             {
@@ -352,14 +373,19 @@ public sealed class OpsExchange : IExchange
                                 // 可设置超时时长，开关信号连续处于开启状态时间不能超过多久。
                                 if ((DateTime.Now - lastestTime).TotalSeconds > _opsConfig.AllowedSwitchOnlineMaxSeconds)
                                 {
-                                    if (_cts != null)
+                                    // 发送 Off 信号结束标识
+                                    await _mediator.Publish(new SwitchEvent
                                     {
-                                        // TODO: 发送 Off 信号结束标识
+                                        Connector = connector,
+                                        Device = device,
+                                        Tag = tag,
+                                        State = SwitchState.Off,
+                                        IsSwitchSignal = true,
+                                    }, cts1.Token);
 
-                                    }
-
-                                    mre.Reset();
+                                    // 运行超时，重置信号，让子任务阻塞。
                                     isOn = false;
+                                    mre.Reset();
                                 }
                             }
 
@@ -370,15 +396,19 @@ public sealed class OpsExchange : IExchange
                         // 若读取失败，或是开关处于 off 状态，则发送关闭动作信号（防止因设备未掉线，而读取失败导致一直发送数据）。
                         if (isOn)
                         {
-                            if (_cts != null)
+                            // 发送 Off 信号结束标识
+                            await _mediator.Publish(new SwitchEvent 
                             {
-                                // TODO: 发送 Off 信号结束标识
-
-                            }
+                                Connector = connector,
+                                Device = device,
+                                Tag = tag,
+                                State = SwitchState.Off,
+                                IsSwitchSignal = true,
+                            }, cts1.Token);
 
                             // 读取失败或开关关闭时，重置信号，让子任务阻塞。
-                            mre.Reset();
                             isOn = false;
+                            mre.Reset();
                         }
                     }
                     catch (OperationCanceledException)

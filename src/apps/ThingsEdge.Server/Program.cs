@@ -23,9 +23,14 @@ builder.Services.AddGlobalForServer();
 builder.Services.AddThingsEdgeRouter();
 builder.Services.AddOpsProvider(builder.Configuration);
 
+// 注册 MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ThingsEdge.Providers.Ops.Doc).Assembly));
+
 builder.Host.UseWindowsService(); // 可设置为 Window Service。
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => 
     loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration)); // 使用 Serilog，并从配置文件中读取配置。
+
+// End 
 
 var app = builder.Build();
 
