@@ -54,11 +54,17 @@ public sealed class Tag
     public TagFlag Flag { get; init; }
 
     /// <summary>
+    /// 用途分类。
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TagUsage Usage { get; init; } = TagUsage.Master;
+
+    /// <summary>
     /// 标记要旨，可用于设置重要信息。
     /// </summary>
     [NotNull]
     public string? Keynote { get; init; } = string.Empty;
-   
+
     /// <summary>
     /// 标记说明。
     /// </summary>

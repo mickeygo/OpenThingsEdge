@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Providers.Ops.Exchange;
+﻿using ThingsEdge.Providers.Ops.Configuration;
+using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
 
@@ -20,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IExchange, OpsExchange>();
         services.AddSingleton<DriverConnectorManager>();
         services.AddSingleton<SwitchContainer>();
+        services.AddSingleton<CurveDirctoryProvier>();
 
         return services;
     }

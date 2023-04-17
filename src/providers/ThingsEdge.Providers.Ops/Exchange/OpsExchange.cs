@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Contracts.Devices;
+using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
 
@@ -274,7 +275,7 @@ public sealed class OpsExchange : IExchange
             // 开关绑定的数据
             _ = Task.Run(async () =>
             {
-                int pollingInterval = _opsConfig.DefaultSwitchScanRate > 0 ? _opsConfig.DefaultSwitchScanRate : 30;
+                int pollingInterval = _opsConfig.SwitchScanRate > 0 ? _opsConfig.SwitchScanRate : 30;
                 while (_cts != null && !_cts.Token.IsCancellationRequested && mre.WaitOne())
                 {
                     try

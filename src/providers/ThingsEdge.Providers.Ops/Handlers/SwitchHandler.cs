@@ -1,4 +1,6 @@
-﻿using ThingsEdge.Providers.Ops.Exchange;
+﻿
+using Microsoft.Extensions.Primitives;
+using ThingsEdge.Providers.Ops.Exchange;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
@@ -8,11 +10,13 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 {
     private readonly SwitchContainer _container;
+    private readonly CurveDirctoryProvier _curveDirProvier;
     private readonly ILogger _logger;
 
-    public SwitchHandler(SwitchContainer container, ILogger<SwitchHandler> logger)
+    public SwitchHandler(SwitchContainer container, CurveDirctoryProvier curveDirProvier, ILogger<SwitchHandler> logger)
     {
         _container = container;
+        _curveDirProvier = curveDirProvier;
         _logger = logger;
     }
 
@@ -23,9 +27,34 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         {
             if (notification.State == SwitchState.On)
             {
-                // TODO: 修改Switch存储文件路径
-                var path = Path.Combine(AppContext.BaseDirectory, "curves", $"{DateTime.Now:yyyyMMddHHmmss}.txt");
-                var writer1 = _container.GetOrCreate(notification.Tag.TagId, path); 
+                // 文件命名格式: "[码]_[序号]_[时间]"
+                StringBuilder filename = new();
+
+                // 码和序号
+                var snTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == Contracts.Devices.TagUsage.SwitchSN);
+                if (snTag != null)
+                {
+                    var (ok1, data1, err1) = await notification.Connector.ReadAsync(snTag);
+                    if (ok1)
+                    {
+                        filename.Append(data1.GetString());
+                        filename.Append('_');
+                    }
+                }
+
+                var indexTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == Contracts.Devices.TagUsage.SwitchIndex);
+                if (indexTag != null)
+                {
+                    var (ok2, data2, err2) = await notification.Connector.ReadAsync(indexTag);
+                    if (ok2)
+                    {
+                        filename.Append(data2.GetString());
+                        filename.Append('_');
+                    }
+                }
+
+                filename.Append($"{DateTime.Now:yyyyMMddHHmmss}.txt");
+                var writer1 = _container.GetOrCreate(notification.Tag.TagId, Path.Combine(_curveDirProvier.GetCurveDirectory(), filename.ToString())); 
 
                 // 添加头信息
                 var headers = string.Join(",", notification.Tag.NormalTags.Select(s => s.Keynote));
@@ -33,7 +62,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             }
             else if (notification.State == SwitchState.Off)
             {
-                _container.Remove(notification.Tag.TagId);
+                _container.TryRemove(notification.Tag.TagId, out _); 
+                // 后续可根据返回的文件路径做其他处理。
             }
 
             return;
@@ -47,7 +77,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 
         // 读取触发标记下的子数据。
         List<string> items = new();
-        foreach (var normalTag in notification.Tag.NormalTags)
+        foreach (var normalTag in notification.Tag.NormalTags.Where(s => s.Usage == Contracts.Devices.TagUsage.SwitchCurve))
         {
             // TODO: 思考如何将子数据地址合并，减少多次读取产生的性能开销。
 

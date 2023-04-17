@@ -43,15 +43,23 @@ internal sealed class SwitchContainer
     }
 
     /// <summary>
-    /// 移除指定的对象，在成功移除后会一并释放对象资源。
+    /// 从容器中移除指定的对象，在成功移除后会一并释放对象资源。
     /// </summary>
     /// <param name="key">对象唯一值。</param>
-    public void Remove(string key)
+    /// <param name="filepath">移除的文件路径。</param>
+    /// <returns></returns>
+    public bool TryRemove(string key, [MaybeNullWhen(false)] out string filepath)
     {
+        filepath = default;
         if (_container.TryRemove(key, out var writer))
         {
+            filepath = writer.FilePath;
             writer.Dispose();
+
+            return true;
         }
+
+        return false;
     }
 
     /// <summary>
@@ -65,69 +73,5 @@ internal sealed class SwitchContainer
         }
 
         _container.Clear();
-    }
-}
-
-/// <summary>
-/// <see cref="StreamWriter"/> 包装类。
-/// </summary>
-public sealed class StreamWriterWrapper : IDisposable
-{
-    private readonly StreamWriter _writer;
-
-    /// <summary>
-    /// 写入的行数数量。
-    /// </summary>
-    public long LineCount { get; private set; }
-
-    /// <summary>
-    /// 当写入的行数到达设定的值时，会调用 Flush 将缓存数据刷入文件。默认为 128。
-    /// </summary>
-    public long FlushMaxLineCount { get; set; } = 128;
-
-    /// <summary>
-    /// 初始化一个新的对象。
-    /// </summary>
-    /// <param name="path">文件路径</param>
-    /// <exception cref="DirectoryNotFoundException"></exception>
-    /// <exception cref="IOException"></exception>
-    public StreamWriterWrapper(string path)
-    {
-        _writer = new(path, true);
-    }
-
-    /// <summary>
-    /// 写入数据。
-    /// </summary>
-    /// <param name="value">要写入的数据。</param>
-    /// <returns></returns>
-    public async Task WriteAsync(string value)
-    {
-        ++LineCount;
-        await _writer.WriteAsync(value);
-        if (LineCount % FlushMaxLineCount == 0)
-        {
-            await _writer.FlushAsync();
-        }
-    }
-
-    /// <summary>
-    /// 写入数据。
-    /// </summary>
-    /// <param name="value">要写入的数据。</param>
-    /// <returns></returns>
-    public async Task WriteLineAsync(string value)
-    {
-        ++LineCount;
-        await _writer.WriteLineAsync(value);
-        if (LineCount % FlushMaxLineCount == 0)
-        {
-            await _writer.FlushAsync();
-        }
-    }
-
-    public void Dispose()
-    {
-        _writer.Dispose();
     }
 }
