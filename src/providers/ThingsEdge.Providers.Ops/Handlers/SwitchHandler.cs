@@ -62,7 +62,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(tagGroup?.Name, sn, no)); 
 
                 // 添加头信息
-                var headers = string.Join(",", notification.Tag.NormalTags.Select(s => s.Keynote));
+                var headers = string.Join(",", notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve).Select(s => s.Keynote));
                 await writer.WriteLineAsync(headers);
             }
             else if (notification.State == SwitchState.Off)

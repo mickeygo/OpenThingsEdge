@@ -18,7 +18,7 @@ public sealed class CurveConfig
     /// <summary>
     /// 是否要推送文件到远端服务器。
     /// </summary>
-    public bool AllowCopy { get; init; } = false;
+    public bool AllowCopy { get; init; }
 
     /// <summary>
     /// 曲线文件远端存储根目录（共享目录）。

@@ -33,11 +33,7 @@ internal sealed class CurveStorage
     /// <exception cref="PathTooLongException"></exception>
     public string BuildCurveFilePath(string? group, string? sn, string? no, bool includeDatetime = true)
     {
-        var curvesDir = _opsConfig.Curve.LocalDirectory;
-        if (string.IsNullOrWhiteSpace(curvesDir))
-        {
-            curvesDir = DefaultCurvesDirectory;
-        }
+        var curvesDir = LocalCurvesDirectory();
 
         StringBuilder sb = new();
        
@@ -53,7 +49,7 @@ internal sealed class CurveStorage
             sb.Append(sn);
         }
 
-        // SN 内部再分组 ==> XXX/[SN001]/OP10/
+        // SN 内部再分组 => XXX/[SN001]/[OP10]/
         if (!string.IsNullOrWhiteSpace(group))
         {
             curvesDir = Path.Combine(curvesDir, group);
@@ -71,19 +67,20 @@ internal sealed class CurveStorage
             {
                 sb.Append(CurveNamedSeparator);
             }
-            sb.Append(no); // [sn_]no
+            sb.Append(no); // => SN001_2
         }
 
+        // 当还没有设置文件名信息时，会设置日期为文件名称。
         if (sb.Length == 0 || includeDatetime)
         {
             if (sb.Length > 0)
             {
                 sb.Append(CurveNamedSeparator);
             }
-            sb.Append(DateTime.Now.ToString("yyyyMMddHHmmss")); // [sn_][no_]yyyyMMddHHmmss
+            sb.Append(DateTime.Now.ToString("yyyyMMddHHmmss")); // => SN001_2_yyyyMMddHHmmss
         }
 
-        var filepath = Path.Combine(curvesDir, sb.ToString(), ".csv"); // [sn_][no_]yyyyMMddHHmmss.csv
+        var filepath = Path.Combine(curvesDir, $"{sb}.csv"); // => SN001_2_yyyyMMddHHmmss.csv
 
         // 考虑目录中文件存储的尺寸
         // 1）文件不删除
@@ -125,16 +122,21 @@ internal sealed class CurveStorage
         try
         {
             // 曲线以每个 SN 文件命名放置。
-            var fileName = Path.GetFileNameWithoutExtension(filepath) ?? "";
-            var sn = SplitName(fileName) ?? fileName;
-            var dir2 = Path.Combine(dir0, sn);
+            var (ok, path2) = ExtractFilePathPostfix(filepath);
+            if (!ok)
+            {
+                tcs.TrySetResult((true, default)); // 不能解析直接返回，不处理
+                return tcs.Task;
+            }
+
+            var destFileName  = Path.Combine(dir0, path2!);
+            var dir2 = Path.GetDirectoryName(destFileName)!;
             if (!Directory.Exists(dir2))
             {
-                Directory.CreateDirectory(dir2);
+                Directory.CreateDirectory(dir2); // 创建目录时，相对路径会转换为绝对路径
             }
 
             // 可根据返回的文件路径做其他处理，如推送到远程服务器。
-            var destFileName = Path.Combine(dir2, Path.GetFileName(filepath));
             File.Copy(filepath, destFileName);
 
             tcs.TrySetResult((true, default));
@@ -147,14 +149,33 @@ internal sealed class CurveStorage
         return tcs.Task;
     }
 
-    private static string? SplitName(string fileName)
+    private (bool ok, string? path) ExtractFilePathPostfix(string fileName)
     {
-        var index = fileName.IndexOf(DefaultCurvesDirectory);
-        if (index <= 0)
+        var localDir = LocalCurvesDirectory();
+
+        // 比较本地存储目录和文件路径，截取文件路径中不包含本地目录的文本。
+        if (fileName.Length <= localDir.Length)
         {
-            return default;
+            return (false, default);
         }
 
-        return fileName[..index];
+        var suffix = fileName[localDir.Length..]; // 含分隔符
+        if (suffix != localDir)
+        {
+            return (false, default);
+        }
+
+        return (true, fileName[(localDir.Length + 1)..]); // 前缀不含分隔符
+    }
+
+    private string LocalCurvesDirectory()
+    {
+        var curvesDir = _opsConfig.Curve.LocalDirectory;
+        if (string.IsNullOrWhiteSpace(curvesDir))
+        {
+            return DefaultCurvesDirectory;
+        }
+
+        return Path.GetFullPath(curvesDir);
     }
 }
