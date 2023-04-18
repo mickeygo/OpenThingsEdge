@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IExchange, OpsExchange>();
         services.AddSingleton<DriverConnectorManager>();
         services.AddSingleton<SwitchContainer>();
-        services.AddSingleton<CurveDirctoryProvier>();
+        services.AddSingleton<CurveStorage>();
 
         return services;
     }

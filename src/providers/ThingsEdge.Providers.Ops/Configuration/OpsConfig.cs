@@ -23,5 +23,5 @@ public sealed class OpsConfig
     /// <summary>
     /// 曲线数据配置。
     /// </summary>
-    public CurveConfig? Curve { get; init; }
+    public CurveConfig Curve { get; init; } = new();
 }

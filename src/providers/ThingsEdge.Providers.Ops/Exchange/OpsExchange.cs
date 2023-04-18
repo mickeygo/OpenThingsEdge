@@ -71,75 +71,73 @@ public sealed class OpsExchange : IExchange
     private Task HeartbeatMonitorAsync(DriverConnector connector)
     {
         var device = _deviceManager.GetDevice(connector.Id);
-        var tag = device!.Tags.FirstOrDefault(s => s.Flag == TagFlag.Heartbeat);
-        if (tag == null)
+        var tags = device!.GetAllTags(TagFlag.Trigger); // 所有标记为心跳的都进行监控。
+        foreach (var tag in tags)
         {
-            return Task.CompletedTask;
-        }
-
-        _ = Task.Run(async () =>
-        {
-            int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
-            while (_cts != null && !_cts.Token.IsCancellationRequested)
+            _ = Task.Run(async () =>
             {
-                try
+                int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
+                while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token);
-
-                    if (_cts == null)
+                    try
                     {
-                        break;
-                    }
+                        await Task.Delay(pollingInterval, _cts.Token);
 
-                    if (!connector.CanConnect)
-                    {
-                        continue;
-                    }
-
-                    // 心跳标记数据类型必须为 bool 或 int16
-                    if (tag.DataType == DataType.Bit)
-                    {
-                        var result = await connector.Driver.ReadBoolAsync(tag.Address);
-                        if (!result.IsSuccess)
+                        if (_cts == null)
                         {
-                            _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
-                                device.Name, tag.Name, tag.Address, result.Message);
+                            break;
+                        }
 
+                        if (!connector.CanConnect)
+                        {
                             continue;
                         }
 
-                        if (result.Content)
+                        // 心跳标记数据类型必须为 bool 或 int16
+                        if (tag.DataType == DataType.Bit)
                         {
-                            await connector.Driver.WriteAsync(tag.Address, false);
+                            var result = await connector.Driver.ReadBoolAsync(tag.Address);
+                            if (!result.IsSuccess)
+                            {
+                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
+                                    device.Name, tag.Name, tag.Address, result.Message);
+
+                                continue;
+                            }
+
+                            if (result.Content)
+                            {
+                                await connector.Driver.WriteAsync(tag.Address, false);
+                            }
+                        }
+                        else if (tag.DataType == DataType.Int)
+                        {
+                            var result = await connector.Driver.ReadInt16Async(tag.Address);
+                            if (!result.IsSuccess)
+                            {
+                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
+                                    device.Name, tag.Name, tag.Address, result.Message);
+
+                                continue;
+                            }
+
+                            if (result.Content == 1)
+                            {
+                                await connector.Driver.WriteAsync(tag.Address, (short)0);
+                            }
                         }
                     }
-                    else if (tag.DataType == DataType.Int)
+                    catch (OperationCanceledException)
                     {
-                        var result = await connector.Driver.ReadInt16Async(tag.Address);
-                        if (!result.IsSuccess)
-                        {
-                            _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
-                                device.Name, tag.Name, tag.Address, result.Message);
-
-                            continue;
-                        }
-
-                        if (result.Content == 1)
-                        {
-                            await connector.Driver.WriteAsync(tag.Address, (short)0);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[Engine] Heartbeat 数据处理异常，设备：{device.Name}，变量：{tag.Name}, 地址：{tag.Address}",
+                            device.Name, tag.Name, tag.Address);
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[Engine] Heartbeat 数据处理异常，设备：{device.Name}，变量：{tag.Name}, 地址：{tag.Address}",
-                        device.Name, tag.Name, tag.Address);
-                }
-            }
-        });
+            });
+        }
 
         return Task.CompletedTask;
     }
@@ -147,7 +145,7 @@ public sealed class OpsExchange : IExchange
     private Task TriggerMonitorAsync(DriverConnector connector)
     {
         var device = _deviceManager.GetDevice(connector.Id);
-        var tags = device!.GetTagsFromGroups(TagFlag.Trigger);
+        var tags = device!.GetAllTags(TagFlag.Trigger);
         foreach (var tag in tags)
         {
             _ = Task.Run(async () =>
@@ -212,7 +210,7 @@ public sealed class OpsExchange : IExchange
     private Task NoticeMonitorAsync(DriverConnector connector)
     {
         var device = _deviceManager.GetDevice(connector.Id);
-        var tags = device!.GetTagsFromGroups(TagFlag.Notice);
+        var tags = device!.GetAllTags(TagFlag.Notice);
         foreach (var tag in tags)
         {
             _ = Task.Run(async () =>
@@ -267,7 +265,7 @@ public sealed class OpsExchange : IExchange
     private Task SwitchMonitorAsync(DriverConnector connector)
     {
         var device = _deviceManager.GetDevice(connector.Id);
-        var tags = device!.GetTagsFromGroups(TagFlag.Switch);
+        var tags = device!.GetAllTags(TagFlag.Switch);
         foreach (var tag in tags)
         {
             ManualResetEvent mre = new(false); // 手动事件

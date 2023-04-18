@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
-/// 返回结果。
+/// 统一结果返回格式。
 /// </summary>
 public class AbstractResult
 {

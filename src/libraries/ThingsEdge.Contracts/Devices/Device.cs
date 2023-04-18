@@ -63,4 +63,30 @@ public sealed class Device
     {
         return TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag)).ToList();
     }
+
+    /// <summary>
+    /// 从设备的所有标记（包括设备标记和分组标记）中获取指定标识的标记集合。
+    /// </summary>
+    /// <param name="flag">标识</param>
+    /// <returns></returns>
+    public List<Tag> GetAllTags(TagFlag flag)
+    {
+        return TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag)).Concat(Tags.Where(s => s.Flag == flag)).ToList();
+    }
+
+    /// <summary>
+    /// 获取标记属于的分组，若未找到标记或是标记不属于分组，返回 null。
+    /// </summary>
+    /// <param name="tagId">标记Id</param>
+    /// <returns></returns>
+    public TagGroup? GetTagGroup(string tagId)
+    {
+        if (Tags.Any(s => s.TagId == tagId))
+        {
+            return null;
+        }
+
+        var tagGroup = TagGroups.FirstOrDefault(s => s.Tags.Any(t => t.TagId == tagId));
+        return tagGroup;
+    }
 }

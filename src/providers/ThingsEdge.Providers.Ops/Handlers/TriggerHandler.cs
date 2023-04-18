@@ -19,7 +19,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 
     public async Task Handle(TriggerEvent notification, CancellationToken cancellationToken)
     {
-        var tagGroup = notification.Device.TagGroups.FirstOrDefault(s => s.Tags.Any(x => x.TagId == notification.Tag.TagId));
+        var tagGroup = notification.Device.GetTagGroup(notification.Tag.TagId);
         var message = new RequestMessage
         {
             Schema = new()

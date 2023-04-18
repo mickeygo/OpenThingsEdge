@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.Primitives;
+﻿using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Exchange;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
@@ -10,13 +9,13 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 {
     private readonly SwitchContainer _container;
-    private readonly CurveDirctoryProvier _curveDirProvier;
+    private readonly CurveStorage _curveStorage;
     private readonly ILogger _logger;
 
-    public SwitchHandler(SwitchContainer container, CurveDirctoryProvier curveDirProvier, ILogger<SwitchHandler> logger)
+    public SwitchHandler(SwitchContainer container, CurveStorage curveStorage, ILogger<SwitchHandler> logger)
     {
         _container = container;
-        _curveDirProvier = curveDirProvier;
+        _curveStorage = curveStorage;
         _logger = logger;
     }
 
@@ -27,43 +26,56 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         {
             if (notification.State == SwitchState.On)
             {
-                // 文件命名格式: "[码]_[序号]_[时间]"
-                StringBuilder filename = new();
-
+                string? sn = null, no = null;
                 // 码和序号
-                var snTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == Contracts.Devices.TagUsage.SwitchSN);
+                var snTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == TagUsage.SwitchSN);
                 if (snTag != null)
                 {
                     var (ok1, data1, err1) = await notification.Connector.ReadAsync(snTag);
                     if (ok1)
                     {
-                        filename.Append(data1.GetString());
-                        filename.Append('_');
+                        sn = data1.GetString();
+                    }
+                    else
+                    {
+                        _logger.LogError("读取SwitchSN标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
+                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err1);
                     }
                 }
 
-                var indexTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == Contracts.Devices.TagUsage.SwitchIndex);
-                if (indexTag != null)
+                var noTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == TagUsage.SwitchNo);
+                if (noTag != null)
                 {
-                    var (ok2, data2, err2) = await notification.Connector.ReadAsync(indexTag);
+                    var (ok2, data2, err2) = await notification.Connector.ReadAsync(noTag);
                     if (ok2)
                     {
-                        filename.Append(data2.GetString());
-                        filename.Append('_');
+                        no = data2.GetString();
+                    }
+                    else
+                    {
+                        _logger.LogError("读取SwitchIndex标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
+                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err2);
                     }
                 }
 
-                filename.Append($"{DateTime.Now:yyyyMMddHHmmss}.txt");
-                var writer1 = _container.GetOrCreate(notification.Tag.TagId, Path.Combine(_curveDirProvier.GetCurveDirectory(), filename.ToString())); 
+                var tagGroup = notification.Device.GetTagGroup(notification.Tag.TagId);
+                var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(tagGroup?.Name, sn, no)); 
 
                 // 添加头信息
                 var headers = string.Join(",", notification.Tag.NormalTags.Select(s => s.Keynote));
-                await writer1.WriteLineAsync(headers);
+                await writer.WriteLineAsync(headers);
             }
             else if (notification.State == SwitchState.Off)
             {
-                _container.TryRemove(notification.Tag.TagId, out _); 
-                // 后续可根据返回的文件路径做其他处理。
+                // 可根据返回的文件路径做其他处理。
+                if (_container.TryRemove(notification.Tag.TagId, out var filepath))
+                {
+                    var (ok, err) = await _curveStorage.TryCopyAsync(filepath, cancellationToken);
+                    if (!ok)
+                    {
+                        _logger.LogError("拷贝曲线失败，错误：{Err}", err);
+                    }
+                }
             }
 
             return;
