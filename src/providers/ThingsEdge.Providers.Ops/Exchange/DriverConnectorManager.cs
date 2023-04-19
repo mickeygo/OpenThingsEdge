@@ -118,11 +118,11 @@ public sealed class DriverConnectorManager : IDisposable
                     // 先检查服务器能否访问
                     try
                     {
-                        var ipStatus = await networkDevice.PingIpAddressAsync(1_000);
+                        var ipStatus = await networkDevice.PingIpAddressAsync(1_000).ConfigureAwait(false);
                         if (ipStatus == IPStatus.Success)
                         {
                             connector.Available = true;
-                            var ret = await networkDevice.ConnectServerAsync();
+                            var ret = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                             if (!ret.IsSuccess)
                             {
                                 _logger.LogWarning("尝试连接服务失败，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
@@ -152,11 +152,11 @@ public sealed class DriverConnectorManager : IDisposable
     {
         _ = Task.Run(async () =>
         {
-            await Task.Delay(3000); // 延迟3s后开始监听
+            await Task.Delay(3000).ConfigureAwait(false); // 延迟3s后开始监听
 
             // PeriodicTimer 定时器，可以让任务不堆积，不会因上一个任务阻塞在下个任务开始时导致多个任务同时进行。
             _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(2));
-            while (await _periodicTimer.WaitForNextTickAsync())
+            while (await _periodicTimer.WaitForNextTickAsync().ConfigureAwait(false))
             {
                 foreach (var connector in _connectors.Values)
                 {
@@ -171,7 +171,7 @@ public sealed class DriverConnectorManager : IDisposable
                             // 所以，在连接成功一次后，不要再重复连接。
                             if (connector.ConnectedStatus == ConnectionStatus.Disconnected)
                             {
-                                _ = await networkDevice.ConnectServerAsync();
+                                _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                             }
                         }
                         catch (Exception ex)

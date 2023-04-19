@@ -1,6 +1,7 @@
 ﻿using ThingsEdge.Router.Configuration;
+using ThingsEdge.Router.Events;
 
-namespace ThingsEdge.Router.Handlers;
+namespace ThingsEdge.Router.Handlers.Health;
 
 /// <summary>
 /// 下游健康检测。
@@ -22,7 +23,7 @@ public sealed class HttpDownstreamHealthChecker : IDownstreamHealthChecker
 
         try
         {
-            var resp = await httpClient.GetAsync(ForwarderConstants.HealthRequestUri, cancellationToken);
+            var resp = await httpClient.GetAsync(ForwarderConstants.HealthRequestUri, cancellationToken).ConfigureAwait(false);
             return resp.IsSuccessStatusCode ? DestinationHealthState.Good : DestinationHealthState.Bad;
         }
         catch (Exception)

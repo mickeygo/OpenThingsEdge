@@ -2,7 +2,7 @@
 using ThingsEdge.Router.Configuration;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Forwarder;
-using ThingsEdge.Router.Handlers;
+using ThingsEdge.Router.Handlers.Health;
 using ThingsEdge.Router.Transport.MQTT;
 
 namespace ThingsEdge.Router;

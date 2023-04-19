@@ -10,7 +10,7 @@ public static class DriverConnectorExtensions
     /// <returns></returns>
     public static async Task<(bool ok, PayloadData data, string err)> ReadAsync(this DriverConnector connector, Tag tag)
     {
-        return await DriverReadWriteUtil.ReadAsync(connector.Driver, tag);
+        return await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public static class DriverConnectorExtensions
                 }
             }
 
-            return await DriverReadWriteUtil.WriteAsync(connector.Driver, tag, data2!);
+            return await DriverReadWriteUtil.WriteAsync(connector.Driver, tag, data2!).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

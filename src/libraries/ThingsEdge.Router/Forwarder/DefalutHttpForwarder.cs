@@ -28,13 +28,13 @@ internal sealed class DefalutHttpForwarder : IHttpForwarder
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts0.Token);
 
             // 注：虽然后做超时处理，但数据接收端还是要做幂等处理来预防重复数据。
-            var resp = await httpClient.PostAsJsonAsync(requestUri, message, cts.Token);
+            var resp = await httpClient.PostAsJsonAsync(requestUri, message, cts.Token).ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode)
             {
                 return HttpResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}");
             }
 
-            var ret = await resp.Content.ReadFromJsonAsync<HttpResponseResult>(cancellationToken: cts.Token);
+            var ret = await resp.Content.ReadFromJsonAsync<HttpResponseResult>(cancellationToken: cts.Token).ConfigureAwait(false);
             var respMessage = new ResponseMessage
             {
                 Request = message,

@@ -37,7 +37,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         {
             // TODO: 思考如何将子数据地址合并，减少多次读取产生的性能开销。
 
-            var (ok, data, err) = await notification.Connector.ReadAsync(normalTag);
+            var (ok, data, err) = await notification.Connector.ReadAsync(normalTag).ConfigureAwait(false);
             if (!ok)
             {
                 _logger.LogError("读取子标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
@@ -50,7 +50,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         }
 
         // 发送消息。
-        var result = await _httpForwarder.SendAsync("/api/iotgateway/trigger", message, cancellationToken);
+        var result = await _httpForwarder.SendAsync("/api/iotgateway/trigger", message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
             // TODO: 推送失败状态
@@ -83,7 +83,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 break;
             }
 
-            var (ok2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!);
+            var (ok2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
             if (!ok2)
             {
                 _logger.LogError("回写标记数据失败, 设备: {DeviceName},标记: {TagName}, 地址: {TagAddress}, 错误: {Err}", 
@@ -96,7 +96,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 
         // 回写标记状态。
         int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data.State;
-        var (ok3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode);
+        var (ok3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {
             _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",

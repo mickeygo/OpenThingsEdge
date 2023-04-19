@@ -22,7 +22,7 @@ internal sealed class DefaultRESTServer : IRESTServerApi
         {
             var httpClient = _httpClientFactory.CreateClient(HttpClientName);
             var requestUri = $"/read/{string.Join("&", tags.Select(s => $"ids={s}"))}";
-            return await httpClient.GetFromJsonAsync<ReadResult>(requestUri, cancellationToken);
+            return await httpClient.GetFromJsonAsync<ReadResult>(requestUri, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -36,9 +36,9 @@ internal sealed class DefaultRESTServer : IRESTServerApi
         {
             var httpClient = _httpClientFactory.CreateClient(HttpClientName);
             var value0 = value.Select(s => new { id = s.Key, v = s.Value });
-            var resp = await httpClient.PostAsJsonAsync("/write", value0, cancellationToken);
+            var resp = await httpClient.PostAsJsonAsync("/write", value0, cancellationToken).ConfigureAwait(false);
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<WriteResultCollection>();
+            return await resp.Content.ReadFromJsonAsync<WriteResultCollection>().ConfigureAwait(false);
         }
         catch (Exception)
         {

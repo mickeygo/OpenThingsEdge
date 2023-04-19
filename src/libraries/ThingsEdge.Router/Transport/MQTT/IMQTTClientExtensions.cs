@@ -17,7 +17,7 @@ public static class IMQTTClientExtensions
         MqttQualityOfServiceLevel qualityOfServiceLevel = MqttQualityOfServiceLevel.AtMostOnce)
     {
         var topicFilters = topics.Select(s => new MqttTopicFilterBuilder().WithTopic(s).WithQualityOfServiceLevel(qualityOfServiceLevel).Build()).ToList();
-        await mqttClient.ManagedMqttClient.SubscribeAsync(topicFilters);
+        await mqttClient.ManagedMqttClient.SubscribeAsync(topicFilters).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public static class IMQTTClientExtensions
     public static async Task<(bool ok, string err)> PublishAsync(this IMQTTClient mqttClient, string topic, string payload, 
         MqttQualityOfServiceLevel qualityOfServiceLevel = MqttQualityOfServiceLevel.AtMostOnce, CancellationToken cancellationToken = default)
     {
-        var result = await mqttClient.ManagedMqttClient.InternalClient.PublishStringAsync(topic, payload, qualityOfServiceLevel, cancellationToken:cancellationToken);
+        var result = await mqttClient.ManagedMqttClient.InternalClient.PublishStringAsync(topic, payload, qualityOfServiceLevel, cancellationToken:cancellationToken).ConfigureAwait(false);
         return (result.IsSuccess, result.ReasonString);
     }
 }

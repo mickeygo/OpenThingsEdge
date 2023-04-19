@@ -1,6 +1,7 @@
 ﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Router.Events;
 
-namespace ThingsEdge.Router.Handlers;
+namespace ThingsEdge.Router.Handlers.Health;
 
 internal sealed class HealthCheckHandlePolicy : IHealthCheckHandlePolicy
 {

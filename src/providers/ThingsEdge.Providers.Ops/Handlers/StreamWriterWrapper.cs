@@ -43,10 +43,10 @@ internal sealed class StreamWriterWrapper : IDisposable
     public async Task WriteAsync(string value)
     {
         ++WrittenCount;
-        await _sw.WriteAsync(value);
+        await _sw.WriteAsync(value).ConfigureAwait(false);
         if (WrittenCount % FlushWhenMaxWrittenCount == 0)
         {
-            await _sw.FlushAsync();
+            await _sw.FlushAsync().ConfigureAwait(false);
         }
     }
 
@@ -59,10 +59,10 @@ internal sealed class StreamWriterWrapper : IDisposable
     public async Task WriteLineAsync(string value)
     {
         ++WrittenCount;
-        await _sw.WriteLineAsync(value);
+        await _sw.WriteLineAsync(value).ConfigureAwait(false);
         if (WrittenCount % FlushWhenMaxWrittenCount == 0)
         {
-            await _sw.FlushAsync();
+            await _sw.FlushAsync().ConfigureAwait(false);
         }
     }
 

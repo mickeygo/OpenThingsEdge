@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Router.Handlers;
+﻿using ThingsEdge.Router.Events;
+
+namespace ThingsEdge.Router.Handlers.Health;
 
 /// <summary>
 /// 健康检查处理策略。

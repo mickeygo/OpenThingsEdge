@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Router.Handlers;
+﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
 /// 目标健康状况事件。

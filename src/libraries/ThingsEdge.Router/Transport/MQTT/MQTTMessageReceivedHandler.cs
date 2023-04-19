@@ -27,7 +27,7 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
         {
             // 发送请求给唯一处理者。
             // 第三方需要有接口处理该消息。
-            reqResult = await _mediator.Send(new MQTTRequestMessage(clientId, topic, body), cancellationToken);
+            reqResult = await _mediator.Send(new MQTTRequestMessage(clientId, topic, body), cancellationToken).ConfigureAwait(false);
             if (!reqResult.IsSuccess())
             {
                 return;
@@ -37,7 +37,7 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
             
             if (reqResult.AutoAcknowledge)
             {
-                await args.AcknowledgeAsync(cancellationToken);
+                await args.AcknowledgeAsync(cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
             try
             {
                 // 广播消息给所有订阅者。
-                await _mediator.Publish(new NotificationMessage(reqResult.RequestMessage), cancellationToken);
+                await _mediator.Publish(new NotificationMessage(reqResult.RequestMessage), cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

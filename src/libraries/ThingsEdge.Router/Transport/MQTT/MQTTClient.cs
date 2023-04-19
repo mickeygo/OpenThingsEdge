@@ -18,13 +18,13 @@ internal sealed class MQTTClient : IMQTTClient
     {
         if (!ManagedMqttClient.IsStarted)
         {
-            await ManagedMqttClient.StartAsync(_managedMqttClientOptions);
+            await ManagedMqttClient.StartAsync(_managedMqttClientOptions).ConfigureAwait(false);
         }
     }
 
     public async Task StopAsync(bool cleanDisconnect = true)
     {
-        await ManagedMqttClient.StopAsync(cleanDisconnect);
+        await ManagedMqttClient.StopAsync(cleanDisconnect).ConfigureAwait(false);
     }
 
     public void Dispose()
