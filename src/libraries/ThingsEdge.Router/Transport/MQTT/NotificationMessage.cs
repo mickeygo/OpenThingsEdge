@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Router.Transport.MQTT;
 
 /// <summary>
 /// 通知消息。

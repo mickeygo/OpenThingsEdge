@@ -5,7 +5,7 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// <summary>
 /// 标记 <see cref="Contracts.Devices.TagFlag.Switch"/> 事件。
 /// </summary>
-public sealed class SwitchEvent : INotification
+internal sealed class SwitchEvent : INotification
 {
     [NotNull]
     public DriverConnector? Connector { get; init; }

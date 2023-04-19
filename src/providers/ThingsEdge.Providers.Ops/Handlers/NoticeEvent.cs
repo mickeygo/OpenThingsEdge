@@ -5,7 +5,7 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// <summary>
 /// 标记 <see cref="Contracts.Devices.TagFlag.Notice"/> 事件。
 /// </summary>
-public sealed class NoticeEvent : INotification
+internal sealed class NoticeEvent : INotification
 {
     [NotNull]
     public DriverConnector? Connector { get; init; }

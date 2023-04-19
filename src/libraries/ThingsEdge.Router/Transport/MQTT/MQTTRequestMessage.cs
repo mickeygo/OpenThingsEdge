@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts.MQTT;
+﻿namespace ThingsEdge.Router.Transport.MQTT;
 
 /// <summary>
 /// 表示是由MQTT产生的请求数据。

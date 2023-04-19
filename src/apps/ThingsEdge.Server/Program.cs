@@ -1,6 +1,5 @@
 using Serilog;
 using ThingsEdge.Router;
-using ThingsEdge.Providers.Ops;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +19,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddGlobalForServer();
 
 // 自定义服务配置 
-builder.Services.AddThingsEdgeRouter();
-builder.Services.AddOpsProvider(builder.Configuration);
-
-// 注册 MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ThingsEdge.Providers.Ops.Doc).Assembly));
+builder.Host.AddThingsEdgeRouter()
+    .AddDeviceFileProvider()
+    .AddHttpForwarder()
+    .AddOpsProvider()
+    .AddEventBus();
 
 builder.Host.UseWindowsService(); // 可设置为 Window Service。
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => 

@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Router.Forwarder;
 
 /// <summary>
 /// 传输数据上下文对象。

@@ -8,7 +8,7 @@ public interface IExchange : IDisposable
     /// <summary>
     /// 获取运行状态，是否正在运行中。
     /// </summary>
-    bool IsRuning { get; }
+    bool IsRunning { get; }
 
     /// <summary>
     /// 启动。

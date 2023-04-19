@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Router.Transport.RESTful;
+﻿namespace ThingsEdge.Router.Configuration;
 
 /// <summary>
 /// RESTful 客户端参数选项。

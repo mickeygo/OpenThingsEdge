@@ -1,9 +1,17 @@
 ﻿namespace ThingsEdge.Router;
 
+/// <summary>
+/// Router Builder 接口。
+/// </summary>
 public interface IRouterBuilder
 {
     /// <summary>
-    /// Gets the services.
+    /// Gets the builder.
     /// </summary>
-    IServiceCollection Services { get; }
+    IHostBuilder Builder { get; }
+
+    /// <summary>
+    /// 要注入到 EventBus 的程序集。
+    /// </summary>
+    ICollection<Assembly> Assemblies { get; }
 }

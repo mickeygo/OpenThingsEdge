@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Contracts.Devices;
+﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
@@ -12,37 +13,34 @@ public sealed class OpsExchange : IExchange
 {
     private CancellationTokenSource? _cts = new();
 
-    private readonly IMediator _mediator;
+    private readonly IEventPublisher _publisher;
     private readonly IDeviceManager _deviceManager;
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly OpsConfig _opsConfig;
     private readonly ILogger _logger;
 
-    public OpsExchange(IMediator mediator,
+    public OpsExchange(IEventPublisher publisher,
         IDeviceManager deviceManager,
         DriverConnectorManager driverConnectorManager,
         IOptionsMonitor<OpsConfig> opsConfig,
         ILogger<OpsExchange> logger)
     {
-        _mediator = mediator;
+        _publisher = publisher;
         _deviceManager = deviceManager;
         _driverConnectorManager = driverConnectorManager;
         _opsConfig = opsConfig.CurrentValue;
         _logger = logger;
     }
 
-    /// <summary>
-    /// 获取运行状态，是否正在运行中。
-    /// </summary>
-    public bool IsRuning { get; private set; }
+    public bool IsRunning { get; private set; }
 
     public async Task StartAsync()
     {
-        if (IsRuning)
+        if (IsRunning)
         {
             return;
         }
-        IsRuning = true;
+        IsRunning = true;
 
         _logger.LogInformation("[Engine] 引擎启动");
 
@@ -50,7 +48,7 @@ public sealed class OpsExchange : IExchange
 
         var devices = _deviceManager.GetDevices();
         _driverConnectorManager.Load(devices);
-        await _driverConnectorManager.ConnectAsync();
+        await _driverConnectorManager.ConnectAsync().ConfigureAwait(false);
 
         foreach (var connector in _driverConnectorManager.GetAllDriver())
         {
@@ -71,7 +69,7 @@ public sealed class OpsExchange : IExchange
     private Task HeartbeatMonitorAsync(DriverConnector connector)
     {
         var device = _deviceManager.GetDevice(connector.Id);
-        var tags = device!.GetAllTags(TagFlag.Trigger); // 所有标记为心跳的都进行监控。
+        var tags = device!.GetAllTags(TagFlag.Heartbeat); // 所有标记为心跳的都进行监控。
         foreach (var tag in tags)
         {
             _ = Task.Run(async () =>
@@ -81,7 +79,7 @@ public sealed class OpsExchange : IExchange
                 {
                     try
                     {
-                        await Task.Delay(pollingInterval, _cts.Token);
+                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
                         {
@@ -93,10 +91,12 @@ public sealed class OpsExchange : IExchange
                             continue;
                         }
 
+                        var cts1 = _cts;
+
                         // 心跳标记数据类型必须为 bool 或 int16
                         if (tag.DataType == DataType.Bit)
                         {
-                            var result = await connector.Driver.ReadBoolAsync(tag.Address);
+                            var result = await connector.Driver.ReadBoolAsync(tag.Address).ConfigureAwait(false);
                             if (!result.IsSuccess)
                             {
                                 _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
@@ -107,12 +107,16 @@ public sealed class OpsExchange : IExchange
 
                             if (result.Content)
                             {
-                                await connector.Driver.WriteAsync(tag.Address, false);
+                                await connector.Driver.WriteAsync(tag.Address, false).ConfigureAwait(false);
+
+                                // 发布心跳事件，心跳处理不阻塞标识复位。
+                                // 有发布事件，说明有接收到心跳。
+                                await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag }, cts1.Token).ConfigureAwait(false);
                             }
                         }
                         else if (tag.DataType == DataType.Int)
                         {
-                            var result = await connector.Driver.ReadInt16Async(tag.Address);
+                            var result = await connector.Driver.ReadInt16Async(tag.Address).ConfigureAwait(false);
                             if (!result.IsSuccess)
                             {
                                 _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
@@ -123,7 +127,10 @@ public sealed class OpsExchange : IExchange
 
                             if (result.Content == 1)
                             {
-                                await connector.Driver.WriteAsync(tag.Address, (short)0);
+                                await connector.Driver.WriteAsync(tag.Address, (short)0).ConfigureAwait(false);
+
+                                // 同上。
+                                await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag }, cts1.Token).ConfigureAwait(false);
                             }
                         }
                     }
@@ -155,7 +162,7 @@ public sealed class OpsExchange : IExchange
                 {
                     try
                     {
-                        await Task.Delay(pollingInterval, _cts.Token);
+                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
                         {
@@ -170,7 +177,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var (ok, data, err) = await connector.ReadAsync(tag); // short 类型
+                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
                         if (!ok)
                         {
                             _logger.LogError("[Engine] Trigger 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
@@ -188,7 +195,7 @@ public sealed class OpsExchange : IExchange
                             // 推送数据
                             if (state == 1)
                             {
-                                await _mediator.Publish(new TriggerEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token);
+                                await _publisher.Publish(new TriggerEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token).ConfigureAwait(false);
                             }
                         }
                     }
@@ -220,7 +227,7 @@ public sealed class OpsExchange : IExchange
                 {
                     try
                     {
-                        await Task.Delay(pollingInterval, _cts.Token);
+                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
                         {
@@ -235,7 +242,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var (ok, data, err) = await connector.ReadAsync(tag);
+                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
                         if (!ok)
                         {
                             _logger.LogError("[Engine] Notice 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}", 
@@ -245,7 +252,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 推送数据
-                        await _mediator.Publish(new NoticeEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token);
+                        await _publisher.Publish(new NoticeEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -278,7 +285,7 @@ public sealed class OpsExchange : IExchange
                 {
                     try
                     {
-                        await Task.Delay(pollingInterval, _cts.Token);
+                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
                         {
@@ -293,7 +300,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 记录数据
-                        await _mediator.Publish(new SwitchEvent { Connector = connector, Device = device, Tag = tag }, cts1.Token);
+                        await _publisher.Publish(new SwitchEvent { Connector = connector, Device = device, Tag = tag }, cts1.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -316,7 +323,7 @@ public sealed class OpsExchange : IExchange
                 {
                     try
                     {
-                        await Task.Delay(pollingInterval, _cts.Token);
+                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
                         {
@@ -336,7 +343,7 @@ public sealed class OpsExchange : IExchange
                             lastestTime = DateTime.Now;
                         }
 
-                        var (ok, data, _) = await connector.ReadAsync(tag);
+                        var (ok, data, _) = await connector.ReadAsync(tag).ConfigureAwait(false);
 
                         // 开关标记数据类型必须为 bool 或 int16
                         bool on = tag.DataType switch
@@ -353,14 +360,14 @@ public sealed class OpsExchange : IExchange
                             if (!isOn)
                             {
                                 // 发送 On 信号结束标识
-                                await _mediator.Publish(new SwitchEvent
+                                await _publisher.Publish(new SwitchEvent
                                 {
                                     Connector = connector,
                                     Device = device,
                                     Tag = tag,
                                     State = SwitchState.On,
                                     IsSwitchSignal = true,
-                                }, cts1.Token);
+                                }, cts1.Token).ConfigureAwait(false);
 
                                 // 开关开启时，发送信号，让子任务执行。
                                 isOn = true;
@@ -373,14 +380,14 @@ public sealed class OpsExchange : IExchange
                                 if ((DateTime.Now - lastestTime).TotalSeconds > _opsConfig.AllowedSwitchOnlineMaxSeconds)
                                 {
                                     // 发送 Off 信号结束标识
-                                    await _mediator.Publish(new SwitchEvent
+                                    await _publisher.Publish(new SwitchEvent
                                     {
                                         Connector = connector,
                                         Device = device,
                                         Tag = tag,
                                         State = SwitchState.Off,
                                         IsSwitchSignal = true,
-                                    }, cts1.Token);
+                                    }, cts1.Token).ConfigureAwait(false);
 
                                     // 运行超时，重置信号，让子任务阻塞。
                                     isOn = false;
@@ -396,14 +403,14 @@ public sealed class OpsExchange : IExchange
                         if (isOn)
                         {
                             // 发送 Off 信号结束标识
-                            await _mediator.Publish(new SwitchEvent 
+                            await _publisher.Publish(new SwitchEvent 
                             {
                                 Connector = connector,
                                 Device = device,
                                 Tag = tag,
                                 State = SwitchState.Off,
                                 IsSwitchSignal = true,
-                            }, cts1.Token);
+                            }, cts1.Token).ConfigureAwait(false);
 
                             // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                             isOn = false;
@@ -434,11 +441,11 @@ public sealed class OpsExchange : IExchange
 
     public async Task ShutdownAsync()
     {
-        if (!IsRuning)
+        if (!IsRunning)
         {
             return;
         }
-        IsRuning = false;
+        IsRunning = false;
 
         if (_cts != null)
         {
@@ -448,7 +455,7 @@ public sealed class OpsExchange : IExchange
             cts.Dispose();
         }
 
-        await Task.Delay(500); // 阻塞 500ms
+        await Task.Delay(500).ConfigureAwait(false); // 阻塞 500ms
         _driverConnectorManager.Close();
 
         _logger.LogInformation("[Engine] 引擎停止");

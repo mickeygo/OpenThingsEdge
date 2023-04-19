@@ -1,28 +1,31 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Handlers;
-using ThingsEdge.Router;
 
-namespace ThingsEdge.Providers.Ops;
+namespace ThingsEdge.Router;
 
 public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// 添加 OPS Provider 服务。
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configuration">配置。</param>
-    /// <param name="name">配置节点名称。</param>
+    /// <param name="builder"></param>
+    /// <param name="configName">配置节点名称。</param>
     /// <returns></returns>
-    public static IServiceCollection AddOpsProvider(this IServiceCollection services, IConfiguration configuration, string name = "Ops")
+    public static IRouterBuilder AddOpsProvider(this IRouterBuilder builder, string configName = "Ops")
     {
-        services.Configure<OpsConfig>(configuration.GetSection(name));
+        builder.AddEventBusRegisterAssembly(typeof(ServiceCollectionExtensions).Assembly);
 
-        services.AddSingleton<IExchange, OpsExchange>();
-        services.AddSingleton<DriverConnectorManager>();
-        services.AddSingleton<SwitchContainer>();
-        services.AddSingleton<CurveStorage>();
+        builder.Builder.ConfigureServices((hostBuilder, services) =>
+        {
+            services.Configure<OpsConfig>(hostBuilder.Configuration.GetSection(configName));
 
-        return services;
+            services.AddSingleton<IExchange, OpsExchange>();
+            services.AddSingleton<DriverConnectorManager>();
+            services.AddSingleton<SwitchContainer>();
+            services.AddSingleton<CurveStorage>();
+        });
+
+        return builder;
     }
 }

@@ -8,10 +8,9 @@ namespace ThingsEdge.Router.Devices;
 public sealed class FileDeviceSource : IDeviceSource
 {
     /// <summary>
-    /// 本地文件路径
+    /// 本地文配置件路径，默认为 "[执行目录]/config/tags.conf"。
     /// </summary>
-    public string? FilePath { get; set; } = Path.Combine(AppContext.BaseDirectory, "tags.conf");
-
+    public string? FilePath { get; set; } = Path.Combine(AppContext.BaseDirectory, "config", "tags.conf");
 
     /// <summary>
     /// 获取通道数据。
