@@ -3,11 +3,11 @@
 namespace ThingsEdge.Providers.Ops.Exchange;
 
 /// <summary>
-/// 数据值缓存工厂。
+/// 标记数据存储集合。
 /// </summary>
-public static class ValueCacheFactory
+public static class TagDataSet
 {
-    private static readonly ConcurrentDictionary<string, object> _valueCache = new();
+    private static readonly ConcurrentDictionary<string, object> _table = new();
 
     /// <summary>
     /// 比较值，若值不同则写入新的值。
@@ -18,24 +18,35 @@ public static class ValueCacheFactory
     public static bool CompareAndSwap(string key, object newValue)
     {
         // 初始状态，不包含数据。
-        if (!_valueCache.TryGetValue(key, out var oldState))
+        if (!_table.TryGetValue(key, out var oldState))
         {
-            _valueCache.GetOrAdd(key, newValue);
+            _table.GetOrAdd(key, newValue);
             return false;
         }
-
+        
         if (oldState.IsDeepEqual(newValue))
         {
             return true;
         }
 
-        _valueCache.TryUpdate(key, newValue, oldState);
+        _table.TryUpdate(key, newValue, oldState);
 
         return false;
     }
 
     /// <summary>
+    /// 获取指定key的值，若没有找到，返回 null。
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public static object? Get(string key)
+    {
+        _table.TryGetValue(key, out var obj);
+        return obj;
+    }
+
+    /// <summary>
     /// 清空状态的缓存数据。
     /// </summary>
-    public static void Clear() => _valueCache.Clear();
+    public static void Clear() => _table.Clear();
 }

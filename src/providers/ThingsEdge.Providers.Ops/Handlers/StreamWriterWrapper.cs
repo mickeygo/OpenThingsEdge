@@ -8,6 +8,11 @@ internal sealed class StreamWriterWrapper : IDisposable
     private readonly StreamWriter _sw;
 
     /// <summary>
+    /// 对象是否已关闭。
+    /// </summary>
+    public bool IsClosed { get; private set; }
+
+    /// <summary>
     /// 已写入的次数。
     /// </summary>
     public long WrittenCount { get; private set; }
@@ -66,8 +71,21 @@ internal sealed class StreamWriterWrapper : IDisposable
         }
     }
 
+    /// <summary>
+    /// 关闭对象，并释放资源。
+    /// </summary>
+    public void Close()
+    {
+        if (!IsClosed)
+        {
+            Dispose();
+            IsClosed = true;
+        }
+    }
+
     public void Dispose()
     {
         _sw.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

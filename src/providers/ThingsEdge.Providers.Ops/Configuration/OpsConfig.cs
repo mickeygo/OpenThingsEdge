@@ -11,14 +11,14 @@ public sealed class OpsConfig
     public int DefaultScanRate { get; init; } = 200;
 
     /// <summary>
-    /// 开关启动后数据扫描速率。
+    /// 开关启动后数据扫描速率，默认为 20。
     /// </summary>
-    public int SwitchScanRate { get; init; } = 100;
+    public int SwitchScanRate { get; init; } = 20;
 
     /// <summary>
-    /// 允许开关处于on状态最长时间（秒）。
+    /// 允许开关处于on状态最长时间（秒），默认为120。
     /// </summary>
-    public int AllowedSwitchOnlineMaxSeconds { get; init; } = 60;
+    public int AllowedSwitchOnlineMaxSeconds { get; init; } = 120;
 
     /// <summary>
     /// 曲线数据配置。

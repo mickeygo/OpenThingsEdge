@@ -53,7 +53,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                     else
                     {
-                        _logger.LogError("读取SwitchIndex标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
+                        _logger.LogError("读取SwitchNo标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
                             notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err2);
                     }
                 }
@@ -103,6 +103,18 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             items.Add(data?.GetString() ?? "0");
         }
 
-        await writer2.WriteLineAsync(string.Join(",", items)).ConfigureAwait(false);
+        // 检测写入对象是否已关闭
+        if (!writer2.IsClosed)
+        {
+            try
+            {
+                await writer2.WriteLineAsync(string.Join(",", items)).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "曲线数据写入文件失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}",
+                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+            }
+        }
     }
 }

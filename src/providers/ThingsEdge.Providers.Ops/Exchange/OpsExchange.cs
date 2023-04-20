@@ -190,7 +190,7 @@ public sealed class OpsExchange : IExchange
                         var state = data.GetInt();
 
                         // 检测标记状态是否有变动
-                        if (!ValueCacheFactory.CompareAndSwap(tag.TagId, state))
+                        if (!TagDataSet.CompareAndSwap(tag.TagId, state))
                         {
                             // 推送数据
                             if (state == 1)
@@ -275,16 +275,17 @@ public sealed class OpsExchange : IExchange
         var tags = device!.GetAllTags(TagFlag.Switch);
         foreach (var tag in tags)
         {
-            ManualResetEvent mre = new(false); // 手动事件
+            AsyncManualResetEvent mre = new(false); // 手动事件
            
             // 开关绑定的数据
             _ = Task.Run(async () =>
             {
                 int pollingInterval = _opsConfig.SwitchScanRate > 0 ? _opsConfig.SwitchScanRate : 30;
-                while (_cts != null && !_cts.Token.IsCancellationRequested && mre.WaitOne())
+                while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
                     try
                     {
+                        await mre.WaitAsync().ConfigureAwait(false);
                         await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
@@ -391,7 +392,7 @@ public sealed class OpsExchange : IExchange
 
                                     // 运行超时，重置信号，让子任务阻塞。
                                     isOn = false;
-                                    mre.Reset();
+                                    mre.Set();
                                 }
                             }
 
@@ -414,7 +415,7 @@ public sealed class OpsExchange : IExchange
 
                             // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                             isOn = false;
-                            mre.Reset();
+                            mre.Set();
                         }
                     }
                     catch (OperationCanceledException)
@@ -429,10 +430,6 @@ public sealed class OpsExchange : IExchange
 
                 // 任务取消后，无论什么情况都发送信号，确保让子任务也能退出
                 mre.Set();
-
-                // 考虑如何安全调用 mre.Dispose()
-                await Task.Delay(10);
-                mre.Dispose();
             });
         }
 

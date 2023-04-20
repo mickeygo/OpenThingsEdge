@@ -12,6 +12,16 @@ internal sealed class SwitchContainer
     }
 
     /// <summary>
+    /// 容器中是否包含指定的对象。
+    /// </summary>
+    /// <param name="key">对象唯一值。</param>
+    /// <returns></returns>
+    public bool Contains(string key)
+    {
+        return _container.ContainsKey(key);
+    }
+
+    /// <summary>
     /// 尝试获取对象。
     /// </summary>
     /// <param name="key">对象唯一值。</param>
@@ -54,7 +64,7 @@ internal sealed class SwitchContainer
         if (_container.TryRemove(key, out var writer))
         {
             filepath = writer.FilePath;
-            writer.Dispose();
+            writer.Close();
 
             return true;
         }
@@ -69,7 +79,7 @@ internal sealed class SwitchContainer
     {
         foreach (var writer in _container.Values)
         {
-            writer.Dispose();
+            writer.Close();
         }
 
         _container.Clear();
