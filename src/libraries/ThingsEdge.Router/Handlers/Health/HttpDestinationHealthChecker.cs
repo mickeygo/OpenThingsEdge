@@ -1,20 +1,18 @@
 ﻿using ThingsEdge.Router.Configuration;
-using ThingsEdge.Router.Events;
+using ThingsEdge.Router.Model;
 
 namespace ThingsEdge.Router.Handlers.Health;
 
 /// <summary>
-/// 下游健康检测。
+/// 目标服务健康检测。
 /// </summary>
-public sealed class HttpDownstreamHealthChecker : IDownstreamHealthChecker
+public sealed class HttpDestinationHealthChecker : IDestinationHealthChecker
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger _logger;
 
-    public HttpDownstreamHealthChecker(IHttpClientFactory httpClientFactory, ILogger<HttpDownstreamHealthChecker> logger)
+    public HttpDestinationHealthChecker(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
-        _logger = logger;
     }
 
     public async Task<DestinationHealthState> CheckAsync(CancellationToken cancellationToken)

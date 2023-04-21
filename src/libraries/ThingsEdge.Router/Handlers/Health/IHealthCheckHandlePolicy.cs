@@ -1,4 +1,4 @@
-﻿using ThingsEdge.Router.Events;
+﻿using ThingsEdge.Router.Model;
 
 namespace ThingsEdge.Router.Handlers.Health;
 

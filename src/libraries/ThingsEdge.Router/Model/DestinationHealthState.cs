@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Router.Events;
+﻿namespace ThingsEdge.Router.Model;
 
 /// <summary>
 /// 目标健康状态。

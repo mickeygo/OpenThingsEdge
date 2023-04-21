@@ -1,4 +1,6 @@
-﻿using ThingsEdge.Providers.Ops.Exchange;
+﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
@@ -8,11 +10,13 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// </summary>
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
+    private readonly IEventPublisher _publisher;
     private readonly IHttpForwarder _httpForwarder;
     private readonly ILogger _logger;
 
-    public TriggerHandler(IHttpForwarder httpForwarder, ILogger<TriggerHandler> logger)
+    public TriggerHandler(IEventPublisher publisher, IHttpForwarder httpForwarder, ILogger<TriggerHandler> logger)
     {
+        _publisher = publisher;
         _httpForwarder = httpForwarder;
         _logger = logger;
     }
@@ -32,6 +36,10 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         };
         message.Values.Add(notification.Self);
 
+        // 发布标记数据读取消息。
+        await _publisher.Publish(new TagValueReadEvent { Tag = notification.Tag, Value = notification.Self! },
+            PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+
         // 读取触发标记下的子数据。
         foreach (var normalTag in notification.Tag.NormalTags)
         {
@@ -47,6 +55,10 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             }
 
             message.Values.Add(data!);
+
+            // 发布标记数据读取消息。
+            await _publisher.Publish(new TagValueReadEvent { Tag = normalTag, Value = data! },
+                PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
         }
 
         // 发送消息。

@@ -37,9 +37,9 @@ public static class IRouterBuilderExtensions
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.AddSingleton<IDownstreamHealthChecker, HttpDownstreamHealthChecker>();
+            services.AddSingleton<IDestinationHealthChecker, HttpDestinationHealthChecker>();
             services.AddSingleton<IHealthCheckHandlePolicy, HealthCheckHandlePolicy>();
-            services.AddHostedService<DowmstreamHealthCheckHostedService>();
+            services.AddHostedService<DestinationHealthCheckHostedService>();
         });
         return builder;
     }
@@ -63,17 +63,22 @@ public static class IRouterBuilderExtensions
     /// 添加 HTTP 服务。
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="postDelegate"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder)
+    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder, Action<RESTfulDestinationOptions>? postDelegate = null)
     {
-        builder.Builder.ConfigureServices(services =>
+        builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
+            services.Configure<RESTfulDestinationOptions>(hostBuilder.Configuration.GetSection("Destination"));
+
             services.AddSingleton<IHttpForwarder, DefalutHttpForwarder>();
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
             {
-                var options = sp.GetRequiredService<IOptions<RESTfulClientOptions>>().Value;
-                httpClient.BaseAddress = new Uri(options.RESTClientBaseAddress);
-                if (!string.IsNullOrEmpty(options.UserName) && !string.IsNullOrEmpty(options.Password))
+                var options = sp.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
+                postDelegate?.Invoke(options);
+                
+                httpClient.BaseAddress = new Uri(options.BaseAddress);
+                if (options.EnableBasicAuth)
                 {
                     httpClient.DefaultRequestHeaders.Authorization =
                         new AuthenticationHeaderValue(
@@ -82,13 +87,13 @@ public static class IRouterBuilderExtensions
                 }
             }).ConfigureHttpMessageHandlerBuilder(builder =>
             {
-                var options = builder.Services.GetRequiredService<IOptions<RESTfulClientOptions>>().Value;
+                var options = builder.Services.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
                 // SocketsHttpHandler
                 if (builder.PrimaryHandler is HttpClientHandler httpHandler)
                 {
+                    // 不验证 TLS 凭证
                     if (options.DisableCertificateValidationCheck)
                     {
-                        // 不验证 TLS 凭证
                         httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
                     }
                 }

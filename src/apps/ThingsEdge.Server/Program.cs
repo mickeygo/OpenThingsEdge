@@ -21,7 +21,7 @@ builder.Services.AddGlobalForServer();
 // 自定义服务配置 
 builder.Host.AddThingsEdgeRouter()
     .AddDeviceFileProvider()
-    .AddHttpForwarder()
+    .AddHttpForwarder(options => { options.BaseAddress = "https://localhost:7214"; })
     .AddOpsProvider()
     .AddEventBus();
 

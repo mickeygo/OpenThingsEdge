@@ -1,19 +1,19 @@
 ﻿namespace ThingsEdge.Router.Handlers.Health;
 
 /// <summary>
-/// 下游服务健康检测后台服务。
+/// 目标服务健康检测后台服务。
 /// </summary>
-internal sealed class DowmstreamHealthCheckHostedService : IHostedService
+internal sealed class DestinationHealthCheckHostedService : IHostedService
 {
-    private readonly IDownstreamHealthChecker _downstreamHealthChecker;
+    private readonly IDestinationHealthChecker _downstreamHealthChecker;
     private readonly IHealthCheckHandlePolicy _healthCheckHandlePolicy;
     private readonly ILogger _logger;
 
     private readonly PeriodicTimer _timer;
 
-    public DowmstreamHealthCheckHostedService(IDownstreamHealthChecker downstreamHealthChecker,
+    public DestinationHealthCheckHostedService(IDestinationHealthChecker downstreamHealthChecker,
         IHealthCheckHandlePolicy healthCheckHandlePolicy,
-        ILogger<DowmstreamHealthCheckHostedService> logger)
+        ILogger<DestinationHealthCheckHostedService> logger)
     {
         _downstreamHealthChecker = downstreamHealthChecker;
         _healthCheckHandlePolicy = healthCheckHandlePolicy;
@@ -24,7 +24,7 @@ internal sealed class DowmstreamHealthCheckHostedService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        while (await _timer.WaitForNextTickAsync())
+        while (await _timer.WaitForNextTickAsync().ConfigureAwait(false))
         {
             try
             {

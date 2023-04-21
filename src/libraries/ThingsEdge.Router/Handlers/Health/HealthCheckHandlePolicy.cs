@@ -1,5 +1,6 @@
 ﻿using ThingsEdge.Common.EventBus;
 using ThingsEdge.Router.Events;
+using ThingsEdge.Router.Model;
 
 namespace ThingsEdge.Router.Handlers.Health;
 
@@ -15,6 +16,6 @@ internal sealed class HealthCheckHandlePolicy : IHealthCheckHandlePolicy
     public async Task HandleAsync(DestinationHealthState healthState, CancellationToken cancellationToken)
     {
         // 通知目标服务健康状况。
-        await _publisher.Publish(new DestinationHealthEvent { HealthState = healthState }, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(new DestinationHealthCheckedEvent { HealthState = healthState }, PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
     }
 }
