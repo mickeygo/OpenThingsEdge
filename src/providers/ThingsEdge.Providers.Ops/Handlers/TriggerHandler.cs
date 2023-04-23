@@ -11,13 +11,13 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
     private readonly IEventPublisher _publisher;
-    private readonly IHttpForwarder _httpForwarder;
+    private readonly IForwarder _forwarder;
     private readonly ILogger _logger;
 
-    public TriggerHandler(IEventPublisher publisher, IHttpForwarder httpForwarder, ILogger<TriggerHandler> logger)
+    public TriggerHandler(IEventPublisher publisher, IForwarder forwarder, ILogger<TriggerHandler> logger)
     {
         _publisher = publisher;
-        _httpForwarder = httpForwarder;
+        _forwarder = forwarder;
         _logger = logger;
     }
 
@@ -28,7 +28,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         {
             Schema = new()
             {
-                ChannelName = "", // 可不用设置
+                ChannelName = notification.ChannelName,
                 DeviceName = notification.Device.Name,
                 TagGroupName = tagGroup?.Name,
             },
@@ -62,13 +62,24 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         }
 
         // 发送消息。
-        var result = await _httpForwarder.SendAsync("/api/iotgateway/trigger", message, cancellationToken).ConfigureAwait(false);
+        var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
             // TODO: 推送失败状态
 
             _logger.LogError("推送消息失败，设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
                 message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, result.ErrorMessage);
+
+            // 写入错误代码到设备
+            if (notification.Connector.CanConnect)
+            {
+                var (ok4, err4) = await notification.Connector.WriteAsync(notification.Tag, result.Code).ConfigureAwait(false);
+                if (!ok4)
+                {
+                    _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
+                        message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err4);
+                }
+            }
 
             return;
         }
@@ -107,14 +118,12 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         }
 
         // 回写标记状态。
-        int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data.State;
+        int tagCode = tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data.State;
         var (ok3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {
             _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
                 message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err3);
-
-            return;
         }
     }
 }

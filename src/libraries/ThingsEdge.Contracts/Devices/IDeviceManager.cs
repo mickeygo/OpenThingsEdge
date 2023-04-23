@@ -26,6 +26,13 @@ public interface IDeviceManager
     /// <returns></returns>
     Device? GetDevice(string deviceId);
 
+    // <summary>
+    /// 获取指定的设备。
+    /// </summary>
+    /// <param name="deviceId">设备Id。</param>
+    /// <returns></returns>
+    (string? channelName, Device? device) GetDevice2(string deviceId);
+
     /// <summary>
     /// 添加通道。
     /// </summary>

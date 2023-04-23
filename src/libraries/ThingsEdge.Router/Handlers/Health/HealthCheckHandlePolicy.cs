@@ -16,6 +16,7 @@ internal sealed class HealthCheckHandlePolicy : IHealthCheckHandlePolicy
     public async Task HandleAsync(DestinationHealthState healthState, CancellationToken cancellationToken)
     {
         // 通知目标服务健康状况。
-        await _publisher.Publish(new DestinationHealthCheckedEvent { HealthState = healthState }, PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(new DestinationHealthCheckedEvent { HealthState = healthState }, 
+            PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
     }
 }

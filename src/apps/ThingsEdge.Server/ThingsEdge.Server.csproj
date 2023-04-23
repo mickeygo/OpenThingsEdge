@@ -14,11 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
-    <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
 		<Content Update="wwwroot\i18n\*.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
@@ -29,6 +24,10 @@
 
   <ItemGroup>
     <Folder Include="Transform\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ThingsEdge.Application\ThingsEdge.Application.csproj" />
   </ItemGroup>
 
 </Project>

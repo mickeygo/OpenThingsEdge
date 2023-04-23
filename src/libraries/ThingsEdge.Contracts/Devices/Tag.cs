@@ -60,6 +60,15 @@ public sealed class Tag
     public TagUsage Usage { get; init; } = TagUsage.Master;
 
     /// <summary>
+    /// 是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 <see cref="PublishMode.OnlyDataChanged"/>。
+    /// </summary>
+    /// <remarks>
+    /// 注：仅适用 <see cref="TagFlag.Notice"/> 标记。
+    /// </remarks>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PublishMode PublishMode { get; init; } = PublishMode.OnlyDataChanged;
+
+    /// <summary>
     /// 标记要旨，可用于设置重要信息。
     /// </summary>
     [NotNull]
@@ -72,8 +81,9 @@ public sealed class Tag
     public string? Description { get; init; } = string.Empty;
 
     /// <summary>
-    /// <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着发送。
+    /// 只有 <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
     /// </summary>
+    /// <remarks><see cref="TagFlag.Switch"/> 类型标记，在开关为 On 状态也会筛选数据并一起推送。</remarks>
     [NotNull]
     public List<Tag>? NormalTags { get; init; } = new();
 

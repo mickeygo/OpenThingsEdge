@@ -60,24 +60,33 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 HTTP 服务。
+    /// 添加 HTTP 转发服务。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate"></param>
+    /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder, Action<RESTfulDestinationOptions>? postDelegate = null)
+    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder, 
+        Action<RESTfulDestinationOptions>? postDelegate = null, 
+        string configName = "HttpDestination")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
-            services.Configure<RESTfulDestinationOptions>(hostBuilder.Configuration.GetSection("Destination"));
+            services.Configure<RESTfulDestinationOptions>(hostBuilder.Configuration.GetSection(configName));
 
-            services.AddSingleton<IHttpForwarder, DefalutHttpForwarder>();
+            services.AddSingleton<IForwarder, HttpForwarder>();
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
             {
                 var options = sp.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
                 postDelegate?.Invoke(options);
-                
+
                 httpClient.BaseAddress = new Uri(options.BaseAddress);
+
+                if (options.Timeout > 0)
+                {
+                    httpClient.Timeout = TimeSpan.FromMilliseconds(options.Timeout.Value);
+                }
+
                 if (options.EnableBasicAuth)
                 {
                     httpClient.DefaultRequestHeaders.Authorization =
@@ -104,7 +113,7 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 MQTT 服务。
+    /// 添加 MQTT 转发服务。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="configName">MQTT配置名称</param>
@@ -114,7 +123,25 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
             services.Configure<MQTTClientOptions>(hostBuilder.Configuration.GetSection(configName));
+            services.AddSingleton<IForwarder, MqttForwarder>();
             services.AddHostedService<MQTTHostedService>();
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加自定义的转发服务。
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static IRouterBuilder AddCustomForwarder<TForwarder>(this IRouterBuilder builder)
+        where TForwarder : class, IForwarder
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<IForwarder, TForwarder>();
+            //services.AddSingleton(typeof(IForwarder), typeof(TForwarder));
         });
 
         return builder;

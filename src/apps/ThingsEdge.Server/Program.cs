@@ -1,4 +1,5 @@
 using Serilog;
+using ThingsEdge.Application;
 using ThingsEdge.Router;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddGlobalForServer();
 
 // 自定义服务配置 
+builder.Services.AddThingsEdgeApplication();
 builder.Host.AddThingsEdgeRouter()
     .AddDeviceFileProvider()
     .AddHttpForwarder(options => { options.BaseAddress = "https://localhost:7214"; })

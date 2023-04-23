@@ -17,6 +17,7 @@ internal sealed class HeartbeatHandler : INotificationHandler<HeartbeatEvent>
 
     public Task Handle(HeartbeatEvent notification, CancellationToken cancellationToken)
     {
+        _deviceHealthMonitor.SetState(notification.Device.DeviceId, notification.ConnectState);
         return Task.CompletedTask;
     }
 }

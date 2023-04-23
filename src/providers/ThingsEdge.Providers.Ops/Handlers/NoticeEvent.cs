@@ -11,6 +11,9 @@ internal sealed class NoticeEvent : INotification
     public DriverConnector? Connector { get; init; }
 
     [NotNull]
+    public string? ChannelName { get; init; }
+
+    [NotNull]
     public Device? Device { get; init; }
 
     [NotNull]

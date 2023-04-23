@@ -35,6 +35,21 @@ internal sealed class DefaultDeviceManager : IDeviceManager
         return devices.FirstOrDefault(s => s.DeviceId == deviceId);
     }
 
+    public (string? channelName, Device? device) GetDevice2(string deviceId)
+    {
+        var channels = GetChannels();
+        foreach (var channel in channels)
+        {
+            var device = channel.Devices.FirstOrDefault(s => s.DeviceId == deviceId);
+            if (device != null)
+            {
+                return (channel.Name, device);
+            }
+        }
+
+        return (default, default);
+    }
+
     public void AddChannel(Channel channel)
     {
         throw new NotImplementedException();

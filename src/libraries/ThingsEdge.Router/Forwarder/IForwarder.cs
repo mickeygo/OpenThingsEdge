@@ -1,6 +1,9 @@
 ﻿namespace ThingsEdge.Router.Forwarder;
 
-public interface IMqttForwarder
+/// <summary>
+/// 转发请求数据。
+/// </summary>
+public interface IForwarder
 {
     /// <summary>
     /// 发送数据。
@@ -8,5 +11,5 @@ public interface IMqttForwarder
     /// <param name="message">要发送的数据。</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task SendAsync(RequestMessage message, CancellationToken cancellationToken);
+    Task<ResponseResult> SendAsync(RequestMessage message, CancellationToken cancellationToken = default);
 }

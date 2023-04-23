@@ -47,7 +47,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Server", "src\ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Contrib.NetMQ", "src\contribs\ThingsEdge.Contrib.NetMQ\ThingsEdge.Contrib.NetMQ.csproj", "{94934BFC-AEE8-4089-B38B-BCD8ADD9857F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Contracts.Tests", "src\libraries\tests\ThingsEdge.Contracts.Tests\ThingsEdge.Contracts.Tests.csproj", "{42F172D5-196A-4BC7-8E49-C54DDBA1EA41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Contracts.Tests", "src\libraries\tests\ThingsEdge.Contracts.Tests\ThingsEdge.Contracts.Tests.csproj", "{42F172D5-196A-4BC7-8E49-C54DDBA1EA41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Application", "src\apps\ThingsEdge.Application\ThingsEdge.Application.csproj", "{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,6 +124,12 @@ Global
 		{42F172D5-196A-4BC7-8E49-C54DDBA1EA41}.Package|Any CPU.Build.0 = Package|Any CPU
 		{42F172D5-196A-4BC7-8E49-C54DDBA1EA41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42F172D5-196A-4BC7-8E49-C54DDBA1EA41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}.Package|Any CPU.Build.0 = Package|Any CPU
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +153,7 @@ Global
 		{59EBBDE2-DA3C-47B6-A579-B17FFD7DAD11} = {DD95CE6B-C4F9-4DD6-9E39-39628F1271B8}
 		{94934BFC-AEE8-4089-B38B-BCD8ADD9857F} = {DE4E1B95-E6FB-47B2-AB26-41315FDA259C}
 		{42F172D5-196A-4BC7-8E49-C54DDBA1EA41} = {F15CEE90-E130-4353-8FB8-EFC14DF62009}
+		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B} = {DD95CE6B-C4F9-4DD6-9E39-39628F1271B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77243E50-0F8A-45CE-B0DD-6CE24BDE6D8B}

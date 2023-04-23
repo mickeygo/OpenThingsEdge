@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Contracts.Devices;
 
 /// <summary>
-/// 数据通道。一个通道对应一种PLC驱动。
+/// 数据通道。
 /// </summary>
 public sealed class Channel
 {

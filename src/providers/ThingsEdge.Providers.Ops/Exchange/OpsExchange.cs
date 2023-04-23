@@ -4,6 +4,7 @@ using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
 using ThingsEdge.Router.Events;
+using ThingsEdge.Router.Model;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -69,7 +70,7 @@ public sealed class OpsExchange : IExchange
 
     private Task HeartbeatMonitorAsync(DriverConnector connector)
     {
-        var device = _deviceManager.GetDevice(connector.Id);
+        var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Heartbeat); // 所有标记为心跳的都进行监控。
         foreach (var tag in tags)
         {
@@ -85,8 +86,13 @@ public sealed class OpsExchange : IExchange
                         if (_cts == null)
                         {
                             // 通知心跳断开。
-                            await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag, ConnectState = ConnectState.Offline }, 
-                                PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _publisher.Publish(new HeartbeatEvent
+                            {
+                                ChannelName = channelName,
+                                Device = device,
+                                Tag = tag,
+                                ConnectState = DeviceConnectState.Offline,
+                            }, PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             break;
                         }
@@ -94,8 +100,13 @@ public sealed class OpsExchange : IExchange
                         if (!connector.CanConnect)
                         {
                             // 通知心跳断开。
-                            await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag, ConnectState = ConnectState.Offline },
-                                PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _publisher.Publish(new HeartbeatEvent
+                            {
+                                ChannelName = channelName,
+                                Device = device,
+                                Tag = tag,
+                                ConnectState = DeviceConnectState.Offline,
+                            }, PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -107,7 +118,7 @@ public sealed class OpsExchange : IExchange
                             var result = await connector.Driver.ReadBoolAsync(tag.Address).ConfigureAwait(false);
                             if (!result.IsSuccess)
                             {
-                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
+                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
                                     device.Name, tag.Name, tag.Address, result.Message);
 
                                 continue;
@@ -126,7 +137,7 @@ public sealed class OpsExchange : IExchange
                             var result = await connector.Driver.ReadInt16Async(tag.Address).ConfigureAwait(false);
                             if (!result.IsSuccess)
                             {
-                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Message}",
+                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
                                     device.Name, tag.Name, tag.Address, result.Message);
 
                                 continue;
@@ -144,8 +155,13 @@ public sealed class OpsExchange : IExchange
                         if (hasHeartbeat)
                         {
                             // 通知心跳正常。
-                            await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag, ConnectState = ConnectState.Online },
-                                PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _publisher.Publish(new HeartbeatEvent
+                            {
+                                ChannelName = channelName,
+                                Device = device,
+                                Tag = tag,
+                                ConnectState = DeviceConnectState.Online,
+                            }, PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                         }
                     }
                     catch (OperationCanceledException)
@@ -153,7 +169,7 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[Engine] Heartbeat 数据处理异常，设备：{device.Name}，变量：{tag.Name}, 地址：{tag.Address}",
+                        _logger.LogError(ex, "[Engine] Heartbeat 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
                             device.Name, tag.Name, tag.Address);
                     }
                 }
@@ -165,7 +181,7 @@ public sealed class OpsExchange : IExchange
 
     private Task TriggerMonitorAsync(DriverConnector connector)
     {
-        var device = _deviceManager.GetDevice(connector.Id);
+        var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Trigger);
         foreach (var tag in tags)
         {
@@ -207,7 +223,14 @@ public sealed class OpsExchange : IExchange
                             // 推送数据
                             if (state == 1)
                             {
-                                await _publisher.Publish(new TriggerEvent { Connector = connector, Device = device, Tag = tag, Self = data }).ConfigureAwait(false);
+                                await _publisher.Publish(new TriggerEvent
+                                {
+                                    Connector = connector,
+                                    ChannelName = channelName,
+                                    Device = device,
+                                    Tag = tag,
+                                    Self = data,
+                                }).ConfigureAwait(false);
                             }
                         }
                     }
@@ -228,7 +251,7 @@ public sealed class OpsExchange : IExchange
 
     private Task NoticeMonitorAsync(DriverConnector connector)
     {
-        var device = _deviceManager.GetDevice(connector.Id);
+        var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Notice);
         foreach (var tag in tags)
         {
@@ -261,8 +284,21 @@ public sealed class OpsExchange : IExchange
                             continue;
                         }
 
+                        // 在仅数据变更才发送模式下，会校验数据是否有跳变。
+                        if (tag.PublishMode == PublishMode.OnlyDataChanged && TagValueSet.CompareAndSwap(tag.TagId, data.Value))
+                        {
+                            continue;
+                        }
+
                         // 推送数据
-                        await _publisher.Publish(new NoticeEvent { Connector = connector, Device = device, Tag = tag, Self = data }).ConfigureAwait(false);
+                        await _publisher.Publish(new NoticeEvent
+                        {
+                            Connector = connector,
+                            ChannelName = channelName,
+                            Device = device,
+                            Tag = tag,
+                            Self = data,
+                        }).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -281,7 +317,7 @@ public sealed class OpsExchange : IExchange
 
     private Task SwitchMonitorAsync(DriverConnector connector)
     {
-        var device = _deviceManager.GetDevice(connector.Id);
+        var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Switch);
         foreach (var tag in tags)
         {
@@ -310,7 +346,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 记录数据
-                        await _publisher.Publish(new SwitchEvent { Connector = connector, Device = device, Tag = tag }).ConfigureAwait(false);
+                        await _publisher.Publish(new SwitchEvent { Connector = connector, ChannelName = channelName, Device = device, Tag = tag }).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -353,53 +389,79 @@ public sealed class OpsExchange : IExchange
 
                         var (ok, data, _) = await connector.ReadAsync(tag).ConfigureAwait(false);
 
-                        // 开关标记数据类型必须为 bool 或 int16
-                        bool on = tag.DataType switch
-                        {
-                            DataType.Bit => data.GetBit(),
-                            DataType.Int => data.GetInt() == 1,
-                            _ => throw new NotSupportedException(),
-                        };
-
                         // 读取成功且开关处于 on 状态，发送开启动作信号。
-                        if (ok && on)
+                        if (ok)
                         {
-                            // 在本身处于关闭状态，才执行开启动作。
-                            if (!isOn)
+                            // 开关标记数据类型必须为 bool 或 int16
+                            bool on = tag.DataType switch
                             {
-                                // 发送 On 信号结束标识
-                                await _publisher.Publish(new SwitchEvent
-                                {
-                                    Connector = connector,
-                                    Device = device,
-                                    Tag = tag,
-                                    State = SwitchState.On,
-                                    IsSwitchSignal = true,
-                                }).ConfigureAwait(false);
+                                DataType.Bit => data.GetBit(),
+                                DataType.Int => data.GetInt() == 1,
+                                _ => throw new NotSupportedException(),
+                            };
 
-                                // 开关开启时，发送信号，让子任务执行。
-                                isOn = true;
-                                mre.Set();
+                            if (on) // Open 标记
+                            {
+                                // Open 信号，在本身处于关闭状态，才执行开启动作。
+                                if (!isOn)
+                                {
+                                    // 发送 On 信号结束标识
+                                    await _publisher.Publish(new SwitchEvent
+                                    {
+                                        Connector = connector,
+                                        ChannelName = channelName,
+                                        Device = device,
+                                        Tag = tag,
+                                        State = SwitchState.On,
+                                        IsSwitchSignal = true,
+                                    }).ConfigureAwait(false);
+
+                                    // 开关开启时，发送信号，让子任务执行。
+                                    isOn = true;
+                                    mre.Set();
+                                }
+                                else
+                                {
+                                    // 考虑设备在工作中发送意外中断，信号没有切换到 off 状态的场景（设备没有主动切换）。
+                                    // 可设置超时时长，开关信号连续处于开启状态时间不能超过多久。
+                                    if ((DateTime.Now - lastestTime).TotalSeconds > _opsConfig.AllowedSwitchOnlineMaxSeconds)
+                                    {
+                                        // 发送 Off 信号结束标识
+                                        await _publisher.Publish(new SwitchEvent
+                                        {
+                                            Connector = connector,
+                                            ChannelName = channelName,
+                                            Device = device,
+                                            Tag = tag,
+                                            State = SwitchState.Off,
+                                            IsSwitchSignal = true,
+                                        }).ConfigureAwait(false);
+
+                                        // 运行超时，重置信号，让子任务阻塞。
+                                        isOn = false;
+                                        mre.Reset();
+                                    }
+                                }
                             }
                             else
                             {
-                                // 考虑设备在工作中发送意外中断，信号没有切换到 off 状态的场景（设备没有主动切换）。
-                                // 可设置超时时长，开关信号连续处于开启状态时间不能超过多久。
-                                if ((DateTime.Now - lastestTime).TotalSeconds > _opsConfig.AllowedSwitchOnlineMaxSeconds)
+                                // Close 标记，在本身处于开启状态，才执行关闭动作。
+                                if (isOn)
                                 {
                                     // 发送 Off 信号结束标识
                                     await _publisher.Publish(new SwitchEvent
                                     {
                                         Connector = connector,
+                                        ChannelName = channelName,
                                         Device = device,
                                         Tag = tag,
                                         State = SwitchState.Off,
                                         IsSwitchSignal = true,
                                     }).ConfigureAwait(false);
 
-                                    // 运行超时，重置信号，让子任务阻塞。
+                                    // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                                     isOn = false;
-                                    mre.Set();
+                                    mre.Reset();
                                 }
                             }
 
@@ -407,13 +469,14 @@ public sealed class OpsExchange : IExchange
                             continue;
                         }
 
-                        // 若读取失败，或是开关处于 off 状态，则发送关闭动作信号（防止因设备未掉线，而读取失败导致一直发送数据）。
+                        // 若读取失败，且开关处于 on 状态，则发送关闭动作信号（防止因设备未掉线，而读取失败导致一直发送数据）。
                         if (isOn)
                         {
                             // 发送 Off 信号结束标识
                             await _publisher.Publish(new SwitchEvent 
                             {
                                 Connector = connector,
+                                ChannelName = channelName,
                                 Device = device,
                                 Tag = tag,
                                 State = SwitchState.Off,
@@ -422,7 +485,7 @@ public sealed class OpsExchange : IExchange
 
                             // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                             isOn = false;
-                            mre.Set();
+                            mre.Reset();
                         }
                     }
                     catch (OperationCanceledException)

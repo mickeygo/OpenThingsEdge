@@ -21,8 +21,15 @@ public sealed class TagDataSet
     internal void Set(string tagId, PayloadData data)
     {
         Interlocked.Increment(ref _version);
-        TagData data1 = new() { Data = data };
-        _map.AddOrUpdate(tagId, data1, (_, _) => data1);
+        _map.AddOrUpdate(tagId,
+            _ => new TagData() { Data = data },
+            (_, data0) =>
+            {
+                data0.Data = data;
+                data0.UpdatedTime = DateTime.Now;
+
+                return data0;
+            });
     }
 
     /// <summary>
@@ -46,10 +53,10 @@ public sealed class TagData
     /// 数据
     /// </summary>
     [NotNull]
-    public PayloadData? Data { get; init; }
+    public PayloadData? Data { get; set; }
 
     /// <summary>
     /// 数据更新时间
     /// </summary>
-    public DateTime UpdatedTime { get; init; } = DateTime.Now;
+    public DateTime UpdatedTime { get; set; } = DateTime.Now;
 }

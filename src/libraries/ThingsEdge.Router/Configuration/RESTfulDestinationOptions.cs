@@ -12,6 +12,11 @@ public sealed class RESTfulDestinationOptions
     public string? BaseAddress { get; set; }
 
     /// <summary>
+    /// 请求目标超时设置，单位毫秒。
+    /// </summary>
+    public int? Timeout { get; set; } = 10_000;
+
+    /// <summary>
     /// 目标服务是否启用 Basic Authentication 验证。
     /// </summary>
     public bool EnableBasicAuth { get; set; }
