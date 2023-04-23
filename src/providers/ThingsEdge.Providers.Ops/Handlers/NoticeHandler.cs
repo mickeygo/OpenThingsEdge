@@ -54,10 +54,10 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
                 continue;
             }
 
-            message.Values.Add(data!);
+            message.Values.Add(data);
 
             // 发布标记数据读取消息。
-            await _publisher.Publish(new TagValueReadEvent { Tag = normalTag, Value = data! },
+            await _publisher.Publish(new TagValueReadEvent { Tag = normalTag, Value = data },
                 PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
         }
 

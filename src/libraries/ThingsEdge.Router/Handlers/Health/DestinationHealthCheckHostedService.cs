@@ -7,17 +7,14 @@ internal sealed class DestinationHealthCheckHostedService : IHostedService
 {
     private readonly IDestinationHealthChecker _downstreamHealthChecker;
     private readonly IHealthCheckHandlePolicy _healthCheckHandlePolicy;
-    private readonly ILogger _logger;
 
     private readonly PeriodicTimer _timer;
 
     public DestinationHealthCheckHostedService(IDestinationHealthChecker downstreamHealthChecker,
-        IHealthCheckHandlePolicy healthCheckHandlePolicy,
-        ILogger<DestinationHealthCheckHostedService> logger)
+        IHealthCheckHandlePolicy healthCheckHandlePolicy)
     {
         _downstreamHealthChecker = downstreamHealthChecker;
         _healthCheckHandlePolicy = healthCheckHandlePolicy;
-        _logger = logger;
 
         _timer = new PeriodicTimer(TimeSpan.FromSeconds(2)); // 2s轮询间隔
     }

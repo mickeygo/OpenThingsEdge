@@ -11,7 +11,7 @@ public interface IRouterBuilder
     IHostBuilder Builder { get; }
 
     /// <summary>
-    /// 要注入到 EventBus 的程序集。
+    /// 要自动注入到 EventBus 的程序集。
     /// </summary>
-    ICollection<Assembly> Assemblies { get; }
+    ICollection<Assembly> EventAssemblies { get; }
 }

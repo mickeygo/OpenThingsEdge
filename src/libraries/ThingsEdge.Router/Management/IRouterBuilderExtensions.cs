@@ -20,9 +20,9 @@ public static class IRouterBuilderExtensions
     /// <returns></returns>
     public static IRouterBuilder AddEventBusRegisterAssembly(this IRouterBuilder builder, Assembly assembly)
     {
-        if (!builder.Assemblies.Any(x => x.FullName == assembly.FullName))
+        if (!builder.EventAssemblies.Any(x => x.FullName == assembly.FullName))
         {
-            builder.Assemblies.Add(assembly);
+            builder.EventAssemblies.Add(assembly);
         }
 
         return builder;
@@ -133,8 +133,8 @@ public static class IRouterBuilderExtensions
             services.AddEventBusPublisher(); // 注入 EventBus 事件发布器。
 
             Assembly[] assemblies2 = assemblies?.Length > 0
-                ? builder.Assemblies.Concat(assemblies).ToArray()
-                : builder.Assemblies.ToArray();
+                ? builder.EventAssemblies.Concat(assemblies).ToArray()
+                : builder.EventAssemblies.ToArray();
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies2));
         });

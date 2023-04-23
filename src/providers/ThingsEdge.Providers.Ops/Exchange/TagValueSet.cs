@@ -5,7 +5,7 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 /// <summary>
 /// 标记数据存储集合。
 /// </summary>
-internal static class TagDataSet
+internal static class TagValueSet
 {
     private static readonly ConcurrentDictionary<string, object> _table = new();
 

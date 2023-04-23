@@ -3,6 +3,7 @@ using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
+using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -83,17 +84,24 @@ public sealed class OpsExchange : IExchange
 
                         if (_cts == null)
                         {
+                            // 通知心跳断开。
+                            await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag, ConnectState = ConnectState.Offline }, 
+                                PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+
                             break;
                         }
 
                         if (!connector.CanConnect)
                         {
+                            // 通知心跳断开。
+                            await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag, ConnectState = ConnectState.Offline },
+                                PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+
                             continue;
                         }
 
-                        var cts1 = _cts;
-
                         // 心跳标记数据类型必须为 bool 或 int16
+                        bool hasHeartbeat = false;
                         if (tag.DataType == DataType.Bit)
                         {
                             var result = await connector.Driver.ReadBoolAsync(tag.Address).ConfigureAwait(false);
@@ -110,8 +118,7 @@ public sealed class OpsExchange : IExchange
                                 await connector.Driver.WriteAsync(tag.Address, false).ConfigureAwait(false);
 
                                 // 发布心跳事件，心跳处理不阻塞标识复位。
-                                // 有发布事件，说明有接收到心跳。
-                                await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag }, cts1.Token).ConfigureAwait(false);
+                                hasHeartbeat = true;
                             }
                         }
                         else if (tag.DataType == DataType.Int)
@@ -130,8 +137,15 @@ public sealed class OpsExchange : IExchange
                                 await connector.Driver.WriteAsync(tag.Address, (short)0).ConfigureAwait(false);
 
                                 // 同上。
-                                await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag }, cts1.Token).ConfigureAwait(false);
+                                hasHeartbeat = true;
                             }
+                        }
+
+                        if (hasHeartbeat)
+                        {
+                            // 通知心跳正常。
+                            await _publisher.Publish(new HeartbeatEvent { Device = device, Tag = tag, ConnectState = ConnectState.Online },
+                                PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                         }
                     }
                     catch (OperationCanceledException)
@@ -169,8 +183,6 @@ public sealed class OpsExchange : IExchange
                             break;
                         }
 
-                        var cts1 = _cts;
-
                         if (!connector.CanConnect)
                         {
                             continue;
@@ -190,12 +202,12 @@ public sealed class OpsExchange : IExchange
                         var state = data.GetInt();
 
                         // 检测标记状态是否有变动
-                        if (!TagDataSet.CompareAndSwap(tag.TagId, state))
+                        if (!TagValueSet.CompareAndSwap(tag.TagId, state))
                         {
                             // 推送数据
                             if (state == 1)
                             {
-                                await _publisher.Publish(new TriggerEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token).ConfigureAwait(false);
+                                await _publisher.Publish(new TriggerEvent { Connector = connector, Device = device, Tag = tag, Self = data }).ConfigureAwait(false);
                             }
                         }
                     }
@@ -234,8 +246,6 @@ public sealed class OpsExchange : IExchange
                             break;
                         }
 
-                        var cts1 = _cts;
-
                         if (!connector.CanConnect)
                         {
                             continue;
@@ -252,7 +262,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 推送数据
-                        await _publisher.Publish(new NoticeEvent { Connector = connector, Device = device, Tag = tag, Self = data }, cts1.Token).ConfigureAwait(false);
+                        await _publisher.Publish(new NoticeEvent { Connector = connector, Device = device, Tag = tag, Self = data }).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -286,6 +296,7 @@ public sealed class OpsExchange : IExchange
                     try
                     {
                         await mre.WaitAsync().ConfigureAwait(false);
+
                         await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                         if (_cts == null)
@@ -293,15 +304,13 @@ public sealed class OpsExchange : IExchange
                             break;
                         }
 
-                        var cts1 = _cts;
-
                         if (!connector.CanConnect)
                         {
                             continue;
                         }
 
                         // 记录数据
-                        await _publisher.Publish(new SwitchEvent { Connector = connector, Device = device, Tag = tag }, cts1.Token).ConfigureAwait(false);
+                        await _publisher.Publish(new SwitchEvent { Connector = connector, Device = device, Tag = tag }).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -330,8 +339,6 @@ public sealed class OpsExchange : IExchange
                         {
                             break;
                         }
-
-                        var cts1 = _cts;
 
                         if (!connector.CanConnect)
                         {
@@ -368,7 +375,7 @@ public sealed class OpsExchange : IExchange
                                     Tag = tag,
                                     State = SwitchState.On,
                                     IsSwitchSignal = true,
-                                }, cts1.Token).ConfigureAwait(false);
+                                }).ConfigureAwait(false);
 
                                 // 开关开启时，发送信号，让子任务执行。
                                 isOn = true;
@@ -388,7 +395,7 @@ public sealed class OpsExchange : IExchange
                                         Tag = tag,
                                         State = SwitchState.Off,
                                         IsSwitchSignal = true,
-                                    }, cts1.Token).ConfigureAwait(false);
+                                    }).ConfigureAwait(false);
 
                                     // 运行超时，重置信号，让子任务阻塞。
                                     isOn = false;
@@ -411,7 +418,7 @@ public sealed class OpsExchange : IExchange
                                 Tag = tag,
                                 State = SwitchState.Off,
                                 IsSwitchSignal = true,
-                            }, cts1.Token).ConfigureAwait(false);
+                            }).ConfigureAwait(false);
 
                             // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                             isOn = false;
