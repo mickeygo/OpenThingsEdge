@@ -29,6 +29,14 @@ public class IoTGatewayController : Controller
         return Ok("Exchange started.");
     }
 
+    [HttpGet]
+    [Route("shutdown")]
+    public async Task<IActionResult> Shutdown()
+    {
+        await _exchange.ShutdownAsync();
+        return Ok("Exchange shutdown.");
+    }
+
     [HttpPost]
     [Route("notice")]
     public IActionResult Notice()

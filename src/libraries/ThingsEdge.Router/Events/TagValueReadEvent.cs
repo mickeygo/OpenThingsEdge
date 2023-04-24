@@ -11,12 +11,6 @@ public sealed class TagValueReadEvent : INotification
     public DateTime EventTime { get; init; } = DateTime.Now;
 
     /// <summary>
-    /// 标记。
-    /// </summary>
-    [NotNull]
-    public Tag? Tag { get; init; }
-
-    /// <summary>
     /// 标记值。
     /// </summary>
     [NotNull]

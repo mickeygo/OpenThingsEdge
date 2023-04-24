@@ -266,7 +266,7 @@ public static class PayloadDataExtensions
             DataType.DInt => (DInt[])payload.Value,
             DataType.Real => (Real[])payload.Value,
             DataType.LReal => (LReal[])payload.Value,
-            DataType.String or DataType.S7String or DataType.S7WString => Arr2Str((string[])payload.Value),
+            DataType.String or DataType.S7String or DataType.S7WString => (string)payload.Value,
             _ => throw new FormatException(),
         };
     }

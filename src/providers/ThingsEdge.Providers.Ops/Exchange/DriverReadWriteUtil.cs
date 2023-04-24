@@ -20,15 +20,7 @@ internal static class DriverReadWriteUtil
     {
         bool ok = false;
         string errMessage = string.Empty;
-        var payloadData = new PayloadData
-        {
-            TagId = tag.TagId,
-            TagName = tag.Name,
-            Address = tag.Address,
-            Length = tag.Length,
-            DataType = tag.DataType,
-            Keynote = tag.Keynote,
-        };
+        var payloadData = PayloadData.FromTag(tag);
         switch (tag.DataType)
         {
             case DataType.Bit:

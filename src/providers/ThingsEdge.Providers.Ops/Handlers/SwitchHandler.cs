@@ -1,5 +1,6 @@
 ﻿using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Exchange;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
@@ -8,6 +9,8 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// </summary>
 internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 {
+    private const int AllowMaxWriteCount = 2048; // 文件中允许写入最大的次数。
+
     private readonly SwitchContainer _container;
     private readonly CurveStorage _curveStorage;
     private readonly ILogger _logger;
@@ -87,20 +90,27 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             return;
         }
 
+        // 检测是否已到达写入行数的上限，用于防止
+        if (writer2.WrittenCount > AllowMaxWriteCount)
+        {
+            _logger.LogWarning("文件写入数据已达到设置上限, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}",
+                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+
+            return;
+        }
+
         // 读取触发标记下的子数据。
         List<string> items = new();
-        foreach (var normalTag in notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve))
+        var normalPaydatas = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
+        foreach ( var normalPaydata in normalPaydatas)
         {
-            // TODO: 思考如何将子数据地址合并，减少多次读取产生的性能开销。
-
-            var (ok, data, err) = await notification.Connector.ReadAsync(normalTag).ConfigureAwait(false);
-            if (!ok)
+            if (!normalPaydata.Ok)
             {
                 _logger.LogError("读取子标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err);
+                   notification.Device.Name, normalPaydata.Payload!.TagName, normalPaydata.Payload.Address, normalPaydata.Error);
             }
 
-            items.Add(data?.GetString() ?? "0");
+            items.Add(normalPaydata.Payload?.GetString() ?? "0");
         }
 
         // 检测写入对象是否已关闭

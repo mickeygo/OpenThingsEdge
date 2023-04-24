@@ -37,27 +37,25 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         message.Values.Add(notification.Self);
 
         // 发布标记数据读取消息。
-        await _publisher.Publish(new TagValueReadEvent { Tag = notification.Tag, Value = notification.Self! },
+        await _publisher.Publish(new TagValueReadEvent { Value = notification.Self! },
             PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
         // 读取触发标记下的子数据。
-        foreach (var normalTag in notification.Tag.NormalTags)
+        var normalPaydatas = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
+        foreach (var normalPaydata in normalPaydatas)
         {
-            // TODO: 思考如何将子数据地址合并，减少多次读取产生的性能开销。
-
-            var (ok, data, err) = await notification.Connector.ReadAsync(normalTag).ConfigureAwait(false);
-            if (!ok)
+            if (!normalPaydata.Ok)
             {
                 _logger.LogError("读取子标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                    message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err);
+                   message.Schema.DeviceName, normalPaydata.Payload.TagName, normalPaydata.Payload.Address, normalPaydata.Error);
 
                 continue;
             }
 
-            message.Values.Add(data!);
+            message.Values.Add(normalPaydata.Payload!);
 
             // 发布标记数据读取消息。
-            await _publisher.Publish(new TagValueReadEvent { Tag = normalTag, Value = data! },
+            await _publisher.Publish(new TagValueReadEvent { Value = normalPaydata.Payload! },
                 PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
         }
 

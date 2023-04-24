@@ -16,11 +16,6 @@ public sealed class OpsConfig
     public int SwitchScanRate { get; init; } = 20;
 
     /// <summary>
-    /// 允许开关处于on状态最长时间（秒），默认为120。
-    /// </summary>
-    public int AllowedSwitchOnlineMaxSeconds { get; init; } = 120;
-
-    /// <summary>
     /// 曲线数据配置。
     /// </summary>
     public CurveConfig Curve { get; init; } = new();

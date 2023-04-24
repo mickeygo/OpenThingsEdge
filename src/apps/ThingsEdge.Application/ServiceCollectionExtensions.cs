@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Application;
+﻿using ThingsEdge.Application.Infrastructure;
+
+namespace ThingsEdge.Application;
 
 public static class ServiceCollectionExtensions
 {
@@ -9,6 +11,7 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddThingsEdgeApplication(this IServiceCollection services)
     {
+        services.AddSqlSugarSetup();
         return services;
     }
 }

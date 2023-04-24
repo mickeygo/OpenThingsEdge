@@ -333,8 +333,15 @@ public sealed class OpsExchange : IExchange
                     {
                         await mre.WaitAsync().ConfigureAwait(false);
 
+                        // 第一次检测
+                        if (_cts == null)
+                        {
+                            break;
+                        }
+
                         await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
+                        // 第二次检测
                         if (_cts == null)
                         {
                             break;
@@ -363,7 +370,6 @@ public sealed class OpsExchange : IExchange
             _ = Task.Run(async () =>
             {
                 int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
-                DateTime lastestTime = DateTime.Now;
                 bool isOn = false; // 开关开启状态
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
@@ -379,12 +385,6 @@ public sealed class OpsExchange : IExchange
                         if (!connector.CanConnect)
                         {
                             continue;
-                        }
-
-                        // 处于 off 状态，刷新最近一次进入的时间
-                        if (!isOn)
-                        {
-                            lastestTime = DateTime.Now;
                         }
 
                         var (ok, data, _) = await connector.ReadAsync(tag).ConfigureAwait(false);
@@ -419,28 +419,6 @@ public sealed class OpsExchange : IExchange
                                     // 开关开启时，发送信号，让子任务执行。
                                     isOn = true;
                                     mre.Set();
-                                }
-                                else
-                                {
-                                    // 考虑设备在工作中发送意外中断，信号没有切换到 off 状态的场景（设备没有主动切换）。
-                                    // 可设置超时时长，开关信号连续处于开启状态时间不能超过多久。
-                                    if ((DateTime.Now - lastestTime).TotalSeconds > _opsConfig.AllowedSwitchOnlineMaxSeconds)
-                                    {
-                                        // 发送 Off 信号结束标识
-                                        await _publisher.Publish(new SwitchEvent
-                                        {
-                                            Connector = connector,
-                                            ChannelName = channelName,
-                                            Device = device,
-                                            Tag = tag,
-                                            State = SwitchState.Off,
-                                            IsSwitchSignal = true,
-                                        }).ConfigureAwait(false);
-
-                                        // 运行超时，重置信号，让子任务阻塞。
-                                        isOn = false;
-                                        mre.Reset();
-                                    }
                                 }
                             }
                             else
@@ -506,26 +484,32 @@ public sealed class OpsExchange : IExchange
         return Task.CompletedTask;
     }
 
-    public async Task ShutdownAsync()
+    public Task ShutdownAsync()
     {
         if (!IsRunning)
         {
-            return;
+            return Task.CompletedTask;
         }
         IsRunning = false;
 
+        CancellationTokenSource? cts = _cts;
         if (_cts != null)
         {
-            CancellationTokenSource cts = _cts;
             _cts = null;
-            cts.Cancel();
-            cts.Dispose();
+            cts!.Cancel();
         }
 
-        await Task.Delay(500).ConfigureAwait(false); // 阻塞 500ms
-        _driverConnectorManager.Close();
+        // 需延迟 Dispose
+        _ = Task.Run(async() =>
+        {
+            await Task.Delay(1000).ConfigureAwait(false);
+            
+            cts?.Dispose();
+            _driverConnectorManager.Close();
+        }).ConfigureAwait(false);
 
         _logger.LogInformation("[Engine] 引擎停止");
+        return Task.CompletedTask;
     }
 
     public void Dispose()

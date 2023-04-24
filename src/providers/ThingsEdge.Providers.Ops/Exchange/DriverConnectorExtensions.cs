@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Providers.Ops.Exchange;
+﻿using Ops.Communication.Profinet.Siemens;
+
+namespace ThingsEdge.Providers.Ops.Exchange;
 
 public static class DriverConnectorExtensions
 {
@@ -11,6 +13,36 @@ public static class DriverConnectorExtensions
     public static async Task<(bool ok, PayloadData data, string err)> ReadAsync(this DriverConnector connector, Tag tag)
     {
         return await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 批量读取数据，若驱动不支持批量读取，会依次逐个读取标记值。
+    /// </summary>
+    /// <param name="connector"></param>
+    /// <param name="tags">批量读取的标记集合。</param>
+    /// <returns></returns>
+    public static async Task<List<TagPayload>> ReadMultiAsync(this DriverConnector connector, IEnumerable<Tag> tags)
+    {
+        if (connector.Driver is SiemensS7Net siemensS7Net)
+        {
+            return await siemensS7Net.ReadMultiAsync(tags).ConfigureAwait(false);
+        }
+
+        // 没有实现批量读取的驱动，逐一读取。
+        List<TagPayload> tagPayloads = new(tags.Count());
+        foreach (var tag in tags)
+        {
+            var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
+
+            tagPayloads.Add(new TagPayload
+            {
+                Ok = ok,
+                Error = err,
+                Payload = data,
+            });
+        }
+
+        return tagPayloads;
     }
 
     /// <summary>

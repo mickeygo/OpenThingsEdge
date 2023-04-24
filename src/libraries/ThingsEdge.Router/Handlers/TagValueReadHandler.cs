@@ -17,7 +17,7 @@ internal sealed class TagValueReadHandler : INotificationHandler<TagValueReadEve
 
     public Task Handle(TagValueReadEvent notification, CancellationToken cancellationToken)
     {
-        _tagDataManager.Set(notification.Tag.TagId, notification.Value);
+        _tagDataManager.Set(notification.Value.TagId, notification.Value);
         return Task.CompletedTask;
     }
 }

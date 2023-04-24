@@ -48,4 +48,22 @@ public sealed class PayloadData
     /// </summary>
     [NotNull]
     public string? Keynote { get; init; } = string.Empty;
+
+    /// <summary>
+    /// 复制 Tag 数据到此对象。
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    public static PayloadData FromTag(Tag tag)
+    {
+        return new PayloadData
+        {
+            TagId = tag.TagId,
+            TagName = tag.Name,
+            Address = tag.Address,
+            DataType = tag.DataType,
+            Length = tag.Length,
+            Keynote = tag.Keynote,
+        };
+    }
 }
