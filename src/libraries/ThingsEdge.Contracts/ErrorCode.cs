@@ -46,6 +46,12 @@ public enum ErrorCode : int
     HttpResponseJsonError,
 
     /// <summary>
+    /// 批量读取子数据错误
+    /// </summary>
+
+    MultiReadItemError = 448,
+
+    /// <summary>
     /// 回写数据项错误。
     /// </summary>
     CallbackItemError = 449,

@@ -100,17 +100,11 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         }
 
         // 读取触发标记下的子数据。
-        List<string> items = new();
-        var normalPaydatas = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
-        foreach ( var normalPaydata in normalPaydatas)
+        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
+        if (!ok2)
         {
-            if (!normalPaydata.Ok)
-            {
-                _logger.LogError("读取子标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                   notification.Device.Name, normalPaydata.Payload!.TagName, normalPaydata.Payload.Address, normalPaydata.Error);
-            }
-
-            items.Add(normalPaydata.Payload?.GetString() ?? "0");
+            _logger.LogError("批量读取子标记值失败, 设备: {DeviceName}, 错误: {Err}", notification.Device.Name, err2);
+            return;
         }
 
         // 检测写入对象是否已关闭
@@ -118,7 +112,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         {
             try
             {
-                await writer2.WriteLineAsync(string.Join(",", items)).ConfigureAwait(false);
+                await writer2.WriteLineAsync(string.Join(",", normalPaydatas!.Select(s => s.GetString()))).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

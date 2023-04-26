@@ -21,7 +21,7 @@ public static class DriverConnectorExtensions
     /// <param name="connector"></param>
     /// <param name="tags">批量读取的标记集合。</param>
     /// <returns></returns>
-    public static async Task<List<TagPayload>> ReadMultiAsync(this DriverConnector connector, IEnumerable<Tag> tags)
+    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this DriverConnector connector, IEnumerable<Tag> tags)
     {
         if (connector.Driver is SiemensS7Net siemensS7Net)
         {
@@ -29,20 +29,19 @@ public static class DriverConnectorExtensions
         }
 
         // 没有实现批量读取的驱动，逐一读取。
-        List<TagPayload> tagPayloads = new(tags.Count());
+        List<PayloadData> tagPayloads = new(tags.Count());
         foreach (var tag in tags)
         {
             var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
-
-            tagPayloads.Add(new TagPayload
+            if (!ok)
             {
-                Ok = ok,
-                Error = err,
-                Payload = data,
-            });
+                return (false, default, err);
+            }
+
+            tagPayloads.Add(data);
         }
 
-        return tagPayloads;
+        return (true, tagPayloads, default);
     }
 
     /// <summary>

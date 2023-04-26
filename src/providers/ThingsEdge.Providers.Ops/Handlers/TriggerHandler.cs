@@ -1,7 +1,9 @@
-﻿using ThingsEdge.Common.EventBus;
+﻿using MediatR;
+using ThingsEdge.Common.EventBus;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
@@ -41,21 +43,32 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
         // 读取触发标记下的子数据。
-        var normalPaydatas = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
-        foreach (var normalPaydata in normalPaydatas)
+        var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
+        if (!ok)
         {
-            if (!normalPaydata.Ok)
-            {
-                _logger.LogError("读取子标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                   message.Schema.DeviceName, normalPaydata.Payload.TagName, normalPaydata.Payload.Address, normalPaydata.Error);
+            _logger.LogError("批量读取子标记值异常, 设备: {DeviceName}, 错误: {Err}", notification.Device.Name, err);
+            // TODO: 发布异常信息。
 
-                continue;
+            // 写入错误代码到设备
+            if (notification.Connector.CanConnect)
+            {
+                var (ok5, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrorCode.MultiReadItemError).ConfigureAwait(false);
+                if (!ok5)
+                {
+                    _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
+                        message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err5);
+                }
             }
 
-            message.Values.Add(normalPaydata.Payload!);
+            return;
+        }
+
+        foreach (var normalPaydata in normalPaydatas!)
+        {
+            message.Values.Add(normalPaydata);
 
             // 发布标记数据读取消息。
-            await _publisher.Publish(new TagValueReadEvent { Value = normalPaydata.Payload! },
+            await _publisher.Publish(new TagValueReadEvent { Value = normalPaydata },
                 PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
         }
 
