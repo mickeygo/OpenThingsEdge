@@ -95,6 +95,6 @@ public sealed class Tag
     public bool IsArray()
     {
         return Length > 0
-           && DataType is not (DataType.S7String or DataType.S7String or DataType.S7WString);
+           && DataType is not (DataType.String or DataType.S7String or DataType.S7WString);
     }
 }

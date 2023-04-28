@@ -6,6 +6,21 @@ namespace ThingsEdge.Providers.Ops.Tests.Profinets;
 public class SiemensS7Net_Tests
 {
     [Fact]
+    public async Task Should_Read_Array_Address_Test()
+    {
+        using var s7 = new SiemensS7Net(SiemensPLCS.S1500, "192.168.0.1");
+        await s7.ConnectServerAsync();
+
+        var ret1 = s7.ReadInt16("DB101.316");
+        var ret2 = await s7.ReadInt16Async("DB101.316");
+
+        var ret3 = await s7.ReadByteAsync("DB101.16");
+        var ret4 = await s7.ReadAsync("DB101.16", 100);
+
+        Assert.True(ret2.IsSuccess);
+    }
+
+    [Fact]
     public async Task Should_Read_Multiple_Address_Test()
     {
         using var s7 = new SiemensS7Net(SiemensPLCS.S1500, "192.168.0.1");

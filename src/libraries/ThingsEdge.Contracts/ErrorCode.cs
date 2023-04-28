@@ -49,10 +49,10 @@ public enum ErrorCode : int
     /// 批量读取子数据错误
     /// </summary>
 
-    MultiReadItemError = 448,
+    MultiReadItemError = 471,
 
     /// <summary>
     /// 回写数据项错误。
     /// </summary>
-    CallbackItemError = 449,
+    CallbackItemError,
 }

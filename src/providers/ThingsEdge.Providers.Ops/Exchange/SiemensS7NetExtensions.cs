@@ -30,6 +30,9 @@ public static class SiemensS7NetExtensions
             _ => throw new NotImplementedException(),
         };
 
+        // 取最短的长度。
+        allowMaxByte = Math.Min(allowMaxByte, siemensS7Net.PDULength);
+
         List<PayloadData> list = new(tags.Count());
         List<List<Tag>> matrix = new();
         int sum = 0, row = 0;
@@ -123,8 +126,6 @@ public static class SiemensS7NetExtensions
                     DataType.DInt => siemensS7Net.ByteTransform.TransInt32(result.Content, index, tag.Length),
                     DataType.Real => siemensS7Net.ByteTransform.TransSingle(result.Content, index, tag.Length),
                     DataType.LReal => siemensS7Net.ByteTransform.TransDouble(result.Content, index, tag.Length),
-                    DataType.String or DataType.S7String => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length, Encoding.ASCII).TrimEnd('\0'),
-                    DataType.S7WString => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length * 2, Encoding.Unicode).TrimEnd('\0'),
                     _ => throw new NotImplementedException(),
                 };
 

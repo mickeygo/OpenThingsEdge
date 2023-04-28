@@ -238,7 +238,7 @@ public static class PayloadDataExtensions
     private static OneOf<string, Bit, byte, Word, DWord, Int, DInt, Real, LReal, Bit[], byte[], Word[], DWord[], Int[], DInt[], Real[], LReal[]> GetValue(this PayloadData payload)
     {
         // 单值
-        if (payload.Length == 0) // payload.Value.GetType().IsArray
+        if (!payload.IsArray()) // payload.Value.GetType().IsArray
         {
             return payload.DataType switch
             {

@@ -50,6 +50,17 @@ public sealed class PayloadData
     public string? Keynote { get; init; } = string.Empty;
 
     /// <summary>
+    /// 标记是否为数组对象。
+    /// 当值不为 String 类型（包含 S7String 和 S7WString）且设定的长度大于 0 时，判定为数组。
+    /// </summary>
+    /// <returns></returns>
+    public bool IsArray()
+    {
+        return Length > 0
+           && DataType is not (DataType.String or DataType.S7String or DataType.S7WString);
+    }
+
+    /// <summary>
     /// 复制 Tag 数据到此对象。
     /// </summary>
     /// <param name="tag"></param>

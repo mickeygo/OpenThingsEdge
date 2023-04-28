@@ -18,6 +18,7 @@ public static class DriverConnectorExtensions
     /// <summary>
     /// 批量读取数据，若驱动不支持批量读取，会依次逐个读取标记值。
     /// </summary>
+    /// <remarks>读取值中任何一个出错，会中断读取并返回错误。</remarks>
     /// <param name="connector"></param>
     /// <param name="tags">批量读取的标记集合。</param>
     /// <returns></returns>

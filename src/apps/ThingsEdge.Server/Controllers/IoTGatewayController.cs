@@ -15,10 +15,12 @@ namespace ThingsEdge.Server.Controllers;
 public class IoTGatewayController : Controller
 {
     private readonly IExchange _exchange;
+    private readonly ILogger _logger;
 
-    public IoTGatewayController(IExchange exchange)
+    public IoTGatewayController(IExchange exchange, ILogger<IoTGatewayController> logger)
     {
         _exchange = exchange;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -39,7 +41,7 @@ public class IoTGatewayController : Controller
 
     [HttpPost]
     [Route("notice")]
-    public IActionResult Notice()
+    public IActionResult Notice(RequestMessage message)
     {
         var ret = new HttpResponseResult();
         return Json(ret);

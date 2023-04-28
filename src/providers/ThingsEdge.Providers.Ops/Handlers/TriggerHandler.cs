@@ -1,9 +1,7 @@
-﻿using MediatR;
-using ThingsEdge.Common.EventBus;
+﻿using ThingsEdge.Common.EventBus;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 

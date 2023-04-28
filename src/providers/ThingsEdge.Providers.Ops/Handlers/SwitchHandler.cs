@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Exchange;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
@@ -49,15 +48,15 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 var noTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == TagUsage.SwitchNo);
                 if (noTag != null)
                 {
-                    var (ok2, data2, err2) = await notification.Connector.ReadAsync(noTag).ConfigureAwait(false);
-                    if (ok2)
+                    var (ok3, data3, err3) = await notification.Connector.ReadAsync(noTag).ConfigureAwait(false);
+                    if (ok3)
                     {
-                        no = data2.GetString();
+                        no = data3.GetString();
                     }
                     else
                     {
                         _logger.LogError("读取SwitchNo标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err2);
+                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err3);
                     }
                 }
 
