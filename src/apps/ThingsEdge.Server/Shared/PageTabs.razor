@@ -2,7 +2,7 @@
 @inject NavHelper NavHelper
 
 <PPageTabs @ref="PPageTabs" TabClass="px-6 rounded-t-xl" Ripple="false" HideSlider SelfPatterns="@SelfPatterns">
-    <TabContent>
+    <TabIconContent>
         @{
             var item = NavHelper.PageTabItems.FirstOrDefault(u => context.IsMatch(u.Href));
         }
@@ -10,7 +10,7 @@
         <span class="mx-2 text-capitalize @(context.Selected ? "neutral--text" : "")" style="min-width:46px;">
             @T(item?.Title)
         </span>
-    </TabContent>
+    </TabIconContent>
     <ChildContent>
         @ChildContent
     </ChildContent>

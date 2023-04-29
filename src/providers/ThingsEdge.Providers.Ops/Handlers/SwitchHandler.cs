@@ -1,5 +1,7 @@
-﻿using ThingsEdge.Contracts.Devices;
+﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
@@ -8,14 +10,16 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// </summary>
 internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 {
-    private const int AllowMaxWriteCount = 2048; // 文件中允许写入最大的次数。
+    private const int AllowMaxWriteCount = 3072; // 文件中允许写入最大的次数。
 
+    private readonly IEventPublisher _publisher;
     private readonly SwitchContainer _container;
     private readonly CurveStorage _curveStorage;
     private readonly ILogger _logger;
 
-    public SwitchHandler(SwitchContainer container, CurveStorage curveStorage, ILogger<SwitchHandler> logger)
+    public SwitchHandler(IEventPublisher publisher, SwitchContainer container, CurveStorage curveStorage, ILogger<SwitchHandler> logger)
     {
+        _publisher = publisher;
         _container = container;
         _curveStorage = curveStorage;
         _logger = logger;
@@ -26,6 +30,11 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         // 开关信号
         if (notification.IsSwitchSignal)
         {
+            List<PayloadData> payloads = new()
+            {
+                notification.Self!,
+            };
+
             if (notification.State == SwitchState.On)
             {
                 string? sn = null, no = null;
@@ -37,6 +46,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     if (ok1)
                     {
                         sn = data1.GetString();
+                        payloads.Add(data1);
                     }
                     else
                     {
@@ -52,6 +62,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     if (ok3)
                     {
                         no = data3.GetString();
+                        payloads.Add(data3);
                     }
                     else
                     {
@@ -80,6 +91,10 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 }
             }
 
+            // 发布标记数据读取事件。
+            await _publisher.Publish(TagValueChangedEvent.Create(payloads),
+                PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+
             return;
         }
 
@@ -99,7 +114,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         }
 
         // 读取触发标记下的子数据。
-        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
+        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(
+            notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
         if (!ok2)
         {
             _logger.LogError("批量读取子标记值失败, 设备: {DeviceName}, 错误: {Err}", notification.Device.Name, err2);

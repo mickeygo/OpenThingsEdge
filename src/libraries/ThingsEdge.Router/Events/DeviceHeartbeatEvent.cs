@@ -3,9 +3,9 @@
 namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 心跳事件。
+/// 与设备连接的心跳事件。
 /// </summary>
-public sealed class HeartbeatEvent : INotification
+public sealed class DeviceHeartbeatEvent : INotification
 {
     [NotNull]
     public string? ChannelName { get; init; }

@@ -6,7 +6,7 @@ namespace ThingsEdge.Router.Handlers;
 /// <summary>
 /// 心跳事件处理器。
 /// </summary>
-internal sealed class HeartbeatHandler : INotificationHandler<HeartbeatEvent>
+internal sealed class HeartbeatHandler : INotificationHandler<DeviceHeartbeatEvent>
 {
     private readonly DeviceHealthMonitor _deviceHealthMonitor;
 
@@ -15,7 +15,7 @@ internal sealed class HeartbeatHandler : INotificationHandler<HeartbeatEvent>
         _deviceHealthMonitor = deviceHealthMonitor;
     }
 
-    public Task Handle(HeartbeatEvent notification, CancellationToken cancellationToken)
+    public Task Handle(DeviceHeartbeatEvent notification, CancellationToken cancellationToken)
     {
         _deviceHealthMonitor.SetState(notification.Device.DeviceId, notification.ConnectState);
         return Task.CompletedTask;

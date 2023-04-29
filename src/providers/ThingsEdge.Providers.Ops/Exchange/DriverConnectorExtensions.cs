@@ -1,4 +1,5 @@
 ﻿using Ops.Communication.Profinet.Siemens;
+using ErrCode = Ops.Communication.ErrorCode;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -10,9 +11,18 @@ public static class DriverConnectorExtensions
     /// <param name="connector">设备连接器。</param>
     /// <param name="tag">要读取的数据标记。</param>
     /// <returns></returns>
-    public static async Task<(bool ok, PayloadData data, string err)> ReadAsync(this DriverConnector connector, Tag tag)
+    public static async Task<(bool ok, PayloadData? data, string? err)> ReadAsync(this DriverConnector connector, Tag tag)
     {
-        return await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
+        var result = await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
+
+        // 读取异常，更改设备状态
+        if (!result.IsSuccess() 
+            && result.ErrorCode is (int)ErrCode.SocketException or (int)ErrCode.SocketSendException or (int)ErrCode.RemoteClosedConnection)
+        {
+
+        }
+
+        return (result.IsSuccess(), result.Data, result.ErrorMessage);
     }
 
     /// <summary>
@@ -39,7 +49,7 @@ public static class DriverConnectorExtensions
                 return (false, default, err);
             }
 
-            tagPayloads.Add(data);
+            tagPayloads.Add(data!);
         }
 
         return (true, tagPayloads, default);

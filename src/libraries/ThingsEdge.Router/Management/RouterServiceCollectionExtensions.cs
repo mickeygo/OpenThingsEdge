@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Management;
-using ThingsEdge.Router.Model;
 
 namespace ThingsEdge.Router;
 
@@ -34,7 +33,7 @@ public static class RouterServiceCollectionExtensions
     private static IServiceCollection AddRouterServices(this IServiceCollection services)
     {
         services.AddSingleton<DeviceHealthMonitor>();
-        services.AddSingleton<TagDataMonitor>();
+        services.AddSingleton<TagDataFactory>();
 
         return services;
     }

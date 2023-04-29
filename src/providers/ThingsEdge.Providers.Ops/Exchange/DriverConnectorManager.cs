@@ -169,9 +169,12 @@ public sealed class DriverConnectorManager : IDisposable
                             connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
                             // 注： networkDevice 中连接成功一次，即使服务器断开一段时间后再恢复，连接依旧可用，
                             // 所以，在连接成功一次后，不要再重复连接。
-                            if (connector.ConnectedStatus == ConnectionStatus.Disconnected)
+                            if (connector.Available && connector.ConnectedStatus == ConnectionStatus.Disconnected)
                             {
-                                _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                                if (networkDevice.IsSocketError)
+                                {
+                                    _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                                }
                             }
                         }
                         catch (Exception ex)

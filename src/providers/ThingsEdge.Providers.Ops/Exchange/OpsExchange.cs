@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Common.EventBus;
+﻿using OneOf.Types;
+using ThingsEdge.Common.EventBus;
 using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
@@ -85,8 +86,8 @@ public sealed class OpsExchange : IExchange
 
                         if (_cts == null)
                         {
-                            // 通知心跳断开。
-                            await _publisher.Publish(new HeartbeatEvent
+                            // 发布设备心跳断开事件。
+                            await _publisher.Publish(new DeviceHeartbeatEvent
                             {
                                 ChannelName = channelName,
                                 Device = device,
@@ -99,8 +100,8 @@ public sealed class OpsExchange : IExchange
 
                         if (!connector.CanConnect)
                         {
-                            // 通知心跳断开。
-                            await _publisher.Publish(new HeartbeatEvent
+                            // 发布设备心跳断开事件。
+                            await _publisher.Publish(new DeviceHeartbeatEvent
                             {
                                 ChannelName = channelName,
                                 Device = device,
@@ -111,51 +112,36 @@ public sealed class OpsExchange : IExchange
                             continue;
                         }
 
+                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
+                        if (!ok)
+                        {
+                            _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
+                                  device.Name, tag.Name, tag.Address, err);
+
+                            continue;
+                        }
+
                         // 心跳标记数据类型必须为 bool 或 int16
-                        bool hasHeartbeat = false;
-                        if (tag.DataType == DataType.Bit)
+                        bool on = tag.DataType switch
                         {
-                            var result = await connector.Driver.ReadBoolAsync(tag.Address).ConfigureAwait(false);
-                            if (!result.IsSuccess)
-                            {
-                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
-                                    device.Name, tag.Name, tag.Address, result.Message);
+                            DataType.Bit => data.GetBit(),
+                            DataType.Int => data.GetInt() == 1,
+                            _ => throw new NotSupportedException(),
+                        };
 
-                                continue;
-                            }
-
-                            if (result.Content)
-                            {
-                                await connector.Driver.WriteAsync(tag.Address, false).ConfigureAwait(false);
-
-                                // 发布心跳事件，心跳处理不阻塞标识复位。
-                                hasHeartbeat = true;
-                            }
-                        }
-                        else if (tag.DataType == DataType.Int)
+                        if (on)
                         {
-                            var result = await connector.Driver.ReadInt16Async(tag.Address).ConfigureAwait(false);
-                            if (!result.IsSuccess)
+                            if (tag.DataType == DataType.Bit)
                             {
-                                _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
-                                    device.Name, tag.Name, tag.Address, result.Message);
-
-                                continue;
+                                await connector.WriteAsync(tag, false).ConfigureAwait(false);
+                            }
+                            else if (tag.DataType == DataType.Int)
+                            {
+                                await connector.WriteAsync(tag, (short)0).ConfigureAwait(false);
                             }
 
-                            if (result.Content == 1)
-                            {
-                                await connector.Driver.WriteAsync(tag.Address, (short)0).ConfigureAwait(false);
-
-                                // 同上。
-                                hasHeartbeat = true;
-                            }
-                        }
-
-                        if (hasHeartbeat)
-                        {
-                            // 通知心跳正常。
-                            await _publisher.Publish(new HeartbeatEvent
+                            // 发布心跳正常事件。
+                            await _publisher.Publish(new DeviceHeartbeatEvent
                             {
                                 ChannelName = channelName,
                                 Device = device,
@@ -223,6 +209,7 @@ public sealed class OpsExchange : IExchange
                             // 推送数据
                             if (state == 1)
                             {
+                                // 发布触发事件
                                 await _publisher.Publish(new TriggerEvent
                                 {
                                     Connector = connector,
@@ -290,7 +277,7 @@ public sealed class OpsExchange : IExchange
                             continue;
                         }
 
-                        // 推送数据
+                        // 发布通知事件
                         await _publisher.Publish(new NoticeEvent
                         {
                             Connector = connector,
@@ -412,6 +399,7 @@ public sealed class OpsExchange : IExchange
                                         ChannelName = channelName,
                                         Device = device,
                                         Tag = tag,
+                                        Self = data,
                                         State = SwitchState.On,
                                         IsSwitchSignal = true,
                                     }).ConfigureAwait(false);
@@ -426,13 +414,14 @@ public sealed class OpsExchange : IExchange
                                 // Close 标记，在本身处于开启状态，才执行关闭动作。
                                 if (isOn)
                                 {
-                                    // 发送 Off 信号结束标识
+                                    // 发送 Off 信号结束标识事件
                                     await _publisher.Publish(new SwitchEvent
                                     {
                                         Connector = connector,
                                         ChannelName = channelName,
                                         Device = device,
                                         Tag = tag,
+                                        Self = data,
                                         State = SwitchState.Off,
                                         IsSwitchSignal = true,
                                     }).ConfigureAwait(false);
@@ -450,7 +439,7 @@ public sealed class OpsExchange : IExchange
                         // 若读取失败，且开关处于 on 状态，则发送关闭动作信号（防止因设备未掉线，而读取失败导致一直发送数据）。
                         if (isOn)
                         {
-                            // 发送 Off 信号结束标识
+                            // 发送 Off 信号结束标识事件
                             await _publisher.Publish(new SwitchEvent 
                             {
                                 Connector = connector,

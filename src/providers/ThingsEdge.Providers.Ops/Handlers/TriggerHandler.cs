@@ -37,7 +37,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         message.Values.Add(notification.Self);
 
         // 发布标记数据读取消息。
-        await _publisher.Publish(new TagValueReadEvent { Value = notification.Self! },
+        await _publisher.Publish(TagValueChangedEvent.Create(notification.Self!),
             PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
         // 读取触发标记下的子数据。
@@ -61,14 +61,11 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             return;
         }
 
-        foreach (var normalPaydata in normalPaydatas!)
-        {
-            message.Values.Add(normalPaydata);
+        message.Values.AddRange(normalPaydatas!);
 
-            // 发布标记数据读取消息。
-            await _publisher.Publish(new TagValueReadEvent { Value = normalPaydata },
-                PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
-        }
+        // 发布标记数据读取消息。
+        await _publisher.Publish(TagValueChangedEvent.Create(normalPaydatas!),
+            PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);

@@ -13,12 +13,12 @@ public enum ConnectionStatus
     Wait = 1,
 
     /// <summary>
-    /// 已连接
+    /// 已连接。
     /// </summary>
     Connected,
 
     /// <summary>
-    /// 已与服务断开
+    /// 已与服务断开连接。
     /// </summary>
     Disconnected,
 
