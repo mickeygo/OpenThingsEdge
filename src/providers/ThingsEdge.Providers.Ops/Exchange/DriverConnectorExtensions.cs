@@ -1,5 +1,4 @@
 ﻿using Ops.Communication.Profinet.Siemens;
-using ErrCode = Ops.Communication.ErrorCode;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -13,15 +12,12 @@ public static class DriverConnectorExtensions
     /// <returns></returns>
     public static async Task<(bool ok, PayloadData? data, string? err)> ReadAsync(this DriverConnector connector, Tag tag)
     {
-        var result = await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
-
-        // 读取异常，更改设备状态
-        if (!result.IsSuccess() 
-            && result.ErrorCode is (int)ErrCode.SocketException or (int)ErrCode.SocketSendException or (int)ErrCode.RemoteClosedConnection)
+        if (!connector.CanConnect)
         {
-
+            return (false, default, "已与设备断开连接");
         }
 
+        var result = await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
         return (result.IsSuccess(), result.Data, result.ErrorMessage);
     }
 
@@ -34,6 +30,11 @@ public static class DriverConnectorExtensions
     /// <returns></returns>
     public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this DriverConnector connector, IEnumerable<Tag> tags)
     {
+        if (!connector.CanConnect)
+        {
+            return (false, default, "已与设备断开连接");
+        }
+
         if (connector.Driver is SiemensS7Net siemensS7Net)
         {
             return await siemensS7Net.ReadMultiAsync(tags).ConfigureAwait(false);
@@ -67,6 +68,11 @@ public static class DriverConnectorExtensions
     /// <remarks>要写入的数据必须与标记的数据类型匹配，或是可转换为标记设定的类型。</remarks>
     public static async Task<(bool ok, string? err)> WriteAsync(this DriverConnector connector, Tag tag, object data, bool format = true)
     {
+        if (!connector.CanConnect)
+        {
+            return (false, "已与设备断开连接");
+        }
+
         try
         {
             object? data2 = data;

@@ -1,5 +1,4 @@
-﻿using OneOf.Types;
-using ThingsEdge.Common.EventBus;
+﻿using ThingsEdge.Common.EventBus;
 using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
@@ -124,8 +123,8 @@ public sealed class OpsExchange : IExchange
                         // 心跳标记数据类型必须为 bool 或 int16
                         bool on = tag.DataType switch
                         {
-                            DataType.Bit => data.GetBit(),
-                            DataType.Int => data.GetInt() == 1,
+                            DataType.Bit => data!.GetBit(),
+                            DataType.Int => data!.GetInt() == 1,
                             _ => throw new NotSupportedException(),
                         };
 
@@ -201,7 +200,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 校验触发标记
-                        var state = data.GetInt();
+                        var state = data!.GetInt();
 
                         // 检测标记状态是否有变动
                         if (!TagValueSet.CompareAndSwap(tag.TagId, state))
@@ -272,7 +271,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 在仅数据变更才发送模式下，会校验数据是否有跳变。
-                        if (tag.PublishMode == PublishMode.OnlyDataChanged && TagValueSet.CompareAndSwap(tag.TagId, data.Value))
+                        if (tag.PublishMode == PublishMode.OnlyDataChanged && TagValueSet.CompareAndSwap(tag.TagId, data!.Value))
                         {
                             continue;
                         }
@@ -382,8 +381,8 @@ public sealed class OpsExchange : IExchange
                             // 开关标记数据类型必须为 bool 或 int16
                             bool on = tag.DataType switch
                             {
-                                DataType.Bit => data.GetBit(),
-                                DataType.Int => data.GetInt() == 1,
+                                DataType.Bit => data!.GetBit(),
+                                DataType.Int => data!.GetInt() == 1,
                                 _ => throw new NotSupportedException(),
                             };
 

@@ -16,7 +16,8 @@ public sealed class DriverConnectorManager : IDisposable
     private readonly Dictionary<string, DriverConnector> _connectors = new(); // Key 为设备编号
     private readonly ILogger _logger;
 
-    private bool _isConnectedServer;
+    private bool _hasTryConnectServer;
+    private bool _fristConnectSuccessful;
     private PeriodicTimer? _periodicTimer;
 
     private object SyncLock => _connectors;
@@ -98,12 +99,17 @@ public sealed class DriverConnectorManager : IDisposable
     /// <returns></returns>
     public async Task ConnectAsync()
     {
-        if (!_isConnectedServer)
+        if (!_hasTryConnectServer)
         {
             foreach (var connector in _connectors.Values)
             {
                 if (connector.Driver is NetworkDeviceBase networkDevice)
                 {
+                    connector.ConnectedStatus = ConnectionStatus.Disconnected; // 初始化
+
+                    // 关闭自动连接
+                    networkDevice.AutoConnectServerWhenSocketIsErrorOrNull = false;
+
                     // 回调，在连接成功后设置连接状态为 Connected。
                     networkDevice.ConnectServerPostDelegate = ok =>
                     {
@@ -113,7 +119,11 @@ public sealed class DriverConnectorManager : IDisposable
                         }
                     };
 
-                    connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                    // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
+                    networkDevice.SocketReadErrorClosedDelegate = code =>
+                    {
+                        connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                    };
 
                     // 先检查服务器能否访问
                     try
@@ -127,6 +137,8 @@ public sealed class DriverConnectorManager : IDisposable
                             {
                                 _logger.LogWarning("尝试连接服务失败，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
                             }
+
+                            _fristConnectSuccessful = ret.IsSuccess;
                         }
                         else
                         {
@@ -140,7 +152,7 @@ public sealed class DriverConnectorManager : IDisposable
                 }
             }
 
-            _isConnectedServer = true;
+            _hasTryConnectServer = true;
 
             // 开启心跳检测
             // 采用 PeriodicTimer 而不是普通的 Timer 定时器，是为了防止产生任务重叠执行。
@@ -167,11 +179,13 @@ public sealed class DriverConnectorManager : IDisposable
                         try
                         {
                             connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
+
                             // 注： networkDevice 中连接成功一次，即使服务器断开一段时间后再恢复，连接依旧可用，
                             // 所以，在连接成功一次后，不要再重复连接。
                             if (connector.Available && connector.ConnectedStatus == ConnectionStatus.Disconnected)
                             {
-                                if (networkDevice.IsSocketError)
+                                // 内部 Socket 异常，或是还没有连接过服务器
+                                if (networkDevice.IsSocketError || !_fristConnectSuccessful)
                                 {
                                     _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                                 }
@@ -231,7 +245,7 @@ public sealed class DriverConnectorManager : IDisposable
     {
         lock (SyncLock)
         {
-            if (_isConnectedServer)
+            if (_hasTryConnectServer)
             {
                 foreach (var connector in _connectors.Values)
                 {
@@ -244,7 +258,7 @@ public sealed class DriverConnectorManager : IDisposable
 
                 _connectors.Clear();
                 _periodicTimer?.Dispose();
-                _isConnectedServer = false;
+                _hasTryConnectServer = false;
             }
         }
     }

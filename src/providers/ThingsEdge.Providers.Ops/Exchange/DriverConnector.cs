@@ -90,7 +90,8 @@ public sealed class DriverConnector
     }
 
     /// <summary>
-    /// 是否可连接
+    /// 是否可连接。
     /// </summary>
+    /// <remarks></remarks>
     public bool CanConnect => Available && DriverStatus == DriverStatus.Normal && ConnectedStatus == ConnectionStatus.Connected;
 }

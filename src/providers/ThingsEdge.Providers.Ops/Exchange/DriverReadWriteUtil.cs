@@ -58,6 +58,7 @@ internal static class DriverReadWriteUtil
             if (result.IsSuccess)
             {
                 result2.Data = PayloadData.FromTag(tag);
+                result2.Data.Value = result.Content;
             }
             else
             {
