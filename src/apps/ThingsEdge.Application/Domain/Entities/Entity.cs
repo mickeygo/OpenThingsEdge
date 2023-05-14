@@ -11,6 +11,9 @@ public abstract class Entity : IEntity
     public long Id { get; set; }
 }
 
+/// <summary>
+/// 表示为实体对象
+/// </summary>
 public interface IEntity
 {
 

@@ -1,5 +1,8 @@
 ﻿namespace ThingsEdge.Server;
 
+/// <summary>
+/// 主键基础类。
+/// </summary>
 public abstract class ProComponentBase : ComponentBase
 {
     [Inject]

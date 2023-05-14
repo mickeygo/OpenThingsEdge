@@ -104,7 +104,7 @@ public class Json_Tests
                                  Name = "Name",
                                  Address = "",
                                  Length = 0,
-                                 DataType = DataType.String,
+                                 DataType = TagDataType.String,
                                  ScanRate = 100,
                                  Flag = TagFlag.Trigger,
                                  Keynote = "",

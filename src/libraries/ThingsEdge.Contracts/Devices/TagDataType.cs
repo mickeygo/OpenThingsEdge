@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Contracts.Devices;
 
 /// <summary>
-/// 数据类型。
+/// 标记数据类型。
 /// </summary>
-public enum DataType
+public enum TagDataType
 {
     /// <summary>
     /// Bool 类型 <see cref="bool"/>

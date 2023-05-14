@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Model;
 
 /// <summary>
-/// 日志级别
+/// 本地消息日志级别。
 /// </summary>
 public enum LoggingLevel
 {

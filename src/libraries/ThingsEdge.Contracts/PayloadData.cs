@@ -41,7 +41,7 @@ public sealed class PayloadData
     /// 数据类型。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public DataType DataType { get; init; }
+    public TagDataType DataType { get; init; }
 
     /// <summary>
     /// 标记要旨，可用于记录重要信息。
@@ -57,7 +57,7 @@ public sealed class PayloadData
     public bool IsArray()
     {
         return Length > 0
-           && DataType is not (DataType.String or DataType.S7String or DataType.S7WString);
+           && DataType is not (TagDataType.String or TagDataType.S7String or TagDataType.S7WString);
     }
 
     /// <summary>

@@ -1,0 +1,132 @@
+﻿@page "/settings/device"
+@using ThingsEdge.Contracts.Devices
+@using ThingsEdge.Server.Models
+@using ThingsEdge.Server.Services
+@inherits ProComponentBase
+@inject IDeviceService _deviceService
+
+<MCard>
+    <MRow>
+        <MCol Cols="3">
+            <MCardText>
+                <MTreeview @bind-Active="_active"
+                           TKey="String"
+                           TItem="TreeModel"
+                           Hoverable
+                           Activatable
+                           Items="_items"
+                           ItemKey="u => u.Id"
+                           ItemChildren="u => u.Children"
+                           ItemText="u => u.Name">
+                </MTreeview>
+            </MCardText>
+        </MCol>
+
+        <MDivider Vertical></MDivider>
+
+        <MCol class="d-flex">
+            <MCardText>
+                <ScrollYTransition>
+                    @if (SelectedId is null)
+                    {
+                        <div class="text-h6 grey--text text--lighten-1 font-weight-light"
+                             style="align-self: center;">
+                        </div>
+                    } 
+                    else
+                    {
+                        <MCard @key="SelectedId" Flat MaxWidth=800>
+                            <MCardTitle>
+                                <MTextField @bind-Value="_search"
+                                        AppendIcon="mdi-magnify"
+                                        Label="Search"
+                                        SingleLine
+                                        HideDetails="true">
+                                </MTextField>
+                            </MCardTitle>
+                            <MDataTable 
+                                    Headers="_headers"
+                                    Items="_tagItems"
+                                    ItemKey="r=>r.TagId"
+                                    Search="@_search"
+                                    HideDefaultFooter
+                                    DisableSort
+                                    ItemsPerPage=1024
+                                    Class="elevation-1">
+                            </MDataTable>
+                        </MCard>
+                    }
+                </ScrollYTransition>
+            </MCardText>
+        </MCol>
+    </MRow>
+</MCard>
+
+@code {
+    private List<string>? _active;
+    private TreeModel? _selected;
+    private List<TreeModel>? _treeItems;
+    private List<TagModel>? _tagItems;
+    private string? _search;
+
+    public TreeModel? SelectedId
+    {
+        get
+        {
+            if (_active == null || _active.Count == 0)
+            {
+                return null;
+            }
+
+            var id = _active[0];
+            var item = FindTreeItem(_treeItems, id);
+            if (item != _selected)
+            {
+                _tagItems = _deviceService.GetTags(id, item.Category) ?? new(0);
+                _selected = item;
+            }
+
+            return _selected;
+        }
+    }
+
+    private List<TreeModel> _items => _treeItems ??= _deviceService.GetDeviceTree();
+
+    private List<DataTableHeader<TagModel>> _headers = new()
+        {
+          new (){ Text = "标记", Value = nameof(TagModel.Name), Width = 200 },
+          new (){ Text = "地址", Value = nameof(TagModel.Address) },
+          new (){ Text = "长度", Value = nameof(TagModel.Length) },
+          new (){ Text = "数据类型", Value = nameof(TagModel.DataType) },
+          new (){ Text = "扫描速率", Value = nameof(TagModel.ScanRate) },
+          new (){ Text = "标识", Value = nameof(TagModel.Flag) },
+          new (){ Text = "用途", Value = nameof(TagModel.Usage) },
+          new (){ Text = "发布模式", Value = nameof(TagModel.PublishMode) },
+          new (){ Text = "要旨", Value = nameof(TagModel.Keynote) },
+          new (){ Text = "描述", Value = nameof(TagModel.Description) },
+        };
+
+    TreeModel? FindTreeItem(List<TreeModel>? treeItems, string id)
+    {
+        if (treeItems is null)
+        {
+            return default;
+        }
+
+        foreach (var treeItem in treeItems)
+        {
+            if (treeItem.Id == id)
+            {
+                return treeItem;
+            }
+
+            var item = FindTreeItem(treeItem.Children, id);
+            if (item is not null)
+            {
+                return item;
+            }
+        }
+
+        return default;
+    }
+}

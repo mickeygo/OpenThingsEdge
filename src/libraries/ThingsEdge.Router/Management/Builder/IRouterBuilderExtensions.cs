@@ -141,7 +141,6 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices(services =>
         {
             services.AddSingleton<IForwarder, TForwarder>();
-            //services.AddSingleton(typeof(IForwarder), typeof(TForwarder));
         });
 
         return builder;

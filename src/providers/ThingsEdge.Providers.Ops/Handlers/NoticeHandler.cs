@@ -5,7 +5,7 @@ using ThingsEdge.Router.Forwarder;
 namespace ThingsEdge.Providers.Ops.Handlers;
 
 /// <summary>
-/// 标记 <see cref="Contracts.Devices.TagFlag.Notice"/> 事件处理器。
+/// 标记 <see cref="TagFlag.Notice"/> 事件处理器。
 /// </summary>
 internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
 {
@@ -44,10 +44,9 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
-            // TODO: 推送失败状态
-
-            _logger.LogError("推送消息失败，设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
-                message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, result.ErrorMessage);
+            string msg = $"推送消息失败，设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {result.ErrorMessage}";
+            _logger.LogError(msg);
+            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
         }
     }
 }

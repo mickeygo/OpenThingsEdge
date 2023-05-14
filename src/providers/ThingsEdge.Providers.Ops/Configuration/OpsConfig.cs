@@ -11,9 +11,9 @@ public sealed class OpsConfig
     public int DefaultScanRate { get; init; } = 200;
 
     /// <summary>
-    /// 开关启动后数据扫描速率，默认为 20。
+    /// 开关启动后数据扫描速率，默认为 100。
     /// </summary>
-    public int SwitchScanRate { get; init; } = 20;
+    public int SwitchScanRate { get; init; } = 100;
 
     /// <summary>
     /// 曲线数据配置。

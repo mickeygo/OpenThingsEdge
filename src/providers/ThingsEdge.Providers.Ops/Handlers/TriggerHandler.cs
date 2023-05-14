@@ -6,7 +6,7 @@ using ThingsEdge.Router.Forwarder;
 namespace ThingsEdge.Providers.Ops.Handlers;
 
 /// <summary>
-/// 标记 <see cref="Contracts.Devices.TagFlag.Trigger"/> 事件处理器。
+/// 标记 <see cref="TagFlag.Trigger"/> 事件处理器。
 /// </summary>
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
@@ -44,8 +44,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
         if (!ok)
         {
-            _logger.LogError("批量读取子标记值异常, 设备: {DeviceName}, 错误: {Err}", notification.Device.Name, err);
-            // TODO: 发布异常信息。
+            string msg1 = $"批量读取子标记值异常, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err}";
+            _logger.LogError(msg1);
+            await _publisher.Publish(MessageLoggedEvent.Error(msg1), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
@@ -53,8 +54,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 var (ok5, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrorCode.MultiReadItemError).ConfigureAwait(false);
                 if (!ok5)
                 {
-                    _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
-                        message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err5);
+                    string msg2 = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err5}";
+                    _logger.LogError(msg2);
+                    await _publisher.Publish(MessageLoggedEvent.Error(msg2), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                 }
             }
 
@@ -71,10 +73,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
-            // TODO: 推送失败状态
-
-            _logger.LogError("推送消息失败，设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
-                message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, result.ErrorMessage);
+            string msg1 = $"推送消息失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {result.ErrorMessage}";
+            _logger.LogError(msg1);
+            await _publisher.Publish(MessageLoggedEvent.Error(msg1), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
@@ -82,8 +83,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 var (ok4, err4) = await notification.Connector.WriteAsync(notification.Tag, result.Code).ConfigureAwait(false);
                 if (!ok4)
                 {
-                    _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
-                        message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err4);
+                    string msg2 = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err4}";
+                    _logger.LogError(msg2);
+                    await _publisher.Publish(MessageLoggedEvent.Error(msg2), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                 }
             }
 
@@ -105,8 +107,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             Tag? tag2 = (tagGroup?.Tags ?? notification.Device.Tags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
             if (tag2 == null)
             {
-                _logger.LogError("地址表中没有找到要回写的标记，设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 回写标记: {TagName}",
-                    message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, tagName);
+                string msg = $"地址表中没有找到要回写的标记, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}";
+                _logger.LogError(msg);
+                await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                 hasError = true;
                 break;
@@ -115,8 +118,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             var (ok2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
             if (!ok2)
             {
-                _logger.LogError("回写标记数据失败, 设备: {DeviceName},标记: {TagName}, 地址: {TagAddress}, 错误: {Err}", 
-                    message.Schema.DeviceName, tag2!.Name, tag2.Address, err2);
+                string msg = $"回写标记数据失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err2}";
+                _logger.LogError(msg);
+                await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                 hasError = true;
                 break;
@@ -128,8 +132,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         var (ok3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {
-            _logger.LogError("回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}, 地址: {TagAddress}, 错误: {Err}",
-                message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, err3);
+            string msg = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err3}";
+            _logger.LogError(msg);
+            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
         }
     }
 }

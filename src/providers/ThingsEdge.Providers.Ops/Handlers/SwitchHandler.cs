@@ -1,5 +1,4 @@
 ﻿using ThingsEdge.Common.EventBus;
-using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Router.Events;
 
@@ -45,13 +44,14 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     var (ok1, data1, err1) = await notification.Connector.ReadAsync(snTag).ConfigureAwait(false);
                     if (ok1)
                     {
-                        sn = data1.GetString();
-                        payloads.Add(data1);
+                        sn = data1!.GetString();
+                        payloads.Add(data1!);
                     }
                     else
                     {
-                        _logger.LogError("读取SwitchSN标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err1);
+                        string msg = $"读取SwitchSN标记值失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}, 错误: {err1}";
+                        _logger.LogError(msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
 
@@ -61,13 +61,14 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     var (ok3, data3, err3) = await notification.Connector.ReadAsync(noTag).ConfigureAwait(false);
                     if (ok3)
                     {
-                        no = data3.GetString();
-                        payloads.Add(data3);
+                        no = data3!.GetString();
+                        payloads.Add(data3!);
                     }
                     else
                     {
-                        _logger.LogError("读取SwitchNo标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}, 错误: {Err}",
-                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err3);
+                        string msg = $"读取SwitchNo标记值失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}, 错误: {err3}";
+                        _logger.LogError(msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
 
@@ -86,7 +87,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     var (ok, err) = await _curveStorage.TryCopyAsync(filepath, cancellationToken).ConfigureAwait(false);
                     if (!ok)
                     {
-                        _logger.LogError("拷贝曲线失败，错误：{Err}", err);
+                        string msg = $"拷贝曲线失败，文件：{Path.GetFileName(filepath)}, 错误：{err}";
+                        _logger.LogError(msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             }
@@ -107,8 +110,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         // 检测是否已到达写入行数的上限，用于防止
         if (writer2.WrittenCount > AllowMaxWriteCount)
         {
-            _logger.LogWarning("文件写入数据已达到设置上限, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}",
-                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+            string msg = $"文件写入数据已达到设置上限, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}";
+            _logger.LogWarning(msg);
+            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
             return;
         }
@@ -118,7 +122,10 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
         if (!ok2)
         {
-            _logger.LogError("批量读取子标记值失败, 设备: {DeviceName}, 错误: {Err}", notification.Device.Name, err2);
+            string msg = $"批量读取子标记值失败, 设备: {notification.Device.Name}, 错误: {err2}";
+            _logger.LogError(msg);
+            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+
             return;
         }
 
@@ -131,8 +138,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "曲线数据写入文件失败, 设备: {DeviceName}, 标记: {TagName}，地址: {TagAddress}",
-                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+                string msg = $"曲线数据写入文件失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}";
+                _logger.LogError(ex, msg);
+                await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
             }
         }
     }

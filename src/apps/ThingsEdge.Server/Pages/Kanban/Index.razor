@@ -1,0 +1,37 @@
+﻿@page "/kanban"
+@using ThingsEdge.Server.Pages.Kanban.Components
+@inherits ProComponentBase
+@implements IDisposable
+
+<MRow>
+</MRow>
+
+<MRow>
+    <LogMessage></LogMessage>
+</MRow>
+
+@code {
+    private Timer? _timer;
+
+    private int _count;
+
+    protected override Task OnInitializedAsync()
+    {
+        _timer = new(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                _count += 1;
+                //StateHasChanged();
+            });
+
+        }, null, 3000, 1000);
+
+        return base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

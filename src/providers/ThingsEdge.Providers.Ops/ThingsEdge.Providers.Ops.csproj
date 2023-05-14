@@ -4,10 +4,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<NoWarn>CA2254</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ops.Communication" Version="0.6.9" />
+    <PackageReference Include="Ops.Communication" Version="0.7.1" />
   </ItemGroup>
 
   <ItemGroup>

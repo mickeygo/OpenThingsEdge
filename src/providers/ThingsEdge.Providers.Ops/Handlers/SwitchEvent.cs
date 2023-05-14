@@ -3,7 +3,7 @@
 namespace ThingsEdge.Providers.Ops.Handlers;
 
 /// <summary>
-/// 标记 <see cref="Contracts.Devices.TagFlag.Switch"/> 事件。
+/// 标记 <see cref="TagFlag.Switch"/> 事件。
 /// </summary>
 internal sealed class SwitchEvent : INotification
 {

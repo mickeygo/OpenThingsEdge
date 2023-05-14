@@ -1,10 +1,8 @@
-﻿using ThingsEdge.Contracts.Devices;
-
-namespace ThingsEdge.Router.Devices;
+﻿namespace ThingsEdge.Router.Devices;
 
 internal sealed class DefaultDeviceManager : IDeviceManager
 {
-    public const string CacheName = "ThingsEdge.Device.Cache";
+    public const string CacheName = "__ThingsEdge.Device.Cache";
 
     private readonly IDeviceSource _deviceSource;
     private readonly IMemoryCache _cache;

@@ -122,7 +122,10 @@ public sealed class DriverConnectorManager : IDisposable
                     // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
                     networkDevice.SocketReadErrorClosedDelegate = code =>
                     {
-                        connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                        if (connector.ConnectedStatus != ConnectionStatus.Disconnected)
+                        {
+                            connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                        }
                     };
 
                     // 先检查服务器能否访问

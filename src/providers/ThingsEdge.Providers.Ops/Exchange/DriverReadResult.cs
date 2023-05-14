@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Providers.Ops.Exchange;
 
 /// <summary>
-/// Siemens 读取数据结果。
+/// 设备驱动读取数据结果。
 /// </summary>
-public sealed class SiemensResult : AbstractResult<PayloadData>
+public sealed class DriverReadResult : AbstractResult<PayloadData>
 {
     /// <summary>
     /// 错误代码
@@ -12,9 +12,9 @@ public sealed class SiemensResult : AbstractResult<PayloadData>
 }
 
 /// <summary>
-/// Siemens 读取数据结果，结果为数据集。
+/// 设备驱动读取数据结果，结果为数据集。
 /// </summary>
-public sealed class SiemensResult2 : AbstractResult<List<PayloadData>>
+public sealed class DriverReadResult2 : AbstractResult<List<PayloadData>>
 {
     /// <summary>
     /// 错误代码

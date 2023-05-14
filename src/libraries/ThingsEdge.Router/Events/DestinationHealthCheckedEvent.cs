@@ -3,7 +3,7 @@
 namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 目标健康状况检测事件。
+/// 目标服务（下游服务）健康状况检测事件。
 /// </summary>
 public sealed class DestinationHealthCheckedEvent : INotification
 {

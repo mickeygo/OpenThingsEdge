@@ -4,13 +4,13 @@ using ThingsEdge.Router.Management;
 namespace ThingsEdge.Router.Handlers;
 
 /// <summary>
-/// 标记数据已更改事件处理者。
+/// 标记数据值已更改事件处理者。
 /// </summary>
 internal sealed class TagValueChangedHandler : INotificationHandler<TagValueChangedEvent>
 {
-    private readonly TagDataFactory _tagDataFactory;
+    private readonly TagDataContainer _tagDataFactory;
 
-    public TagValueChangedHandler(TagDataFactory tagDataFactory)
+    public TagValueChangedHandler(TagDataContainer tagDataFactory)
     {
         _tagDataFactory = tagDataFactory;
     }

@@ -1,0 +1,54 @@
+﻿@implements IDisposable
+
+<MCard Height=320 MaxHeight=320 Class="mx-auto my-auto">
+    <MList Dense MaxHeight=320 Class="rounded-4 mt-6" Style="overflow-y:auto;">
+        @foreach (var message in _messages)
+        {
+            <MListItem Style="min-height:24px;">
+                <MListItemContent Class="text-body neutral-lighten-2--text">
+                    <span>@message.Time @message.Message</span>
+                </MListItemContent>
+            </MListItem>
+        }
+    </MList>
+</MCard>
+
+@code {
+    private readonly LinkedList<LoggerMessage> _messages = new();
+
+    private Timer? _timer;
+
+    protected override Task OnInitializedAsync()
+    {
+        _timer = new(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                if (_messages.Count >= 32)
+                {
+                    _messages.RemoveLast();
+                }
+
+                _messages.AddFirst(new LoggerMessage() { Time = DateTime.Now, Level = 1, Message = "test" });
+                StateHasChanged();
+            });
+          
+        }, null, 3000, 1000);
+
+        return base.OnInitializedAsync();
+    }
+
+    public sealed class LoggerMessage
+    {
+        public DateTime Time { get; set; }
+
+        public int Level { get; set; }
+
+        public string? Message { get; set; }
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

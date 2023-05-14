@@ -1,5 +1,4 @@
 ﻿using ThingsEdge.Common.EventBus;
-using ThingsEdge.Contracts.Devices;
 using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
@@ -45,6 +44,7 @@ public sealed class OpsExchange : IExchange
         IsRunning = true;
 
         _logger.LogInformation("[Engine] 引擎启动");
+        await _publisher.Publish(MessageLoggedEvent.Info("[Engine] 引擎启动")).ConfigureAwait(false);
 
         _cts ??= new();
 
@@ -114,8 +114,9 @@ public sealed class OpsExchange : IExchange
                         var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
                         if (!ok)
                         {
-                            _logger.LogError("[Engine] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
-                                  device.Name, tag.Name, tag.Address, err);
+                            string msg = $"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
+                            _logger.LogError(msg);
+                            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -123,18 +124,18 @@ public sealed class OpsExchange : IExchange
                         // 心跳标记数据类型必须为 bool 或 int16
                         bool on = tag.DataType switch
                         {
-                            DataType.Bit => data!.GetBit(),
-                            DataType.Int => data!.GetInt() == 1,
+                            TagDataType.Bit => data!.GetBit(),
+                            TagDataType.Int => data!.GetInt() == 1,
                             _ => throw new NotSupportedException(),
                         };
 
                         if (on)
                         {
-                            if (tag.DataType == DataType.Bit)
+                            if (tag.DataType == TagDataType.Bit)
                             {
                                 await connector.WriteAsync(tag, false).ConfigureAwait(false);
                             }
-                            else if (tag.DataType == DataType.Int)
+                            else if (tag.DataType == TagDataType.Int)
                             {
                                 await connector.WriteAsync(tag, (short)0).ConfigureAwait(false);
                             }
@@ -154,8 +155,9 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[Engine] Heartbeat 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
-                            device.Name, tag.Name, tag.Address);
+                        string msg = $"[Engine] Heartbeat 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
+                        _logger.LogError(ex, msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -193,8 +195,9 @@ public sealed class OpsExchange : IExchange
                         var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
                         if (!ok)
                         {
-                            _logger.LogError("[Engine] Trigger 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
-                                device.Name, tag.Name, tag.Address, err);
+                            string msg = $"[Engine] Trigger 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
+                            _logger.LogError(msg);
+                            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -225,8 +228,9 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[Engine] Trigger 数据处理异常，设备：{DeviceName}，变量：{TagName}, 地址：{TagAddress}", 
-                            device.Name, tag.Name, tag.Address);
+                        string msg = $"[Engine] Trigger 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
+                        _logger.LogError(ex, msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -264,8 +268,9 @@ public sealed class OpsExchange : IExchange
                         var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
                         if (!ok)
                         {
-                            _logger.LogError("[Engine] Notice 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}", 
-                                device.Name, tag.Name, tag.Address, err);
+                            string msg = $"[Engine] Notice 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
+                            _logger.LogError(msg);
+                            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -291,8 +296,9 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[Engine] Notice 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}", 
-                            device.Name, tag.Name, tag.Address);
+                        string msg = $"[Engine] Notice 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
+                        _logger.LogError(ex, msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -312,7 +318,7 @@ public sealed class OpsExchange : IExchange
             // 开关绑定的数据
             _ = Task.Run(async () =>
             {
-                int pollingInterval = _opsConfig.SwitchScanRate > 0 ? _opsConfig.SwitchScanRate : 30;
+                int pollingInterval = _opsConfig.SwitchScanRate > 0 ? _opsConfig.SwitchScanRate : 70;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
                     try
@@ -346,8 +352,9 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[Engine] Switch 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
-                            device.Name, tag.Name, tag.Address);
+                        string msg = $"[Engine] Switch 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
+                        _logger.LogError(ex, msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -381,8 +388,8 @@ public sealed class OpsExchange : IExchange
                             // 开关标记数据类型必须为 bool 或 int16
                             bool on = tag.DataType switch
                             {
-                                DataType.Bit => data!.GetBit(),
-                                DataType.Int => data!.GetInt() == 1,
+                                TagDataType.Bit => data!.GetBit(),
+                                TagDataType.Int => data!.GetInt() == 1,
                                 _ => throw new NotSupportedException(),
                             };
 
@@ -459,8 +466,9 @@ public sealed class OpsExchange : IExchange
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[Engine] Switch 开关数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
-                            device.Name, tag.Name, tag.Address);
+                        string msg = $"[Engine] Switch 开关数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
+                        _logger.LogError(ex, msg);
+                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
 
@@ -472,11 +480,13 @@ public sealed class OpsExchange : IExchange
         return Task.CompletedTask;
     }
 
-    public Task ShutdownAsync()
+    public async Task ShutdownAsync()
     {
+        string msg = "[Engine] 引擎已停止";
         if (!IsRunning)
         {
-            return Task.CompletedTask;
+            await _publisher.Publish(MessageLoggedEvent.Info(msg)).ConfigureAwait(false);
+            return;
         }
         IsRunning = false;
 
@@ -496,8 +506,8 @@ public sealed class OpsExchange : IExchange
             _driverConnectorManager.Close();
         }).ConfigureAwait(false);
 
-        _logger.LogInformation("[Engine] 引擎停止");
-        return Task.CompletedTask;
+        _logger.LogInformation(msg);
+        await _publisher.Publish(MessageLoggedEvent.Info(msg)).ConfigureAwait(false);
     }
 
     public void Dispose()

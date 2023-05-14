@@ -33,7 +33,7 @@ public static class RouterServiceCollectionExtensions
     private static IServiceCollection AddRouterServices(this IServiceCollection services)
     {
         services.AddSingleton<DeviceHealthMonitor>();
-        services.AddSingleton<TagDataFactory>();
+        services.AddSingleton<TagDataContainer>();
 
         return services;
     }

@@ -14,6 +14,8 @@ internal sealed class MessageLoggedHandler : INotificationHandler<MessageLoggedE
 
     public Task Handle(MessageLoggedEvent notification, CancellationToken cancellationToken)
     {
+        // TODO: 处理消息日志事件
+
         return Task.CompletedTask;
     }
 }

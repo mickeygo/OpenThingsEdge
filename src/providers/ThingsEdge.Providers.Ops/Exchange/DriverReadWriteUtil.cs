@@ -1,7 +1,6 @@
 ﻿using Ops.Communication;
 using Ops.Communication.Core;
 using Ops.Communication.Profinet.Siemens;
-using ThingsEdge.Contracts.Devices;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -16,23 +15,23 @@ internal static class DriverReadWriteUtil
     /// <param name="driver">读取数据。</param>
     /// <param name="tag">Tag标记</param>
     /// <returns></returns>
-    public static async Task<SiemensResult> ReadAsync(IReadWriteNet driver, Tag tag)
+    public static async Task<DriverReadResult> ReadAsync(IReadWriteNet driver, Tag tag)
     {
         // 非数组
         if (!tag.IsArray())
         {
             return tag.DataType switch
             {
-                DataType.Bit => MakeResult(await driver.ReadBoolAsync(tag.Address).ConfigureAwait(false)),
-                DataType.Byte => MakeResult(await driver.ReadAsync(tag.Address, 1).ConfigureAwait(false)),
-                DataType.Word => MakeResult(await driver.ReadUInt16Async(tag.Address).ConfigureAwait(false)),
-                DataType.DWord => MakeResult(await driver.ReadUInt32Async(tag.Address).ConfigureAwait(false)),
-                DataType.Int => MakeResult(await driver.ReadInt16Async(tag.Address).ConfigureAwait(false)),
-                DataType.DInt => MakeResult(await driver.ReadInt32Async(tag.Address).ConfigureAwait(false)),
-                DataType.Real => MakeResult(await driver.ReadFloatAsync(tag.Address).ConfigureAwait(false)),
-                DataType.LReal => MakeResult(await driver.ReadDoubleAsync(tag.Address).ConfigureAwait(false)),
-                DataType.String or DataType.S7String => MakeResult(await ReadStringAsync(driver, tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-                DataType.S7WString => MakeResult(await ReadWStringAsync(driver, tag.Address).ConfigureAwait(false)),
+                TagDataType.Bit => MakeResult(await driver.ReadBoolAsync(tag.Address).ConfigureAwait(false)),
+                TagDataType.Byte => MakeResult(await driver.ReadAsync(tag.Address, 1).ConfigureAwait(false)),
+                TagDataType.Word => MakeResult(await driver.ReadUInt16Async(tag.Address).ConfigureAwait(false)),
+                TagDataType.DWord => MakeResult(await driver.ReadUInt32Async(tag.Address).ConfigureAwait(false)),
+                TagDataType.Int => MakeResult(await driver.ReadInt16Async(tag.Address).ConfigureAwait(false)),
+                TagDataType.DInt => MakeResult(await driver.ReadInt32Async(tag.Address).ConfigureAwait(false)),
+                TagDataType.Real => MakeResult(await driver.ReadFloatAsync(tag.Address).ConfigureAwait(false)),
+                TagDataType.LReal => MakeResult(await driver.ReadDoubleAsync(tag.Address).ConfigureAwait(false)),
+                TagDataType.String or TagDataType.S7String => MakeResult(await ReadStringAsync(driver, tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+                TagDataType.S7WString => MakeResult(await ReadWStringAsync(driver, tag.Address).ConfigureAwait(false)),
                 _ => throw new NotImplementedException(),
             };
         }
@@ -40,20 +39,20 @@ internal static class DriverReadWriteUtil
         // 数组
         return tag.DataType switch
         {
-            DataType.Bit => MakeResult(await driver.ReadBoolAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.Byte => MakeResult(await driver.ReadAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.Word => MakeResult(await driver.ReadUInt16Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.DWord => MakeResult(await driver.ReadUInt32Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.Int => MakeResult(await driver.ReadInt16Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.DInt => MakeResult(await driver.ReadInt32Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.Real => MakeResult(await driver.ReadFloatAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
-            DataType.LReal => MakeResult(await driver.ReadDoubleAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.Bit => MakeResult(await driver.ReadBoolAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.Byte => MakeResult(await driver.ReadAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.Word => MakeResult(await driver.ReadUInt16Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.DWord => MakeResult(await driver.ReadUInt32Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.Int => MakeResult(await driver.ReadInt16Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.DInt => MakeResult(await driver.ReadInt32Async(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.Real => MakeResult(await driver.ReadFloatAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
+            TagDataType.LReal => MakeResult(await driver.ReadDoubleAsync(tag.Address, (ushort)tag.Length).ConfigureAwait(false)),
             _ => throw new NotImplementedException(),
         };
 
-        SiemensResult MakeResult<T>(OperateResult<T> result)
+        DriverReadResult MakeResult<T>(OperateResult<T> result)
         {
-            SiemensResult result2 = new();
+            DriverReadResult result2 = new();
 
             if (result.IsSuccess)
             {
@@ -111,16 +110,16 @@ internal static class DriverReadWriteUtil
         {
             return tag.DataType switch
             {
-                DataType.Bit => MakeResult(await driver.WriteAsync(tag.Address, (bool)data).ConfigureAwait(false)),
-                DataType.Byte => MakeResult(await driver.WriteAsync(tag.Address, new byte[] { (byte)data }).ConfigureAwait(false)),
-                DataType.Word => MakeResult(await driver.WriteAsync(tag.Address, (ushort)data).ConfigureAwait(false)),
-                DataType.DWord => MakeResult(await driver.WriteAsync(tag.Address, (uint)data).ConfigureAwait(false)),
-                DataType.Int => MakeResult(await driver.WriteAsync(tag.Address, (short)data).ConfigureAwait(false)),
-                DataType.DInt => MakeResult(await driver.WriteAsync(tag.Address, (int)data).ConfigureAwait(false)),
-                DataType.Real => MakeResult(await driver.WriteAsync(tag.Address, (float)data).ConfigureAwait(false)),
-                DataType.LReal => MakeResult(await driver.WriteAsync(tag.Address, (double)data).ConfigureAwait(false)),
-                DataType.String or DataType.S7String => MakeResult(await WriteStringAsync(driver, tag.Address, (string)data).ConfigureAwait(false)),
-                DataType.S7WString => MakeResult(await WriteWStringAsync(driver, tag.Address, (string)data).ConfigureAwait(false)),
+                TagDataType.Bit => MakeResult(await driver.WriteAsync(tag.Address, (bool)data).ConfigureAwait(false)),
+                TagDataType.Byte => MakeResult(await driver.WriteAsync(tag.Address, new byte[] { (byte)data }).ConfigureAwait(false)),
+                TagDataType.Word => MakeResult(await driver.WriteAsync(tag.Address, (ushort)data).ConfigureAwait(false)),
+                TagDataType.DWord => MakeResult(await driver.WriteAsync(tag.Address, (uint)data).ConfigureAwait(false)),
+                TagDataType.Int => MakeResult(await driver.WriteAsync(tag.Address, (short)data).ConfigureAwait(false)),
+                TagDataType.DInt => MakeResult(await driver.WriteAsync(tag.Address, (int)data).ConfigureAwait(false)),
+                TagDataType.Real => MakeResult(await driver.WriteAsync(tag.Address, (float)data).ConfigureAwait(false)),
+                TagDataType.LReal => MakeResult(await driver.WriteAsync(tag.Address, (double)data).ConfigureAwait(false)),
+                TagDataType.String or TagDataType.S7String => MakeResult(await WriteStringAsync(driver, tag.Address, (string)data).ConfigureAwait(false)),
+                TagDataType.S7WString => MakeResult(await WriteWStringAsync(driver, tag.Address, (string)data).ConfigureAwait(false)),
                 _ => throw new NotImplementedException(),
             };
         }
@@ -128,14 +127,14 @@ internal static class DriverReadWriteUtil
         // 数组
         return tag.DataType switch
         {
-            DataType.Bit => MakeResult(await driver.WriteAsync(tag.Address, (bool[])data).ConfigureAwait(false)),
-            DataType.Byte => MakeResult(await driver.WriteAsync(tag.Address, (byte[])data).ConfigureAwait(false)),
-            DataType.Word => MakeResult(await driver.WriteAsync(tag.Address, (ushort[])data).ConfigureAwait(false)),
-            DataType.DWord => MakeResult(await driver.WriteAsync(tag.Address, (uint[])data).ConfigureAwait(false)),
-            DataType.Int => MakeResult(await driver.WriteAsync(tag.Address, (short[])data).ConfigureAwait(false)),
-            DataType.DInt => MakeResult(await driver.WriteAsync(tag.Address, (int[])data).ConfigureAwait(false)),
-            DataType.Real => MakeResult(await driver.WriteAsync(tag.Address, (float[])data).ConfigureAwait(false)),
-            DataType.LReal => MakeResult(await driver.WriteAsync(tag.Address, (double[])data).ConfigureAwait(false)),
+            TagDataType.Bit => MakeResult(await driver.WriteAsync(tag.Address, (bool[])data).ConfigureAwait(false)),
+            TagDataType.Byte => MakeResult(await driver.WriteAsync(tag.Address, (byte[])data).ConfigureAwait(false)),
+            TagDataType.Word => MakeResult(await driver.WriteAsync(tag.Address, (ushort[])data).ConfigureAwait(false)),
+            TagDataType.DWord => MakeResult(await driver.WriteAsync(tag.Address, (uint[])data).ConfigureAwait(false)),
+            TagDataType.Int => MakeResult(await driver.WriteAsync(tag.Address, (short[])data).ConfigureAwait(false)),
+            TagDataType.DInt => MakeResult(await driver.WriteAsync(tag.Address, (int[])data).ConfigureAwait(false)),
+            TagDataType.Real => MakeResult(await driver.WriteAsync(tag.Address, (float[])data).ConfigureAwait(false)),
+            TagDataType.LReal => MakeResult(await driver.WriteAsync(tag.Address, (double[])data).ConfigureAwait(false)),
             _ => throw new NotImplementedException(),
         };
 

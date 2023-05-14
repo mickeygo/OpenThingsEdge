@@ -21,15 +21,15 @@ public static class TagFormater
         {
             return tag.DataType switch
             {
-                DataType.Bit => tag.Length == 0 ? JsonElementUtil.GetBoolean(jsonElement) : JsonElementUtil.GetBooleanArray(jsonElement),
-                DataType.Byte => tag.Length == 0 ? JsonElementUtil.GetByte(jsonElement) : JsonElementUtil.GetByteArray(jsonElement),
-                DataType.Word => tag.Length == 0 ? JsonElementUtil.GetUInt16(jsonElement) : JsonElementUtil.GetUInt16Array(jsonElement),
-                DataType.DWord => tag.Length == 0 ? JsonElementUtil.GetUInt32(jsonElement) : JsonElementUtil.GetUInt32Array(jsonElement),
-                DataType.Int => tag.Length == 0 ? JsonElementUtil.GetInt16(jsonElement) : JsonElementUtil.GetInt16Array(jsonElement),
-                DataType.DInt => tag.Length == 0 ? JsonElementUtil.GetInt32(jsonElement) : JsonElementUtil.GetInt32Array(jsonElement),
-                DataType.Real => tag.Length == 0 ? JsonElementUtil.GetFloat(jsonElement) : JsonElementUtil.GetFloatArray(jsonElement),
-                DataType.LReal => tag.Length == 0 ? JsonElementUtil.GetDouble(jsonElement) : JsonElementUtil.GetDoubleArray(jsonElement),
-                DataType.String or DataType.S7String or DataType.S7WString => JsonElementUtil.GetString(jsonElement),
+                TagDataType.Bit => tag.Length == 0 ? JsonElementUtil.GetBoolean(jsonElement) : JsonElementUtil.GetBooleanArray(jsonElement),
+                TagDataType.Byte => tag.Length == 0 ? JsonElementUtil.GetByte(jsonElement) : JsonElementUtil.GetByteArray(jsonElement),
+                TagDataType.Word => tag.Length == 0 ? JsonElementUtil.GetUInt16(jsonElement) : JsonElementUtil.GetUInt16Array(jsonElement),
+                TagDataType.DWord => tag.Length == 0 ? JsonElementUtil.GetUInt32(jsonElement) : JsonElementUtil.GetUInt32Array(jsonElement),
+                TagDataType.Int => tag.Length == 0 ? JsonElementUtil.GetInt16(jsonElement) : JsonElementUtil.GetInt16Array(jsonElement),
+                TagDataType.DInt => tag.Length == 0 ? JsonElementUtil.GetInt32(jsonElement) : JsonElementUtil.GetInt32Array(jsonElement),
+                TagDataType.Real => tag.Length == 0 ? JsonElementUtil.GetFloat(jsonElement) : JsonElementUtil.GetFloatArray(jsonElement),
+                TagDataType.LReal => tag.Length == 0 ? JsonElementUtil.GetDouble(jsonElement) : JsonElementUtil.GetDoubleArray(jsonElement),
+                TagDataType.String or TagDataType.S7String or TagDataType.S7WString => JsonElementUtil.GetString(jsonElement),
                 _ => (false, null, ""),
             };
         }
@@ -37,15 +37,15 @@ public static class TagFormater
         // 原始数据。
         object? obj2 = tag.DataType switch
         {
-            DataType.Bit => Convert.ToBoolean(obj),
-            DataType.Byte => Convert.ToByte(obj),
-            DataType.Word => Convert.ToUInt16(obj),
-            DataType.DWord => Convert.ToUInt32(obj),
-            DataType.Int => Convert.ToInt16(obj),
-            DataType.DInt => Convert.ToInt32(obj),
-            DataType.Real => Convert.ToSingle(obj),
-            DataType.LReal => Convert.ToDouble(obj),
-            DataType.String or DataType.S7String or DataType.S7WString => Convert.ToString(obj),
+            TagDataType.Bit => Convert.ToBoolean(obj),
+            TagDataType.Byte => Convert.ToByte(obj),
+            TagDataType.Word => Convert.ToUInt16(obj),
+            TagDataType.DWord => Convert.ToUInt32(obj),
+            TagDataType.Int => Convert.ToInt16(obj),
+            TagDataType.DInt => Convert.ToInt32(obj),
+            TagDataType.Real => Convert.ToSingle(obj),
+            TagDataType.LReal => Convert.ToDouble(obj),
+            TagDataType.String or TagDataType.S7String or TagDataType.S7WString => Convert.ToString(obj),
             _ => throw new NotImplementedException(),
         };
 

@@ -3,7 +3,7 @@
 namespace ThingsEdge.Providers.Ops.Handlers;
 
 /// <summary>
-/// 标记 <see cref="Contracts.Devices.TagFlag.Trigger"/> 事件。
+/// 标记 <see cref="TagFlag.Trigger"/> 事件。
 /// </summary>
 internal sealed class TriggerEvent : INotification
 {

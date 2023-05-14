@@ -10,6 +10,17 @@ public sealed class DeviceHealthMonitor
     private readonly ConcurrentDictionary<string, DeviceHealthState> _map = new();
 
     /// <summary>
+    /// 获取设备连接状态，没有找到设备则返回 null。
+    /// </summary>
+    /// <param name="deviceId">设备 Id。</param>
+    /// <returns></returns>
+    public DeviceHealthState? Get(string deviceId)
+    {
+        _map.TryGetValue(deviceId, out var state);
+        return state;
+    }
+
+    /// <summary>
     /// 设置设备连接状态。
     /// </summary>
     /// <param name="deviceId">设备 Id。</param>
@@ -27,17 +38,6 @@ public sealed class DeviceHealthMonitor
             return state;
         });
     }
-
-    /// <summary>
-    /// 获取设备连接状态，没有找到设备则返回 null。
-    /// </summary>
-    /// <param name="deviceId">设备 Id。</param>
-    /// <returns></returns>
-    public DeviceHealthState? Get(string deviceId)
-    {
-        _map.TryGetValue(deviceId, out var state);
-        return state;
-    }
 }
 
 /// <summary>
@@ -54,10 +54,10 @@ public sealed class DeviceHealthState
     /// <summary>
     /// 设备连接状态。
     /// </summary>
-    public DeviceConnectState ConnectState { get; set; }
+    public DeviceConnectState ConnectState { get; internal set; }
 
     /// <summary>
     /// 上一次连接状态更改时间。
     /// </summary>
-    public DateTime UpdatedTime { get; set; } = DateTime.Now;
+    public DateTime UpdatedTime { get; internal set; } = DateTime.Now;
 }

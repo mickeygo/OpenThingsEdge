@@ -1,5 +1,4 @@
-﻿using ThingsEdge.Contracts.Devices;
-using ThingsEdge.Router.Configuration;
+﻿using ThingsEdge.Router.Configuration;
 
 namespace ThingsEdge.Router.Forwarder;
 

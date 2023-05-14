@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Model;
 
 /// <summary>
-/// 目标健康状态。
+/// 目标服务健康状态。
 /// </summary>
 public enum DestinationHealthState
 {

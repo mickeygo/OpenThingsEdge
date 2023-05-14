@@ -49,9 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Contrib.NetMQ", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Contracts.Tests", "src\libraries\tests\ThingsEdge.Contracts.Tests\ThingsEdge.Contracts.Tests.csproj", "{42F172D5-196A-4BC7-8E49-C54DDBA1EA41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Application", "src\apps\ThingsEdge.Application\ThingsEdge.Application.csproj", "{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Application", "src\apps\ThingsEdge.Application\ThingsEdge.Application.csproj", "{8BE26977-8A13-400F-B6A4-EC5D729D6E2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Providers.Ops.Tests", "src\providers\tests\ThingsEdge.Providers.Ops.Tests\ThingsEdge.Providers.Ops.Tests.csproj", "{405F26D9-3C0C-4AB0-A312-3B94507E44C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Providers.Ops.Tests", "src\providers\tests\ThingsEdge.Providers.Ops.Tests\ThingsEdge.Providers.Ops.Tests.csproj", "{405F26D9-3C0C-4AB0-A312-3B94507E44C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

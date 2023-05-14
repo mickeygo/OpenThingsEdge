@@ -13,7 +13,7 @@ namespace ThingsEdge.Contracts;
 public static class PayloadDataExtensions
 {
     /// <summary>
-    /// 获取 <see cref="DataType.String"/> 或 <see cref="DataType.S7String"/> 或 <see cref="DataType.S7WString"/> 类型的值。
+    /// 获取 <see cref="TagDataType.String"/> 或 <see cref="TagDataType.S7String"/> 或 <see cref="TagDataType.S7WString"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <remarks>注：对于非字符串数据，会转换为字符串；对于数组数据，进行 JSON 序列化。</remarks>
@@ -44,7 +44,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Bit"/> 类型的值。
+    /// 获取 <see cref="TagDataType.Bit"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -56,7 +56,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Byte"/> 类型的值。
+    /// 获取 <see cref="TagDataType.Byte"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -68,7 +68,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Word"/> 类型的值。
+    /// 获取 <see cref="TagDataType.Word"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -80,7 +80,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.DWord"/> 类型的值。
+    /// 获取 <see cref="TagDataType.DWord"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -92,7 +92,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Int"/> 类型的值。
+    /// 获取 <see cref="TagDataType.Int"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -104,7 +104,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.DInt"/> 类型的值。
+    /// 获取 <see cref="TagDataType.DInt"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -116,7 +116,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Real"/> 类型的值。
+    /// 获取 <see cref="TagDataType.Real"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -128,7 +128,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.LReal"/> 类型的值。
+    /// 获取 <see cref="TagDataType.LReal"/> 类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -140,7 +140,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Bit"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.Bit"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -152,7 +152,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Byte"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.Byte"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -164,7 +164,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Word"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.Word"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -176,7 +176,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.DWord"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.DWord"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -188,7 +188,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Int"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.Int"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -200,7 +200,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.DInt"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.DInt"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -212,7 +212,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.Real"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.Real"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -224,7 +224,7 @@ public static class PayloadDataExtensions
     }
 
     /// <summary>
-    /// 获取 <see cref="DataType.LReal"/> 数组类型的值。
+    /// 获取 <see cref="TagDataType.LReal"/> 数组类型的值。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// </summary>
     /// <returns></returns>
@@ -242,15 +242,15 @@ public static class PayloadDataExtensions
         {
             return payload.DataType switch
             {
-                DataType.Bit => (Bit)payload.Value,
-                DataType.Byte => ((byte[])payload.Value)[0],// byte 都为数组
-                DataType.Word => (Word)payload.Value,
-                DataType.DWord => (DWord)payload.Value,
-                DataType.Int => (Int)payload.Value,
-                DataType.DInt => (DInt)payload.Value,
-                DataType.Real => (Real)payload.Value,
-                DataType.LReal => (LReal)payload.Value,
-                DataType.String or DataType.S7String or DataType.S7WString => (string)payload.Value,
+                TagDataType.Bit => (Bit)payload.Value,
+                TagDataType.Byte => ((byte[])payload.Value)[0],// byte 都为数组
+                TagDataType.Word => (Word)payload.Value,
+                TagDataType.DWord => (DWord)payload.Value,
+                TagDataType.Int => (Int)payload.Value,
+                TagDataType.DInt => (DInt)payload.Value,
+                TagDataType.Real => (Real)payload.Value,
+                TagDataType.LReal => (LReal)payload.Value,
+                TagDataType.String or TagDataType.S7String or TagDataType.S7WString => (string)payload.Value,
                 _ => throw new FormatException(),
             };
         }
@@ -258,15 +258,15 @@ public static class PayloadDataExtensions
         // 数组
         return payload.DataType switch
         {
-            DataType.Bit => (Bit[])payload.Value,
-            DataType.Byte => (byte[])payload.Value,
-            DataType.Word => (Word[])payload.Value,
-            DataType.DWord => (DWord[])payload.Value,
-            DataType.Int => (Int[])payload.Value,
-            DataType.DInt => (DInt[])payload.Value,
-            DataType.Real => (Real[])payload.Value,
-            DataType.LReal => (LReal[])payload.Value,
-            DataType.String or DataType.S7String or DataType.S7WString => (string)payload.Value,
+            TagDataType.Bit => (Bit[])payload.Value,
+            TagDataType.Byte => (byte[])payload.Value,
+            TagDataType.Word => (Word[])payload.Value,
+            TagDataType.DWord => (DWord[])payload.Value,
+            TagDataType.Int => (Int[])payload.Value,
+            TagDataType.DInt => (DInt[])payload.Value,
+            TagDataType.Real => (Real[])payload.Value,
+            TagDataType.LReal => (LReal[])payload.Value,
+            TagDataType.String or TagDataType.S7String or TagDataType.S7WString => (string)payload.Value,
             _ => throw new FormatException(),
         };
     }

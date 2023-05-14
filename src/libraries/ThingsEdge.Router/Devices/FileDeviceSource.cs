@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Devices;
-
-namespace ThingsEdge.Router.Devices;
+﻿namespace ThingsEdge.Router.Devices;
 
 /// <summary>
 /// 设备数据来源于本地文件。
@@ -8,7 +6,7 @@ namespace ThingsEdge.Router.Devices;
 public sealed class FileDeviceSource : IDeviceSource
 {
     /// <summary>
-    /// 本地文配置件路径，默认为 "[执行目录]/config/tags.conf"。
+    /// 置件文配路径，默认为 "[执行目录]/config/tags.conf"，可以为相对路径。
     /// </summary>
     public string? FilePath { get; set; } = Path.Combine(AppContext.BaseDirectory, "config", "tags.conf");
 
@@ -25,7 +23,7 @@ public sealed class FileDeviceSource : IDeviceSource
             return new(0);
         }
 
-        var context = File.ReadAllText(FilePath);
+        var context = File.ReadAllText(Path.GetFullPath(FilePath));
         return JsonSerializer.Deserialize<List<Channel>>(context) ?? new(0);
     }
 }
