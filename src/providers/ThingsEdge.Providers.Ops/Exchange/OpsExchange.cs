@@ -3,7 +3,6 @@ using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
 using ThingsEdge.Router.Events;
-using ThingsEdge.Router.Model;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -85,28 +84,24 @@ public sealed class OpsExchange : IExchange
 
                         if (_cts == null)
                         {
-                            // 发布设备心跳断开事件。
-                            await _publisher.Publish(new DeviceHeartbeatEvent
+                            if (!TagValueSet.CompareAndSwap(tag.TagId, false))
                             {
-                                ChannelName = channelName,
-                                Device = device,
-                                Tag = tag,
-                                ConnectState = DeviceConnectState.Offline,
-                            }, PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                                // 任务取消时，发布设备心跳断开事件。
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag), 
+                                    PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            }
 
                             break;
                         }
 
                         if (!connector.CanConnect)
                         {
-                            // 发布设备心跳断开事件。
-                            await _publisher.Publish(new DeviceHeartbeatEvent
+                            if(!TagValueSet.CompareAndSwap(tag.TagId, false))
                             {
-                                ChannelName = channelName,
-                                Device = device,
-                                Tag = tag,
-                                ConnectState = DeviceConnectState.Offline,
-                            }, PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                                // 连接断开时，发布设备心跳断开事件。
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag), 
+                                    PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            }
 
                             continue;
                         }
@@ -140,14 +135,12 @@ public sealed class OpsExchange : IExchange
                                 await connector.WriteAsync(tag, (short)0).ConfigureAwait(false);
                             }
 
-                            // 发布心跳正常事件。
-                            await _publisher.Publish(new DeviceHeartbeatEvent
+                            if (!TagValueSet.CompareAndSwap(tag.TagId, true))
                             {
-                                ChannelName = channelName,
-                                Device = device,
-                                Tag = tag,
-                                ConnectState = DeviceConnectState.Online,
-                            }, PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                                // 发布心跳正常事件。
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true), 
+                                    PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            }
                         }
                     }
                     catch (OperationCanceledException)
@@ -203,24 +196,20 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 校验触发标记
-                        var state = data!.GetInt();
+                        var state = data!.GetInt(); // 触发标记还可能包含状态码信息。
 
-                        // 检测标记状态是否有变动
-                        if (!TagValueSet.CompareAndSwap(tag.TagId, state))
+                        // 必须先检测并更新标记状态值，若值有变动且触发标记值为 1 则推送数据。
+                        if (!TagValueSet.CompareAndSwap(tag.TagId, state) && state == 1)
                         {
-                            // 推送数据
-                            if (state == 1)
+                            // 发布触发事件
+                            await _publisher.Publish(new TriggerEvent
                             {
-                                // 发布触发事件
-                                await _publisher.Publish(new TriggerEvent
-                                {
-                                    Connector = connector,
-                                    ChannelName = channelName,
-                                    Device = device,
-                                    Tag = tag,
-                                    Self = data,
-                                }).ConfigureAwait(false);
-                            }
+                                Connector = connector,
+                                ChannelName = channelName,
+                                Device = device,
+                                Tag = tag,
+                                Self = data,
+                            }).ConfigureAwait(false);
                         }
                     }
                     catch (OperationCanceledException)
@@ -275,7 +264,7 @@ public sealed class OpsExchange : IExchange
                             continue;
                         }
 
-                        // 在仅数据变更才发送模式下，会校验数据是否有跳变。
+                        // 在仅数据变更才会发送模式下，会校验数据是否有跳变。
                         if (tag.PublishMode == PublishMode.OnlyDataChanged && TagValueSet.CompareAndSwap(tag.TagId, data!.Value))
                         {
                             continue;
@@ -284,7 +273,6 @@ public sealed class OpsExchange : IExchange
                         // 发布通知事件
                         await _publisher.Publish(new NoticeEvent
                         {
-                            Connector = connector,
                             ChannelName = channelName,
                             Device = device,
                             Tag = tag,
@@ -363,7 +351,7 @@ public sealed class OpsExchange : IExchange
             _ = Task.Run(async () =>
             {
                 int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
-                bool isOn = false; // 开关开启状态
+                bool isOn = false; // 开关处于的状态
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
                     try

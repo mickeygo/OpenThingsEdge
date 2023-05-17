@@ -7,11 +7,6 @@ namespace ThingsEdge.Router.Handlers;
 /// </summary>
 internal sealed class MessageLoggedHandler : INotificationHandler<MessageLoggedEvent>
 {
-    public MessageLoggedHandler()
-    {
-        
-    }
-
     public Task Handle(MessageLoggedEvent notification, CancellationToken cancellationToken)
     {
         // TODO: 处理消息日志事件

@@ -3,9 +3,20 @@
 namespace ThingsEdge.Application.Infrastructure;
 
 /// <summary>
-/// 实体Id基类。
+/// 表示实现的对象为实体。
 /// </summary>
-public abstract class EntityBaseId
+public interface IEntity
+{
+    /// <summary>
+    /// 主键 Id。
+    /// </summary>
+    public long Id { get; set; }
+}
+
+/// <summary>
+/// 只包含Id的实体基类。
+/// </summary>
+public abstract class EntityBaseId : IEntity
 {
     /// <summary>
     /// 主键。
@@ -15,7 +26,7 @@ public abstract class EntityBaseId
     public long Id { get; set; }
 
     /// <summary>
-    /// 实体是否是临时创建的。
+    /// 实体是否为临时创建的。
     /// </summary>
     /// <returns></returns>
     public bool IsTransient()
@@ -25,7 +36,7 @@ public abstract class EntityBaseId
 }
 
 /// <summary>
-/// 实体基类。
+/// 带审计的实体基类。
 /// </summary>
 public abstract class EntityBase : EntityBaseId
 {
@@ -45,5 +56,5 @@ public abstract class EntityBase : EntityBaseId
     /// 更新时间
     /// </summary>
     [DisplayName("更新时间")]
-    public DateTime? UpdateTime { get; set; }
+    public DateTime UpdateTime { get; set; }
 }

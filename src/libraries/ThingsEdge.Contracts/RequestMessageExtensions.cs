@@ -6,11 +6,12 @@ public static class RequestMessageExtensions
     /// 获取对象值，若没找标记，则返回 null。
     /// 若对象是数组或是数字，会返回其序列化中的原始文本。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public static string? GetString(this RequestMessage requestMessage, string tagName)
+    /// <exception cref="NotImplementedException"></exception>
+    public static string? FetchString(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -37,11 +38,12 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="bool"/> 值，若没找到，返回 null。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static bool? GetBoolean(this RequestMessage requestMessage, string tagName)
+    public static bool? FetchBoolean(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -69,11 +71,12 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="byte"/> 值，若没找到，返回 null。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static byte? GetByte(this RequestMessage requestMessage, string tagName)
+    public static byte? FetchByte(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -97,11 +100,12 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="int"/> 值，若没找到，返回 null。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static int? GetInt(this RequestMessage requestMessage, string tagName)
+    public static int? FetchInt(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -125,11 +129,12 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="double"/> 值，若没找到，返回 null。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static double? GetDouble(this RequestMessage requestMessage, string tagName)
+    public static double? FetchDouble(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -154,11 +159,12 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="bool"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static bool[]? GetBooleanArray(this RequestMessage requestMessage, string tagName)
+    public static bool[]? FetchBooleanArray(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -192,11 +198,12 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="byte"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static byte[]? GetByteArray(this RequestMessage requestMessage, string tagName)
+    public static byte[]? FetchByteArray(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -226,11 +233,12 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="int"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static int[]? GetIntArray(this RequestMessage requestMessage, string tagName)
+    public static int[]? FetchIntArray(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)
@@ -260,11 +268,12 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="double"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
+    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static double[]? GetDoubleArray(this RequestMessage requestMessage, string tagName)
+    public static double[]? FetchDoubleArray(this RequestMessage requestMessage, string tagName)
     {
         var value = requestMessage.GetData(tagName)?.Value;
         if (value is null)

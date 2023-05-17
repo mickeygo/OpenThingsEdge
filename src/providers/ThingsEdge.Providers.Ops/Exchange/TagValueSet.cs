@@ -14,7 +14,7 @@ internal static class TagValueSet
     /// </summary>
     /// <param name="key"></param>
     /// <param name="newValue">新值</param>
-    /// <returns>true 表示状态相同；false 表示不同。</returns>
+    /// <returns>true 表示旧值与新写入的值相同；false 表示不同（或第一次写入）。</returns>
     public static bool CompareAndSwap(string key, object newValue)
     {
         // 初始状态，不包含数据。

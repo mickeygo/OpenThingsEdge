@@ -7,7 +7,7 @@
 ///  1. 记录设备每次开机时间和关机时间；
 ///  2. 记录设备做件的开始和结束时间；
 /// </remarks>
-public sealed class EquipmentStateRecord : Entity
+public sealed class EquipmentStateRecord : EntityBase
 {
     /// <summary>
     /// 设备编号
@@ -40,16 +40,11 @@ public sealed class EquipmentStateRecord : Entity
 public enum Equipment
 {
     /// <summary>
-    /// 运行。
+    /// 
     /// </summary>
-    Running = 1,
+    Idle,
 
-    /// <summary>
-    /// 工作。
-    /// </summary>
     Working,
-
-    Repair,
 }
 
 /// <summary>

@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Devices;
-
-namespace ThingsEdge.Router.Forwarder;
+﻿namespace ThingsEdge.Router.Forwarder;
 
 /// <summary>
 /// Forward 路由。

@@ -28,7 +28,7 @@ public sealed class RequestMessage
     /// <summary>
     /// 加载的数据集合。
     /// </summary>
-    /// <remarks>注：加载的标记数据集合会包含触发的标记数据。</remarks>
+    /// <remarks>注：加载的标记数据集合会包含触发点的信号标记数据。</remarks>
     [NotNull]
     public List<PayloadData>? Values { get; init; } = new();
 
@@ -45,6 +45,7 @@ public sealed class RequestMessage
     /// <summary>
     /// 获取标记触发点的数据。
     /// </summary>
+    /// <remarks>通知数据为其本身，触发数据和开关数据为信号标记值，心跳事件没有触发点值，调用后会出现异常。</remarks>
     /// <returns></returns>
     public PayloadData Self()
     {

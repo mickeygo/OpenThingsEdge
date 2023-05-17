@@ -36,10 +36,6 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         };
         message.Values.Add(notification.Self);
 
-        // 发布标记数据读取消息。
-        await _publisher.Publish(TagValueChangedEvent.Create(notification.Self!),
-            PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
-
         // 读取触发标记下的子数据。
         var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
         if (!ok)
@@ -60,14 +56,16 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 }
             }
 
+            // 发布标记数据请求事件，即使子数据读取失败，触发点数据也需要更新。
+            await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+
             return;
         }
 
         message.Values.AddRange(normalPaydatas!);
 
-        // 发布标记数据读取消息。
-        await _publisher.Publish(TagValueChangedEvent.Create(normalPaydatas!),
-            PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+        // 发布标记数据请求事件。
+        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);

@@ -14,9 +14,4 @@ public enum DeviceConnectState
     /// 离线状态。
     /// </summary>
     Offline,
-
-    /// <summary>
-    /// 未知状态。
-    /// </summary>
-    Unknown,
 }

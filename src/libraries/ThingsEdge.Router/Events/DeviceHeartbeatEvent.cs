@@ -17,7 +17,18 @@ public sealed class DeviceHeartbeatEvent : INotification
     public Tag? Tag { get; init; }
 
     /// <summary>
-    /// 设备连接状态。
+    /// 是否为在线状态。
     /// </summary>
-    public DeviceConnectState ConnectState { get; init; }
+    public bool IsOnline { get; init; }
+
+    public static DeviceHeartbeatEvent Create(string channelName, Device device, Tag tag, bool isOnline = false)
+    {
+        return new DeviceHeartbeatEvent
+        {
+            ChannelName = channelName,
+            Device = device,
+            Tag = tag,
+            IsOnline = isOnline,
+        };
+    }
 }

@@ -29,10 +29,18 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         // 开关信号
         if (notification.IsSwitchSignal)
         {
-            List<PayloadData> payloads = new()
+            var tagGroup = notification.Device.GetTagGroup(notification.Tag.TagId);
+            var message = new RequestMessage
             {
-                notification.Self!,
+                Schema = new()
+                {
+                    ChannelName = notification.ChannelName,
+                    DeviceName = notification.Device.Name,
+                    TagGroupName = tagGroup?.Name,
+                },
+                Flag = notification.Tag.Flag,
             };
+            message.Values.Add(notification.Self!);
 
             if (notification.State == SwitchState.On)
             {
@@ -45,7 +53,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     if (ok1)
                     {
                         sn = data1!.GetString();
-                        payloads.Add(data1!);
+                        message.Values.Add(data1!);
                     }
                     else
                     {
@@ -62,7 +70,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     if (ok3)
                     {
                         no = data3!.GetString();
-                        payloads.Add(data3!);
+                        message.Values.Add(data3!);
                     }
                     else
                     {
@@ -72,7 +80,6 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                 }
 
-                var tagGroup = notification.Device.GetTagGroup(notification.Tag.TagId);
                 var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(tagGroup?.Name, sn, no)); 
 
                 // 添加头信息
@@ -94,9 +101,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 }
             }
 
-            // 发布标记数据读取事件。
-            await _publisher.Publish(TagValueChangedEvent.Create(payloads),
-                PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+            // 发布标记数据请求事件。
+            await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
             return;
         }
@@ -118,8 +124,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         }
 
         // 读取触发标记下的子数据。
-        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(
-            notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
+        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
         if (!ok2)
         {
             string msg = $"批量读取子标记值失败, 设备: {notification.Device.Name}, 错误: {err2}";

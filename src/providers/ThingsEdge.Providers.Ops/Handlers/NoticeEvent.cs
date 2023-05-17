@@ -1,18 +1,10 @@
-﻿using ThingsEdge.Providers.Ops.Exchange;
-
-namespace ThingsEdge.Providers.Ops.Handlers;
+﻿namespace ThingsEdge.Providers.Ops.Handlers;
 
 /// <summary>
 /// 标记 <see cref="TagFlag.Notice"/> 事件。
 /// </summary>
 internal sealed class NoticeEvent : INotification
 {
-    /// <summary>
-    /// 连接驱动
-    /// </summary>
-    [NotNull]
-    public DriverConnector? Connector { get; init; }
-
     /// <summary>
     /// 通道名称
     /// </summary>

@@ -61,7 +61,8 @@ public static class SqlSugarSetup
 
                 dbProvider.Aop.OnError = (ex) =>
                 {
-                    logger.LogInformation("【错误SQL】{NewLine} {SQL}", Environment.NewLine, UtilMethods.GetSqlString(config.DbType, ex.Sql, (SugarParameter[])ex.Parametres));
+                    logger.LogError("【错误SQL】{Message} {NewLine} {SQL}",
+                        ex.Message, Environment.NewLine, UtilMethods.GetSqlString(config.DbType, ex.Sql, (SugarParameter[])ex.Parametres));
                 };
 #endif
 
@@ -74,18 +75,15 @@ public static class SqlSugarSetup
                         // 主键(long类型)且没有值的---赋值雪花Id
                         if (entityInfo.EntityColumnInfo.IsPrimarykey && entityInfo.EntityColumnInfo.PropertyInfo.PropertyType == typeof(long))
                         {
-                            var id = entityInfo.EntityColumnInfo.PropertyInfo.GetValue(entityInfo.EntityValue);
+                            var id = oldValue; // entityInfo.EntityColumnInfo.PropertyInfo.GetValue(entityInfo.EntityValue);
                             if (id == null || (long)id == 0)
                             {
                                 entityInfo.SetValue(YitIdHelper.NextId());
                             }
                         }
 
-                        if (entityInfo.PropertyName == nameof(EntityBase.CreateTime))
-                        {
-                            entityInfo.SetValue(DateTime.Now);
-                        }
-                        else if (entityInfo.PropertyName == nameof(EntityBase.UpdateTime)) // 有更新时间，再新建时一起更新。
+                        // 创建时间和更新时间一起更新。
+                        if (entityInfo.PropertyName == nameof(EntityBase.CreateTime) || entityInfo.PropertyName == nameof(EntityBase.UpdateTime))
                         {
                             entityInfo.SetValue(DateTime.Now);
                         }

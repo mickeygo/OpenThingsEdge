@@ -9,7 +9,7 @@
   <ItemGroup>
 	<PackageReference Include="Masa.Blazor" Version="1.0.0-rc.1" />
 	<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
-	<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+	<PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
 	<PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
   </ItemGroup>
 

@@ -35,10 +35,8 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         };
         message.Values.Add(notification.Self);
 
-        // 发布标记数据读取消息。
-        // 注：Notice 只包含数据本身，不包含标记下的子数据。
-        await _publisher.Publish(TagValueChangedEvent.Create(notification.Self),
-            PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+        // 发布标记数据请求事件。
+        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
