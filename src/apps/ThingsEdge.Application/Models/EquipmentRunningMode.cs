@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Application.Management.Equipment;
+﻿namespace ThingsEdge.Application.Models;
 
 /// <summary>
 /// 设备运行模式（状态互斥）

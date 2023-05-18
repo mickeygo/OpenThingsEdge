@@ -3,13 +3,14 @@
 /// <summary>
 /// SN 当前状态
 /// </summary>
+[SugarTable("SnCurrentStatus")]
 public sealed class SnCurrentStatus : EntityBase
 {
     /// <summary>
     /// SN
     /// </summary>
     [NotNull]
-    public string? SN { get; set; }
+    public string? SN { get; init; }
 
     /// <summary>
     /// 当前站点

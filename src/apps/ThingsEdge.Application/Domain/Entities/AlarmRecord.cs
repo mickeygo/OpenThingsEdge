@@ -4,23 +4,23 @@
 /// 警报记录。
 /// </summary>
 [SugarTable("AlarmRecord")]
-public sealed class AlarmRecord : EntityBase
+public sealed class AlarmRecord : EntityBaseId
 {
     /// <summary>
     /// 警报定义的编号
     /// </summary>
-    public int No { get; set; }
+    public int No { get; init; }
 
     /// <summary>
     /// 警报信息
     /// </summary>
     [NotNull]
-    public string? Message { get; set; }
+    public string? Message { get; init; }
 
     /// <summary>
     /// 警报开始时间
     /// </summary>
-    public DateTime StartTime { get; set; } = DateTime.Now;
+    public DateTime StartTime { get; init; }
 
     /// <summary>
     /// 警报结束时间

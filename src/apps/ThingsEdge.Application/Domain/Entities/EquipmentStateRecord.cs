@@ -1,30 +1,34 @@
-﻿namespace ThingsEdge.Application.Domain.Entities;
+﻿using ThingsEdge.Application.Models;
+
+namespace ThingsEdge.Application.Domain.Entities;
 
 /// <summary>
 /// 设备状态记录。
 /// </summary>
-/// <remarks>
-///  1. 记录设备每次开机时间和关机时间；
-///  2. 记录设备做件的开始和结束时间；
-/// </remarks>
-public sealed class EquipmentStateRecord : EntityBase
+[SugarTable("EquipmentStateRecord")]
+public sealed class EquipmentStateRecord : EntityBaseId
 {
     /// <summary>
     /// 设备编号
     /// </summary>
     [NotNull]
-    public string? EquipmentCode { get; set; }
+    public string? EquipmentCode { get; init; }
 
     /// <summary>
     /// 设备名称
     /// </summary>
     [NotNull]
-    public string? EquipmentName { get; set; }
+    public string? EquipmentName { get; init; }
+
+    /// <summary>
+    /// 设备运行状态
+    /// </summary>
+    public EquipmentRunningState RunningState { get; init; }
 
     /// <summary>
     /// 开始时间
     /// </summary>
-    public DateTime StartTime { get; set; }
+    public DateTime StartTime { get; init; }
 
     /// <summary>
     /// 结束时间
@@ -32,48 +36,22 @@ public sealed class EquipmentStateRecord : EntityBase
     public DateTime? EndTime { get; set; }
 
     /// <summary>
-    /// 时长，单位秒。
+    /// 该状态是否已结束。
+    /// </summary>
+    public bool IsEnded { get; set; }
+
+    /// <summary>
+    /// 持续时长，单位秒。
     /// </summary>
     public double Duration { get; set; }
-}
-
-public enum Equipment
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    Idle,
-
-    Working,
-}
-
-/// <summary>
-/// 设备正处于的状态。
-/// </summary>
-public enum EquipmentState
-{
-    /// <summary>
-    /// 空闲中。
-    /// </summary>
-    Idle = 1,
 
     /// <summary>
-    /// 工作中。
+    /// 闭合
     /// </summary>
-    Working,
-
-    /// <summary>
-    /// 故障。
-    /// </summary>
-    Fault,
-
-    /// <summary>
-    /// 维修。
-    /// </summary>
-    Repair,
-
-    /// <summary>
-    /// 停机。
-    /// </summary>
-    Stop,
+    public void Close()
+    {
+        IsEnded = true;
+        EndTime = DateTime.Now;
+        Duration = (EndTime - StartTime).Value.TotalSeconds;
+    }
 }

@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Application.Management.Equipment;
+﻿namespace ThingsEdge.Application.Models;
 
 /// <summary>
 /// 设备运行状态
@@ -21,7 +21,7 @@ public enum EquipmentRunningState
     EmergencyStopping,
 
     /// <summary>
-    /// 离线
+    /// 离线（设备与PLC断开）
     /// </summary>
     Offline,
 }

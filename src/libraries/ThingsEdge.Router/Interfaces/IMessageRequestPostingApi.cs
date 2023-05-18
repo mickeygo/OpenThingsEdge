@@ -6,11 +6,11 @@
 public interface IMessageRequestPostingApi
 {
     /// <summary>
-    /// 消息请求
+    /// 请求消息。
     /// </summary>
-    /// <param name="oldPayloadData"></param>
+    /// <param name="oldMasterPayloadData">最近一次记录的标记主数据，没有则为null</param>
     /// <param name="requestMessage">请求消息</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task PostAsync(PayloadData? oldPayloadData, RequestMessage requestMessage, CancellationToken cancellationToken);
+    Task PostAsync(PayloadData? oldMasterPayloadData, RequestMessage requestMessage, CancellationToken cancellationToken);
 }

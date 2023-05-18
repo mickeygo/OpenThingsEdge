@@ -3,19 +3,20 @@
 /// <summary>
 /// SN 过站数据。
 /// </summary>
+[SugarTable("SnTransitData")]
 public sealed class SnTransitData : EntityBase
 {
     /// <summary>
     /// SN
     /// </summary>
     [NotNull]
-    public string? SN { get; set; }
+    public string? SN { get; init; }
 
     /// <summary>
     /// 站点
     /// </summary>
     [NotNull]
-    public string? Station { get; set; }
+    public string? Station { get; init; }
 
     /// <summary>
     /// 过站状态（OK、NG）
