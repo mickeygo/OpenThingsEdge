@@ -1,4 +1,7 @@
-﻿namespace ThingsEdge.Application;
+﻿using ThingsEdge.Application.Handlers;
+using ThingsEdge.Router.Interfaces;
+
+namespace ThingsEdge.Application;
 
 public static class ServiceCollectionExtensions
 {
@@ -13,6 +16,10 @@ public static class ServiceCollectionExtensions
 
         services.AddThingsEdgeDomainService();
         services.AddThingsEdgeManagement();
+
+        // 注册处理 Api
+        services.AddTransient<IDeviceHeartbeatApi, DeviceHeartbeatApiHandler>();
+        services.AddTransient<IMessageRequestPostingApi, MessageRequestPostingApiHandler>();
 
         return services;
     }

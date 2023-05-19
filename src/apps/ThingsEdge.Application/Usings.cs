@@ -3,6 +3,7 @@ global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Reflection;
+global using System.Runtime.CompilerServices;
 
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;

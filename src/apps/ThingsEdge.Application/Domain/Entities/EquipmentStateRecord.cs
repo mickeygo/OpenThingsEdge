@@ -5,9 +5,15 @@ namespace ThingsEdge.Application.Domain.Entities;
 /// <summary>
 /// 设备状态记录。
 /// </summary>
-[SugarTable("EquipmentStateRecord")]
+[SugarTable("equipment_state_record")]
 public sealed class EquipmentStateRecord : EntityBaseId
 {
+    /// <summary>
+    /// 产线
+    /// </summary>
+    [NotNull]
+    public string? Line { get; init; }
+
     /// <summary>
     /// 设备编号
     /// </summary>
@@ -43,7 +49,7 @@ public sealed class EquipmentStateRecord : EntityBaseId
     /// <summary>
     /// 持续时长，单位秒。
     /// </summary>
-    public double Duration { get; set; }
+    public int Duration { get; set; }
 
     /// <summary>
     /// 闭合
@@ -52,6 +58,6 @@ public sealed class EquipmentStateRecord : EntityBaseId
     {
         IsEnded = true;
         EndTime = DateTime.Now;
-        Duration = (EndTime - StartTime).Value.TotalSeconds;
+        Duration = Convert.ToInt32((EndTime - StartTime).Value.TotalSeconds);
     }
 }

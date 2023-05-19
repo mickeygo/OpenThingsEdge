@@ -3,7 +3,7 @@
 /// <summary>
 /// 警报信息设定。
 /// </summary>
-[SugarTable("AlarmSetting")]
+[SugarTable("alarm_setting")]
 public sealed class AlarmSetting : EntityBase
 {
     /// <summary>

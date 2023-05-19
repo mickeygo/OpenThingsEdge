@@ -1,10 +1,10 @@
 ﻿namespace ThingsEdge.Application.Domain.Entities;
 
 /// <summary>
-/// SN 过站数据。
+/// SN 过站记录。
 /// </summary>
-[SugarTable("SnTransitData")]
-public sealed class SnTransitData : EntityBase
+[SugarTable("sn_transit_record")]
+internal sealed class SnTransitRecord : EntityBaseId
 {
     /// <summary>
     /// SN
@@ -13,15 +13,16 @@ public sealed class SnTransitData : EntityBase
     public string? SN { get; init; }
 
     /// <summary>
-    /// 站点
+    /// 产线
+    /// </summary>
+    [NotNull]
+    public string? Line { get; init; }
+
+    /// <summary>
+    /// 工站
     /// </summary>
     [NotNull]
     public string? Station { get; init; }
-
-    /// <summary>
-    /// 过站状态（OK、NG）
-    /// </summary>
-    public SnStatusType Status { get; set; }
 
     /// <summary>
     /// 进站时间
@@ -34,16 +35,22 @@ public sealed class SnTransitData : EntityBase
     public DateTime? ArchiveTime { get; set; }
 
     /// <summary>
-    /// CT 时长，单位秒。
+    /// 是否已存档。
     /// </summary>
-    public double CycleTime { get; set; }
+    public bool IsArchived { get; set; }
 
     /// <summary>
-    /// 出站
+    /// CT 时长，单位秒。
+    /// </summary>
+    public int CycleTime { get; set; }
+
+    /// <summary>
+    /// 过站
     /// </summary>
     public void Outbound()
     {
+        IsArchived = true;
         ArchiveTime = DateTime.Now;
-        CycleTime = (ArchiveTime - EntryTime).Value.TotalSeconds;
+        CycleTime = Convert.ToInt32((ArchiveTime - EntryTime).Value.TotalSeconds);
     }
 }

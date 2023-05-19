@@ -58,7 +58,7 @@ public sealed class RequestMessage
     /// <returns></returns>
     public IReadOnlyList<PayloadData> Children()
     {
-        if (Values.Count == 1)
+        if (Values.Count <= 1)
         {
             return Array.Empty<PayloadData>();
         }

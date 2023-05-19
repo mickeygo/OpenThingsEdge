@@ -1,0 +1,15 @@
+JSON 支持：
+
+# MySQL 5.7.8+
+  JSON 字段长度  max_allowed_packet，default is 4MB
+  字段需设置为 utf8mb4 字符集 和 utf8mb4_bin 排序
+# MySQL 8.0+
+  JSON 字段长度  max_allowed_packet，default is 64MB
+  字段需设置为 utf8mb4 字符集 和 utf8mb4_bin 排序
+
+# PostgreSQL 9.2 引入，9.5 加强
+
+# SQL Server 2016+
+  定义 NVARCHAR() / NVARCHAR(MAX)
+
+

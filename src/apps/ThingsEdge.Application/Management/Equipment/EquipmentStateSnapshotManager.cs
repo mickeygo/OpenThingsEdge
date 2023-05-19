@@ -4,30 +4,31 @@ namespace ThingsEdge.Application.Management.Equipment;
 
 public sealed class EquipmentStateSnapshotManager : IManager
 {
-    private readonly ConcurrentDictionary<string, EquipmentStateSnapshot> _map = new();
+    record EquipmentStateSnapshotKey(string Line, string EquipmentCode);
 
-    public EquipmentStateSnapshot? this[string equipmentCode] => GetSnapshot(equipmentCode);
+    private readonly ConcurrentDictionary<EquipmentStateSnapshotKey, EquipmentStateSnapshot> _map = new();
 
-    public EquipmentStateSnapshot? GetSnapshot(string equipmentCode)
+    public EquipmentStateSnapshot? GetSnapshot(string line, string equipmentCode)
     {
-        _map.TryGetValue(equipmentCode, out var snapshot);
+        _map.TryGetValue(new EquipmentStateSnapshotKey(line, equipmentCode), out var snapshot);
         return snapshot;
     }
 
     /// <summary>
     /// 设置设备运行模式。
     /// </summary>
+    /// <param name="line">产线</param>
     /// <param name="equipmentCode">设备代码</param>
     /// <param name="runningMode">设备运行模式</param>
-    public void ChangeMode(string equipmentCode, EquipmentRunningMode runningMode)
+    public void ChangeMode(string line, string equipmentCode, EquipmentRunningMode runningMode)
     {
-        _map.AddOrUpdate(equipmentCode,
+        _map.AddOrUpdate(new EquipmentStateSnapshotKey(line, equipmentCode),
             k =>
             {
                 var snapshot0 = new EquipmentStateSnapshot
                 {
-                    EquipmentCode = equipmentCode,
-                    EquipmentName = equipmentCode,
+                    EquipmentCode = k.EquipmentCode,
+                    EquipmentName = k.EquipmentCode,
                 };
                 snapshot0.ChangeRunningMode(runningMode);
 
@@ -43,17 +44,18 @@ public sealed class EquipmentStateSnapshotManager : IManager
     /// <summary>
     /// 设置设备运行状态。
     /// </summary>
+    /// <param name="line">产线</param>
     /// <param name="equipmentCode">设备代码</param>
     /// <param name="runningState">设备运行状态</param>
-    public void ChangeState(string equipmentCode, EquipmentRunningState runningState)
+    public void ChangeState(string line, string equipmentCode, EquipmentRunningState runningState)
     {
-        _map.AddOrUpdate(equipmentCode,
+        _map.AddOrUpdate(new EquipmentStateSnapshotKey(line, equipmentCode),
             k => 
             {
                 var snapshot0 = new EquipmentStateSnapshot
                 {
-                    EquipmentCode = equipmentCode,
-                    EquipmentName = equipmentCode,
+                    EquipmentCode = k.EquipmentCode,
+                    EquipmentName = k.EquipmentCode,
                 };
                 snapshot0.ChangeRunningState(runningState);
 

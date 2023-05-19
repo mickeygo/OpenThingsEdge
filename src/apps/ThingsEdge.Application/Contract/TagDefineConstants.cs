@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Application.Contract;
 
 /// <summary>
-/// Tag 约定。
+/// Tag 命名约定。
 /// </summary>
 internal sealed class TagDefineConstants
 {

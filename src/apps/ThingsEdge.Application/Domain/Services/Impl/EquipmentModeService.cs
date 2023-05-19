@@ -11,10 +11,11 @@ internal sealed class EquipmentModeService : IEquipmentModeService
         _equipModeRepo = equipModeRepo;
     }
 
-    public async Task ChangeModeAsync(string equipmentCode, EquipmentRunningMode runningMode)
+    public async Task ChangeModeAsync(string line, string equipmentCode, EquipmentRunningMode runningMode)
     {
         await _equipModeRepo.InsertAsync(new EquipmentModeRecord
         {
+            Line = line,
             EquipmentCode = equipmentCode,
             EquipmentName = equipmentCode,
             RunningMode = runningMode,

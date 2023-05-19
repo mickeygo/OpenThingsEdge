@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Application.Domain.Services;
+using ThingsEdge.Application.Dtos;
 using ThingsEdge.Application.Models;
 
 namespace ThingsEdge.Application.Management.Equipment;
@@ -17,39 +18,41 @@ public sealed class EquipmentStateManager : IManager
         _equipmentStateSnapshotManager = equipmentStateSnapshotManager;
     }
 
-    public async Task ChangeModeAsync(IEnumerable<string> equipmentCodes, EquipmentRunningMode runningMode, CancellationToken cancellationToken)
+    public async Task ChangeModeAsync(EquipmentCodeInput input, EquipmentRunningMode runningMode, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
 
-        var service = _serviceProvider.GetRequiredService<IEquipmentModeService>();
-        foreach (var equipmentCode in equipmentCodes)
+        using var scope = _serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IEquipmentModeService>();
+        foreach (var equipmentCode in input.EquipmentCodes)
         {
             // 更新快照
-            _equipmentStateSnapshotManager.ChangeMode(equipmentCode, runningMode);
+            _equipmentStateSnapshotManager.ChangeMode(input.Line, equipmentCode, runningMode);
 
             // 更新状态记录
-            await service.ChangeModeAsync(equipmentCode, runningMode);
+            await service.ChangeModeAsync(input.Line, equipmentCode, runningMode);
         }
     }
 
-    public async Task ChangeStateAsync(IEnumerable<string> equipmentCodes, EquipmentRunningState runningState, CancellationToken cancellationToken)
+    public async Task ChangeStateAsync(EquipmentCodeInput input, EquipmentRunningState runningState, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
 
-        var service = _serviceProvider.GetRequiredService<IEquipmentStateService>();
-        foreach (var equipmentCode in equipmentCodes)
+        using var scope = _serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IEquipmentStateService>();
+        foreach (var equipmentCode in input.EquipmentCodes)
         {
             // 更新快照
-            _equipmentStateSnapshotManager.ChangeState(equipmentCode, runningState);
+            _equipmentStateSnapshotManager.ChangeState(input.Line, equipmentCode, runningState);
 
             // 更新状态记录
-            await service.ChangeStateAsync(equipmentCode, runningState);
+            await service.ChangeStateAsync(input.Line, equipmentCode, runningState);
         }
     }
 }

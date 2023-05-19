@@ -5,9 +5,15 @@ namespace ThingsEdge.Application.Domain.Entities;
 /// <summary>
 /// 设备运行模式记录。
 /// </summary>
-[SugarTable("EquipmentModeRecord")]
+[SugarTable("equipment_mode_record")]
 public sealed class EquipmentModeRecord : EntityBaseId
 {
+    /// <summary>
+    /// 产线
+    /// </summary>
+    [NotNull]
+    public string? Line { get; init; }
+
     /// <summary>
     /// 设备编号
     /// </summary>

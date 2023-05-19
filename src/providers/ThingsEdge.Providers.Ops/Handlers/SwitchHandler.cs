@@ -58,8 +58,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     else
                     {
                         string msg = $"读取SwitchSN标记值失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}, 错误: {err1}";
-                        _logger.LogError(msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await LogAndPublishError(msg).ConfigureAwait(false);
                     }
                 }
 
@@ -75,8 +74,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     else
                     {
                         string msg = $"读取SwitchNo标记值失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}, 错误: {err3}";
-                        _logger.LogError(msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await LogAndPublishError(msg).ConfigureAwait(false);
                     }
                 }
 
@@ -95,14 +93,13 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     if (!ok)
                     {
                         string msg = $"拷贝曲线失败，文件：{Path.GetFileName(filepath)}, 错误：{err}";
-                        _logger.LogError(msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await LogAndPublishError(msg).ConfigureAwait(false);
                     }
                 }
             }
 
             // 发布标记数据请求事件。
-            await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+            await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
             return;
         }
@@ -113,12 +110,11 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             return;
         }
 
-        // 检测是否已到达写入行数的上限，用于防止
+        // 检测是否已到达写入行数的上限，用于防止写入数据过程导致数据过大。
         if (writer2.WrittenCount > AllowMaxWriteCount)
         {
             string msg = $"文件写入数据已达到设置上限, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}";
-            _logger.LogWarning(msg);
-            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+            await LogAndPublishError(msg).ConfigureAwait(false);
 
             return;
         }
@@ -128,8 +124,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         if (!ok2)
         {
             string msg = $"批量读取子标记值失败, 设备: {notification.Device.Name}, 错误: {err2}";
-            _logger.LogError(msg);
-            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+            await LogAndPublishError(msg).ConfigureAwait(false);
 
             return;
         }
@@ -144,9 +139,22 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             catch (Exception ex)
             {
                 string msg = $"曲线数据写入文件失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}";
-                _logger.LogError(ex, msg);
-                await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                await LogAndPublishError(msg, ex).ConfigureAwait(false);
             }
         }
+    }
+
+    private async Task LogAndPublishError(string msg, Exception? ex = default)
+    {
+        if (ex is null)
+        {
+            _logger.LogError(msg);
+        }
+        else
+        {
+            _logger.LogError(ex, msg);
+        }
+
+        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
     }
 }

@@ -11,7 +11,7 @@ internal sealed class EquipmentStateService : IEquipmentStateService
         _equipStateRepo = equipStateRepo;
     }
 
-    public async Task ChangeStateAsync(string equipmentCode, EquipmentRunningState runningState)
+    public async Task ChangeStateAsync(string line, string equipmentCode, EquipmentRunningState runningState)
     {
         // 数据运行状态有重叠
         // 运行 => S->运行; E->警报|急停
@@ -22,36 +22,37 @@ internal sealed class EquipmentStateService : IEquipmentStateService
         switch (runningState)
         {
             case EquipmentRunningState.Running:
-                await NewStateAsync(equipmentCode, EquipmentRunningState.Running); // 开始运行
-                await EndStateAsync(equipmentCode, EquipmentRunningState.Warning); // 结束警报
-                await EndStateAsync(equipmentCode, EquipmentRunningState.EmergencyStopping); // 结束急停
+                await NewStateAsync(line, equipmentCode, EquipmentRunningState.Running); // 开始运行
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.Warning); // 结束警报
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.EmergencyStopping); // 结束急停
                 break;
             case EquipmentRunningState.Warning:
-                await NewStateAsync(equipmentCode, EquipmentRunningState.Warning); // 开始警报
-                await EndStateAsync(equipmentCode, EquipmentRunningState.EmergencyStopping); // 结束急停
+                await NewStateAsync(line, equipmentCode, EquipmentRunningState.Warning); // 开始警报
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.EmergencyStopping); // 结束急停
                 break;
             case EquipmentRunningState.EmergencyStopping:
-                await NewStateAsync(equipmentCode, EquipmentRunningState.EmergencyStopping);
-                await EndStateAsync(equipmentCode, EquipmentRunningState.Warning);
+                await NewStateAsync(line, equipmentCode, EquipmentRunningState.EmergencyStopping);
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.Warning);
                 break;
             case EquipmentRunningState.Offline:
-                await EndStateAsync(equipmentCode, EquipmentRunningState.Running); // 结束运行
-                await EndStateAsync(equipmentCode, EquipmentRunningState.Warning); // 结束警报
-                await EndStateAsync(equipmentCode, EquipmentRunningState.EmergencyStopping); // 结束急停
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.Running); // 结束运行
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.Warning); // 结束警报
+                await EndStateAsync(line, equipmentCode, EquipmentRunningState.EmergencyStopping); // 结束急停
                 break;
             default:
                 break;
         }
     }
 
-    private async Task NewStateAsync(string equipmentCode, EquipmentRunningState runningState)
+    private async Task NewStateAsync(string line, string equipmentCode, EquipmentRunningState runningState)
     {
         // 找到指定运行状态的设备，且设备正处于开启状态
-        var equipment = await _equipStateRepo.GetFirstAsync(s => s.EquipmentCode == equipmentCode && s.RunningState == runningState && !s.IsEnded);
+        var equipment = await _equipStateRepo.GetFirstAsync(s => s.Line == line && s.EquipmentCode == equipmentCode && s.RunningState == runningState && !s.IsEnded);
         if (equipment is null)
         {
             await _equipStateRepo.InsertAsync(new EquipmentStateRecord
             {
+                Line = line,
                 EquipmentCode = equipmentCode,
                 EquipmentName = equipmentCode,
                 RunningState = EquipmentRunningState.Running,
@@ -60,10 +61,10 @@ internal sealed class EquipmentStateService : IEquipmentStateService
         }
     }
 
-    private async Task EndStateAsync(string equipmentCode, EquipmentRunningState runningState)
+    private async Task EndStateAsync(string line, string equipmentCode, EquipmentRunningState runningState)
     {
         // 找到指定运行状态的设备，且设备正处于开启状态
-        var equipment = await _equipStateRepo.GetFirstAsync(s => s.EquipmentCode == equipmentCode && s.RunningState == runningState && !s.IsEnded);
+        var equipment = await _equipStateRepo.GetFirstAsync(s => s.Line == line && s.EquipmentCode == equipmentCode && s.RunningState == runningState && !s.IsEnded);
         if (equipment is not null)
         {
             equipment.Close();

@@ -20,6 +20,14 @@ public interface IDeviceManager
     List<Device> GetDevices();
 
     /// <summary>
+    /// 获取指定通道下指定名称的设备。
+    /// </summary>
+    /// <param name="channelName">通道名称</param>
+    /// <param name="deviceName">设备名称</param>
+    /// <returns></returns>
+    Device? GetDevice(string channelName, string deviceName);
+
+    /// <summary>
     /// 获取指定的设备。
     /// </summary>
     /// <param name="deviceId">设备Id。</param>

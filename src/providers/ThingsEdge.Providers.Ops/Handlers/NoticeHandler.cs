@@ -35,8 +35,8 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         };
         message.Values.Add(notification.Self);
 
-        // 发布标记数据请求事件。
-        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
+        // 发布标记数据请求事件（不用等待）。
+        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);

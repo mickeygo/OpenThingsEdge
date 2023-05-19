@@ -3,9 +3,15 @@
 /// <summary>
 /// 警报记录。
 /// </summary>
-[SugarTable("AlarmRecord")]
+[SugarTable("alarm_record")]
 public sealed class AlarmRecord : EntityBaseId
 {
+    /// <summary>
+    /// 产线
+    /// </summary>
+    [NotNull]
+    public string? Line { get; init; }
+
     /// <summary>
     /// 警报定义的编号
     /// </summary>
@@ -44,6 +50,6 @@ public sealed class AlarmRecord : EntityBaseId
     {
         IsClosed = true;
         EndTime = DateTime.Now;
-        Duration = (EndTime - StartTime).Value.TotalSeconds;
+        Duration = Convert.ToInt32((EndTime - StartTime).Value.TotalSeconds);
     }
 }

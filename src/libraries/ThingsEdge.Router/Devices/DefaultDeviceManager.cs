@@ -15,7 +15,7 @@ internal sealed class DefaultDeviceManager : IDeviceManager
 
     public List<Channel> GetChannels()
     {
-        return _cache.GetOrCreate(CacheName, entry =>
+        return _cache.GetOrCreate(CacheName, _ =>
         {
             return _deviceSource.GetChannels();
         }) ?? new(0);
@@ -25,6 +25,18 @@ internal sealed class DefaultDeviceManager : IDeviceManager
     {
         var channels = GetChannels();
         return channels.SelectMany(s => s.Devices).ToList();
+    }
+
+    public Device? GetDevice(string channelName, string deviceName)
+    {
+        var channels = GetChannels();
+        var channel = channels.FirstOrDefault(s => s.Name == channelName);
+        if (channel == null)
+        {
+            return default;
+        }
+
+        return channel.Devices.FirstOrDefault(s => channel.Name == deviceName);
     }
 
     public Device? GetDevice(string deviceId)
