@@ -1,0 +1,16 @@
+DATA_BLOCK "OP100"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+NON_RETAIN
+   STRUCT 
+      Heartbeat : Bool;
+      Alarm : Array[0..127] of Bool;
+      PLC_Equipment_State : Int;
+      PLC_Equipment_Mode : Int;
+   END_STRUCT;
+
+
+BEGIN
+
+END_DATA_BLOCK
+
