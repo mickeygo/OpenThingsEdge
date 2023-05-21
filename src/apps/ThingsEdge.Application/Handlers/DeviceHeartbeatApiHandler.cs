@@ -7,12 +7,12 @@ namespace ThingsEdge.Application.Handlers;
 
 internal sealed class DeviceHeartbeatApiHandler : IDeviceHeartbeatApi
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly EquipmentStateManager _equipmentStateManager;
     private readonly ILogger _logger;
 
-    public DeviceHeartbeatApiHandler(IServiceProvider serviceProvider, ILogger<DeviceHeartbeatApiHandler> logger)
+    public DeviceHeartbeatApiHandler(EquipmentStateManager equipmentStateManager, ILogger<DeviceHeartbeatApiHandler> logger)
     {
-        _serviceProvider = serviceProvider;
+        _equipmentStateManager = equipmentStateManager;
         _logger = logger;
     }
 
@@ -38,12 +38,9 @@ internal sealed class DeviceHeartbeatApiHandler : IDeviceHeartbeatApi
 
         try
         {
-            using var scope = _serviceProvider.CreateScope();
-            var equipmentStateManager = scope.ServiceProvider.GetRequiredService<EquipmentStateManager>();
-
             // 更改设备运行状态（Running/Offline）
             var runningState = isOnline ? EquipmentRunningState.Running : EquipmentRunningState.Offline;
-            await equipmentStateManager.ChangeStateAsync(input, runningState, cancellationToken);
+            await _equipmentStateManager.ChangeStateAsync(input, runningState, cancellationToken);
         }
         catch (Exception ex)
         {

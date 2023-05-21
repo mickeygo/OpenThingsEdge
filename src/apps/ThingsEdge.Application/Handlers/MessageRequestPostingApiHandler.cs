@@ -10,11 +10,25 @@ namespace ThingsEdge.Application.Handlers;
 internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
 {
     private readonly IServiceProvider _serviceProvider;
+
+    private readonly IAlarmService _alarmService;
+    private readonly EquipmentStateManager _equipmentStateManager;
+    private readonly IEntryService _entryService;
+    private readonly IArchiveService _archiveService;
     private readonly ILogger _logger;
 
-    public MessageRequestPostingApiHandler(IServiceProvider serviceProvider, ILogger<MessageRequestPostingApiHandler> logger)
+    public MessageRequestPostingApiHandler(IServiceProvider serviceProvider, 
+        IAlarmService alarmService,
+        EquipmentStateManager equipmentStateManager, 
+        IEntryService entryService,
+        IArchiveService archiveService,
+        ILogger<MessageRequestPostingApiHandler> logger)
     {
         _serviceProvider = serviceProvider;
+        _alarmService = alarmService;
+        _equipmentStateManager = equipmentStateManager;
+        _entryService = entryService;
+        _archiveService = archiveService;
         _logger = logger;
     }
 
@@ -22,8 +36,6 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
     {
         var self = requestMessage.Self();
 
-        using var scope = _serviceProvider.CreateScope();
-        
         try
         {
             if (requestMessage.Flag == TagFlag.Notice)
@@ -33,16 +45,14 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                     var lastAlarms = lastMasterPayloadData?.GetBitArray();
                     var newAlarms = self.GetBitArray();
 
-                    var alarmService = scope.ServiceProvider.GetRequiredService<IAlarmService>();
-                    await alarmService.RecordAlarmsAsync(new AlarmInput { Line = requestMessage.Schema.ChannelName, LastAlarms = lastAlarms, NewAlarms = newAlarms });
+                    await _alarmService.RecordAlarmsAsync(new AlarmInput { Line = requestMessage.Schema.ChannelName, LastAlarms = lastAlarms, NewAlarms = newAlarms });
                 }
                 else if (self.TagName == TagDefineConstants.PLC_Equipment_State) // 设备运行状态
                 {
                     int state = self.GetInt(); // 转换可能异常
                     if (Enum.IsDefined(typeof(EquipmentRunningState), state))
                     {
-                        var equipManager = scope.ServiceProvider.GetRequiredService<EquipmentStateManager>();
-                        await equipManager.ChangeStateAsync(GetEquipmentCodeInput(), (EquipmentRunningState)state, cancellationToken);
+                        await _equipmentStateManager.ChangeStateAsync(GetEquipmentCodeInput(), (EquipmentRunningState)state, cancellationToken);
                     }
                 }
                 else if (self.TagName == TagDefineConstants.PLC_Equipment_Mode)  // 设备运行模式
@@ -50,8 +60,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                     int mode = self.GetInt();
                     if (Enum.IsDefined(typeof(EquipmentRunningMode), mode))
                     {
-                        var equipManager = scope.ServiceProvider.GetRequiredService<EquipmentStateManager>();
-                        await equipManager.ChangeModeAsync(GetEquipmentCodeInput(), (EquipmentRunningMode)mode, cancellationToken);
+                        await _equipmentStateManager.ChangeModeAsync(GetEquipmentCodeInput(), (EquipmentRunningMode)mode, cancellationToken);
                     }                  
                 }
             }
@@ -64,8 +73,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                     var sn = requestMessage.GetData(TagDefineConstants.PLC_Entry_SN)!.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
-                        var service = scope.ServiceProvider.GetRequiredService<IEntryService>();
-                        await service.EntryAsync(requestMessage.Schema.ChannelName, station, sn);
+                        await _entryService.EntryAsync(requestMessage.Schema.ChannelName, station, sn);
                     }
                 }
                 else if (self.TagName == TagDefineConstants.PLC_Archive_Sign) // 产品出站
@@ -74,8 +82,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                     var sn = requestMessage.GetData(TagDefineConstants.PLC_Archive_SN)!.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
-                        var service = scope.ServiceProvider.GetRequiredService<IArchiveService>();
-                        await service.ArchiveAsync(requestMessage.Schema.ChannelName, station, sn);
+                        await _archiveService.ArchiveAsync(requestMessage.Schema.ChannelName, station, sn);
                     }
                 }
             }
@@ -101,7 +108,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
             }
 
             // 标记归属于设备，查找设备下所有分组
-            var deviceManager = scope.ServiceProvider.GetRequiredService<IDeviceManager>();
+            var deviceManager = _serviceProvider.GetRequiredService<IDeviceManager>();
             var device = deviceManager.GetDevice(requestMessage.Schema.ChannelName, requestMessage.Schema.DeviceName);
             if (device != null)
             {

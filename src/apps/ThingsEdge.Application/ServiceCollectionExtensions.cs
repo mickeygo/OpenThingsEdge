@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Application.Handlers;
+using ThingsEdge.Application.Management.Equipment;
 using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Application;
@@ -16,6 +17,8 @@ public static class ServiceCollectionExtensions
 
         services.AddThingsEdgeDomainService();
         services.AddThingsEdgeManagement();
+
+        services.AddTransient<EquipmentStateManager>();
 
         // 注册处理 Api
         services.AddTransient<IDeviceHeartbeatApi, DeviceHeartbeatApiHandler>();

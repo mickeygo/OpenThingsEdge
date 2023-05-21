@@ -7,14 +7,18 @@ namespace ThingsEdge.Application.Management.Equipment;
 /// <summary>
 /// 设备状态管理对象。
 /// </summary>
-public sealed class EquipmentStateManager : IManager
+public sealed class EquipmentStateManager
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IEquipmentModeService _equipmentModeService;
+    private readonly IEquipmentStateService _equipmentStateService;
     private readonly EquipmentStateSnapshotManager _equipmentStateSnapshotManager;
 
-    public EquipmentStateManager(IServiceProvider serviceProvider, EquipmentStateSnapshotManager equipmentStateSnapshotManager)
+    public EquipmentStateManager(IEquipmentModeService equipmentModeService,
+        IEquipmentStateService equipmentStateService,
+        EquipmentStateSnapshotManager equipmentStateSnapshotManager)
     {
-        _serviceProvider = serviceProvider;
+        _equipmentModeService = equipmentModeService;
+        _equipmentStateService = equipmentStateService;
         _equipmentStateSnapshotManager = equipmentStateSnapshotManager;
     }
 
@@ -25,15 +29,13 @@ public sealed class EquipmentStateManager : IManager
             return;
         }
 
-        using var scope = _serviceProvider.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<IEquipmentModeService>();
         foreach (var equipmentCode in input.EquipmentCodes)
         {
             // 更新快照
             _equipmentStateSnapshotManager.ChangeMode(input.Line, equipmentCode, runningMode);
 
             // 更新状态记录
-            await service.ChangeModeAsync(input.Line, equipmentCode, runningMode);
+            await _equipmentModeService.ChangeModeAsync(input.Line, equipmentCode, runningMode);
         }
     }
 
@@ -44,15 +46,13 @@ public sealed class EquipmentStateManager : IManager
             return;
         }
 
-        using var scope = _serviceProvider.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<IEquipmentStateService>();
         foreach (var equipmentCode in input.EquipmentCodes)
         {
             // 更新快照
             _equipmentStateSnapshotManager.ChangeState(input.Line, equipmentCode, runningState);
 
             // 更新状态记录
-            await service.ChangeStateAsync(input.Line, equipmentCode, runningState);
+            await _equipmentStateService.ChangeStateAsync(input.Line, equipmentCode, runningState);
         }
     }
 }

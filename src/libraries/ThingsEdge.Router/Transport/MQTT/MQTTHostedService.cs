@@ -5,16 +5,19 @@
 /// </summary>
 internal sealed class MQTTHostedService : IHostedService
 {
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IMQTTMessageReceivedHandler _msgRecevHandler;
     private readonly MQTTClientOptions _mqttClientOptions;
     private readonly ILogger _logger;
 
     private IMQTTClient? _mqttClient;
 
-    public MQTTHostedService(IMQTTMessageReceivedHandler msgRecevHandler, 
+    public MQTTHostedService(IServiceScopeFactory serviceScopeFactory,
+        IMQTTMessageReceivedHandler msgRecevHandler, 
         IOptions<MQTTClientOptions> mqttClientOptions, 
         ILogger<MQTTHostedService> logger)
     {
+        _serviceScopeFactory = serviceScopeFactory;
         _msgRecevHandler = msgRecevHandler;
         _mqttClientOptions = mqttClientOptions.Value;
         _logger = logger;

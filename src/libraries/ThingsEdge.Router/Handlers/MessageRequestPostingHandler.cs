@@ -29,7 +29,8 @@ internal sealed class MessageRequestPostingHandler : INotificationHandler<Messag
         // 更新标记值。
         _tagDataContainer.Set(reqMessage.Schema, reqMessage.Values);
 
-        var msgReqApi = _serviceProvider.GetService<IMessageRequestPostingApi>();
+        using var scope = _serviceProvider.CreateScope();
+        var msgReqApi = scope.ServiceProvider.GetService<IMessageRequestPostingApi>();
         if (msgReqApi is not null)
         {
             await msgReqApi.PostAsync(oldTagData?.Data, notification.Message, cancellationToken).ConfigureAwait(false);

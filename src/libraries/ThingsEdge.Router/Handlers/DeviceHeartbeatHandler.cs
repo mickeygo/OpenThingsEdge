@@ -17,7 +17,8 @@ internal sealed class DeviceHeartbeatHandler : INotificationHandler<DeviceHeartb
 
     public async Task Handle(DeviceHeartbeatEvent notification, CancellationToken cancellationToken)
     {
-        var devHeartbeatApi = _serviceProvider.GetService<IDeviceHeartbeatApi>();
+        using var scope = _serviceProvider.CreateScope();
+        var devHeartbeatApi = scope.ServiceProvider.GetService<IDeviceHeartbeatApi>();
         if (devHeartbeatApi != null)
         {
             await devHeartbeatApi.ChangeAsync(notification.ChannelName, notification.Device, notification.Tag, notification.IsOnline, cancellationToken).ConfigureAwait(false);
