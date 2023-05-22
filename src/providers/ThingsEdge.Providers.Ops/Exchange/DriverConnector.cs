@@ -3,51 +3,9 @@
 namespace ThingsEdge.Providers.Ops.Exchange;
 
 /// <summary>
-/// 连接状态
-/// </summary>
-public enum ConnectionStatus
-{
-    /// <summary>
-    /// 初始化，等待连接
-    /// </summary>
-    Wait = 1,
-
-    /// <summary>
-    /// 已连接。
-    /// </summary>
-    Connected,
-
-    /// <summary>
-    /// 已与服务断开连接。
-    /// </summary>
-    Disconnected,
-
-    /// <summary>
-    /// 连接终止，表示不会再连接。
-    /// </summary>
-    Aborted,
-}
-
-/// <summary>
-/// 驱动状态
-/// </summary>
-public enum DriverStatus
-{
-    /// <summary>
-    /// 可正常通信
-    /// </summary>
-    Normal = 1,
-
-    /// <summary>
-    /// 驱动挂起中
-    /// </summary>
-    Suspended = 2,
-}
-
-/// <summary>
 /// 驱动连接器。
 /// </summary>
-public sealed class DriverConnector
+public sealed class DriverConnector : IDriverConnector
 {
     /// <summary>
     /// 连接ID, 与设备ID一致。
@@ -74,12 +32,12 @@ public sealed class DriverConnector
     /// <summary>
     /// 表示可与服务器进行连接（能 Ping 通）。
     /// </summary>
-    public bool Available { get; internal set; }
+    public bool Available { get; set; }
 
     /// <summary>
     /// 驱动状态
     /// </summary>
-    public DriverStatus DriverStatus { get; internal set; } = DriverStatus.Normal;
+    public DriverStatus DriverStatus { get; set; } = DriverStatus.Normal;
 
     public DriverConnector(string id, string host, int port, IReadWriteNet driver)
     {

@@ -4,7 +4,6 @@ using Ops.Communication.Profinet.AllenBradley;
 using Ops.Communication.Profinet.Melsec;
 using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Profinet.Siemens;
-using ThingsEdge.Contracts.Devices;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -13,7 +12,7 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 /// </summary>
 public sealed class DriverConnectorManager : IDisposable
 {
-    private readonly Dictionary<string, DriverConnector> _connectors = new(); // Key 为设备编号
+    private readonly Dictionary<string, IDriverConnector> _connectors = new(); // Key 为设备编号
     private readonly ILogger _logger;
 
     private bool _hasTryConnectServer;
@@ -32,14 +31,14 @@ public sealed class DriverConnectorManager : IDisposable
     /// </summary>
     /// <param name="name">设备名称</param>
     /// <returns></returns>
-    public DriverConnector this[string name] => _connectors[name];
+    public IDriverConnector this[string name] => _connectors[name];
 
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
     /// <param name="name">设备名称</param>
     /// <returns></returns>
-    public DriverConnector? GetConnector(string name)
+    public IDriverConnector? GetConnector(string name)
     {
         if (_connectors.TryGetValue(name, out var connector))
         {
@@ -52,7 +51,7 @@ public sealed class DriverConnectorManager : IDisposable
     /// 获取所有的连接驱动
     /// </summary>
     /// <returns></returns>
-    public IReadOnlyCollection<DriverConnector> GetAllDriver()
+    public IReadOnlyCollection<IDriverConnector> GetAllDriver()
     {
         return _connectors.Values;
     }
@@ -78,6 +77,7 @@ public sealed class DriverConnectorManager : IDisposable
                 DriverModel.Melsec_CIP => new MelsecCipNet(deviceInfo.Host),
                 DriverModel.Melsec_A1E => new MelsecA1ENet(deviceInfo.Host, deviceInfo.Port),
                 DriverModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port),
+                DriverModel.Melsec_MCAscii => new MelsecMcAsciiNet(deviceInfo.Host, deviceInfo.Port),
                 DriverModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port),
                 DriverModel.Omron_FinsTcp => new OmronFinsNet(deviceInfo.Host, deviceInfo.Port),
                 DriverModel.Omron_CipNet => new OmronCipNet(deviceInfo.Host, deviceInfo.Port),

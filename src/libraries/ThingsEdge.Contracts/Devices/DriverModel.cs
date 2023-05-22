@@ -31,8 +31,15 @@ public enum DriverModel
 
     /// <summary>
     /// 支持 Q、Qna 系列。
+    /// 二进制码通讯。
     /// </summary>
     Melsec_MC,
+
+    /// <summary>
+    /// 支持 Q、Qna 系列。
+    /// ASCII码通信。
+    /// </summary>
+    Melsec_MCAscii,
 
     /// <summary>
     /// 支持三菱 R 系列。

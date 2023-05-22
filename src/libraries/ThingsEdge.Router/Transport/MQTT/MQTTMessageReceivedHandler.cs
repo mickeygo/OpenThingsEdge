@@ -20,8 +20,8 @@ internal sealed class MQTTMessageReceivedHandler : IMQTTMessageReceivedHandler
     {
         var clientId = args.ClientId;
         var topic = args.ApplicationMessage.Topic;
-        var body = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
-
+        var body = Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment);
+        
         MQTTRequestMessageResult reqResult;
         try
         {

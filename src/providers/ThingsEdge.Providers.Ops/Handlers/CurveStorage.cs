@@ -24,14 +24,14 @@ internal sealed class CurveStorage
     /// <summary>
     /// 构建曲线的存储路径，文件命名格式: "[码]_[序号]_[时间]"。
     /// </summary>
-    /// <param name="group">分组名称。</param>
     /// <param name="sn">曲线绑定的 SN</param>
+    /// <param name="group">分组名称。</param>
     /// <param name="no">曲线所属的编号。</param>
     /// <param name="includeDatetime">是否包含时间, 默认为true</param>
     /// <returns></returns>
     /// <exception cref="IOException"></exception>
     /// <exception cref="PathTooLongException"></exception>
-    public string BuildCurveFilePath(string? group, string? sn, string? no, bool includeDatetime = true)
+    public string BuildCurveFilePath(string? sn, string? group, string? no, bool includeDatetime = true)
     {
         var curvesDir = LocalCurvesDirectory();
 

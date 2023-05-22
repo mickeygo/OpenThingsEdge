@@ -78,7 +78,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                 }
 
-                var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(tagGroup?.Name, sn, no)); 
+                var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(sn, tagGroup?.Name, no)); 
 
                 // 添加头信息
                 var headers = string.Join(",", notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve).Select(s => s.Keynote));

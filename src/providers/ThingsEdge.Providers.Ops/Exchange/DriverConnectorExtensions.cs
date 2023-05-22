@@ -1,4 +1,5 @@
-﻿using Ops.Communication.Profinet.Siemens;
+﻿using Ops.Communication.Profinet.Melsec;
+using Ops.Communication.Profinet.Siemens;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -10,7 +11,7 @@ public static class DriverConnectorExtensions
     /// <param name="connector">设备连接器。</param>
     /// <param name="tag">要读取的数据标记。</param>
     /// <returns></returns>
-    public static async Task<(bool ok, PayloadData? data, string? err)> ReadAsync(this DriverConnector connector, Tag tag)
+    public static async Task<(bool ok, PayloadData? data, string? err)> ReadAsync(this IDriverConnector connector, Tag tag)
     {
         if (!connector.CanConnect)
         {
@@ -28,7 +29,7 @@ public static class DriverConnectorExtensions
     /// <param name="connector"></param>
     /// <param name="tags">批量读取的标记集合。</param>
     /// <returns></returns>
-    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this DriverConnector connector, IEnumerable<Tag> tags)
+    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this IDriverConnector connector, IEnumerable<Tag> tags)
     {
         if (!connector.CanConnect)
         {
@@ -40,6 +41,11 @@ public static class DriverConnectorExtensions
             return await siemensS7Net.ReadMultiAsync(tags).ConfigureAwait(false);
         }
 
+        if (connector.Driver is MelsecMcNet melsecMcNet)
+        {
+            return await melsecMcNet.ReadContinuationAsync(tags).ConfigureAwait(false);
+        }
+        
         // 没有实现批量读取的驱动，逐一读取。
         List<PayloadData> tagPayloads = new(tags.Count());
         foreach (var tag in tags)
@@ -66,7 +72,7 @@ public static class DriverConnectorExtensions
     /// <param name="format">是否写入前格式化数据。</param>
     /// <returns></returns>
     /// <remarks>要写入的数据必须与标记的数据类型匹配，或是可转换为标记设定的类型。</remarks>
-    public static async Task<(bool ok, string? err)> WriteAsync(this DriverConnector connector, Tag tag, object data, bool format = true)
+    public static async Task<(bool ok, string? err)> WriteAsync(this IDriverConnector connector, Tag tag, object data, bool format = true)
     {
         if (!connector.CanConnect)
         {

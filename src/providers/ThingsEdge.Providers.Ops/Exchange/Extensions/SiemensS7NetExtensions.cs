@@ -78,7 +78,7 @@ public static class SiemensS7NetExtensions
         foreach (var tag in tags)
         {
             addresses.Add(tag.Address);
-            lengths.Add((ushort)TagToByteLength(tag));
+            lengths.Add((ushort)TagToByteLength(tag)); // 数据长度
         }
 
         var result = await siemensS7Net.ReadAsync(addresses.ToArray(), lengths.ToArray()).ConfigureAwait(false);

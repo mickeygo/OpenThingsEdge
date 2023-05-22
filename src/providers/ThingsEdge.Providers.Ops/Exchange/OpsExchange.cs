@@ -67,7 +67,7 @@ public sealed class OpsExchange : IExchange
         }
     }
 
-    private Task HeartbeatMonitorAsync(DriverConnector connector)
+    private Task HeartbeatMonitorAsync(IDriverConnector connector)
     {
         var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Heartbeat); // 所有标记为心跳的都进行监控。
@@ -159,7 +159,7 @@ public sealed class OpsExchange : IExchange
         return Task.CompletedTask;
     }
 
-    private Task TriggerMonitorAsync(DriverConnector connector)
+    private Task TriggerMonitorAsync(IDriverConnector connector)
     {
         var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Trigger);
@@ -228,7 +228,7 @@ public sealed class OpsExchange : IExchange
         return Task.CompletedTask;
     }
 
-    private Task NoticeMonitorAsync(DriverConnector connector)
+    private Task NoticeMonitorAsync(IDriverConnector connector)
     {
         var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Notice);
@@ -295,7 +295,7 @@ public sealed class OpsExchange : IExchange
         return Task.CompletedTask;
     }
 
-    private Task SwitchMonitorAsync(DriverConnector connector)
+    private Task SwitchMonitorAsync(IDriverConnector connector)
     {
         var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
         var tags = device!.GetAllTags(TagFlag.Switch);

@@ -11,7 +11,7 @@ internal sealed class SwitchEvent : INotification
     /// 连接驱动
     /// </summary>
     [NotNull]
-    public DriverConnector? Connector { get; init; }
+    public IDriverConnector? Connector { get; init; }
 
     /// <summary>
     /// 通道名称
