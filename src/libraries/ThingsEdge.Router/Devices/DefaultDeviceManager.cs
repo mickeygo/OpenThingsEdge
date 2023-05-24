@@ -36,7 +36,7 @@ internal sealed class DefaultDeviceManager : IDeviceManager
             return default;
         }
 
-        return channel.Devices.FirstOrDefault(s => channel.Name == deviceName);
+        return channel.Devices.FirstOrDefault(s => s.Name == deviceName);
     }
 
     public Device? GetDevice(string deviceId)

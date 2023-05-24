@@ -35,4 +35,19 @@ public sealed class RESTfulDestinationOptions
     /// 是否禁用凭证检测（https），默认为 true。
     /// </summary>
     public bool DisableCertificateValidationCheck { get; set; } = true;
+
+    /// <summary>
+    /// 目标服务健康检测地址，默认为 "/api/health"。
+    /// </summary>
+    public string? HealthRequestUrl { get; set; } = "/api/health";
+
+    /// <summary>
+    /// 目标服务接收通知数据的地址，默认为 "/api/iotgateway/notice"。
+    /// </summary>
+    public string? NoticeRequestUrl { get; set; } = "/api/iotgateway/notice";
+
+    /// <summary>
+    /// 目标服务接收触发数据的地址，默认为 "/api/iotgateway/trigger"。
+    /// </summary>
+    public string? TriggerRequestUrl { get; set; } = "/api/iotgateway/trigger";
 }

@@ -1,34 +1,34 @@
-﻿using MQTTnet.Extensions.ManagedClient;
+﻿using MQTTnet.Client;
 
 namespace ThingsEdge.Router.Transport.MQTT;
 
 internal sealed class MQTTClient : IMQTTClient
 {
-    private readonly ManagedMqttClientOptions _managedMqttClientOptions;
+    private readonly MqttClientOptions _mqttClientOptions;
 
-    public IManagedMqttClient ManagedMqttClient { get; }
+    public IMqttClient MqttClient { get; }
 
-    public MQTTClient(IManagedMqttClient managedMqttClient, ManagedMqttClientOptions managedMqttClientOptions)
+    public MQTTClient(IMqttClient mqttClient, MqttClientOptions mqttClientOptions)
     {
-        ManagedMqttClient = managedMqttClient;
-        _managedMqttClientOptions = managedMqttClientOptions;
+        MqttClient = mqttClient;
+        _mqttClientOptions = mqttClientOptions;
     }
 
-    public async Task StartAsync()
+    public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
-        if (!ManagedMqttClient.IsStarted)
+        if (!MqttClient.IsConnected)
         {
-            await ManagedMqttClient.StartAsync(_managedMqttClientOptions).ConfigureAwait(false);
+           await MqttClient.ConnectAsync(_mqttClientOptions, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    public async Task StopAsync(bool cleanDisconnect = true)
+    public async Task DisconnectAsync(CancellationToken cancellationToken = default)
     {
-        await ManagedMqttClient.StopAsync(cleanDisconnect).ConfigureAwait(false);
+        await MqttClient.DisconnectAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     public void Dispose()
     {
-        ManagedMqttClient.Dispose();
+        MqttClient.Dispose();
     }
 }

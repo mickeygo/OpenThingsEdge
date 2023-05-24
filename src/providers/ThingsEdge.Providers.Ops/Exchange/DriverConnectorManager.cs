@@ -29,14 +29,14 @@ public sealed class DriverConnectorManager : IDisposable
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
-    /// <param name="name">设备名称</param>
+    /// <param name="name">设备Id</param>
     /// <returns></returns>
     public IDriverConnector this[string name] => _connectors[name];
 
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
-    /// <param name="name">设备名称</param>
+    /// <param name="name">设备Id</param>
     /// <returns></returns>
     public IDriverConnector? GetConnector(string name)
     {

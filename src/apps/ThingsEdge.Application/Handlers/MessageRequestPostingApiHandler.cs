@@ -70,7 +70,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                 if (self.TagName == TagDefineConstants.PLC_Entry_Sign) // 产品进站
                 {
                     var station = requestMessage.Schema.TagGroupName!;
-                    var sn = requestMessage.GetData(TagDefineConstants.PLC_Entry_SN)!.GetString();
+                    var sn = requestMessage.GetData(TagDefineConstants.PLC_Entry_SN)?.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
                         await _entryService.EntryAsync(requestMessage.Schema.ChannelName, station, sn);
@@ -79,7 +79,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                 else if (self.TagName == TagDefineConstants.PLC_Archive_Sign) // 产品出站
                 {
                     var station = requestMessage.Schema.TagGroupName!;
-                    var sn = requestMessage.GetData(TagDefineConstants.PLC_Archive_SN)!.GetString();
+                    var sn = requestMessage.GetData(TagDefineConstants.PLC_Archive_SN)?.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
                         await _archiveService.ArchiveAsync(requestMessage.Schema.ChannelName, station, sn);

@@ -11,13 +11,13 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
     private readonly IEventPublisher _publisher;
-    private readonly IForwarder _forwarder;
+    private readonly IForwarderFactory _forwarderFactory;
     private readonly ILogger _logger;
 
-    public TriggerHandler(IEventPublisher publisher, IForwarder forwarder, ILogger<TriggerHandler> logger)
+    public TriggerHandler(IEventPublisher publisher, IForwarderFactory forwarderFactory, ILogger<TriggerHandler> logger)
     {
         _publisher = publisher;
-        _forwarder = forwarder;
+        _forwarderFactory = forwarderFactory;
         _logger = logger;
     }
 
@@ -53,20 +53,23 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                     await LogAndPublishError(msg2).ConfigureAwait(false);
                 }
             }
+        }
+        else
+        {
+            message.Values.AddRange(normalPaydatas!);
+        }
 
-            // 发布标记数据请求事件，即使子数据读取失败，触发点数据也需要更新（不用等待）。
-            await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+        // 不管读取是否成功，都发布标记数据请求事件（不用等待）。
+        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
+        // 读取数据出错，直接退出
+        if (!ok)
+        {
             return;
         }
 
-        message.Values.AddRange(normalPaydatas!);
-
-        // 发布标记数据请求事件（不用等待）。
-        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
-
         // 发送消息。
-        var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
+        var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
             string msg1 = $"推送消息失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {result.ErrorMessage}";
@@ -94,33 +97,36 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 
         // 若存在子数据，则先回写。
         bool hasError = false;
-        foreach (var (tagName, tagValue) in result.Data.CallbackItems)
+        if (result.Data?.CallbackItems != null)
         {
-            // 通过 tagName 找到对应的 Tag 标记。
-            // 注意：回写标记与触发标记处于同一级别，位于设备下或是分组中。
-            Tag? tag2 = (tagGroup?.Tags ?? notification.Device.Tags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
-            if (tag2 == null)
+            foreach (var (tagName, tagValue) in result.Data.CallbackItems)
             {
-                string msg = $"地址表中没有找到要回写的标记, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}";
-                await LogAndPublishError(msg).ConfigureAwait(false);
+                // 通过 tagName 找到对应的 Tag 标记。
+                // 注意：回写标记与触发标记处于同一级别，位于设备下或是分组中。
+                Tag? tag2 = (tagGroup?.Tags ?? notification.Device.Tags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                if (tag2 == null)
+                {
+                    string msg = $"地址表中没有找到要回写的标记, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}";
+                    await LogAndPublishError(msg).ConfigureAwait(false);
 
-                hasError = true;
-                break;
-            }
+                    hasError = true;
+                    break;
+                }
 
-            var (ok2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
-            if (!ok2)
-            {
-                string msg = $"回写标记数据失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err2}";
-                await LogAndPublishError(msg).ConfigureAwait(false);
+                var (ok2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
+                if (!ok2)
+                {
+                    string msg = $"回写标记数据失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err2}";
+                    await LogAndPublishError(msg).ConfigureAwait(false);
 
-                hasError = true;
-                break;
+                    hasError = true;
+                    break;
+                }
             }
         }
 
         // 回写标记状态。
-        int tagCode = tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data.State;
+        int tagCode = tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
         var (ok3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {

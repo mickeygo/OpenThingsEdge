@@ -9,10 +9,12 @@ namespace ThingsEdge.Router.Handlers.Health;
 public sealed class HttpDestinationHealthChecker : IDestinationHealthChecker
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly RESTfulDestinationOptions _restfulOptions;
 
-    public HttpDestinationHealthChecker(IHttpClientFactory httpClientFactory)
+    public HttpDestinationHealthChecker(IHttpClientFactory httpClientFactory, IOptions<RESTfulDestinationOptions> restfulOptions)
     {
         _httpClientFactory = httpClientFactory;
+        _restfulOptions = restfulOptions.Value;
     }
 
     public async Task<DestinationHealthState> CheckAsync(CancellationToken cancellationToken)
@@ -21,7 +23,7 @@ public sealed class HttpDestinationHealthChecker : IDestinationHealthChecker
 
         try
         {
-            var resp = await httpClient.GetAsync(ForwarderConstants.HealthRequestUri, cancellationToken).ConfigureAwait(false);
+            var resp = await httpClient.GetAsync(_restfulOptions.HealthRequestUrl, cancellationToken).ConfigureAwait(false);
             return resp.IsSuccessStatusCode ? DestinationHealthState.Good : DestinationHealthState.Bad;
         }
         catch (Exception)

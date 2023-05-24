@@ -5,23 +5,39 @@
 /// </summary>
 public sealed class ResponseResult : AbstractResult<ResponseMessage>
 {
-    public static ResponseResult FromOk(ResponseMessage data)
+    /// <summary>
+    /// Source 可为 HTTP、MQTT、或 Native。
+    /// </summary>
+    public ResponseSource Source { get; init; }
+
+    public static ResponseResult FromOk(ResponseMessage data, ResponseSource source = ResponseSource.None)
     {
-        return new ResponseResult() { Data = data };
+        return new ResponseResult() { Data = data, Source = source };
     }
 
-    public static ResponseResult FromOk(int code, ResponseMessage data)
+    public static ResponseResult FromOk(int code, ResponseMessage data, ResponseSource source = ResponseSource.None)
     {
-        return new ResponseResult() { Code = code, Data = data };
+        return new ResponseResult() { Code = code, Data = data, Source = source };
     }
 
-    public static ResponseResult FromError(int code, string errMessage)
+    public static ResponseResult FromError(int code, string errMessage, ResponseSource source = ResponseSource.None)
     {
-        return new ResponseResult() { Code = code, ErrorMessage = errMessage };
+        return new ResponseResult() { Code = code, ErrorMessage = errMessage, Source = source };
     }
 
-    public static ResponseResult FromError(ErrorCode code, string errMessage)
+    public static ResponseResult FromError(ErrorCode code, string errMessage, ResponseSource source = ResponseSource.None)
     {
-        return new ResponseResult() { Code = (int)code, ErrorMessage = errMessage };
+        return new ResponseResult() { Code = (int)code, ErrorMessage = errMessage, Source = source };
+    }
+
+    public enum ResponseSource
+    {
+        None = 0,
+
+        HTTP,
+
+        MQTT,
+
+        Native,
     }
 }

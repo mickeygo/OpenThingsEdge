@@ -1,4 +1,4 @@
-﻿using MQTTnet.Extensions.ManagedClient;
+﻿using MQTTnet.Client;
 
 namespace ThingsEdge.Router.Transport.MQTT;
 
@@ -10,14 +10,19 @@ public interface IMQTTClient : IDisposable
     /// <summary>
     /// MQTT 客户端
     /// </summary>
-    public IManagedMqttClient ManagedMqttClient { get; }
+    IMqttClient MqttClient { get; }
 
     /// <summary>
-    /// 启动服务。
+    /// 连接服务
     /// </summary>
-    /// <remarks>注：启动后尝试连接Broker，连接成功后会订阅主题，因此在开启前选先订阅好主题。</remarks>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task StartAsync();
+    Task ConnectAsync(CancellationToken cancellationToken = default);
 
-    Task StopAsync(bool cleanDisconnect = true);
+    /// <summary>
+    /// 断开连接。
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task DisconnectAsync(CancellationToken cancellationToken = default);
 }

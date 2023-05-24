@@ -55,7 +55,7 @@ internal sealed class EquipmentStateService : IEquipmentStateService
                 Line = line,
                 EquipmentCode = equipmentCode,
                 EquipmentName = equipmentCode,
-                RunningState = EquipmentRunningState.Running,
+                RunningState = runningState,
                 StartTime = DateTime.Now,
             });
         }

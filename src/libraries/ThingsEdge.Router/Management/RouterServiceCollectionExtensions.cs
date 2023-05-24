@@ -1,4 +1,4 @@
-﻿using ThingsEdge.Router.Devices;
+﻿using ThingsEdge.Router.Forwarder;
 using ThingsEdge.Router.Management;
 
 namespace ThingsEdge.Router;
@@ -33,6 +33,7 @@ public static class RouterServiceCollectionExtensions
     private static IServiceCollection AddRouterServices(this IServiceCollection services)
     {
         services.AddSingleton<TagDataContainer>();
+        services.AddSingleton<IForwarderFactory, InternalForwarderFactory>();
 
         return services;
     }

@@ -8,11 +8,15 @@ namespace ThingsEdge.Router.Forwarder;
 internal sealed class HttpForwarder : IForwarder
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly RESTfulDestinationOptions _restfulOptions;
     private readonly ILogger _logger;
 
-    public HttpForwarder(IHttpClientFactory httpClientFactory, ILogger<HttpForwarder> logger)
+    public HttpForwarder(IHttpClientFactory httpClientFactory, 
+        IOptions<RESTfulDestinationOptions> restfulOptions, 
+        ILogger<HttpForwarder> logger)
     {
         _httpClientFactory = httpClientFactory;
+        _restfulOptions = restfulOptions.Value;
         _logger = logger;
     }
 
@@ -29,8 +33,8 @@ internal sealed class HttpForwarder : IForwarder
             // 路由适配
             var requestUri = message.Flag switch
             {
-                TagFlag.Notice => "/api/iotgateway/notice",
-                TagFlag.Trigger => "/api/iotgateway/trigger",
+                TagFlag.Notice => _restfulOptions.NoticeRequestUrl,
+                TagFlag.Trigger => _restfulOptions.TriggerRequestUrl,
                 _ => "",
             };
 
@@ -38,7 +42,7 @@ internal sealed class HttpForwarder : IForwarder
             var resp = await httpClient.PostAsJsonAsync(requestUri, message, cancellationToken).ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode)
             {
-                return ResponseResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}");
+                return ResponseResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}", ResponseResult.ResponseSource.HTTP);
             }
 
             var ret = await resp.Content.ReadFromJsonAsync<HttpResponseResult>(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -46,30 +50,30 @@ internal sealed class HttpForwarder : IForwarder
             {
                 Request = message,
                 State = ret?.Code ?? 0,
-                CallbackItems = ret?.Data ?? new(0),
+                CallbackItems = ret?.Data,
             };
 
             // 记录响应的数据
             _logger.LogInformation("RequestId: {RequestId}, 状态: {State}, 回调值: {CallbackItems}",
                message.RequestId, respMessage.State, JsonSerializer.Serialize(respMessage.CallbackItems));
 
-            return ResponseResult.FromOk(respMessage);
+            return ResponseResult.FromOk(respMessage, ResponseResult.ResponseSource.HTTP);
         }
         catch (OperationCanceledException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpRequestTimedOut, $"请求 HTTP 服务超时，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrorCode.HttpRequestTimedOut, $"请求 HTTP 服务超时，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
         }
         catch (HttpRequestException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpRequestError, $"调用 HTTP 服务请求异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrorCode.HttpRequestError, $"调用 HTTP 服务请求异常，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
         }
         catch (JsonException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpResponseJsonError, $"调用 HTTP 服务解析返回数据异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrorCode.HttpResponseJsonError, $"调用 HTTP 服务解析返回数据异常，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
         }
         catch (Exception ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpError, $"调用 HTTP 服务异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrorCode.HttpError, $"调用 HTTP 服务异常，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
         }
     }
 }

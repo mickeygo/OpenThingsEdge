@@ -10,13 +10,13 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
 {
     private readonly IEventPublisher _publisher;
-    private readonly IForwarder _forwarder;
+    private readonly IForwarderFactory _forwarderFactory;
     private readonly ILogger _logger;
 
-    public NoticeHandler(IEventPublisher publisher, IForwarder forwarder, ILogger<NoticeHandler> logger)
+    public NoticeHandler(IEventPublisher publisher, IForwarderFactory forwarderFacory, ILogger<NoticeHandler> logger)
     {
         _publisher = publisher;
-        _forwarder = forwarder;
+        _forwarderFactory = forwarderFacory;
         _logger = logger;
     }
 
@@ -39,7 +39,7 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
-        var result = await _forwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
+        var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
             string msg = $"推送消息失败，设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {result.ErrorMessage}";

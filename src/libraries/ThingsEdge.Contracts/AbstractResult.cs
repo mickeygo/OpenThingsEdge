@@ -34,6 +34,5 @@ public class AbstractResult<T> : AbstractResult
     /// <summary>
     /// 返回数据，若出现错误则为默认值。
     /// </summary>
-    [NotNull]
     public T? Data { get; set; }
 }
