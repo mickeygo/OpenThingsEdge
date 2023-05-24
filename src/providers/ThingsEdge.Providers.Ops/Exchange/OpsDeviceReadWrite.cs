@@ -4,10 +4,12 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 
 internal sealed class OpsDeviceReadWrite : IDeviceReadWrite
 {
+    private readonly TagDataSnapshot _tagDataSnapshot;
     private readonly DriverConnectorManager _driverConnectorManager;
 
-    public OpsDeviceReadWrite(DriverConnectorManager driverConnectorManager)
+    public OpsDeviceReadWrite(TagDataSnapshot tagDataSnapshot, DriverConnectorManager driverConnectorManager)
     {
+        _tagDataSnapshot = tagDataSnapshot;
         _driverConnectorManager = driverConnectorManager;
     }
 
@@ -16,7 +18,6 @@ internal sealed class OpsDeviceReadWrite : IDeviceReadWrite
         DeviceReadResult result = new();
 
         // 从快照中读取
-
         var driver = _driverConnectorManager.GetConnector(deviceId);
         if (driver == null)
         {
