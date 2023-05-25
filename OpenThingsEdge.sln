@@ -53,7 +53,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Application", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Providers.Ops.Tests", "src\providers\tests\ThingsEdge.Providers.Ops.Tests\ThingsEdge.Providers.Ops.Tests.csproj", "{405F26D9-3C0C-4AB0-A312-3B94507E44C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.WpfApp", "src\apps\ThingsEdge.WpfApp\ThingsEdge.WpfApp.csproj", "{AF467393-45E7-4BCC-BD16-D3E94B119E24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.ServerApp", "src\apps\ThingsEdge.ServerApp\ThingsEdge.ServerApp.csproj", "{440A067B-C556-4D34-9FFD-4D846DF8C69E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,12 +140,12 @@ Global
 		{405F26D9-3C0C-4AB0-A312-3B94507E44C2}.Package|Any CPU.Build.0 = Package|Any CPU
 		{405F26D9-3C0C-4AB0-A312-3B94507E44C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{405F26D9-3C0C-4AB0-A312-3B94507E44C2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24}.Package|Any CPU.ActiveCfg = Package|Any CPU
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24}.Package|Any CPU.Build.0 = Package|Any CPU
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E}.Package|Any CPU.Build.0 = Package|Any CPU
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -171,7 +171,7 @@ Global
 		{42F172D5-196A-4BC7-8E49-C54DDBA1EA41} = {F15CEE90-E130-4353-8FB8-EFC14DF62009}
 		{8BE26977-8A13-400F-B6A4-EC5D729D6E2B} = {DD95CE6B-C4F9-4DD6-9E39-39628F1271B8}
 		{405F26D9-3C0C-4AB0-A312-3B94507E44C2} = {36B1FD5F-8D59-448D-BC7B-26901F94C3F6}
-		{AF467393-45E7-4BCC-BD16-D3E94B119E24} = {DD95CE6B-C4F9-4DD6-9E39-39628F1271B8}
+		{440A067B-C556-4D34-9FFD-4D846DF8C69E} = {DD95CE6B-C4F9-4DD6-9E39-39628F1271B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77243E50-0F8A-45CE-B0DD-6CE24BDE6D8B}
