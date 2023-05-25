@@ -3,6 +3,8 @@ using ThingsEdge.Application.Domain.Services;
 using ThingsEdge.Application.Dtos;
 using ThingsEdge.Application.Management.Equipment;
 using ThingsEdge.Application.Models;
+using ThingsEdge.Contracts.Variables;
+using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Application.Handlers;

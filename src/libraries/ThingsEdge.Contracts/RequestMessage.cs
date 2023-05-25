@@ -1,4 +1,4 @@
-﻿using ThingsEdge.Contracts.Devices;
+﻿using ThingsEdge.Contracts.Variables;
 
 namespace ThingsEdge.Contracts;
 

@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Devices;
 
 /// <summary>
-/// 设备读写数据的接口。
+/// 设备数据读写接口。
 /// </summary>
 public interface IDeviceReadWrite
 {

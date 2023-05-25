@@ -1,6 +1,7 @@
 ﻿using ThingsEdge.Application.Dtos;
 using ThingsEdge.Application.Management.Equipment;
 using ThingsEdge.Application.Models;
+using ThingsEdge.Contracts.Variables;
 using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Application.Handlers;

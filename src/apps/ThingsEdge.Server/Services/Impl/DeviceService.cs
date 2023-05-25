@@ -1,5 +1,5 @@
-﻿using ThingsEdge.Contracts;
-using ThingsEdge.Contracts.Devices;
+﻿using ThingsEdge.Contracts.Variables;
+using ThingsEdge.Router.Devices;
 using ThingsEdge.Server.Models;
 
 namespace ThingsEdge.Server.Services.Impl;

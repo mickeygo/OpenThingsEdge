@@ -12,4 +12,4 @@ global using MediatR;
 global using Nito.AsyncEx;
 
 global using ThingsEdge.Contracts;
-global using ThingsEdge.Contracts.Devices;
+global using ThingsEdge.Contracts.Variables;

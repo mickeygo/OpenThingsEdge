@@ -6,12 +6,12 @@
 public sealed class OpsConfig
 {
     /// <summary>
-    /// 默认的标记扫描速率, 默认为 200ms。
+    /// 默认的标记扫描速率, 默认为 100ms。
     /// </summary>
-    public int DefaultScanRate { get; init; } = 200;
+    public int DefaultScanRate { get; init; } = 100;
 
     /// <summary>
-    /// 开关启动后数据扫描速率，默认为 100ms。
+    /// 开关启动后曲线数据扫描速率，默认为 100ms。
     /// </summary>
     public int SwitchScanRate { get; init; } = 100;
 

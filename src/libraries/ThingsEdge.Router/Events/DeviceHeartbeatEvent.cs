@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Router.Model;
-
-namespace ThingsEdge.Router.Events;
+﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
 /// 与设备连接的心跳事件。

@@ -1,0 +1,20 @@
+﻿namespace ThingsEdge.Providers.Ops.Snapshot;
+
+/// <summary>
+/// PayloadData 快照数据。
+/// </summary>
+public sealed class PayloadDataSnapshot
+{
+    [NotNull]
+    public PayloadData? Data { get; init; }
+
+    /// <summary>
+    /// 数据更新时间
+    /// </summary>
+    public DateTime UpdatedTime { get; internal set; } = DateTime.Now;
+
+    /// <summary>
+    /// 数据更新的版本
+    /// </summary>
+    public long Version { get; internal set; } = 1;
+}

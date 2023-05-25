@@ -54,7 +54,7 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices(services =>
         {
             services.AddSingleton<IDeviceManager, DefaultDeviceManager>();
-            services.AddSingleton<IDeviceSource, FileDeviceSource>();
+            services.AddSingleton<IDeviceProvider, FileDeviceProvider>();
         });
         return builder;
     }

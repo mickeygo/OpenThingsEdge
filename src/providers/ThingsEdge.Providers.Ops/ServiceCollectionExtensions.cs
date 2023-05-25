@@ -1,6 +1,7 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Handlers;
+using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Devices;
 
 namespace ThingsEdge.Router;
@@ -25,7 +26,8 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<DriverConnectorManager>();
             services.AddSingleton<SwitchContainer>();
             services.AddSingleton<CurveStorage>();
-            services.AddSingleton<IDeviceReadWrite, OpsDeviceReadWrite>();
+            services.AddSingleton<ITagDataSnapshot, InternalTagDataSnapshot>();
+            services.AddTransient<IDeviceReadWrite, OpsDeviceReadWrite>();
         });
 
         return builder;

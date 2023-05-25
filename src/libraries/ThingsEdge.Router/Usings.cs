@@ -19,4 +19,4 @@ global using Microsoft.Extensions.Options;
 global using MediatR;
 
 global using ThingsEdge.Contracts;
-global using ThingsEdge.Contracts.Devices;
+global using ThingsEdge.Contracts.Variables;

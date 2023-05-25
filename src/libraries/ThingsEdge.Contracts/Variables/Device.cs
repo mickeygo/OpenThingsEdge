@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Devices;
-
-namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts.Variables;
 
 /// <summary>
 /// 设备信息。一种设备对应指定通道中的一种PLC型号。

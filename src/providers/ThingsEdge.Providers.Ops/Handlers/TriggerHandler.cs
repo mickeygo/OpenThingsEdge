@@ -1,5 +1,6 @@
 ﻿using ThingsEdge.Common.EventBus;
 using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
 
@@ -11,12 +12,17 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
     private readonly IEventPublisher _publisher;
+    private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly IForwarderFactory _forwarderFactory;
     private readonly ILogger _logger;
 
-    public TriggerHandler(IEventPublisher publisher, IForwarderFactory forwarderFactory, ILogger<TriggerHandler> logger)
+    public TriggerHandler(IEventPublisher publisher,
+        ITagDataSnapshot tagDataSnapshot,
+        IForwarderFactory forwarderFactory, 
+        ILogger<TriggerHandler> logger)
     {
         _publisher = publisher;
+        _tagDataSnapshot = tagDataSnapshot;
         _forwarderFactory = forwarderFactory;
         _logger = logger;
     }
@@ -46,7 +52,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
             {
-                var (ok5, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrorCode.MultiReadItemError).ConfigureAwait(false);
+                var (ok5, _, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrorCode.MultiReadItemError).ConfigureAwait(false);
                 if (!ok5)
                 {
                     string msg2 = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err5}";
@@ -58,6 +64,9 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         {
             message.Values.AddRange(normalPaydatas!);
         }
+
+        // 设置标记值快照。
+        _tagDataSnapshot.Change(message.Values);
 
         // 不管读取是否成功，都发布标记数据请求事件（不用等待）。
         await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
@@ -78,7 +87,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
             {
-                var (ok4, err4) = await notification.Connector.WriteAsync(notification.Tag, result.Code).ConfigureAwait(false);
+                var (ok4, _, err4) = await notification.Connector.WriteAsync(notification.Tag, result.Code).ConfigureAwait(false);
                 if (!ok4)
                 {
                     string msg2 = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err4}";
@@ -113,7 +122,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                     break;
                 }
 
-                var (ok2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
+                var (ok2, _, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
                 if (!ok2)
                 {
                     string msg = $"回写标记数据失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err2}";
@@ -127,7 +136,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 
         // 回写标记状态。
         int tagCode = tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
-        var (ok3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
+        var (ok3, _, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {
             string msg = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err3}";

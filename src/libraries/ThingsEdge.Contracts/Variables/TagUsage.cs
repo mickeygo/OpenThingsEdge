@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts.Devices;
+﻿namespace ThingsEdge.Contracts.Variables;
 
 /// <summary>
 /// 标记数据用途。

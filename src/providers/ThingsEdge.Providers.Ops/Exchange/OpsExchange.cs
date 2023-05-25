@@ -2,12 +2,13 @@
 using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Handlers;
 using ThingsEdge.Router;
+using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
 /// <summary>
-/// 信息采集引擎。
+/// 数据交换引擎。
 /// </summary>
 public sealed class OpsExchange : IExchange
 {
@@ -47,7 +48,7 @@ public sealed class OpsExchange : IExchange
 
         _cts ??= new();
 
-        var devices = _deviceManager.GetDevices();
+        var devices = _deviceManager.ReloadDevices();
         _driverConnectorManager.Load(devices);
         await _driverConnectorManager.ConnectAsync().ConfigureAwait(false);
 
@@ -117,14 +118,7 @@ public sealed class OpsExchange : IExchange
                         }
 
                         // 心跳标记数据类型必须为 bool 或 int16
-                        bool on = tag.DataType switch
-                        {
-                            TagDataType.Bit => data!.GetBit(),
-                            TagDataType.Int => data!.GetInt() == 1,
-                            _ => throw new NotSupportedException(),
-                        };
-
-                        if (on)
+                        if (CheckOn(data!))
                         {
                             if (tag.DataType == TagDataType.Bit)
                             {
@@ -138,7 +132,7 @@ public sealed class OpsExchange : IExchange
                             if (!TagValueSet.CompareAndSwap(tag.TagId, true))
                             {
                                 // 发布心跳正常事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true), 
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true, data), 
                                     PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                             }
                         }
@@ -373,15 +367,7 @@ public sealed class OpsExchange : IExchange
                         // 读取成功且开关处于 on 状态，发送开启动作信号。
                         if (ok)
                         {
-                            // 开关标记数据类型必须为 bool 或 int16
-                            bool on = tag.DataType switch
-                            {
-                                TagDataType.Bit => data!.GetBit(),
-                                TagDataType.Int => data!.GetInt() == 1,
-                                _ => throw new NotSupportedException(),
-                            };
-
-                            if (on) // Open 标记
+                            if (CheckOn(data!)) // Open 标记
                             {
                                 // Open 信号，在本身处于关闭状态，才执行开启动作。
                                 if (!isOn)
@@ -440,6 +426,7 @@ public sealed class OpsExchange : IExchange
                                 ChannelName = channelName,
                                 Device = device,
                                 Tag = tag,
+                                Self = SetOff(tag),
                                 State = SwitchState.Off,
                                 IsSwitchSignal = true,
                             }).ConfigureAwait(false);
@@ -466,6 +453,8 @@ public sealed class OpsExchange : IExchange
         }
 
         return Task.CompletedTask;
+
+      
     }
 
     public async Task ShutdownAsync()
@@ -501,5 +490,51 @@ public sealed class OpsExchange : IExchange
     public void Dispose()
     {
         ShutdownAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// 检查数据是否处于 On 状态。
+    /// </summary>
+    /// <remarks>数据类型必须为 bool 或 short 类型，且不为数组。</remarks>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
+    private static bool CheckOn(PayloadData data)
+    {
+        if (data.IsArray())
+        {
+            throw new NotSupportedException();
+        }
+
+        return data.DataType switch
+        {
+            TagDataType.Bit => data!.GetBit(),
+            TagDataType.Int => data!.GetInt() == 1,
+            _ => throw new NotSupportedException(),
+        };
+    }
+
+    /// <summary>
+    /// 设置标记为 Off 状态，bool 类型设置为 false, 数值类型设置为 0。
+    /// </summary>
+    /// <remarks>数据类型必须为 bool 或 short 类型，且不为数组。</remarks>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
+    private static PayloadData SetOff(Tag tag)
+    {
+        var data = PayloadData.FromTag(tag);
+        if (data.IsArray())
+        {
+            throw new NotSupportedException();
+        }
+
+        data.Value = data.DataType switch
+        {
+            TagDataType.Bit => false,
+            TagDataType.Int => 0,
+            _ => throw new NotSupportedException(),
+        };
+        return data;
     }
 }

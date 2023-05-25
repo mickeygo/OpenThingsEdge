@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Devices;
-
-namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Router.Devices;
 
 /// <summary>
 /// 设备管理。
@@ -12,34 +10,6 @@ public interface IDeviceManager
     /// </summary>
     /// <returns></returns>
     List<Channel> GetChannels();
-
-    /// <summary>
-    /// 获取所有的设备。
-    /// </summary>
-    /// <returns></returns>
-    List<Device> GetDevices();
-
-    /// <summary>
-    /// 获取指定通道下指定名称的设备。
-    /// </summary>
-    /// <param name="channelName">通道名称</param>
-    /// <param name="deviceName">设备名称</param>
-    /// <returns></returns>
-    Device? GetDevice(string channelName, string deviceName);
-
-    /// <summary>
-    /// 获取指定的设备。
-    /// </summary>
-    /// <param name="deviceId">设备Id。</param>
-    /// <returns></returns>
-    Device? GetDevice(string deviceId);
-
-    // <summary>
-    /// 获取指定的设备。
-    /// </summary>
-    /// <param name="deviceId">设备Id。</param>
-    /// <returns></returns>
-    (string? channelName, Device? device) GetDevice2(string deviceId);
 
     /// <summary>
     /// 添加通道。
@@ -98,4 +68,9 @@ public interface IDeviceManager
     /// </summary>
     /// <param name="tagId">标记Id。</param>
     void RemoveTag(string tagId);
+
+    /// <summary>
+    /// 刷新数据。
+    /// </summary>
+    void Refresh();
 }

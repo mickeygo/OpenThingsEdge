@@ -1,7 +1,7 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
-using ThingsEdge.Contracts.Devices;
+using ThingsEdge.Contracts.Variables;
 
 namespace ThingsEdge.Contracts.Tests;
 

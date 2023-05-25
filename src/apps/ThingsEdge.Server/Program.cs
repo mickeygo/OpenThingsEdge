@@ -23,8 +23,8 @@ builder.Services.AddGlobalForServer();
 builder.Services.AddThingsEdgeApplication();
 builder.Host.AddThingsEdgeRouter()
     .AddDeviceFileProvider()
-    .AddHttpForwarder(options => { options.BaseAddress = "https://localhost:7214"; })
-    .AddMqttClientForwarder(options => { options.ConnectionUri = "mqtt://127.0.0.1"; options.ClientId = "ThingsEdge"; })
+    .AddHttpForwarder()
+    .AddMqttClientForwarder()
     .AddOpsProvider()
     .AddEventBus();
 

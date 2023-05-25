@@ -31,6 +31,7 @@ internal sealed class SwitchEvent : INotification
     /// <summary>
     /// 读取的标记值，开关开启/闭合时才有值。
     /// </summary>
+    [NotNull]
     public PayloadData? Self { get; init; }
 
     /// <summary>

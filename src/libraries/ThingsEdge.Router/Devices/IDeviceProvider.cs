@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Router.Devices;
 
 /// <summary>
-/// 设备数据来源
+/// 设备数据提供来源。
 /// </summary>
-public interface IDeviceSource
+public interface IDeviceProvider
 {
     /// <summary>
     /// 获取通道数据。

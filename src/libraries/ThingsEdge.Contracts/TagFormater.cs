@@ -1,5 +1,5 @@
-﻿using ThingsEdge.Contracts.Devices;
-using ThingsEdge.Contracts.Utils;
+﻿using ThingsEdge.Contracts.Utils;
+using ThingsEdge.Contracts.Variables;
 
 namespace ThingsEdge.Contracts;
 

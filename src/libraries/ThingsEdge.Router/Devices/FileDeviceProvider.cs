@@ -3,7 +3,7 @@
 /// <summary>
 /// 设备数据来源于本地文件。
 /// </summary>
-public sealed class FileDeviceSource : IDeviceSource
+public sealed class FileDeviceProvider : IDeviceProvider
 {
     /// <summary>
     /// 置件文配路径，默认为 "[执行目录]/config/tags.conf"，可以为相对路径。

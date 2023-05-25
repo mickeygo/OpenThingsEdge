@@ -4,10 +4,10 @@ internal sealed class DefaultDeviceManager : IDeviceManager
 {
     public const string CacheName = "__ThingsEdge.Device.Cache";
 
-    private readonly IDeviceSource _deviceSource;
+    private readonly IDeviceProvider _deviceSource;
     private readonly IMemoryCache _cache;
 
-    public DefaultDeviceManager(IDeviceSource deviceSource, IMemoryCache cache)
+    public DefaultDeviceManager(IDeviceProvider deviceSource, IMemoryCache cache)
     {
         _deviceSource = deviceSource;
         _cache = cache;
@@ -21,87 +21,62 @@ internal sealed class DefaultDeviceManager : IDeviceManager
         }) ?? new(0);
     }
 
-    public List<Device> GetDevices()
-    {
-        var channels = GetChannels();
-        return channels.SelectMany(s => s.Devices).ToList();
-    }
-
-    public Device? GetDevice(string channelName, string deviceName)
-    {
-        var channels = GetChannels();
-        var channel = channels.FirstOrDefault(s => s.Name == channelName);
-        if (channel == null)
-        {
-            return default;
-        }
-
-        return channel.Devices.FirstOrDefault(s => s.Name == deviceName);
-    }
-
-    public Device? GetDevice(string deviceId)
-    {
-        var devices = GetDevices();
-        return devices.FirstOrDefault(s => s.DeviceId == deviceId);
-    }
-
-    public (string? channelName, Device? device) GetDevice2(string deviceId)
-    {
-        var channels = GetChannels();
-        foreach (var channel in channels)
-        {
-            var device = channel.Devices.FirstOrDefault(s => s.DeviceId == deviceId);
-            if (device != null)
-            {
-                return (channel.Name, device);
-            }
-        }
-
-        return (default, default);
-    }
-
     public void AddChannel(Channel channel)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void AddDevice(string channelId, Device device)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void AddDeviceTag(string tagGroupId, Tag tag)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void AddTagGroup(string deviceId, TagGroup tagGroup)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void AddTag(string tagGroupId, Tag tag)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void RemoveChannel(string channelId)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void RemoveDevice(string deviceId)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void RemoveTagGroup(string tagGroupId)
     {
+        Refresh();
         throw new NotImplementedException();
     }
 
     public void RemoveTag(string tagId)
     {
+        Refresh();
         throw new NotImplementedException();
+    }
+
+    public void Refresh()
+    {
+        _cache.Remove(CacheName);
     }
 }

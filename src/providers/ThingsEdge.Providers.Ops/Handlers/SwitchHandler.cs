@@ -1,5 +1,6 @@
 ﻿using ThingsEdge.Common.EventBus;
 using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
@@ -12,13 +13,19 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
     private const int AllowMaxWriteCount = 3072; // 文件中允许写入最大的次数。
 
     private readonly IEventPublisher _publisher;
+    private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly SwitchContainer _container;
     private readonly CurveStorage _curveStorage;
     private readonly ILogger _logger;
 
-    public SwitchHandler(IEventPublisher publisher, SwitchContainer container, CurveStorage curveStorage, ILogger<SwitchHandler> logger)
+    public SwitchHandler(IEventPublisher publisher, 
+        ITagDataSnapshot tagDataSnapshot,
+        SwitchContainer container, 
+        CurveStorage curveStorage, 
+        ILogger<SwitchHandler> logger)
     {
         _publisher = publisher;
+        _tagDataSnapshot = tagDataSnapshot;
         _container = container;
         _curveStorage = curveStorage;
         _logger = logger;
@@ -40,7 +47,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 },
                 Flag = notification.Tag.Flag,
             };
-            message.Values.Add(notification.Self!);
+            message.Values.Add(notification.Self);
 
             if (notification.State == SwitchState.On)
             {
@@ -78,6 +85,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                 }
 
+                // 获取或创建数据写入器（即使 sn 和 no 读取失败继续）
                 var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(sn, tagGroup?.Name, no)); 
 
                 // 添加头信息
@@ -97,6 +105,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                 }
             }
+
+            // 设置标记值快照。
+            _tagDataSnapshot.Change(message.Values);
 
             // 发布标记数据请求事件。
             await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
@@ -128,6 +139,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 
             return;
         }
+
+        // 设置标记值快照。
+        _tagDataSnapshot.Change(normalPaydatas!);
 
         // 检测写入对象是否已关闭
         if (!writer2.IsClosed)

@@ -24,17 +24,23 @@ internal sealed class HeartbeatEvent : INotification
     public Tag? Tag { get; init; }
 
     /// <summary>
+    /// 读取的标记值
+    /// </summary>
+    public PayloadData? Self { get; init; }
+
+    /// <summary>
     /// 是否处于连接状态
     /// </summary>
     public bool IsConnected { get; init; }
 
-    public static HeartbeatEvent Create(string channelName, Device device, Tag tag, bool isConnected = false)
+    public static HeartbeatEvent Create(string channelName, Device device, Tag tag, bool isConnected = false, PayloadData? self = null)
     {
         return new HeartbeatEvent
         {
             ChannelName = channelName,
             Device = device,
             Tag = tag,
+            Self = self,
             IsConnected = isConnected,
         };
     }

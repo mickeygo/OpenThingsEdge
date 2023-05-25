@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Common.EventBus;
+﻿using MediatR;
+
+namespace ThingsEdge.Common.EventBus;
 
 /// <summary>
 /// 事件发布器。

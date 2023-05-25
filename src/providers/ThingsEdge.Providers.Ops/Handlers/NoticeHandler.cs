@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
 
@@ -10,12 +11,17 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
 {
     private readonly IEventPublisher _publisher;
+    private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly IForwarderFactory _forwarderFactory;
     private readonly ILogger _logger;
 
-    public NoticeHandler(IEventPublisher publisher, IForwarderFactory forwarderFacory, ILogger<NoticeHandler> logger)
+    public NoticeHandler(IEventPublisher publisher, 
+        ITagDataSnapshot tagDataSnapshot,
+        IForwarderFactory forwarderFacory, 
+        ILogger<NoticeHandler> logger)
     {
         _publisher = publisher;
+        _tagDataSnapshot = tagDataSnapshot;
         _forwarderFactory = forwarderFacory;
         _logger = logger;
     }
@@ -34,6 +40,9 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
             Flag = notification.Tag.Flag,
         };
         message.Values.Add(notification.Self);
+
+        // 设置标记值快照。
+        _tagDataSnapshot.Change(message.Values);
 
         // 发布标记数据请求事件（不用等待）。
         await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);

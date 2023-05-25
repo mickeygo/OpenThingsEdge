@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Contracts.Devices;
+﻿namespace ThingsEdge.Contracts.Variables;
 
 /// <summary>
 /// Channel 模型。

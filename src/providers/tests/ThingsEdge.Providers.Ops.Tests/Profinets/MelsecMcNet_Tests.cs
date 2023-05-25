@@ -1,5 +1,5 @@
 ﻿using Ops.Communication.Profinet.Melsec;
-using ThingsEdge.Contracts.Devices;
+using ThingsEdge.Contracts.Variables;
 using ThingsEdge.Providers.Ops.Exchange;
 
 namespace ThingsEdge.Providers.Ops.Tests.Profinets;

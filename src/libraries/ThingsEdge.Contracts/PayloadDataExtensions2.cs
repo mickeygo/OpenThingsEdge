@@ -161,7 +161,7 @@ public static class PayloadDataExtensions2
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="JsonException"></exception>
-    public static byte[]? GetByteArray(this PayloadData payload)
+    public static byte[]? FetchByteArray(this PayloadData payload)
     {
         if (payload.Value is not JsonElement jsonElement)
         {
