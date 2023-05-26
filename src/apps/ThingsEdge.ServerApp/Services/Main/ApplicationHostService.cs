@@ -3,7 +3,7 @@
 /// <summary>
 /// Managed host of the application.
 /// </summary>
-public class ApplicationHostService : IHostedService
+public sealed class ApplicationHostService : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
     private INavigationWindow? _navigationWindow;

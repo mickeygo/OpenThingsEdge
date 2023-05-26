@@ -1,0 +1,24 @@
+{
+  "Items": [
+    {
+      "Content": "看板",
+      "PageTag": "dashboard",
+      "Icon": "Home24",
+      "PageType": "DashboardPage"
+    },
+    {
+      "Content": "数据",
+      "PageTag": "data",
+      "Icon": "DataHistogram24",
+      "PageType": "DataPage"
+    }
+  ],
+  "Footer": [
+    {
+      "Content": "设置",
+      "PageTag": "settings",
+      "Icon": "Settings24",
+      "PageType": "SettingsPage"
+    }
+  ]
+}

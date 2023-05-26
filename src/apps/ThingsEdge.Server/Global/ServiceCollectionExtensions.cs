@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddGlobalForServer(this IServiceCollection services)
         {
-            services.AddNav(Path.Combine(AppContext.BaseDirectory, $"wwwroot/nav/nav.json"));
+            services.AddNav(Path.Combine(AppContext.BaseDirectory, "wwwroot", "nav", "nav.json"));
             services.AddScoped<GlobalConfig>();
 
             services.AddTransient<IDeviceService, DeviceService>();

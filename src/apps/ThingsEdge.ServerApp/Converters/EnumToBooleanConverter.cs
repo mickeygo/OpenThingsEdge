@@ -1,6 +1,9 @@
-﻿namespace ThingsEdge.ServerApp.Helpers;
+﻿namespace ThingsEdge.ServerApp.Converters;
 
-internal class EnumToBooleanConverter : IValueConverter
+/// <summary>
+/// 枚举类型 <see cref="ThemeType"/> 转换为bool类型。
+/// </summary>
+internal sealed class EnumToBooleanConverter : IValueConverter
 {
     public EnumToBooleanConverter()
     {
@@ -11,10 +14,10 @@ internal class EnumToBooleanConverter : IValueConverter
         if (parameter is not string enumString)
             throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
 
-        if (!Enum.IsDefined(typeof(Wpf.Ui.Appearance.ThemeType), value))
+        if (!Enum.IsDefined(typeof(ThemeType), value))
             throw new ArgumentException("ExceptionEnumToBooleanConverterValueMustBeAnEnum");
 
-        var enumValue = Enum.Parse(typeof(Wpf.Ui.Appearance.ThemeType), enumString);
+        var enumValue = Enum.Parse(typeof(ThemeType), enumString);
 
         return enumValue.Equals(value);
     }
@@ -24,6 +27,6 @@ internal class EnumToBooleanConverter : IValueConverter
         if (parameter is not string enumString)
             throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
 
-        return Enum.Parse(typeof(Wpf.Ui.Appearance.ThemeType), enumString);
+        return Enum.Parse(typeof(ThemeType), enumString);
     }
 }

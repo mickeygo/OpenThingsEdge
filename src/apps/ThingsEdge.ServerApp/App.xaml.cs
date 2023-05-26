@@ -1,5 +1,5 @@
 ﻿using Serilog;
-using ThingsEdge.ServerApp.Services;
+using ThingsEdge.ServerApp.Services.Impl;
 
 namespace ThingsEdge.ServerApp;
 
@@ -39,16 +39,11 @@ public partial class App
             services.AddScoped<INavigationWindow, Views.Windows.MainWindow>();
             services.AddScoped<MainWindowViewModel>();
 
-            // Views and ViewModels
-            services.AddScoped<DashboardPage>();
-            services.AddScoped<DashboardViewModel>();
-            services.AddScoped<DataPage>();
-            services.AddScoped<DataViewModel>();
-            services.AddScoped<SettingsPage>();
-            services.AddScoped<SettingsViewModel>();
-
             // Configuration
             services.Configure<AppConfig>(context.Configuration.GetSection(nameof(AppConfig)));
+
+            // 自定义服务配置
+            ConfigureAppServices(context, services);
         })
         .UseSerilog((hostingContext, loggerConfiguration) =>
         {
@@ -83,7 +78,7 @@ public partial class App
     private async void OnStartup(object sender, StartupEventArgs e)
     {
         // 只允许开启一个
-        _mutex = new Mutex(true, "Ops.Host.App", out var createdNew);
+        _mutex = new Mutex(true, "ThingsEdge.ServerApp", out var createdNew);
         if (!createdNew)
         {
             System.Windows.MessageBox.Show("已有一个程序在运行");
@@ -110,5 +105,24 @@ public partial class App
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+    }
+
+    /// <summary>
+    /// 配置 App 服务。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="services"></param>
+    private static void ConfigureAppServices(HostBuilderContext context, IServiceCollection services)
+    {
+        // Views and ViewModels
+        services.AddScoped<DashboardPage>();
+        services.AddScoped<DashboardViewModel>();
+        services.AddScoped<DataPage>();
+        services.AddScoped<DataViewModel>();
+        services.AddScoped<SettingsPage>();
+        services.AddScoped<SettingsViewModel>();
+
+        // Services
+        services.AddTransient<INavService, NavService>();
     }
 }

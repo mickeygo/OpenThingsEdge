@@ -1,23 +1,11 @@
 ﻿namespace ThingsEdge.ServerApp.ViewModels;
 
-public partial class DataViewModel : ObservableObject, INavigationAware
+public partial class DataViewModel : AbstractObservableNavViewModel
 {
-    private bool _isInitialized = false;
-
     [ObservableProperty]
     private IEnumerable<DataColor> _colors;
 
-    public void OnNavigatedTo()
-    {
-        if (!_isInitialized)
-            InitializeViewModel();
-    }
-
-    public void OnNavigatedFrom()
-    {
-    }
-
-    private void InitializeViewModel()
+    protected override void Initialize()
     {
         var random = new Random();
         var colorCollection = new List<DataColor>();
@@ -33,7 +21,5 @@ public partial class DataViewModel : ObservableObject, INavigationAware
             });
 
         Colors = colorCollection;
-
-        _isInitialized = true;
     }
 }

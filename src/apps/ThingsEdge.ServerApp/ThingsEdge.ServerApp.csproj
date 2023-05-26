@@ -25,7 +25,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\*.png" />
+    <Resource Include="Assets\img\*.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\nav\nav.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@
 /// <summary>
 /// Service that provides pages for navigation.
 /// </summary>
-public class PageService : IPageService
+public sealed class PageService : IPageService
 {
     /// <summary>
     /// Service which provides the instances of pages.
@@ -24,7 +24,7 @@ public class PageService : IPageService
         if (!typeof(FrameworkElement).IsAssignableFrom(typeof(T)))
             throw new InvalidOperationException("The page should be a WPF control.");
 
-        return (T?)_serviceProvider.GetService(typeof(T));
+        return _serviceProvider.GetService<T>();
     }
 
     /// <inheritdoc />

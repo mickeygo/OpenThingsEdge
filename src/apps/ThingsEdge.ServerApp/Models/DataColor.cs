@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.ServerApp.Models;
 
-public struct DataColor
+public readonly struct DataColor
 {
-    public Brush Color { get; set; }
+    public Brush Color { get; init; }
 }
