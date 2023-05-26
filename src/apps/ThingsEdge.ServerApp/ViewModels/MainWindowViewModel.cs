@@ -1,13 +1,11 @@
-﻿using Wpf.Ui.Controls.Interfaces;
-
-namespace ThingsEdge.ServerApp.ViewModels;
+﻿namespace ThingsEdge.ServerApp.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
     private bool _isInitialized = false;
 
     [ObservableProperty]
-    private string _applicationTitle = String.Empty;
+    private string _applicationTitle = string.Empty;
 
     [ObservableProperty]
     private ObservableCollection<INavigationControl> _navigationItems = new();
@@ -16,7 +14,7 @@ public partial class MainWindowViewModel : ObservableObject
     private ObservableCollection<INavigationControl> _navigationFooter = new();
 
     [ObservableProperty]
-    private ObservableCollection<MenuItem> _trayMenuItems = new();
+    private ObservableCollection<Wpf.Ui.Controls.MenuItem> _trayMenuItems = new();
 
     public MainWindowViewModel(INavigationService navigationService)
     {
@@ -57,9 +55,9 @@ public partial class MainWindowViewModel : ObservableObject
             }
         };
 
-        TrayMenuItems = new ObservableCollection<MenuItem>
+        TrayMenuItems = new ObservableCollection<Wpf.Ui.Controls.MenuItem>
         {
-            new MenuItem
+            new Wpf.Ui.Controls.MenuItem
             {
                 Header = "Home",
                 Tag = "tray_home"

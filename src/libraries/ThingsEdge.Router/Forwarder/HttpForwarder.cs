@@ -20,6 +20,8 @@ internal sealed class HttpForwarder : IForwarder
         _logger = logger;
     }
 
+    public ForworderSource Source => ForworderSource.HTTP;
+
     public async Task<ResponseResult> SendAsync(RequestMessage message, CancellationToken cancellationToken = default)
     {
         var httpClient = _httpClientFactory.CreateClient(ForwarderConstants.HttpClientName);
@@ -42,7 +44,7 @@ internal sealed class HttpForwarder : IForwarder
             var resp = await httpClient.PostAsJsonAsync(requestUri, message, cancellationToken).ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode)
             {
-                return ResponseResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}", ResponseResult.ResponseSource.HTTP);
+                return ResponseResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}", Source);
             }
 
             var ret = await resp.Content.ReadFromJsonAsync<HttpResponseResult>(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -57,23 +59,23 @@ internal sealed class HttpForwarder : IForwarder
             _logger.LogInformation("RequestId: {RequestId}, 状态: {State}, 回调值: {CallbackItems}",
                message.RequestId, respMessage.State, JsonSerializer.Serialize(respMessage.CallbackItems));
 
-            return ResponseResult.FromOk(respMessage, ResponseResult.ResponseSource.HTTP);
+            return ResponseResult.FromOk(respMessage, Source);
         }
         catch (OperationCanceledException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpRequestTimedOut, $"请求 HTTP 服务超时，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
+            return ResponseResult.FromError(ErrorCode.HttpRequestTimedOut, $"请求 HTTP 服务超时，错误：{ex.Message}", Source);
         }
         catch (HttpRequestException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpRequestError, $"调用 HTTP 服务请求异常，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
+            return ResponseResult.FromError(ErrorCode.HttpRequestError, $"调用 HTTP 服务请求异常，错误：{ex.Message}", Source);
         }
         catch (JsonException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpResponseJsonError, $"调用 HTTP 服务解析返回数据异常，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
+            return ResponseResult.FromError(ErrorCode.HttpResponseJsonError, $"调用 HTTP 服务解析返回数据异常，错误：{ex.Message}", Source);
         }
         catch (Exception ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpError, $"调用 HTTP 服务异常，错误：{ex.Message}", ResponseResult.ResponseSource.HTTP);
+            return ResponseResult.FromError(ErrorCode.HttpError, $"调用 HTTP 服务异常，错误：{ex.Message}", Source);
         }
     }
 }

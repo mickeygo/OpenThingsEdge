@@ -3,16 +3,18 @@ using ThingsEdge.Router.Transport.MQTT;
 
 namespace ThingsEdge.Router.Forwarder;
 
-internal sealed class MqttClientForwarder : IForwarder, IAsyncDisposable
+internal sealed partial class MqttClientForwarder : IForwarder, IAsyncDisposable
 {
     private readonly MQTTClientOptions _mqttClientOptions;
     private readonly ILogger _logger;
     private readonly AsyncLock _asyncLock = new();
     private IMQTTManagedClient? _managedMqttClient;
 
-    public MqttClientForwarder(IOptions<MQTTClientOptions> mqttClientOptions, ILogger<MqttClientForwarder> logger)
+    public ForworderSource Source => ForworderSource.MQTT;
+
+    public MqttClientForwarder(IOptionsMonitor<MQTTClientOptions> mqttClientOptions, ILogger<MqttClientForwarder> logger)
     {
-        _mqttClientOptions = mqttClientOptions.Value;
+        _mqttClientOptions = mqttClientOptions.CurrentValue;
         _logger = logger;
     }
 
@@ -20,7 +22,7 @@ internal sealed class MqttClientForwarder : IForwarder, IAsyncDisposable
     {
         try
         {
-            // 双检锁 
+            // 双检锁（本实例需注册为单例）
             if (_managedMqttClient is null)
             {
                 using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
@@ -33,15 +35,22 @@ internal sealed class MqttClientForwarder : IForwarder, IAsyncDisposable
                 }
             }
 
-            // Topic => {ChannelName}/{DeviceName}/[{TagGroupName}], eg: line01/device01/op010
-            StringBuilder topic = new();
-            topic.AppendFormat("{0}/{1}", message.Schema.ChannelName, message.Schema.DeviceName);
-            if (!string.IsNullOrEmpty(message.Schema.TagGroupName))
+            // 默认格式 {ChannelName}/{DeviceName}/{TagGroupName}, eg: line01/device01/op010
+            var topicFormater = _mqttClientOptions.TopicFormater ?? "{ChannelName}/{DeviceName}/{TagGroupName}";
+            var match = TopicRegex().Replace(topicFormater, match =>
             {
-                topic.AppendFormat("/{0}", message.Schema.TagGroupName);
-            }
+                return match.Value switch
+                {
+                    "{ChannelName}" => MatchToLower(message.Schema.ChannelName),
+                    "{DeviceName}" => MatchToLower(message.Schema.DeviceName),
+                    "{TagGroupName}" => MatchToLower(message.Schema.TagGroupName ?? ""),
+                    _ => "",
+                };
+            });
 
-            await _managedMqttClient.EnqueueAsync(topic.ToString().ToLower(), JsonSerializer.Serialize(message)).ConfigureAwait(false);
+            // 移除首尾斜杠
+            var topic = match.Trim('/');
+            await _managedMqttClient.EnqueueAsync(topic, JsonSerializer.Serialize(message)).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -55,7 +64,18 @@ internal sealed class MqttClientForwarder : IForwarder, IAsyncDisposable
         return ResponseResult.FromOk(new ResponseMessage
         {
             Request = message,
-        }, ResponseResult.ResponseSource.MQTT);
+        }, Source);
+
+
+        string MatchToLower(string str)
+        {
+            if (_mqttClientOptions.TopicFormatMatchLower)
+            {
+                return str.ToLower();
+            }
+
+            return str;
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -66,4 +86,7 @@ internal sealed class MqttClientForwarder : IForwarder, IAsyncDisposable
             _managedMqttClient.Dispose();
         }
     }
+
+    [GeneratedRegex("{ChannelName}|{DeviceName}|{TagGroupName}", RegexOptions.IgnoreCase)]
+    private static partial Regex TopicRegex();
 }

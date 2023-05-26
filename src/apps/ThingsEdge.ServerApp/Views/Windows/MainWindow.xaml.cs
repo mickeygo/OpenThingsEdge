@@ -1,63 +1,53 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using Wpf.Ui.Controls.Interfaces;
-using Wpf.Ui.Mvvm.Contracts;
+﻿namespace ThingsEdge.ServerApp.Views.Windows;
 
-namespace ThingsEdge.ServerApp.Views.Windows
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : INavigationWindow
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : INavigationWindow
+    public MainWindowViewModel ViewModel { get; }
+
+    public MainWindow(MainWindowViewModel viewModel, IPageService pageService, INavigationService navigationService)
     {
-        public ViewModels.MainWindowViewModel ViewModel
-        {
-            get;
-        }
+        ViewModel = viewModel;
+        DataContext = this;
 
-        public MainWindow(ViewModels.MainWindowViewModel viewModel, IPageService pageService, INavigationService navigationService)
-        {
-            ViewModel = viewModel;
-            DataContext = this;
+        InitializeComponent();
+        SetPageService(pageService);
 
-            InitializeComponent();
-            SetPageService(pageService);
+        navigationService.SetNavigationControl(RootNavigation);
+    }
 
-            navigationService.SetNavigationControl(RootNavigation);
-        }
+    #region INavigationWindow methods
 
-        #region INavigationWindow methods
+    public Frame GetFrame()
+        => RootFrame;
 
-        public Frame GetFrame()
-            => RootFrame;
+    public INavigation GetNavigation()
+        => RootNavigation;
 
-        public INavigation GetNavigation()
-            => RootNavigation;
+    public bool Navigate(Type pageType)
+        => RootNavigation.Navigate(pageType);
 
-        public bool Navigate(Type pageType)
-            => RootNavigation.Navigate(pageType);
+    public void SetPageService(IPageService pageService)
+        => RootNavigation.PageService = pageService;
 
-        public void SetPageService(IPageService pageService)
-            => RootNavigation.PageService = pageService;
+    public void ShowWindow()
+        => Show();
 
-        public void ShowWindow()
-            => Show();
+    public void CloseWindow()
+        => Close();
 
-        public void CloseWindow()
-            => Close();
+    #endregion INavigationWindow methods
 
-        #endregion INavigationWindow methods
+    /// <summary>
+    /// Raises the closed event.
+    /// </summary>
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
 
-        /// <summary>
-        /// Raises the closed event.
-        /// </summary>
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-
-            // Make sure that closing this window will begin the process of closing the application.
-            Application.Current.Shutdown();
-        }
+        // Make sure that closing this window will begin the process of closing the application.
+        System.Windows.Application.Current.Shutdown();
     }
 }

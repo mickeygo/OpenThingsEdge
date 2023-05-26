@@ -1,8 +1,8 @@
 ﻿namespace ThingsEdge.ServerApp.Models;
 
-public class AppConfig
+public sealed class AppConfig
 {
-    public string ConfigurationsFolder { get; set; }
+    public string? ConfigurationsFolder { get; set; }
 
-    public string AppPropertiesFileName { get; set; }
+    public string? AppPropertiesFileName { get; set; }
 }

@@ -36,14 +36,12 @@ public class ApplicationHostService : IHostedService
     /// </summary>
     private async Task HandleActivationAsync()
     {
-        await Task.CompletedTask;
-
-        if (!Application.Current.Windows.OfType<Views.Windows.MainWindow>().Any())
+        if (!System.Windows.Application.Current.Windows.OfType<Views.Windows.MainWindow>().Any())
         {
-            _navigationWindow = (_serviceProvider.GetService(typeof(INavigationWindow)) as INavigationWindow)!;
-            _navigationWindow!.ShowWindow();
+            _navigationWindow = _serviceProvider.GetRequiredService<INavigationWindow>();
+            _navigationWindow.ShowWindow();
 
-            _navigationWindow.Navigate(typeof(Views.Pages.DashboardPage));
+            _navigationWindow.Navigate(typeof(DashboardPage));
         }
 
         await Task.CompletedTask;

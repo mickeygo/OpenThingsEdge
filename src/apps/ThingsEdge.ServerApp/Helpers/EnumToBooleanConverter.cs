@@ -8,7 +8,7 @@ internal class EnumToBooleanConverter : IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (parameter is not String enumString)
+        if (parameter is not string enumString)
             throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
 
         if (!Enum.IsDefined(typeof(Wpf.Ui.Appearance.ThemeType), value))
@@ -21,7 +21,7 @@ internal class EnumToBooleanConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (parameter is not String enumString)
+        if (parameter is not string enumString)
             throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
 
         return Enum.Parse(typeof(Wpf.Ui.Appearance.ThemeType), enumString);

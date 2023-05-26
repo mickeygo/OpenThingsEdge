@@ -35,7 +35,7 @@ internal sealed class InternalTagDataSnapshot : ITagDataSnapshot
            },
            (_, snapshot) =>
            {
-               snapshot.Data.Value = data.Value;
+               snapshot.Data = data; // 替换整个值，而不仅仅是其 Value 属性
                snapshot.UpdatedTime = DateTime.Now;
                snapshot.Version++;
                return snapshot;

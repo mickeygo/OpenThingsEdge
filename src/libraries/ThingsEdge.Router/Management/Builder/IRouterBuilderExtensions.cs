@@ -63,7 +63,7 @@ public static class IRouterBuilderExtensions
     /// 添加 HTTP 转发服务。
     /// </summary>
     /// <param name="builder"></param>
-    /// <param name="postDelegate"></param>
+    /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder, 
@@ -72,13 +72,17 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
             services.Configure<RESTfulDestinationOptions>(hostBuilder.Configuration.GetSection(configName));
+            if (postDelegate is not null)
+            {
+                services.PostConfigure(postDelegate);
+            }
 
-            InternalForwarderHub.Instance.Register<HttpForwarder>();
+            InternalForwarderHub.Instance.Register<HttpForwarder>(); // 注册 Http Forward
+
+            // 配置 HttpClient
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
             {
                 var options = sp.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
-                postDelegate?.Invoke(options);
-
                 httpClient.BaseAddress = new Uri(options.BaseAddress);
 
                 if (options.Timeout > 0)
@@ -115,31 +119,21 @@ public static class IRouterBuilderExtensions
     /// 添加 MQTT 客户端转发服务。
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">MQTT配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder, string configName = "MQTT")
+    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder, 
+        Action<MQTTClientOptions>? postDelegate = null, string configName = "MQTT")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
             services.Configure<MQTTClientOptions>(hostBuilder.Configuration.GetSection(configName));
-            InternalForwarderHub.Instance.Register<MqttClientForwarder>();
-        });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 添加 MQTT 客户端转发服务。
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="optionsDelegate">MQTT参数配置</param>
-    /// <returns></returns>
-    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder, Action<MQTTClientOptions> optionsDelegate)
-    {
-        builder.Builder.ConfigureServices((hostBuilder, services) =>
-        {
-            services.Configure(optionsDelegate);
-            InternalForwarderHub.Instance.Register<MqttClientForwarder>();
+            if (postDelegate is not null)
+            {
+                services.PostConfigure(postDelegate);
+            }
+            
+            InternalForwarderHub.Instance.Register<MqttClientForwarder>(); // 注册 MQTT Forward
         });
 
         return builder;

@@ -26,7 +26,7 @@ internal sealed class InternalForwarderFactory : IForwarderFactory
             var results = await Task.WhenAll(tasks).ConfigureAwait(false); // 等待所有任务结束
 
             // 只处理 HTTP 请求的返回的状态
-            var httpResult = results.FirstOrDefault(s => s.Source == ResponseResult.ResponseSource.HTTP);
+            var httpResult = results.FirstOrDefault(s => s.Source == ForworderSource.HTTP);
             if (httpResult is not null)
             {
                 return httpResult;

@@ -32,7 +32,6 @@ public static class RouterServiceCollectionExtensions
     // 配置服务
     private static IServiceCollection AddRouterServices(this IServiceCollection services)
     {
-        services.AddSingleton<TagDataContainer>();
         services.AddSingleton<IForwarderFactory, InternalForwarderFactory>();
 
         return services;

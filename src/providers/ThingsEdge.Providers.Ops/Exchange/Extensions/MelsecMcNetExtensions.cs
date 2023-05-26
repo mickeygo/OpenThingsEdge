@@ -1,5 +1,4 @@
 ﻿using Ops.Communication.Profinet.Melsec;
-using ThingsEdge.Contracts.Variables;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 

@@ -6,6 +6,11 @@
 public interface IForwarder
 {
     /// <summary>
+    /// 转发请求源分类
+    /// </summary>
+    ForworderSource Source { get; }
+
+    /// <summary>
     /// 发送数据。
     /// </summary>
     /// <param name="message">要发送的数据。</param>

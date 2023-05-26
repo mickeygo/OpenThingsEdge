@@ -1,6 +1,4 @@
-﻿using ThingsEdge.ServerApp.Models;
-
-namespace ThingsEdge.ServerApp.ViewModels;
+﻿namespace ThingsEdge.ServerApp.ViewModels;
 
 public partial class DataViewModel : ObservableObject, INavigationAware
 {

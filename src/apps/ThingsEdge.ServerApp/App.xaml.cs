@@ -1,10 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.IO;
-using System.Reflection;
-using System.Windows;
-using ThingsEdge.ServerApp.Models;
+﻿using Serilog;
 using ThingsEdge.ServerApp.Services;
 
 namespace ThingsEdge.ServerApp;
@@ -14,6 +8,8 @@ namespace ThingsEdge.ServerApp;
 /// </summary>
 public partial class App
 {
+    public Mutex? _mutex;
+
     // The.NET Generic Host provides dependency injection, configuration, logging, and other services.
     // https://docs.microsoft.com/dotnet/core/extensions/generic-host
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
@@ -21,7 +17,7 @@ public partial class App
     // https://docs.microsoft.com/dotnet/core/extensions/logging
     private static readonly IHost _host = Host
         .CreateDefaultBuilder()
-        .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)); })
+        .ConfigureAppConfiguration(c => { c.SetBasePath(AppContext.BaseDirectory); })
         .ConfigureServices((context, services) =>
         {
             // App Host
@@ -41,18 +37,22 @@ public partial class App
 
             // Main window with navigation
             services.AddScoped<INavigationWindow, Views.Windows.MainWindow>();
-            services.AddScoped<ViewModels.MainWindowViewModel>();
+            services.AddScoped<MainWindowViewModel>();
 
             // Views and ViewModels
-            services.AddScoped<Views.Pages.DashboardPage>();
-            services.AddScoped<ViewModels.DashboardViewModel>();
-            services.AddScoped<Views.Pages.DataPage>();
-            services.AddScoped<ViewModels.DataViewModel>();
-            services.AddScoped<Views.Pages.SettingsPage>();
-            services.AddScoped<ViewModels.SettingsViewModel>();
+            services.AddScoped<DashboardPage>();
+            services.AddScoped<DashboardViewModel>();
+            services.AddScoped<DataPage>();
+            services.AddScoped<DataViewModel>();
+            services.AddScoped<SettingsPage>();
+            services.AddScoped<SettingsViewModel>();
 
             // Configuration
             services.Configure<AppConfig>(context.Configuration.GetSection(nameof(AppConfig)));
+        })
+        .UseSerilog((hostingContext, loggerConfiguration) =>
+        {
+            loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
         }).Build();
 
     /// <summary>
@@ -60,10 +60,21 @@ public partial class App
     /// </summary>
     /// <typeparam name="T">Type of the service to get.</typeparam>
     /// <returns>Instance of the service or <see langword="null"/>.</returns>
-    public static T GetService<T>()
+    public static T? GetService<T>()
         where T : class
     {
-        return _host.Services.GetService(typeof(T)) as T;
+        return _host.Services.GetService<T>();
+    }
+
+    /// <summary>
+    /// Gets registered service.
+    /// </summary>
+    /// <typeparam name="T">Type of the service to get.</typeparam>
+    /// <returns>Instance of the service or <see langword="notnull"/>.</returns>
+    public static T GetRequiredService<T>()
+       where T : class
+    {
+        return _host.Services.GetRequiredService<T>();
     }
 
     /// <summary>
@@ -71,6 +82,15 @@ public partial class App
     /// </summary>
     private async void OnStartup(object sender, StartupEventArgs e)
     {
+        // 只允许开启一个
+        _mutex = new Mutex(true, "Ops.Host.App", out var createdNew);
+        if (!createdNew)
+        {
+            System.Windows.MessageBox.Show("已有一个程序在运行");
+            Environment.Exit(0);
+            return;
+        }
+
         await _host.StartAsync();
     }
 

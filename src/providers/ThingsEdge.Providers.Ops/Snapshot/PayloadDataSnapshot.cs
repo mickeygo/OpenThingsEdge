@@ -6,7 +6,7 @@
 public sealed class PayloadDataSnapshot
 {
     [NotNull]
-    public PayloadData? Data { get; init; }
+    public PayloadData? Data { get; internal set; }
 
     /// <summary>
     /// 数据更新时间

@@ -106,11 +106,14 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 }
             }
 
+            // 先提取上一次触发点的值
+            var lastPayload = _tagDataSnapshot.Get(notification.Tag.TagId)?.Data;
+
             // 设置标记值快照。
             _tagDataSnapshot.Change(message.Values);
 
             // 发布标记数据请求事件。
-            await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+            await _publisher.Publish(MessageRequestPostingEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
             return;
         }

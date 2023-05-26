@@ -3,14 +3,11 @@
 /// <summary>
 /// Interaction logic for SettingsPage.xaml
 /// </summary>
-public partial class SettingsPage : INavigableView<ViewModels.SettingsViewModel>
+public partial class SettingsPage : INavigableView<SettingsViewModel>
 {
-    public ViewModels.SettingsViewModel ViewModel
-    {
-        get;
-    }
+    public SettingsViewModel ViewModel { get; }
 
-    public SettingsPage(ViewModels.SettingsViewModel viewModel)
+    public SettingsPage(SettingsViewModel viewModel)
     {
         ViewModel = viewModel;
 

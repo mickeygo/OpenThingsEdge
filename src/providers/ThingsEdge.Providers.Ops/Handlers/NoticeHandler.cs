@@ -41,11 +41,14 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         };
         message.Values.Add(notification.Self);
 
+        // 先提取上一次触发点的值
+        var lastPayload = _tagDataSnapshot.Get(notification.Tag.TagId)?.Data;
+
         // 设置标记值快照。
         _tagDataSnapshot.Change(message.Values);
 
         // 发布标记数据请求事件（不用等待）。
-        await _publisher.Publish(MessageRequestPostingEvent.Create(message), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(MessageRequestPostingEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);

@@ -27,7 +27,9 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<SwitchContainer>();
             services.AddSingleton<CurveStorage>();
             services.AddSingleton<ITagDataSnapshot, InternalTagDataSnapshot>();
-            services.AddTransient<IDeviceReadWrite, OpsDeviceReadWrite>();
+
+            services.AddSingleton<IDeviceReadWrite, DeviceReadWriteImpl>();
+            services.AddSingleton<IDeviceTagDataSnapshot, DeviceTagDataSnapshotImpl>();
         });
 
         return builder;

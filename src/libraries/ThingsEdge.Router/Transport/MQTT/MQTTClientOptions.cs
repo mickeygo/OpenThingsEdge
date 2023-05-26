@@ -20,6 +20,23 @@ public sealed class MQTTClientOptions
     public int MaxPendingMessages { get; set; } = short.MaxValue;
 
     /// <summary>
+    /// Topic 格式器，系统内部默认会采用 {ChannelName}/{DeviceName}/{TagGroupName} 模式匹配，匹配规则不区分大小写。
+    /// </summary>
+    /// <remarks>
+    /// Topic 格式：
+    ///   {ChannelName}/{DeviceName}/{TagGroupName} => line01/device01/op010, 
+    ///   iot/{ChannelName}/{DeviceName} => iot/line01/device01 。
+    /// 若占位符没有找到值，会移除占位符。
+    /// </remarks>
+    public string? TopicFormater { get; set; }
+
+    /// <summary>
+    /// Topic 格式化时匹配的数据是否要转为小写，默认为 true。
+    /// </summary>
+    /// <remarks>topic 是区分大小写的。</remarks>
+    public bool TopicFormatMatchLower { get; set; } = true;
+
+    /// <summary>
     /// MQTT 协议版本，默认为 3.1.1 。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]

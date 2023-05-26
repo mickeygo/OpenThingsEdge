@@ -1,15 +1,14 @@
-﻿using ThingsEdge.Contracts.Variables;
-using ThingsEdge.Providers.Ops.Snapshot;
+﻿using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Devices;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
-internal sealed class OpsDeviceReadWrite : IDeviceReadWrite
+internal sealed class DeviceReadWriteImpl : IDeviceReadWrite
 {
     private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly DriverConnectorManager _driverConnectorManager;
 
-    public OpsDeviceReadWrite(ITagDataSnapshot tagDataSnapshot, DriverConnectorManager driverConnectorManager)
+    public DeviceReadWriteImpl(ITagDataSnapshot tagDataSnapshot, DriverConnectorManager driverConnectorManager)
     {
         _tagDataSnapshot = tagDataSnapshot;
         _driverConnectorManager = driverConnectorManager;

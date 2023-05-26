@@ -4,7 +4,6 @@ using Ops.Communication.Profinet.AllenBradley;
 using Ops.Communication.Profinet.Melsec;
 using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Profinet.Siemens;
-using ThingsEdge.Contracts.Variables;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -191,7 +190,11 @@ public sealed class DriverConnectorManager : IDisposable
                                 // 内部 Socket 异常，或是还没有连接过服务器
                                 if (networkDevice.IsSocketError || !_fristConnectSuccessful)
                                 {
-                                    _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                                    var result = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                                    if (result.IsSuccess)
+                                    {
+                                        _logger.LogInformation("已连接上服务，主机：{Host}，Port:{Port}", connector.Host, connector.Port);
+                                    }
                                 }
                             }
                         }

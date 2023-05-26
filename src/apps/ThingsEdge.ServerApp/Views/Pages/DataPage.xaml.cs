@@ -3,14 +3,11 @@
 /// <summary>
 /// Interaction logic for DataView.xaml
 /// </summary>
-public partial class DataPage : INavigableView<ViewModels.DataViewModel>
+public partial class DataPage : INavigableView<DataViewModel>
 {
-    public ViewModels.DataViewModel ViewModel
-    {
-        get;
-    }
+    public DataViewModel ViewModel { get; }
 
-    public DataPage(ViewModels.DataViewModel viewModel)
+    public DataPage(DataViewModel viewModel)
     {
         ViewModel = viewModel;
 
