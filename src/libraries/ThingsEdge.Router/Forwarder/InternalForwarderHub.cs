@@ -4,7 +4,9 @@ internal sealed class InternalForwarderHub : IForwarderHub
 {
     private readonly HashSet<Type> _forwarderTypes = new();
 
-    public static InternalForwarderHub Instance = new();
+    private static readonly Lazy<IForwarderHub> Instance = new(() => new InternalForwarderHub());
+
+    public static IForwarderHub Default = Instance.Value;
 
     private InternalForwarderHub()
     {

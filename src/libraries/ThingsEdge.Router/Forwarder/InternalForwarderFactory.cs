@@ -12,7 +12,7 @@ internal sealed class InternalForwarderFactory : IForwarderFactory
     {
         try
         {
-            var forwarders = InternalForwarderHub.Instance.ResloveAll(_serviceProvider);
+            var forwarders = InternalForwarderHub.Default.ResloveAll(_serviceProvider);
             if (!forwarders.Any())
             {
                 // 处理 HTTP 返回的状态
