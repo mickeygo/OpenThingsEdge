@@ -193,7 +193,7 @@ public sealed class DriverConnectorManager : IDisposable
                                     var result = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                                     if (result.IsSuccess)
                                     {
-                                        _logger.LogInformation("已连接上服务，主机：{Host}，Port:{Port}", connector.Host, connector.Port);
+                                        _logger.LogInformation("已连接上服务，主机：{Host}", connector.Host);
                                     }
                                 }
                             }

@@ -150,6 +150,6 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
     private async Task LogAndPublishError(string msg)
     {
         _logger.LogError(msg);
-        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
     }
 }

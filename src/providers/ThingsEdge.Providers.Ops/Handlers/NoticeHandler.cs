@@ -56,7 +56,7 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         {
             string msg = $"推送消息失败，设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {result.ErrorMessage}";
             _logger.LogError(msg);
-            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
         }
     }
 }

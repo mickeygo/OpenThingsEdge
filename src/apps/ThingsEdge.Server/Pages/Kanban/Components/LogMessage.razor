@@ -1,4 +1,6 @@
-﻿@implements IDisposable
+﻿@using ThingsEdge.Router.Model
+@using ThingsEdge.Router.Pipe
+@implements IDisposable
 
 <MCard Height=320 MaxHeight=320 Class="mx-auto my-auto">
     <MList Dense MaxHeight=320 Class="rounded-4 mt-6" Style="overflow-y:auto;">
@@ -6,7 +8,7 @@
         {
             <MListItem Style="min-height:24px;">
                 <MListItemContent Class="text-body neutral-lighten-2--text">
-                    <span>@message.Time @message.Message</span>
+                    <span>@message.LoggedTime @message.Message</span>
                 </MListItemContent>
             </MListItem>
         }
@@ -14,41 +16,41 @@
 </MCard>
 
 @code {
-    private readonly LinkedList<LoggerMessage> _messages = new();
+    private readonly LinkedList<LoggingMessage> _messages = new();
+    private readonly CancellationTokenSource _cts = new();
 
-    private Timer? _timer;
-
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _timer = new(_ =>
-        {
-            InvokeAsync(() =>
-            {
-                if (_messages.Count >= 32)
+        //_ = Task.Run(async () =>
+        // {
+        //     while (!_cts.IsCancellationRequested)
+        //     {
+        //         await Task.Delay(1000).ConfigureAwait(false);
+        //         await ChannelFactory.LoggingChannel.TryWriteAsync(new() { Message = "123456789qwer" }).ConfigureAwait(false);
+        //     }
+        // });
+
+        await ChannelFactory.LoggingChannel.PollReadAsync(e =>
+           {
+               InvokeAsync(() =>
                 {
-                    _messages.RemoveLast();
-                }
+                    if (e is not null)
+                    {
+                        if (_messages.Count >= 32)
+                        {
+                            _messages.RemoveLast();
+                        }
 
-                _messages.AddFirst(new LoggerMessage() { Time = DateTime.Now, Level = 1, Message = "test" });
-                StateHasChanged();
-            });
-          
-        }, null, 3000, 1000);
-
-        return base.OnInitializedAsync();
-    }
-
-    public sealed class LoggerMessage
-    {
-        public DateTime Time { get; set; }
-
-        public int Level { get; set; }
-
-        public string? Message { get; set; }
+                        _messages.AddFirst(e);
+                        StateHasChanged();
+                    }
+                });
+           }, _cts.Token);
     }
 
     public void Dispose()
     {
-        _timer?.Dispose();
+        _cts.Cancel();
+        _cts.Dispose();
     }
 }

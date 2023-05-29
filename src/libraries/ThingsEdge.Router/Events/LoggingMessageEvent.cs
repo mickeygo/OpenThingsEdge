@@ -5,7 +5,7 @@ namespace ThingsEdge.Router.Events;
 /// <summary>
 /// 日志消息记录事件。
 /// </summary>
-public sealed class MessageLoggedEvent : INotification
+public sealed class LoggingMessageEvent : INotification
 {
     /// <summary>
     /// 事件创建时间。
@@ -28,7 +28,7 @@ public sealed class MessageLoggedEvent : INotification
     /// </summary>
     /// <param name="message">要记录的消息。</param>
     /// <returns></returns>
-    public static MessageLoggedEvent Info(string message)
+    public static LoggingMessageEvent Info(string message)
     {
         return new() { Level = LoggingLevel.Info, Message = message };
     }
@@ -38,7 +38,7 @@ public sealed class MessageLoggedEvent : INotification
     /// </summary>
     /// <param name="message">要记录的消息。</param>
     /// <returns></returns>
-    public static MessageLoggedEvent Warning(string message)
+    public static LoggingMessageEvent Warning(string message)
     {
         return new() { Level = LoggingLevel.Warning, Message = message };
     }
@@ -48,7 +48,7 @@ public sealed class MessageLoggedEvent : INotification
     /// </summary>
     /// <param name="message">要记录的消息。</param>
     /// <returns></returns>
-    public static MessageLoggedEvent Error(string message)
+    public static LoggingMessageEvent Error(string message)
     {
         return new() { Level = LoggingLevel.Error, Message = message };
     }

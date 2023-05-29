@@ -172,6 +172,6 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             _logger.LogError(ex, msg);
         }
 
-        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
     }
 }

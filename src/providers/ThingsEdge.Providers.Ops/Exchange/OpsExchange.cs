@@ -44,7 +44,7 @@ public sealed class OpsExchange : IExchange
         IsRunning = true;
 
         _logger.LogInformation("[Engine] 引擎启动");
-        await _publisher.Publish(MessageLoggedEvent.Info("[Engine] 引擎启动")).ConfigureAwait(false);
+        await _publisher.Publish(LoggingMessageEvent.Info("[Engine] 引擎启动")).ConfigureAwait(false);
 
         _cts ??= new();
 
@@ -112,7 +112,7 @@ public sealed class OpsExchange : IExchange
                         {
                             string msg = $"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
                             _logger.LogError(msg);
-                            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -144,7 +144,7 @@ public sealed class OpsExchange : IExchange
                     {
                         string msg = $"[Engine] Heartbeat 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -184,7 +184,7 @@ public sealed class OpsExchange : IExchange
                         {
                             string msg = $"[Engine] Trigger 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
                             _logger.LogError(msg);
-                            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -213,7 +213,7 @@ public sealed class OpsExchange : IExchange
                     {
                         string msg = $"[Engine] Trigger 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -253,7 +253,7 @@ public sealed class OpsExchange : IExchange
                         {
                             string msg = $"[Engine] Notice 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
                             _logger.LogError(msg);
-                            await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
 
                             continue;
                         }
@@ -280,7 +280,7 @@ public sealed class OpsExchange : IExchange
                     {
                         string msg = $"[Engine] Notice 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -336,7 +336,7 @@ public sealed class OpsExchange : IExchange
                     {
                         string msg = $"[Engine] Switch 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
             });
@@ -443,7 +443,7 @@ public sealed class OpsExchange : IExchange
                     {
                         string msg = $"[Engine] Switch 开关数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(MessageLoggedEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                 }
 
@@ -462,7 +462,7 @@ public sealed class OpsExchange : IExchange
         string msg = "[Engine] 引擎已停止";
         if (!IsRunning)
         {
-            await _publisher.Publish(MessageLoggedEvent.Info(msg)).ConfigureAwait(false);
+            await _publisher.Publish(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
             return;
         }
         IsRunning = false;
@@ -484,7 +484,7 @@ public sealed class OpsExchange : IExchange
         }).ConfigureAwait(false);
 
         _logger.LogInformation(msg);
-        await _publisher.Publish(MessageLoggedEvent.Info(msg)).ConfigureAwait(false);
+        await _publisher.Publish(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
     }
 
     public void Dispose()
