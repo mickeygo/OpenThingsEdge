@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Variables;
-
-namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
 /// 请求消息。

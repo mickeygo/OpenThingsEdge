@@ -6,3 +6,6 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 
 global using OneOf;
+
+global using ThingsEdge.Contracts.Utils;
+global using ThingsEdge.Contracts.Variables;

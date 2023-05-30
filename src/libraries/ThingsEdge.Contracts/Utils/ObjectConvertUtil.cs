@@ -7,7 +7,7 @@ public static class ObjectConvertUtil
     /// </summary>
     /// <remarks>
     /// 可转换的参数类型：<see cref="bool"/>、<see cref="byte"/>、<see cref="ushort"/>、<see cref="short"/>、
-    /// <see cref="uint"/>、<see cref="int"/>、<see cref="float"/>、<see cref="double"/>
+    /// <see cref="uint"/>、<see cref="int"/>、<see cref="float"/>、<see cref="double"/>。
     /// </remarks>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>

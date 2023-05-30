@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Application.Models;
+﻿using ThingsEdge.Application.Dtos;
+using ThingsEdge.Application.Models;
 
 namespace ThingsEdge.Application.Domain.Services.Impl;
 
@@ -9,6 +10,13 @@ internal sealed class EquipmentStateService : IEquipmentStateService
     public EquipmentStateService(SqlSugarRepository<EquipmentStateRecord> equipStateRepo)
     {
         _equipStateRepo = equipStateRepo;
+    }
+
+    public async Task<PagedList<EquipmentStateRecord>> GetPagedAsync(PagedQuery query)
+    {
+         return await _equipStateRepo.AsQueryable()
+                .OrderBy(s => s.StartTime, OrderByType.Desc)
+                .ToPagedListAsync(query.PageIndex, query.PageSize);
     }
 
     public async Task ChangeStateAsync(string line, string equipmentCode, EquipmentRunningState runningState)

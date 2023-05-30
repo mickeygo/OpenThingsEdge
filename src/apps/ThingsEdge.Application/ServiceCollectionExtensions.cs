@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Application.Handlers;
+﻿using ThingsEdge.Application.Configuration;
+using ThingsEdge.Application.Handlers;
 using ThingsEdge.Application.Management.Equipment;
 using ThingsEdge.Router.Interfaces;
 
@@ -9,22 +10,26 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// 注册 ThingsEdge 应用服务。
     /// </summary>
-    /// <param name="services"></param>
+    /// <param name="hostBuilder"></param>
+    /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IServiceCollection AddThingsEdgeApplication(this IServiceCollection services)
+    public static void AddThingsEdgeApplication(this IHostBuilder hostBuilder, string configName = "AppConfig")
     {
-        services.AddSqlSugarSetup();
+        hostBuilder.ConfigureServices((context, services) =>
+        {
+            services.Configure<ApplicationConfig>(context.Configuration.GetSection(configName));
 
-        services.AddThingsEdgeDomainService();
-        services.AddThingsEdgeManagement();
+            services.AddSqlSugarSetup();
 
-        services.AddTransient<EquipmentStateManager>();
+            services.AddThingsEdgeDomainService();
+            services.AddThingsEdgeManagement();
 
-        // 注册处理 Api
-        services.AddTransient<IDeviceHeartbeatApi, DeviceHeartbeatApiHandler>();
-        services.AddTransient<IMessageRequestPostingApi, MessageRequestPostingApiHandler>();
+            services.AddTransient<EquipmentStateManager>();
 
-        return services;
+            // 注册处理 Api
+            services.AddTransient<IDeviceHeartbeatApi, DeviceHeartbeatApiHandler>();
+            services.AddTransient<IMessageRequestPostingApi, MessageRequestPostingApiHandler>();
+        });
     }
 
     /// <summary>

@@ -28,7 +28,7 @@ internal sealed class ArchiveService : IArchiveService
         var transitRecord = await _snTransitRecordRepo.GetFirstAsync(s => s.Line == line && s.Station == station && s.SN == sn && !s.IsArchived);
         if (transitRecord is not null)
         {
-            transitRecord.Outbound();
+            transitRecord.Archive();
             await _snTransitRecordRepo.AsUpdateable(transitRecord).UpdateColumns(s => new
             {
                 s.IsArchived,

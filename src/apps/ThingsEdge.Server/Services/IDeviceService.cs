@@ -9,5 +9,5 @@ public interface IDeviceService
 {
     List<TreeModel> GetDeviceTree();
 
-    List<TagModel>? GetTags(string id, string category);
+    List<TagModel> GetTags(string id, string? category);
 }

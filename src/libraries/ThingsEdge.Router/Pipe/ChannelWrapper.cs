@@ -159,7 +159,7 @@ public sealed class ChannelWrapper<T>
         public DisposableAction(CancellationTokenSource cts)
         {
             _cts = cts;
-        }8
+        }
 
         public void Dispose()
         {

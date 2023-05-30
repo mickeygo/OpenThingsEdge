@@ -5,7 +5,6 @@ using Int = System.Int16;
 using DInt = System.Int32;
 using Real = System.Single;
 using LReal = System.Double;
-using ThingsEdge.Contracts.Variables;
 
 namespace ThingsEdge.Contracts;
 

@@ -1,9 +1,8 @@
-﻿using ThingsEdge.Application.Contract;
+﻿using ThingsEdge.Application.Configuration;
 using ThingsEdge.Application.Domain.Services;
 using ThingsEdge.Application.Dtos;
 using ThingsEdge.Application.Management.Equipment;
 using ThingsEdge.Application.Models;
-using ThingsEdge.Contracts.Variables;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Interfaces;
 
@@ -17,6 +16,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
     private readonly EquipmentStateManager _equipmentStateManager;
     private readonly IEntryService _entryService;
     private readonly IArchiveService _archiveService;
+    private readonly ApplicationConfig _appConfig;
     private readonly ILogger _logger;
 
     public MessageRequestPostingApiHandler(IServiceProvider serviceProvider, 
@@ -24,6 +24,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
         EquipmentStateManager equipmentStateManager, 
         IEntryService entryService,
         IArchiveService archiveService,
+        IOptions<ApplicationConfig> appConfig,
         ILogger<MessageRequestPostingApiHandler> logger)
     {
         _serviceProvider = serviceProvider;
@@ -31,6 +32,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
         _equipmentStateManager = equipmentStateManager;
         _entryService = entryService;
         _archiveService = archiveService;
+        _appConfig = appConfig.Value;
         _logger = logger;
     }
 
@@ -42,14 +44,14 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
         {
             if (requestMessage.Flag == TagFlag.Notice)
             {
-                if (self.TagName == TagDefineConstants.PLC_Alarm)  // 设备警报
+                if (self.TagName == _appConfig.TagDefine.PLC_Alarm)  // 设备警报
                 {
                     var lastAlarms = lastMasterPayloadData?.GetBitArray();
                     var newAlarms = self.GetBitArray();
 
                     await _alarmService.RecordAlarmsAsync(new AlarmInput { Line = requestMessage.Schema.ChannelName, LastAlarms = lastAlarms, NewAlarms = newAlarms });
                 }
-                else if (self.TagName == TagDefineConstants.PLC_Equipment_State) // 设备运行状态
+                else if (self.TagName == _appConfig.TagDefine.PLC_Equipment_State) // 设备运行状态
                 {
                     int state = self.GetInt(); // 转换可能异常
                     if (Enum.IsDefined(typeof(EquipmentRunningState), state))
@@ -57,7 +59,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
                         await _equipmentStateManager.ChangeStateAsync(GetEquipmentCodeInput(), (EquipmentRunningState)state, cancellationToken);
                     }
                 }
-                else if (self.TagName == TagDefineConstants.PLC_Equipment_Mode)  // 设备运行模式
+                else if (self.TagName == _appConfig.TagDefine.PLC_Equipment_Mode)  // 设备运行模式
                 {
                     int mode = self.GetInt();
                     if (Enum.IsDefined(typeof(EquipmentRunningMode), mode))
@@ -69,19 +71,19 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
 
             if (requestMessage.Flag == TagFlag.Trigger)
             {
-                if (self.TagName == TagDefineConstants.PLC_Entry_Sign) // 产品进站
+                if (self.TagName == _appConfig.TagDefine.PLC_Entry_Sign) // 产品进站
                 {
                     var station = requestMessage.Schema.TagGroupName!;
-                    var sn = requestMessage.GetData(TagDefineConstants.PLC_Entry_SN)?.GetString();
+                    var sn = requestMessage.GetData(_appConfig.TagDefine.PLC_Entry_SN)?.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
                         await _entryService.EntryAsync(requestMessage.Schema.ChannelName, station, sn);
                     }
                 }
-                else if (self.TagName == TagDefineConstants.PLC_Archive_Sign) // 产品出站
+                else if (self.TagName == _appConfig.TagDefine.PLC_Archive_Sign) // 产品出站
                 {
                     var station = requestMessage.Schema.TagGroupName!;
-                    var sn = requestMessage.GetData(TagDefineConstants.PLC_Archive_SN)?.GetString();
+                    var sn = requestMessage.GetData(_appConfig.TagDefine.PLC_Archive_SN)?.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
                         await _archiveService.ArchiveAsync(requestMessage.Schema.ChannelName, station, sn);

@@ -1,4 +1,5 @@
-﻿using ThingsEdge.Application.Models;
+﻿using ThingsEdge.Application.Dtos;
+using ThingsEdge.Application.Models;
 
 namespace ThingsEdge.Application.Domain.Services;
 
@@ -7,6 +8,13 @@ namespace ThingsEdge.Application.Domain.Services;
 /// </summary>
 public interface IEquipmentStateService : IDomainService
 {
+    /// <summary>
+    /// 分页查询
+    /// </summary>
+    /// <param name="query">筛选条件</param>
+    /// <returns></returns>
+    Task<PagedList<EquipmentStateRecord>> GetPagedAsync(PagedQuery query);
+
     /// <summary>
     /// 更改设备运行状态。
     /// </summary>

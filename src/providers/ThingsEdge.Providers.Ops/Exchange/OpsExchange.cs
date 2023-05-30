@@ -88,7 +88,7 @@ public sealed class OpsExchange : IExchange
                             if (!TagValueSet.CompareAndSwap(tag.TagId, false))
                             {
                                 // 任务取消时，发布设备心跳断开事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag), 
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, false, SetOff(tag)), 
                                     PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                             }
 
@@ -100,7 +100,7 @@ public sealed class OpsExchange : IExchange
                             if(!TagValueSet.CompareAndSwap(tag.TagId, false))
                             {
                                 // 连接断开时，发布设备心跳断开事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag), 
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, false, SetOff(tag)), 
                                     PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                             }
 
@@ -120,22 +120,19 @@ public sealed class OpsExchange : IExchange
                         // 心跳标记数据类型必须为 bool 或 int16
                         if (CheckOn(data!))
                         {
-                            if (tag.DataType == TagDataType.Bit)
-                            {
-                                await connector.WriteAsync(tag, false).ConfigureAwait(false);
-                            }
-                            else if (tag.DataType == TagDataType.Int)
-                            {
-                                await connector.WriteAsync(tag, (short)0).ConfigureAwait(false);
-                            }
+                            await connector.WriteAsync(tag, SetOff2(tag)).ConfigureAwait(false);
 
                             if (!TagValueSet.CompareAndSwap(tag.TagId, true))
                             {
                                 // 发布心跳正常事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true, data), 
+                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true, data!), 
                                     PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                             }
                         }
+
+                        // 发布心跳信号事件（仅记录值）。
+                        await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true, data!, true),
+                            PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -523,18 +520,31 @@ public sealed class OpsExchange : IExchange
     /// <exception cref="NotSupportedException"></exception>
     private static PayloadData SetOff(Tag tag)
     {
+        object obj = SetOff2(tag);
         var data = PayloadData.FromTag(tag);
-        if (data.IsArray())
+        data.Value = obj;
+        return data;
+    }
+
+    /// <summary>
+    /// 设置标记为 Off 状态，bool 类型设置为 false, 数值类型设置为 0。
+    /// </summary>
+    /// <remarks>数据类型必须为 bool 或 short 类型，且不为数组。</remarks>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
+    private static object SetOff2(Tag tag)
+    {
+        if (tag.IsArray())
         {
             throw new NotSupportedException();
         }
 
-        data.Value = data.DataType switch
+        return tag.DataType switch
         {
             TagDataType.Bit => false,
-            TagDataType.Int => 0,
+            TagDataType.Int => (short)0,
             _ => throw new NotSupportedException(),
         };
-        return data;
     }
 }

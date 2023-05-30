@@ -26,6 +26,7 @@ internal sealed class HeartbeatEvent : INotification
     /// <summary>
     /// 读取的标记值
     /// </summary>
+    [NotNull]
     public PayloadData? Self { get; init; }
 
     /// <summary>
@@ -33,7 +34,12 @@ internal sealed class HeartbeatEvent : INotification
     /// </summary>
     public bool IsConnected { get; init; }
 
-    public static HeartbeatEvent Create(string channelName, Device device, Tag tag, bool isConnected = false, PayloadData? self = null)
+    /// <summary>
+    /// 是否仅仅为信号
+    /// </summary>
+    public bool IsOnlySign { get; init; }
+
+    public static HeartbeatEvent Create(string channelName, Device device, Tag tag, bool isConnected, PayloadData self, bool isOnlySign = false)
     {
         return new HeartbeatEvent
         {
@@ -42,6 +48,7 @@ internal sealed class HeartbeatEvent : INotification
             Tag = tag,
             Self = self,
             IsConnected = isConnected,
+            IsOnlySign = isOnlySign,
         };
     }
 }

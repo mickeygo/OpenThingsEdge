@@ -20,7 +20,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddGlobalForServer();
 
 // 自定义服务配置 
-builder.Services.AddThingsEdgeApplication();
+builder.Host.AddThingsEdgeApplication();
 builder.Host.AddThingsEdgeRouter()
     .AddDeviceFileProvider()
     .AddHttpForwarder()

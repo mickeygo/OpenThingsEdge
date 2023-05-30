@@ -35,6 +35,11 @@ internal sealed class SnTransitRecord : EntityBaseId
     public DateTime? ArchiveTime { get; set; }
 
     /// <summary>
+    /// 过站状态，1=>OK；2=>NG
+    /// </summary>
+    public int Pass { get; set; } = 1;
+
+    /// <summary>
     /// 是否已存档。
     /// </summary>
     public bool IsArchived { get; set; }
@@ -45,12 +50,26 @@ internal sealed class SnTransitRecord : EntityBaseId
     public int CycleTime { get; set; }
 
     /// <summary>
-    /// 过站
+    /// 存档
     /// </summary>
-    public void Outbound()
+    /// <param name="pass">过站状态，默认为 1（OK）</param>
+    public void Archive(int pass = 1)
     {
+        Pass = pass;
         IsArchived = true;
         ArchiveTime = DateTime.Now;
         CycleTime = Convert.ToInt32((ArchiveTime - EntryTime).Value.TotalSeconds);
     }
+
+    /// <summary>
+    /// 是否为 OK 过站
+    /// </summary>
+    /// <returns></returns>
+    public bool IsOK() => Pass == 1;
+
+    /// <summary>
+    /// 是否为 NG 过站
+    /// </summary>
+    /// <returns></returns>
+    public bool IsNG() => Pass == 2;
 }

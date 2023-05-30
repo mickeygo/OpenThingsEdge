@@ -1,7 +1,4 @@
-﻿using ThingsEdge.Contracts.Utils;
-using ThingsEdge.Contracts.Variables;
-
-namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts;
 
 /// <summary>
 /// 标记数据格式化器。

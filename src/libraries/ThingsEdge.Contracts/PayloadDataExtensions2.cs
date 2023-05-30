@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Utils;
-
-namespace ThingsEdge.Contracts;
+﻿namespace ThingsEdge.Contracts;
 
 public static class PayloadDataExtensions2
 {

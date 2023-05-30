@@ -87,4 +87,9 @@ public sealed class TagModel
     /// <remarks><see cref="TagFlag.Switch"/> 类型标记，在开关为 On 状态也会筛选数据并一起推送。</remarks>
     [NotNull]
     public List<Tag>? NormalTags { get; set; }
+
+    /// <summary>
+    /// 标记文本值
+    /// </summary>
+    public string? Text { get; set; }
 }

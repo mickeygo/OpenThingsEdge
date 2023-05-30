@@ -67,21 +67,21 @@ internal sealed class DeviceService : IDeviceService
         };
     }
 
-    public List<TagModel>? GetTags(string id, string category)
+    public List<TagModel> GetTags(string id, string? category)
     {
         if (category == "Device")
         {
             var device = _deviceManager.GetDevice(id);
-            return device?.Tags.SelectMany(From).ToList();
+            return device?.Tags.SelectMany(From).ToList() ?? new(0);
         }
 
         if (category == "TagGroup")
         {
             var tagGroup = _deviceManager.GetDevices().SelectMany(s => s.TagGroups).FirstOrDefault(s => s.TagGroupId == id);
-            return tagGroup?.Tags.SelectMany(From).ToList();
+            return tagGroup?.Tags.SelectMany(From).ToList() ?? new(0);
         }
 
-        return default;
+        return new(0);
     }
 
     private static List<TagModel> From(Tag tag)

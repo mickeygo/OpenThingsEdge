@@ -20,10 +20,12 @@ internal class HeartbeatHandler : INotificationHandler<HeartbeatEvent>
 
     public async Task Handle(HeartbeatEvent notification, CancellationToken cancellationToken)
     {
-        if (notification.Self is not null)
+        // 设置标记值快照。
+        _tagDataSnapshot.Change(notification.Self);
+
+        if (notification.IsOnlySign)
         {
-            // 设置标记值快照。
-            _tagDataSnapshot.Change(notification.Self);
+            return;
         }
 
         var @event = DeviceHeartbeatEvent.Create(notification.ChannelName, notification.Device, notification.Tag, notification.IsConnected);

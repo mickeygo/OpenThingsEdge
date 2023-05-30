@@ -1,9 +1,8 @@
-﻿@page "/settings/device"
-@using ThingsEdge.Contracts.Variables
-@using ThingsEdge.Server.Models
-@using ThingsEdge.Server.Services
+﻿@page "/settings/variable"
 @inherits ProComponentBase
 @inject IDeviceService _deviceService
+@inject IDeviceTagDataSnapshot _deviceTagDataSnapshot
+@implements IDisposable
 
 <MCard>
     <MRow>
@@ -82,7 +81,7 @@
             var item = FindTreeItem(_treeItems, id);
             if (item != _selected)
             {
-                _tagItems = _deviceService.GetTags(id, item.Category) ?? new(0);
+                _tagItems = _deviceService.GetTags(id, item?.Category);
                 _selected = item;
             }
 
@@ -95,15 +94,16 @@
     private List<DataTableHeader<TagModel>> _headers = new()
         {
           new (){ Text = "标记", Value = nameof(TagModel.Name), Width = 200 },
-          new (){ Text = "地址", Value = nameof(TagModel.Address) },
-          new (){ Text = "长度", Value = nameof(TagModel.Length) },
-          new (){ Text = "数据类型", Value = nameof(TagModel.DataType) },
-          new (){ Text = "扫描速率", Value = nameof(TagModel.ScanRate) },
-          new (){ Text = "标识", Value = nameof(TagModel.Flag) },
-          new (){ Text = "用途", Value = nameof(TagModel.Usage) },
-          new (){ Text = "发布模式", Value = nameof(TagModel.PublishMode) },
-          new (){ Text = "要旨", Value = nameof(TagModel.Keynote) },
-          new (){ Text = "描述", Value = nameof(TagModel.Description) },
+          new (){ Text = "地址", Value = nameof(TagModel.Address), Width = 80 },
+          new (){ Text = "长度", Value = nameof(TagModel.Length), Width = 80 },
+          new (){ Text = "数据类型", Value = nameof(TagModel.DataType), Width = 100 },
+          new (){ Text = "扫描速率", Value = nameof(TagModel.ScanRate), Width = 100 },
+          new (){ Text = "标识", Value = nameof(TagModel.Flag), Width = 80 },
+          new (){ Text = "用途", Value = nameof(TagModel.Usage), Width = 100 },
+          new (){ Text = "发布模式", Value = nameof(TagModel.PublishMode), Width = 80 },
+          new (){ Text = "要旨", Value = nameof(TagModel.Keynote), Width = 100 },
+          new (){ Text = "描述", Value = nameof(TagModel.Description), Width = 120 },
+          new (){ Text = "文本值", Value = nameof(TagModel.Text), Width = 200 },
         };
 
     TreeModel? FindTreeItem(List<TreeModel>? treeItems, string id)
@@ -128,5 +128,27 @@
         }
 
         return default;
+    }
+
+    private IDisposable? _disposable;
+
+    protected override void OnInitialized()
+    {
+        _disposable = Observable.Timer(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(1)).Subscribe(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                _tagItems?.ForEach(s =>
+                {
+                    s.Text = _deviceTagDataSnapshot.Get(s.TagId)?.GetString();
+                });
+                StateHasChanged();
+            });
+        });
+    }
+
+    public void Dispose()
+    {
+        _disposable?.Dispose();
     }
 }

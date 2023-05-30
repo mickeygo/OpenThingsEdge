@@ -8,14 +8,39 @@
   },
   {
     "Id": 11,
+    "Title": "设备",
+    "Icon": "mdi-devices",
+    "Children": [
+      {
+        "Id": 12,
+        "Title": "OEE",
+        "Icon": "mdi-chart-box-outline",
+        "Href": "/devices/oee"
+      },
+      {
+        "Id": 13,
+        "Title": "状态记录",
+        "Icon": "mdi-database-search",
+        "Href": "/devices/record/state"
+      },
+      {
+        "Id": 14,
+        "Title": "模式记录",
+        "Icon": "mdi-file-find-outline",
+        "Href": "/devices/record/mode"
+      }
+    ]
+  },
+  {
+    "Id": 91,
     "Title": "设置",
     "Icon": "mdi-application-cog",
     "Children": [
       {
-        "Id": 12,
-        "Title": "设备",
+        "Id": 92,
+        "Title": "变量",
         "Icon": "mdi-cog-box",
-        "Href": "/settings/device"
+        "Href": "/settings/variable"
       }
     ]
   }

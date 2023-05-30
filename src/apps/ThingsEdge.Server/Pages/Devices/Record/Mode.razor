@@ -1,0 +1,56 @@
+﻿@page "/devices/record/mode"
+@inherits ProComponentBase
+@inject IEquipmentModeService _equipmentModeService
+
+<MCard>
+    <MDataTable Headers="_headers"
+                Items="_items"
+                OnOptionsUpdate="HandleOnOptionsUpdate"
+                ServerItemsLength="_totalItemCount"
+                Loading="_loading"
+                Class="elevation-1"></MDataTable>
+</MCard>
+
+@code {
+    private bool _loading = true;
+    private int _totalItemCount = 0;
+
+    private IEnumerable<EquipmentModeRecord> _items = new List<EquipmentModeRecord>();
+
+    private List<DataTableHeader<EquipmentModeRecord>> _headers = new()
+        {
+          new (){ Text = "产线", Value = nameof(EquipmentModeRecord.Line), Width = 100 },
+          new (){ Text = "设备名称", Value = nameof(EquipmentModeRecord.EquipmentName), Width = 80 },
+          new (){ Text = "运行模式", Value = nameof(EquipmentModeRecord.RunningMode), Width = 80 },
+          new (){ Text = "记录时间", Value = nameof(EquipmentModeRecord.RecordTime), Width = 100 },
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SearchAsync(1, 10);
+    }
+
+    async Task HandleOnOptionsUpdate(DataOptions options)
+    {
+        int pageIndex = options.Page;
+        int pageSize = options.ItemsPerPage;
+
+        if (pageSize == -1)
+        {
+            pageSize = _totalItemCount;
+        }
+        await SearchAsync(pageIndex, pageSize);
+    }
+
+    async Task SearchAsync(int pageIndex = 0, int pageSize = 0)
+    {
+        var pagedList = await _equipmentModeService.GetPagedAsync(new PagedQuery { PageIndex = pageIndex, PageSize = pageSize });
+
+        _items = pagedList.Items;
+        _totalItemCount = pagedList.TotalCount;
+
+        _loading = false;
+
+        InvokeAsync(StateHasChanged);
+    }
+}

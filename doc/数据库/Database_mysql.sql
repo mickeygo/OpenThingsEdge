@@ -74,6 +74,7 @@ CREATE TABLE `sn_transit_record`  (
   `Station` varchar(64) NOT NULL COMMENT '工站',
   `EntryTime` datetime(0) NOT NULL COMMENT '进站时间',
   `ArchiveTime` datetime(0) NULL DEFAULT NULL COMMENT '出站时间',
+  `Pass` int NOT NULL COMMENT '过站状态，1=>OK；2=>NG',
   `IsArchived` bit(1) NOT NULL COMMENT '是否已存档',
   `CycleTime` int NOT NULL COMMENT 'CT 时长，单位秒',
   PRIMARY KEY (`Id`) USING BTREE,
