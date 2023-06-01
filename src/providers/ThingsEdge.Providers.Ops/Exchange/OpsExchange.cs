@@ -500,14 +500,14 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
     {
         if (data.IsArray())
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException("Tag 数据类型不能为数组");
         }
 
         return data.DataType switch
         {
             TagDataType.Bit => data!.GetBit(),
             TagDataType.Int => data!.GetInt() == 1,
-            _ => throw new NotSupportedException(),
+            _ => throw new NotSupportedException("Tag 数据类型必须为 bool 或 short。"),
         };
     }
 
@@ -537,14 +537,14 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
     {
         if (tag.IsArray())
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException("Tag 数据类型不能为数组");
         }
 
         return tag.DataType switch
         {
             TagDataType.Bit => false,
             TagDataType.Int => (short)0,
-            _ => throw new NotSupportedException(),
+            _ => throw new NotSupportedException("Tag 数据类型必须为 bool 或 short。"),
         };
     }
 }

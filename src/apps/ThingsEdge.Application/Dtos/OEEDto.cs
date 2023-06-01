@@ -21,24 +21,24 @@ public sealed class OEEDto
     public string? EquipmentCode { get; set; }
 
     /// <summary>
-    /// 负荷时间
+    /// 负荷时间（分钟）
     /// </summary>
-    public int LoadingTime { get; set; }
+    public double LoadingTime { get; set; }
 
     /// <summary>
-    /// 警报时间
+    /// 警报时间（分钟）
     /// </summary>
-    public int WarningTime { get; set; }
+    public double WarningTime { get; set; }
 
     /// <summary>
-    /// 急停时间
+    /// 急停时间（分钟）
     /// </summary>
-    public int EStopingTime { get; set; }
+    public double EStopingTime { get; set; }
 
     /// <summary>
-    /// 加工时间
+    /// 加工时间（分钟）
     /// </summary>
-    public int WorkingTime { get; set; }
+    public double WorkingTime { get; set; }
 
     /// <summary>
     /// 性能效率 (合格数+缺陷数)*单件标准耗时 / 实际工作时间

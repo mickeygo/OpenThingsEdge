@@ -43,12 +43,12 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         //  OEE = 有效率*表现性*质量指数=80%
 
         OEECollectionDto oeeCollection = new();
-
+        
         // 设备运行状态记录
         var exp = Expressionable.Create<EquipmentStateRecord>();
-        exp.Or(s => query.StartTime < s.StartTime && s.StartTime < query.EndTime);
-        exp.Or(s => s.IsEnded && query.StartTime < s.EndTime && s.EndTime < query.EndTime);
-        exp.Or(s => s.StartTime < query.StartTime && ((s.IsEnded && query.EndTime < s.EndTime) || !s.IsEnded));
+        exp.Or(s => query.StartTime <= s.StartTime && s.StartTime <= query.EndTime);
+        exp.Or(s => s.IsEnded && query.StartTime <= s.EndTime && s.EndTime <= query.EndTime);
+        exp.Or(s => s.StartTime <= query.StartTime && ((s.IsEnded && query.EndTime <= s.EndTime) || !s.IsEnded));
 
         var loadings = await _equipStateRepo.AsQueryable()
             .WhereIF(!string.IsNullOrEmpty(query.Line), s => s.Line == query.Line)
@@ -62,9 +62,9 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
             .ToListAsync();
 
         // 分组聚合
-        var loadingMap = CalAndGroup(loadings.Where(s => s.RunningState == Models.EquipmentRunningState.Running), query.StartTime, query.EndTime);
-        var warningMap = CalAndGroup(loadings.Where(s => s.RunningState == Models.EquipmentRunningState.Warning), query.StartTime, query.EndTime);
-        var eStoppingMap = CalAndGroup(loadings.Where(s => s.RunningState == Models.EquipmentRunningState.EmergencyStopping), query.StartTime, query.EndTime);
+        var loadingMap = CalAndGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Running), query.StartTime, query.EndTime);
+        var warningMap = CalAndGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Warning), query.StartTime, query.EndTime);
+        var eStoppingMap = CalAndGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.EmergencyStopping), query.StartTime, query.EndTime);
         var recordMap = records.GroupBy(s => s.Station)
             .Select(g => new { Station = g.Key, CycleTime = g.Sum(s => s.CycleTime) })
             .ToDictionary(k => k.Station, v => v.CycleTime);
@@ -80,27 +80,27 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
             OEEDto oee = new()
             {
                 EquipmentCode = equipmentCode,
-                LoadingTime = duration,
+                LoadingTime = Math.Round(duration * 1.0 / 60, 2),
             };
             oeeCollection.OeeList.Add(oee);
 
             if (warningMap.TryGetValue(equipmentCode, out var wt))
             {
-                oee.WarningTime = wt;
+                oee.WarningTime = Math.Round(wt * 1.0 / 60, 2);
             }
 
             if (eStoppingMap.TryGetValue(equipmentCode, out var st))
             {
-                oee.EStopingTime = st;
+                oee.EStopingTime = Math.Round(st * 1.0 / 60, 2);
             }
 
             if (recordMap.TryGetValue(equipmentCode, out var ct))
             {
-                oee.WorkingTime = ct;
+                oee.WorkingTime = Math.Round(ct * 1.0 / 60, 2);
 
                 if (oee.LoadingTime - oee.EStopingTime > 0)
                 {
-                    oee.PerformanceRate = Math.Round(oee.WorkingTime * 1.0 / (oee.LoadingTime - oee.EStopingTime), 2);
+                    oee.PerformanceRate = Math.Round(oee.WorkingTime / (oee.LoadingTime - oee.EStopingTime), 2);
                 }
 
                 oee.OkCount = yieldMap[equipmentCode].OkCount;
@@ -118,7 +118,7 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         var totalCycleTime = recordMap.Sum(s => s.Value);
         if (totalDuration > 0)
         {
-            oeeCollection.TotalPerformanceRate = Math.Round(totalCycleTime * 1.0 / totalDuration, 2);
+            oeeCollection.TotalPerformanceRate = Math.Round(totalCycleTime / totalDuration, 2);
         }
 
         return oeeCollection;

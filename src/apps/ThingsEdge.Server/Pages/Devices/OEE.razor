@@ -1,33 +1,154 @@
 ﻿@page "/devices/oee"
 @inherits ProComponentBase
+@inject IEquipmentStatisticsService _equipmentStatisticsService
 
 <MCard>
-    <MECharts Option="_option" Width="@("100%")" Height="300">
+    <MCardText Class="pa-6">
+        <h6>查询</h6>
+        <MRow Class="mt-3">
+            <MCol Sm=12 Md=4>
+                <MMenu @bind-Value="_menu1"
+                       CloseOnContentClick="false"
+                       NudgeRight="40"
+                       Transition="scale-transition"
+                       OffsetY
+                       MinWidth="@("auto")">
+                    <ActivatorContent>
+                        <MTextField @bind-Value="_date1"
+                                    Label="开始日期"
+                                    PrependIcon="mdi-calendar"
+                                    Readonly
+                                    @attributes="context.Attrs"></MTextField>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MDatePicker @bind-Value="_date1"
+                                     OnInput="() => _menu1 = false"></MDatePicker>
+                    </ChildContent>
+                </MMenu>
+            </MCol>
+            <MCol Sm=12 Md=4>
+                    <MMenu @bind-Value="_menu2"
+                       CloseOnContentClick="false"
+                       NudgeRight="40"
+                       Transition="scale-transition"
+                       OffsetY
+                       MinWidth="@("auto")">
+                    <ActivatorContent>
+                        <MTextField @bind-Value="_date2"
+                                    Label="结束日期"
+                                    PrependIcon="mdi-calendar"
+                                    Readonly
+                        @attributes="context.Attrs"></MTextField>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MDatePicker @bind-Value="_date2"
+                                     OnInput="() => _menu2 = false"></MDatePicker>
+                    </ChildContent>
+                </MMenu>
+            </MCol>
+            <MCol Sm="12" Md="4">
+                <MButton Color="primary" MinWidth=80 Height=32 Class="ml-6 rounded-pill" OnClick="QueryAsync">
+                    查询
+                </MButton>
+            </MCol>
+        </MRow>
+    </MCardText>
+</MCard>
+
+<MCard Class="mt-6">
+    <MECharts Option="_chatOption" Width="@("100%")" Height="300" IncludeFunctionsInOption>
     </MECharts>
 </MCard>
 
 @code {
-    private object _option = new
+    private bool _menu1, _menu2;
+    private DateOnly _date1 = DateOnly.FromDateTime(DateTime.Now.AddDays(-7));
+    private DateOnly _date2 = DateOnly.FromDateTime(DateTime.Now);
+    private object _chatOption = new();
+
+    private async Task QueryAsync()
     {
-        Title = new
-        {
-            Left = "center",
-            Text = "Getting started"
-        },
-        Tooltip = new { },
-        XAxis = new
-        {
-            Data = new[] { "Shirt", "Cardigan", "Chiffon shirt", "Pants", "High heel", "Sock" }
-        },
-        YAxis = new { },
-        Series = new[]
-        {
-            new
+        var oeeCollection = await _equipmentStatisticsService.AnalysisOEEAsync(new OEEQueryInput
             {
-                Name = "sales",
-                Type= "bar",
-                Data= new []{ 5, 20, 36, 10, 10, 20 }
+                StartTime = TimeUtil.ToDateTime(_date1),
+                EndTime = TimeUtil.ToDateTimeCeil(_date2),
+            });
+
+        var source = oeeCollection.OeeList.ToArray();
+
+        // 绘制 bar 图
+        _chatOption = new
+        {
+            Title = new
+            {
+                Left = "center",
+                Text = "设备性能效率"
+            },
+            Tooltip = new
+            {
+                Formatter = new StringBuilder("function(params) { return `")
+                                .Append("${params.name}<br/>")
+                                .Append("负荷时间 ${params.value.loadingTime}<br/>")
+                                .Append("急停时间 ${params.value.eStopingTime}<br/>")
+                                .Append("加工时间 ${params.value.workingTime}<br/>")
+                                .Append("OK数量 ${params.value.okCount}<br/>")
+                                .Append("NG数量 ${params.value.ngCount}<br/>")
+                                .Append("总数量 ${params.value.totalCount}<br/>")
+                                .Append("良率 ${params.value.yieldRate}<br/>")
+                                .Append("`; }")
+                                .ToString(),
+            },
+            Dataset = new
+            {
+                Dimensions = new[] { "equipmentCode", "performanceRate" },
+                Source = new[] 
+                { 
+                    new { EquipmentCode = "OP010", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.72, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP020", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.62, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP030", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.82, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP040", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.82, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP050", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.92, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP060", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.72, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP070", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.92, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP080", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.82, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP090", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.92, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP100", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.92, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP110", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.62, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP120", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.52, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP130", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.42, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP140", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.42, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP150", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.52, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP160", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.52, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP170", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.72, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP180", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.82, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP190", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.72, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP200", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.62, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP210", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.72, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP220", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.82, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP230", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.52, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP240", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.62, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP250", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.62, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                    new { EquipmentCode = "OP260", LoadingTime = 13.52, WarningTime = 12.52, EStopingTime = 11.53, WorkingTime = 12.45, PerformanceRate = 0.52, OkCount = 123, NgCount = 2, TotalCount = 125, YieldRate = 0.98 },
+                },
+            },
+            XAxis = new 
+            { 
+                Type = "category", 
+                AxisLabel = new { Rotate = -30 },
+            },
+            YAxis = new { },
+            Series = new[]
+            {
+                new 
+                { 
+                    Type = "bar", 
+                    Label = new { Show = true, Position = "inside" },
+                    MarkLine = new
+                    {
+                        Data = new[] { new { Type = "average", Name = "平均线" } },
+                    },
+                }
             }
-        }
-    };
+        };
+    }
 }

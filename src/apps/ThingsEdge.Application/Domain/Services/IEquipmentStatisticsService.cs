@@ -8,7 +8,7 @@ public interface IEquipmentStatisticsService
     /// <summary>
     /// OEE 分析
     /// </summary>
-    /// <param name="query">查询</param>
+    /// <param name="query">查询条件</param>
     /// <returns></returns>
     Task<OEECollectionDto> AnalysisOEEAsync(OEEQueryInput query);
 }
