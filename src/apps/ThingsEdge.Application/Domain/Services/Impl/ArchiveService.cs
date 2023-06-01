@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.Application.Domain.Services.Impl;
 
-internal sealed class ArchiveService : IArchiveService
+internal sealed class ArchiveService : IArchiveService, ITransientDependency
 {
     private readonly SqlSugarRepository<SnTransitRecord> _snTransitRecordRepo;
     private readonly SqlSugarRepository<SnTransitRecordLog> _snTransitRecordLogRepo;

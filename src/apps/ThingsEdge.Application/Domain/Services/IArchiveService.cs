@@ -3,7 +3,7 @@
 /// <summary>
 /// 产品出站服务。
 /// </summary>
-public interface IArchiveService : IDomainService
+public interface IArchiveService
 {
     /// <summary>
     /// 产品出站存档

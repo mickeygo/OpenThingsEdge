@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.Router.Forwarder;
 
-internal sealed class InternalForwarderFactory : IForwarderFactory
+internal sealed class InternalForwarderFactory : IForwarderFactory, ISingletonDependency
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;

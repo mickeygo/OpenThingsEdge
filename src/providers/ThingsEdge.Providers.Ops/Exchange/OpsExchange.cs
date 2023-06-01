@@ -10,7 +10,7 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 /// <summary>
 /// 数据交换引擎。
 /// </summary>
-public sealed class OpsExchange : IExchange
+public sealed class OpsExchange : IExchange, ISingletonDependency
 {
     private CancellationTokenSource? _cts = new();
 

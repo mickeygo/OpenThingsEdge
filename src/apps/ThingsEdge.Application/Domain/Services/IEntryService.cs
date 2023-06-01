@@ -3,7 +3,7 @@
 /// <summary>
 /// 产品进站服务
 /// </summary>
-internal interface IEntryService : IDomainService
+internal interface IEntryService
 {
     /// <summary>
     /// 产品进站请求

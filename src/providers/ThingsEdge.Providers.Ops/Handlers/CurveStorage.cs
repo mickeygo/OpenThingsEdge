@@ -5,7 +5,7 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// <summary>
 /// 曲线存储器。
 /// </summary>
-internal sealed class CurveStorage
+internal sealed class CurveStorage : ISingletonDependency
 {
     private static readonly string DefaultCurvesDirectory = Path.Combine(AppContext.BaseDirectory, "curves");
 

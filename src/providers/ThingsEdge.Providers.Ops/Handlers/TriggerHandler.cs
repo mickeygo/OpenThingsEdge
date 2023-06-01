@@ -125,7 +125,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                     break;
                 }
 
-                var (ok2, _, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
+                var (ok2, formatedData2, err2) = await notification.Connector.WriteAsync(tag2!, tagValue!).ConfigureAwait(false);
                 if (!ok2)
                 {
                     string msg = $"回写标记数据失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err2}";
@@ -134,17 +134,23 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                     hasError = true;
                     break;
                 }
+
+                // 设置回写的标记值快照。
+                _tagDataSnapshot.Change(tag2, formatedData2!);
             }
         }
 
         // 回写标记状态。
         int tagCode = tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
-        var (ok3, _, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
+        var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {
             string msg = $"回写触发标记状态失败, 设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {err3}";
             await LogAndPublishError(msg).ConfigureAwait(false);
         }
+
+        // 设置回写的标记状态快照。
+        _tagDataSnapshot.Change(notification.Tag, formatedData3!);
     }
 
     private async Task LogAndPublishError(string msg)

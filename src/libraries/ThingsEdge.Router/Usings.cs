@@ -1,11 +1,7 @@
-﻿global using System.Collections.Concurrent;
-global using System.ComponentModel;
-global using System.Diagnostics;
-global using System.Diagnostics.CodeAnalysis;
+﻿global using System.Diagnostics.CodeAnalysis;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Reflection;
-global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
@@ -19,5 +15,6 @@ global using Microsoft.Extensions.Options;
 
 global using MediatR;
 
+global using ThingsEdge.Common.DependencyInjection;
 global using ThingsEdge.Contracts;
 global using ThingsEdge.Contracts.Variables;

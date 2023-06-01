@@ -1,5 +1,4 @@
-﻿using ThingsEdge.Router.Forwarder;
-using ThingsEdge.Router.Management;
+﻿using ThingsEdge.Router.Management;
 
 namespace ThingsEdge.Router;
 
@@ -23,17 +22,9 @@ public static class RouterServiceCollectionExtensions
         // 注册全局服务
         builder2.Builder.ConfigureServices((_, services) =>
         {
-            services.AddRouterServices();
+            services.AddAutoDependencyInjection(typeof(RouterServiceCollectionExtensions).Assembly);
         });
 
         return builder2;
-    }
-
-    // 配置服务
-    private static IServiceCollection AddRouterServices(this IServiceCollection services)
-    {
-        services.AddSingleton<IForwarderFactory, InternalForwarderFactory>();
-
-        return services;
     }
 }

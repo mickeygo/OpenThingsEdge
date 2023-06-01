@@ -1,12 +1,9 @@
-﻿using ThingsEdge.Application.Dtos;
-using ThingsEdge.Application.Models;
-
-namespace ThingsEdge.Application.Domain.Services;
+﻿namespace ThingsEdge.Application.Domain.Services;
 
 /// <summary>
 /// 设备运行模式服务。
 /// </summary>
-public interface IEquipmentModeService : IDomainService
+public interface IEquipmentModeService
 {
     /// <summary>
     /// 分页查询

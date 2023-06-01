@@ -3,7 +3,7 @@ using ThingsEdge.Router.Devices;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
-internal sealed class DeviceReadWriteImpl : IDeviceReadWrite
+internal sealed class DeviceReadWriteImpl : IDeviceReadWrite, ISingletonDependency
 {
     private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly DriverConnectorManager _driverConnectorManager;

@@ -11,5 +11,6 @@ global using Microsoft.Extensions.Options;
 global using MediatR;
 global using Nito.AsyncEx;
 
+global using ThingsEdge.Common.DependencyInjection;
 global using ThingsEdge.Contracts;
 global using ThingsEdge.Contracts.Variables;

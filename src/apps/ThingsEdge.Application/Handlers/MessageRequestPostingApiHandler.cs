@@ -1,8 +1,6 @@
 ﻿using ThingsEdge.Application.Configuration;
 using ThingsEdge.Application.Domain.Services;
-using ThingsEdge.Application.Dtos;
 using ThingsEdge.Application.Management.Equipment;
-using ThingsEdge.Application.Models;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Interfaces;
 

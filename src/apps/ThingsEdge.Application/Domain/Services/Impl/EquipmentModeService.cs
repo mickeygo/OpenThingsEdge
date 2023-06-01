@@ -1,9 +1,6 @@
-﻿using ThingsEdge.Application.Dtos;
-using ThingsEdge.Application.Models;
+﻿namespace ThingsEdge.Application.Domain.Services.Impl;
 
-namespace ThingsEdge.Application.Domain.Services.Impl;
-
-internal sealed class EquipmentModeService : IEquipmentModeService
+internal sealed class EquipmentModeService : IEquipmentModeService, ITransientDependency
 {
     private readonly SqlSugarRepository<EquipmentModeRecord> _equipModeRepo;
 

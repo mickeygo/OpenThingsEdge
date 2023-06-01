@@ -3,7 +3,7 @@
 /// <summary>
 /// Switch 数据容器
 /// </summary>
-internal sealed class SwitchContainer
+internal sealed class SwitchContainer : ISingletonDependency
 {
     private readonly ConcurrentDictionary<string, StreamWriterWrapper> _container = new();
 

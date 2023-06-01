@@ -1,9 +1,6 @@
-﻿using ThingsEdge.Application.Dtos;
-using ThingsEdge.Application.Models;
+﻿namespace ThingsEdge.Application.Domain.Services.Impl;
 
-namespace ThingsEdge.Application.Domain.Services.Impl;
-
-internal sealed class EquipmentStateService : IEquipmentStateService
+internal sealed class EquipmentStateService : IEquipmentStateService, ITransientDependency
 {
     private readonly SqlSugarRepository<EquipmentStateRecord> _equipStateRepo;
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// 警报设置服务
 /// </summary>
-public interface IAlarmSettingService : IDomainService
+public interface IAlarmSettingService
 {
     /// <summary>
     /// 获取全部的警报对象。

@@ -1,8 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Exchange;
-using ThingsEdge.Providers.Ops.Handlers;
-using ThingsEdge.Providers.Ops.Snapshot;
-using ThingsEdge.Router.Devices;
 
 namespace ThingsEdge.Router;
 
@@ -22,14 +19,9 @@ public static class ServiceCollectionExtensions
         {
             services.Configure<OpsConfig>(hostBuilder.Configuration.GetSection(configName));
 
-            services.AddSingleton<IExchange, OpsExchange>();
-            services.AddSingleton<DriverConnectorManager>();
-            services.AddSingleton<SwitchContainer>();
-            services.AddSingleton<CurveStorage>();
-            services.AddSingleton<ITagDataSnapshot, InternalTagDataSnapshot>();
+            services.AddAutoDependencyInjection(typeof(ServiceCollectionExtensions).Assembly);
 
-            services.AddSingleton<IDeviceReadWrite, DeviceReadWriteImpl>();
-            services.AddSingleton<IDeviceTagDataSnapshot, DeviceTagDataSnapshotImpl>();
+            services.AddSingleton<DriverConnectorManager>();
         });
 
         return builder;

@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.Application.Domain.Services.Impl;
 
-internal sealed class AlarmSettingService : IAlarmSettingService
+internal sealed class AlarmSettingService : IAlarmSettingService, ITransientDependency
 {
     const string CacheName = "__AlarmSettingCache";
 

@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Application.Models;
-
-namespace ThingsEdge.Application.Management.Equipment;
+﻿namespace ThingsEdge.Application.Management.Equipment;
 
 /// <summary>
 /// 设备状态快照。

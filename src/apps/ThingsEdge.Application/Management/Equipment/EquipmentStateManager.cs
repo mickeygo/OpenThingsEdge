@@ -1,13 +1,11 @@
 ﻿using ThingsEdge.Application.Domain.Services;
-using ThingsEdge.Application.Dtos;
-using ThingsEdge.Application.Models;
 
 namespace ThingsEdge.Application.Management.Equipment;
 
 /// <summary>
 /// 设备状态管理对象。
 /// </summary>
-public sealed class EquipmentStateManager
+public sealed class EquipmentStateManager : ITransientDependency
 {
     private readonly IEquipmentModeService _equipmentModeService;
     private readonly IEquipmentStateService _equipmentStateService;

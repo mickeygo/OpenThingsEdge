@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Application.Models;
-
-namespace ThingsEdge.Application.Domain.Entities;
+﻿namespace ThingsEdge.Application.Domain.Entities;
 
 /// <summary>
 /// 设备状态记录。

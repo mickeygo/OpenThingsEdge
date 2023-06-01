@@ -1,8 +1,6 @@
-﻿using ThingsEdge.Application.Dtos;
+﻿namespace ThingsEdge.Application.Domain.Services.Impl;
 
-namespace ThingsEdge.Application.Domain.Services.Impl;
-
-internal sealed class AlarmService : IAlarmService, IDomainService
+internal sealed class AlarmService : IAlarmService, ITransientDependency
 {
     private readonly SqlSugarRepository<AlarmRecord> _alarmRecordRepo;
     private readonly IAlarmSettingService _alarmSettingService;

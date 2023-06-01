@@ -2,7 +2,7 @@
 
 namespace ThingsEdge.Providers.Ops.Snapshot;
 
-internal sealed class DeviceTagDataSnapshotImpl : IDeviceTagDataSnapshot
+internal sealed class DeviceTagDataSnapshotImpl : IDeviceTagDataSnapshot, ISingletonDependency
 {
     private readonly ITagDataSnapshot _tagDataSnapshot;
 

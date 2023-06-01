@@ -1,8 +1,6 @@
-﻿using ThingsEdge.Application.Models;
+﻿namespace ThingsEdge.Application.Management.Equipment;
 
-namespace ThingsEdge.Application.Management.Equipment;
-
-public sealed class EquipmentStateSnapshotManager : IManager
+public sealed class EquipmentStateSnapshotManager : ISingletonDependency
 {
     record EquipmentStateSnapshotKey(string Line, string EquipmentCode);
 
