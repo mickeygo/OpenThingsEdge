@@ -8,15 +8,18 @@ public enum EquipmentRunningMode
     /// <summary>
     /// 未知
     /// </summary>
+    [Display(Name = "未知")]
     Unkown = 0,
 
     /// <summary>
     /// 手动模式
     /// </summary>
+    [Display(Name = "手动")]
     Manual = 1,
 
     /// <summary>
     /// 自动模式
     /// </summary>
+    [Display(Name = "自动")]
     Auto = 2
 }

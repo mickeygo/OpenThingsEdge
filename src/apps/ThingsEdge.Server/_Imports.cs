@@ -3,6 +3,7 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
 global using System.Reflection;
+global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 
@@ -13,6 +14,8 @@ global using Microsoft.AspNetCore.Components.Web;
 global using BlazorComponent;
 global using BlazorComponent.I18n;
 global using Masa.Blazor;
+
+global using ThingsEdge.Application.Dtos;
 
 global using ThingsEdge.Server.Data.App.ECommerce;
 global using ThingsEdge.Server.Data.App.ECommerce.Dto;

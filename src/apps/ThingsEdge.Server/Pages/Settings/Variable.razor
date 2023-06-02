@@ -52,6 +52,18 @@
                                     DisableSort
                                     ItemsPerPage=1024
                                     Class="elevation-1">
+                                <ItemColContent>
+                                    @if (context.Header.Value == nameof(TagModel.Flag))
+                                    {
+                                        <MChip Color="@GetColor(context.Item.Flag)">
+                                            @context.Value
+                                        </MChip>
+                                    }
+                                    else
+                                    {
+                                        @context.Value
+                                    }
+                                </ItemColContent>
                             </MDataTable>
                         </MCard>
                     }
@@ -97,10 +109,10 @@
           new (){ Text = "地址", Value = nameof(TagModel.Address), Width = 80 },
           new (){ Text = "长度", Value = nameof(TagModel.Length), Width = 80 },
           new (){ Text = "数据类型", Value = nameof(TagModel.DataType), Width = 100 },
-          new (){ Text = "扫描速率", Value = nameof(TagModel.ScanRate), Width = 100 },
+          new (){ Text = "扫描速率(ms)", Value = nameof(TagModel.ScanRate), Width = 120 },
           new (){ Text = "标识", Value = nameof(TagModel.Flag), Width = 80 },
           new (){ Text = "用途", Value = nameof(TagModel.Usage), Width = 100 },
-          new (){ Text = "发布模式", Value = nameof(TagModel.PublishMode), Width = 80 },
+          new (){ Text = "发布模式", Value = nameof(TagModel.PublishMode), Width = 100 },
           new (){ Text = "要旨", Value = nameof(TagModel.Keynote), Width = 100 },
           new (){ Text = "描述", Value = nameof(TagModel.Description), Width = 120 },
           new (){ Text = "文本值", Value = nameof(TagModel.Text), Width = 200 },
@@ -146,6 +158,15 @@
             });
         });
     }
+
+    string GetColor(TagFlag flag) => flag switch
+    {
+        TagFlag.Heartbeat => "green",
+        TagFlag.Notice => "blue",
+        TagFlag.Trigger => "teal",
+        TagFlag.Switch => "orange",
+        _ => "",
+    };
 
     public void Dispose()
     {

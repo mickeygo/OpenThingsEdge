@@ -3,12 +3,34 @@
 @inject IEquipmentStateService _equipmentStateService
 
 <MCard>
-    <MDataTable Headers="_headers"
+    <MDataTable Stripe
+                Headers="_headers"
                 Items="_items"
                 OnOptionsUpdate="HandleOnOptionsUpdate"
                 ServerItemsLength="_totalItemCount"
                 Loading="_loading"
-                Class="elevation-1"></MDataTable>
+                Class="elevation-1">
+        <ItemColContent>
+            @if (context.Header.Value == nameof(EquipmentStateRecord.RunningState))
+            {
+                <MChip Color="@GetColor(context.Item.RunningState)">
+                    @context.Item.RunningState.DisplayName()
+                </MChip>
+            }
+            else if (context.Header.Value == nameof(EquipmentStateRecord.Duration))
+            {
+                @(Math.Round(context.Item.Duration / 3600.0, 2))
+            }
+            else if (context.Header.Value == nameof(EquipmentStateRecord.IsEnded))
+            {
+                @(context.Item.IsEnded ? "是" : "否")
+            }
+            else
+            {
+                @context.Value
+            }
+        </ItemColContent>
+    </MDataTable>
 </MCard>
 
 @code {
@@ -25,7 +47,7 @@
           new (){ Text = "开始时间", Value = nameof(EquipmentStateRecord.StartTime), Width = 100 },
           new (){ Text = "结束时间", Value = nameof(EquipmentStateRecord.EndTime), Width = 80 },
           new (){ Text = "是否已结束", Value = nameof(EquipmentStateRecord.IsEnded), Width = 60 },
-          new (){ Text = "持续时长(s)", Value = nameof(EquipmentStateRecord.Duration), Width = 80 },
+          new (){ Text = "持续时长(h)", Value = nameof(EquipmentStateRecord.Duration), Width = 80 },
         };
 
     protected override async Task OnInitializedAsync()
@@ -54,6 +76,14 @@
 
         _loading = false;
 
-        InvokeAsync(StateHasChanged);
+        _ = InvokeAsync(StateHasChanged);
     }
+
+    string GetColor(EquipmentRunningState state) => state switch
+    {
+        EquipmentRunningState.Running => "green",
+        EquipmentRunningState.Warning => "orange",
+        EquipmentRunningState.EmergencyStopping => "red",
+        _ => "",
+    };
 }

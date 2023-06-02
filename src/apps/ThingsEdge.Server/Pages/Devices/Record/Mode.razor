@@ -3,12 +3,27 @@
 @inject IEquipmentModeService _equipmentModeService
 
 <MCard>
-    <MDataTable Headers="_headers"
-                Items="_items"
-                OnOptionsUpdate="HandleOnOptionsUpdate"
-                ServerItemsLength="_totalItemCount"
-                Loading="_loading"
-                Class="elevation-1"></MDataTable>
+    <MDataTable 
+        Stripe
+        Headers="_headers"
+        Items="_items"
+        OnOptionsUpdate="HandleOnOptionsUpdate"
+        ServerItemsLength="_totalItemCount"
+        Loading="_loading"
+        Class="elevation-1">
+        <ItemColContent>
+            @if (context.Header.Value == nameof(EquipmentModeRecord.RunningMode))
+            {
+                <MChip Color="@GetColor(context.Item.RunningMode)">
+                    @context.Item.RunningMode.DisplayName()
+                </MChip>
+            }
+            else
+            {
+                @context.Value
+            }
+        </ItemColContent>
+    </MDataTable>
 </MCard>
 
 @code {
@@ -51,6 +66,14 @@
 
         _loading = false;
 
-        InvokeAsync(StateHasChanged);
+        _ = InvokeAsync(StateHasChanged);
     }
+
+    string GetColor(EquipmentRunningMode mode) => mode switch
+    {
+        EquipmentRunningMode.Unkown => "",
+        EquipmentRunningMode.Manual => "orange",
+        EquipmentRunningMode.Auto => "green",
+        _ => "",
+    };
 }
