@@ -12,7 +12,7 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         _snTransitRecordRepo = snTransitRecordRepo;
     }
 
-    public async Task<OEECollectionDto> AnalysisOEEAsync(OEEQueryInput query)
+    public async Task<List<OEEGroupDto>> AnalysisOEEAsync(OEEQueryInput query)
     {
         // 基本指标：
         // => 最大操作时间：代表该设施在一定期间内能实际运转的时间，若设备本身可完全由厂内使用，则为日历时间。
@@ -42,8 +42,8 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         //  质量指数（良率）= (400-20)/400=0.95(95%)
         //  OEE = 有效率*表现性*质量指数=80%
 
-        OEECollectionDto oeeCollection = new();
-        
+        List<OEEGroupDto> oeeGroups = new();
+
         // 设备运行状态记录
         var exp = Expressionable.Create<EquipmentStateRecord>();
         exp.Or(s => query.StartTime <= s.StartTime && s.StartTime <= query.EndTime);
@@ -62,49 +62,53 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
             .ToListAsync();
 
         // 分组聚合
-        var loadingMap = CalAndGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Running), query.StartTime, query.EndTime);
-        var warningMap = CalAndGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Warning), query.StartTime, query.EndTime);
-        var eStoppingMap = CalAndGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.EmergencyStopping), query.StartTime, query.EndTime);
-        var recordMap = records.GroupBy(s => s.Station)
-            .Select(g => new { Station = g.Key, CycleTime = g.Sum(s => s.CycleTime) })
-            .ToDictionary(k => k.Station, v => v.CycleTime);
-
-        // 计算各工位良品率
-        var yieldMap = records.GroupBy(s => s.Station)
-            .Select(g => new { Station = g.Key, OkCount = g.Count(s => s.IsOK()), NgCount = g.Count(s => s.IsNG()) })
-            .ToDictionary(k => k.Station, v => new { v.OkCount, v.NgCount });
+        var loadingGroup = CalOeeGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Running), query.StartTime, query.EndTime);
+        var warningGroup = CalOeeGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Warning), query.StartTime, query.EndTime);
+        var eStoppingGroup = CalOeeGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.EmergencyStopping), query.StartTime, query.EndTime);
+        var recordGroup = records.GroupBy(s => new { s.Line, s.Station })
+            .Select(g => new { g.Key.Line, g.Key.Station, TotalCycleTime = g.Sum(g => g.CycleTime), OkCount = g.Count(s => s.IsOK()), NgCount = g.Count(s => s.IsNG()) });
 
         // 数据计算
-        foreach (var (equipmentCode, duration) in loadingMap)
+        foreach (var loading in loadingGroup)
         {
             OEEDto oee = new()
             {
-                EquipmentCode = equipmentCode,
-                LoadingTime = Math.Round(duration * 1.0 / 60, 2),
+                EquipmentCode = loading.EquipmentCode,
+                LoadingTime = Math.Round(loading.Duration * 1.0 / 60, 2),
             };
-            oeeCollection.OeeList.Add(oee);
 
-            if (warningMap.TryGetValue(equipmentCode, out var wt))
+            var oeeGroup = oeeGroups.FirstOrDefault(s => s.Line == loading.Line);
+            if (oeeGroup is null)
             {
-                oee.WarningTime = Math.Round(wt * 1.0 / 60, 2);
+                oeeGroup = new() { Line = loading.Line };
+                oeeGroups.Add(oeeGroup);
+            }
+            oeeGroup.OeeList.Add(oee);
+
+            var warning = warningGroup.FirstOrDefault(s => s.Line == loading.Line && s.EquipmentCode == loading.EquipmentCode);
+            if (warning is not null)
+            {
+                oee.WarningTime = Math.Round(warning.Duration * 1.0 / 60, 2);
             }
 
-            if (eStoppingMap.TryGetValue(equipmentCode, out var st))
+            var stopping = eStoppingGroup.FirstOrDefault(s => s.Line == loading.Line && s.EquipmentCode == loading.EquipmentCode);
+            if (stopping is not null)
             {
-                oee.EStopingTime = Math.Round(st * 1.0 / 60, 2);
+                oee.EStopingTime = Math.Round(stopping.Duration * 1.0 / 60, 2);
             }
 
-            if (recordMap.TryGetValue(equipmentCode, out var ct))
+            var record0 = recordGroup.FirstOrDefault(s => s.Line == loading.Line && s.Station == loading.EquipmentCode);
+            if (record0 is not null)
             {
-                oee.WorkingTime = Math.Round(ct * 1.0 / 60, 2);
+                oee.WorkingTime = Math.Round(record0.TotalCycleTime * 1.0 / 60, 2);
 
                 if (oee.LoadingTime - oee.EStopingTime > 0)
                 {
                     oee.PerformanceRate = Math.Round(oee.WorkingTime / (oee.LoadingTime - oee.EStopingTime), 2);
                 }
 
-                oee.OkCount = yieldMap[equipmentCode].OkCount;
-                oee.NgCount = yieldMap[equipmentCode].NgCount;
+                oee.OkCount = record0.OkCount;
+                oee.NgCount = record0.NgCount;
                 oee.TotalCount = oee.OkCount + oee.NgCount;
                 if (oee.TotalCount > 0)
                 {
@@ -114,20 +118,23 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         }
 
         // 产线汇总
-        var totalDuration = oeeCollection.OeeList.Sum(s => s.LoadingTime - s.EStopingTime);
-        var totalCycleTime = recordMap.Sum(s => s.Value);
-        if (totalDuration > 0)
+        foreach (var oeeGroup0 in oeeGroups)
         {
-            oeeCollection.TotalPerformanceRate = Math.Round(totalCycleTime / totalDuration, 2);
+            var totalDuration = oeeGroup0.OeeList.Sum(s => s.LoadingTime - s.EStopingTime);
+            var totalCycleTime = oeeGroup0.OeeList.Sum(s => s.WorkingTime);
+            if (totalDuration > 0)
+            {
+                oeeGroup0.AvgPerformanceRate = Math.Round(totalCycleTime / totalDuration, 2);
+            }
         }
 
-        return oeeCollection;
+        return oeeGroups;
     }
 
     /// <summary>
     /// 计算并汇总负荷时长
     /// </summary>
-    private static Dictionary<string, int> CalAndGroup(IEnumerable<EquipmentStateRecord> records, DateTime start, DateTime end)
+    private static IEnumerable<OeeGroupRecord> CalOeeGroup(IEnumerable<EquipmentStateRecord> records, DateTime start, DateTime end)
     {
         foreach (var s in records)
         {
@@ -142,8 +149,9 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
             }
         }
 
-        return records.GroupBy(s => s.EquipmentCode)
-           .Select(g => new { EquipmentCode = g.Key, Duration = g.Sum(s => s.Duration) })
-           .ToDictionary(k => k.EquipmentCode, v => v.Duration);
+        return records.GroupBy(s => new { s.Line, s.EquipmentCode })
+            .Select(s => new OeeGroupRecord(s.Key.Line, s.Key.EquipmentCode, s.Sum(s => s.Duration)));
     }
+
+    private record class OeeGroupRecord(string Line, string EquipmentCode, int Duration);
 }

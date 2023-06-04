@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Events;
 
@@ -29,6 +30,6 @@ internal class HeartbeatHandler : INotificationHandler<HeartbeatEvent>
         }
 
         var @event = DeviceHeartbeatEvent.Create(notification.ChannelName, notification.Device, notification.Tag, notification.IsConnected);
-        await _publisher.Publish(@event, PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(@event, PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
     }
 }

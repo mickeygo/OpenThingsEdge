@@ -1,5 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
-using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Providers.Ops.Events;
 
 namespace ThingsEdge.Router;
 
@@ -18,12 +18,32 @@ public static class ServiceCollectionExtensions
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
             services.Configure<OpsConfig>(hostBuilder.Configuration.GetSection(configName));
-
             services.AddAutoDependencyInjection(typeof(ServiceCollectionExtensions).Assembly);
-
-            services.AddSingleton<DriverConnectorManager>();
+            services.AddHostedService<OpsHostedService>();
         });
 
         return builder;
+    }
+}
+
+internal sealed class OpsHostedService : IHostedService
+{
+    private readonly EventLoop _eventLoop;
+
+    public OpsHostedService(EventLoop eventLoop)
+    {
+        _eventLoop = eventLoop;
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        _ = _eventLoop.Loop(cancellationToken);
+
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

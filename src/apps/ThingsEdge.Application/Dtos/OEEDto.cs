@@ -13,6 +13,25 @@ public sealed class OEECollectionDto
     public double TotalPerformanceRate { get; set; }
 }
 
+public sealed class OEEGroupDto
+{
+    /// <summary>
+    /// 产线
+    /// </summary>
+    [NotNull]
+    public string? Line { get; set; }
+
+    /// <summary>
+    /// OEE 各设备
+    /// </summary>
+    public List<OEEDto> OeeList { get; init; } = new();
+
+    /// <summary>
+    /// 性能效率均值
+    /// </summary>
+    public double AvgPerformanceRate { get; set; }
+}
+
 public sealed class OEEDto
 {
     /// <summary>

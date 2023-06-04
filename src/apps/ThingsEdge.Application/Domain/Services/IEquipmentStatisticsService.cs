@@ -10,5 +10,5 @@ public interface IEquipmentStatisticsService
     /// </summary>
     /// <param name="query">查询条件</param>
     /// <returns></returns>
-    Task<OEECollectionDto> AnalysisOEEAsync(OEEQueryInput query);
+    Task<List<OEEGroupDto>> AnalysisOEEAsync(OEEQueryInput query);
 }

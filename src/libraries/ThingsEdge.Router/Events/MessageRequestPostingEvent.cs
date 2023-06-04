@@ -3,7 +3,7 @@
 /// <summary>
 /// 消息请求预处理事件。
 /// </summary>
-public sealed class MessageRequestPostingEvent : INotification
+public sealed class MessageRequestPostingEvent : INotification, IEvent
 {
     /// <summary>
     /// 事件创建时间。

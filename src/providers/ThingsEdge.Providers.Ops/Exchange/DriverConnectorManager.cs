@@ -10,7 +10,7 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 /// <summary>
 /// 驱动连接器管理者。
 /// </summary>
-public sealed class DriverConnectorManager : IDisposable
+public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
 {
     private readonly Dictionary<string, IDriverConnector> _connectors = new(); // Key 为设备编号
     private readonly ILogger _logger;

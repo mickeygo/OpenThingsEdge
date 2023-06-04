@@ -1,9 +1,11 @@
-﻿namespace ThingsEdge.Providers.Ops.Handlers;
+﻿using ThingsEdge.Router.Events;
+
+namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
 /// 标记 <see cref="TagFlag.Heartbeat"/> 事件。
 /// </summary>
-internal sealed class HeartbeatEvent : INotification
+internal sealed class HeartbeatEvent : INotification, IEvent
 {
     /// <summary>
     /// 通道名称

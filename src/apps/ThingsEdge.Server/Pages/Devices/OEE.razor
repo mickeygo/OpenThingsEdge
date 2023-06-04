@@ -56,27 +56,28 @@
 </MCard>
 
 <MCard Class="mt-6">
-    <MECharts Option="_chatOption" Width="@("100%")" Height="300" IncludeFunctionsInOption>
-    </MECharts>
+    @foreach (var option in _chatOptions)
+    {
+        <MECharts Class="pt-4" Option="option" Width="@("100%")" Height="300" IncludeFunctionsInOption>
+        </MECharts>
+    }
 </MCard>
 
 @code {
     private bool _menu1, _menu2;
     private DateOnly _date1 = DateOnly.FromDateTime(DateTime.Now.AddDays(-7));
     private DateOnly _date2 = DateOnly.FromDateTime(DateTime.Now);
-    private object _chatOption = new();
+    private IEnumerable<object> _chatOptions = new object[0];
 
     private async Task QueryAsync()
     {
-        var oeeCollection = await _equipmentStatisticsService.AnalysisOEEAsync(new OEEQueryInput
+        var oeeGroups = await _equipmentStatisticsService.AnalysisOEEAsync(new OEEQueryInput
             {
                 StartTime = TimeUtil.ToDateTime(_date1),
                 EndTime = TimeUtil.ToDateTimeCeil(_date2),
             });
 
-        var source = oeeCollection.OeeList;
-
         // 绘制 bar 图
-        _chatOption = new OeeChatViewModel().BuildOeeChatOption(source);
+        _chatOptions = new OeeChatViewModel().BuildOeeChatOptions(oeeGroups);
     }
 }

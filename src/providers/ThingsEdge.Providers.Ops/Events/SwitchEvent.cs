@@ -1,11 +1,12 @@
 ﻿using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Router.Events;
 
-namespace ThingsEdge.Providers.Ops.Handlers;
+namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
 /// 标记 <see cref="TagFlag.Switch"/> 事件。
 /// </summary>
-internal sealed class SwitchEvent : INotification
+internal sealed class SwitchEvent : INotification, IEvent
 {
     /// <summary>
     /// 连接驱动

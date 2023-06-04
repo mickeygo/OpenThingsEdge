@@ -1,6 +1,5 @@
-﻿using ThingsEdge.Common.EventBus;
-using ThingsEdge.Providers.Ops.Configuration;
-using ThingsEdge.Providers.Ops.Handlers;
+﻿using ThingsEdge.Providers.Ops.Configuration;
+using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Router;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Events;
@@ -10,23 +9,23 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 /// <summary>
 /// 数据交换引擎。
 /// </summary>
-public sealed class OpsExchange : IExchange, ISingletonDependency
+internal sealed class OpsExchange : IExchange, ISingletonDependency
 {
     private CancellationTokenSource? _cts = new();
 
-    private readonly IEventPublisher _publisher;
+    private readonly IProducer _producer;
     private readonly IDeviceManager _deviceManager;
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly OpsConfig _opsConfig;
     private readonly ILogger _logger;
 
-    public OpsExchange(IEventPublisher publisher,
+    public OpsExchange(IProducer producer,
         IDeviceManager deviceManager,
         DriverConnectorManager driverConnectorManager,
         IOptionsMonitor<OpsConfig> opsConfig,
         ILogger<OpsExchange> logger)
     {
-        _publisher = publisher;
+        _producer = producer;
         _deviceManager = deviceManager;
         _driverConnectorManager = driverConnectorManager;
         _opsConfig = opsConfig.CurrentValue;
@@ -44,7 +43,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
         IsRunning = true;
 
         _logger.LogInformation("[Engine] 引擎启动");
-        await _publisher.Publish(LoggingMessageEvent.Info("[Engine] 引擎启动")).ConfigureAwait(false);
+        await _producer.ProduceAsync(LoggingMessageEvent.Info("[Engine] 引擎启动")).ConfigureAwait(false);
 
         _cts ??= new();
 
@@ -57,11 +56,11 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
             // 心跳数据监控器
             _ = HeartbeatMonitorAsync(connector);
 
-            // 触发数据监控器
-            _ = TriggerMonitorAsync(connector);
-
             // 通知数据监控器
             _ = NoticeMonitorAsync(connector);
+
+            // 触发数据监控器
+            _ = TriggerMonitorAsync(connector);
 
             // 开关数据监控器
             _ = SwitchMonitorAsync(connector);
@@ -88,8 +87,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                             if (!TagValueSet.CompareAndSwap(tag.TagId, false))
                             {
                                 // 任务取消时，发布设备心跳断开事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, false, SetOff(tag)), 
-                                    PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                                await _producer.ProduceAsync(HeartbeatEvent.Create(channelName!, device, tag, false, SetOff(tag))).ConfigureAwait(false);
                             }
 
                             break;
@@ -100,8 +98,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                             if(!TagValueSet.CompareAndSwap(tag.TagId, false))
                             {
                                 // 连接断开时，发布设备心跳断开事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, false, SetOff(tag)), 
-                                    PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                                await _producer.ProduceAsync(HeartbeatEvent.Create(channelName!, device, tag, false, SetOff(tag))).ConfigureAwait(false);
                             }
 
                             continue;
@@ -112,7 +109,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                         {
                             string msg = $"[Engine] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
                             _logger.LogError(msg);
-                            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
 
                             continue;
                         }
@@ -125,14 +122,12 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                             if (!TagValueSet.CompareAndSwap(tag.TagId, true))
                             {
                                 // 发布心跳正常事件。
-                                await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true, data!), 
-                                    PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                                await _producer.ProduceAsync(HeartbeatEvent.Create(channelName!, device, tag, true, data!)).ConfigureAwait(false);
                             }
                         }
 
                         // 发布心跳信号事件（仅记录值）。
-                        await _publisher.Publish(HeartbeatEvent.Create(channelName!, device, tag, true, data!, true),
-                            PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _producer.ProduceAsync(HeartbeatEvent.Create(channelName!, device, tag, true, data!, true)).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -141,76 +136,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                     {
                         string msg = $"[Engine] Heartbeat 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
-                    }
-                }
-            });
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private Task TriggerMonitorAsync(IDriverConnector connector)
-    {
-        var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
-        var tags = device!.GetAllTags(TagFlag.Trigger);
-        foreach (var tag in tags)
-        {
-            _ = Task.Run(async () =>
-            {
-                int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
-                while (_cts != null && !_cts.Token.IsCancellationRequested)
-                {
-                    try
-                    {
-                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
-
-                        if (_cts == null)
-                        {
-                            break;
-                        }
-
-                        if (!connector.CanConnect)
-                        {
-                            continue;
-                        }
-
-                        // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
-                        if (!ok)
-                        {
-                            string msg = $"[Engine] Trigger 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
-                            _logger.LogError(msg);
-                            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
-
-                            continue;
-                        }
-
-                        // 校验触发标记
-                        var state = data!.GetInt(); // 触发标记还可能包含状态码信息。
-
-                        // 必须先检测并更新标记状态值，若值有变动且触发标记值为 1 则推送数据。
-                        if (!TagValueSet.CompareAndSwap(tag.TagId, state) && state == 1)
-                        {
-                            // 发布触发事件
-                            await _publisher.Publish(new TriggerEvent
-                            {
-                                Connector = connector,
-                                ChannelName = channelName,
-                                Device = device,
-                                Tag = tag,
-                                Self = data,
-                            }).ConfigureAwait(false);
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        string msg = $"[Engine] Trigger 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
-                        _logger.LogError(ex, msg);
-                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
                     }
                 }
             });
@@ -250,7 +176,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                         {
                             string msg = $"[Engine] Notice 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
                             _logger.LogError(msg);
-                            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                            await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
 
                             continue;
                         }
@@ -262,7 +188,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                         }
 
                         // 发布通知事件
-                        await _publisher.Publish(new NoticeEvent
+                        await _producer.ProduceAsync(new NoticeEvent
                         {
                             ChannelName = channelName,
                             Device = device,
@@ -277,7 +203,76 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                     {
                         string msg = $"[Engine] Notice 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                    }
+                }
+            });
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task TriggerMonitorAsync(IDriverConnector connector)
+    {
+        var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
+        var tags = device!.GetAllTags(TagFlag.Trigger);
+        foreach (var tag in tags)
+        {
+            _ = Task.Run(async () =>
+            {
+                int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
+                while (_cts != null && !_cts.Token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+
+                        if (_cts == null)
+                        {
+                            break;
+                        }
+
+                        if (!connector.CanConnect)
+                        {
+                            continue;
+                        }
+
+                        // 若读取失败，该信号点不会复位，下次会继续读取执行。
+                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
+                        if (!ok)
+                        {
+                            string msg = $"[Engine] Trigger 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
+                            _logger.LogError(msg);
+                            await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+
+                            continue;
+                        }
+
+                        // 校验触发标记
+                        var state = data!.GetInt(); // 触发标记还可能包含状态码信息。
+
+                        // 必须先检测并更新标记状态值，若值有变动且触发标记值为 1 则推送数据。
+                        if (!TagValueSet.CompareAndSwap(tag.TagId, state) && state == 1)
+                        {
+                            // 发布触发事件
+                            await _producer.ProduceAsync(new TriggerEvent
+                            {
+                                Connector = connector,
+                                ChannelName = channelName,
+                                Device = device,
+                                Tag = tag,
+                                Self = data,
+                            }).ConfigureAwait(false);
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                    catch (Exception ex)
+                    {
+                        string msg = $"[Engine] Trigger 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
+                        _logger.LogError(ex, msg);
+                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
                     }
                 }
             });
@@ -324,7 +319,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                         }
 
                         // 记录数据
-                        await _publisher.Publish(new SwitchEvent { Connector = connector, ChannelName = channelName, Device = device, Tag = tag }).ConfigureAwait(false);
+                        await _producer.ProduceAsync(new SwitchEvent { Connector = connector, ChannelName = channelName, Device = device, Tag = tag }).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -333,7 +328,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                     {
                         string msg = $"[Engine] Switch 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
                     }
                 }
             });
@@ -370,7 +365,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                                 if (!isOn)
                                 {
                                     // 发送 On 信号结束标识
-                                    await _publisher.Publish(new SwitchEvent
+                                    await _producer.ProduceAsync(new SwitchEvent
                                     {
                                         Connector = connector,
                                         ChannelName = channelName,
@@ -392,7 +387,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                                 if (isOn)
                                 {
                                     // 发送 Off 信号结束标识事件
-                                    await _publisher.Publish(new SwitchEvent
+                                    await _producer.ProduceAsync(new SwitchEvent
                                     {
                                         Connector = connector,
                                         ChannelName = channelName,
@@ -417,7 +412,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                         if (isOn)
                         {
                             // 发送 Off 信号结束标识事件
-                            await _publisher.Publish(new SwitchEvent 
+                            await _producer.ProduceAsync(new SwitchEvent 
                             {
                                 Connector = connector,
                                 ChannelName = channelName,
@@ -440,7 +435,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
                     {
                         string msg = $"[Engine] Switch 开关数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
                         _logger.LogError(ex, msg);
-                        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
                     }
                 }
 
@@ -459,7 +454,7 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
         string msg = "[Engine] 引擎已停止";
         if (!IsRunning)
         {
-            await _publisher.Publish(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
+            await _producer.ProduceAsync(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
             return;
         }
         IsRunning = false;
@@ -481,12 +476,12 @@ public sealed class OpsExchange : IExchange, ISingletonDependency
         }).ConfigureAwait(false);
 
         _logger.LogInformation(msg);
-        await _publisher.Publish(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
+        await _producer.ProduceAsync(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        ShutdownAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        await ShutdownAsync().ConfigureAwait(false);
     }
 
     /// <summary>

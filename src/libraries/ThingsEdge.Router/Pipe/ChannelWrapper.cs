@@ -41,8 +41,6 @@ public sealed class ChannelWrapper<T>
     /// <returns></returns>
     public Task PollReadAsync(Action<T?> callback, CancellationToken cancellationToken = default)
     {
-        CancellationTokenSource _cts = new();
-
         _ = Task.Run(async () =>
         {
             while (!cancellationToken.IsCancellationRequested
@@ -66,8 +64,6 @@ public sealed class ChannelWrapper<T>
     /// <returns></returns>
     public Task PollReadAsync(Func<T?, Task> asyncCallback, CancellationToken cancellationToken = default)
     {
-        CancellationTokenSource _cts = new();
-
         _ = Task.Run(async () =>
         {
             while (!cancellationToken.IsCancellationRequested

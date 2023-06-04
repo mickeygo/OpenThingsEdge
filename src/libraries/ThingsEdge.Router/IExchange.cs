@@ -3,7 +3,7 @@
 /// <summary>
 /// 交换机引擎。
 /// </summary>
-public interface IExchange : IDisposable
+public interface IExchange : IAsyncDisposable
 {
     /// <summary>
     /// 获取运行状态，是否正在运行中。
