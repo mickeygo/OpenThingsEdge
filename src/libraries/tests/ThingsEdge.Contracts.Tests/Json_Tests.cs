@@ -71,7 +71,6 @@ public class Json_Tests
             {
                  //ChannelId = "",
                  Name = "Name",
-                 Model = ChannelModel.Siemens,
                  Keynote = "测试Channel",
                  Devices = new()
                  {

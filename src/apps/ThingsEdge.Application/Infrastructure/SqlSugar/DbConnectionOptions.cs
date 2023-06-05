@@ -18,6 +18,11 @@ public sealed class DbConnectionOptions
     public bool EnableDiffLog { get; set; }
 
     /// <summary>
+    /// 启用打印 SQL 日志
+    /// </summary>
+    public bool EnabledSqlLog { get; set; }
+
+    /// <summary>
     /// 数据库配置集合
     /// </summary>
     public List<ConnectionConfig>? ConnectionConfigs { get; set; }

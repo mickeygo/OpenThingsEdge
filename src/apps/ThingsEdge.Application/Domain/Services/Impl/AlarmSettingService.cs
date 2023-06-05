@@ -11,7 +11,6 @@ internal sealed class AlarmSettingService : IAlarmSettingService, ITransientDepe
     {
         _memoryCache = memoryCache;
         _alarmSettingRepo = alarmSettingRepo;
-
     }
 
     public async Task<List<AlarmSetting>> GetAllAsync()

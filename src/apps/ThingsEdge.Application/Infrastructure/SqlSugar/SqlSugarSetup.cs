@@ -17,8 +17,8 @@ public static class SqlSugarSetup
         // 设置雪花Id算法机器码
         YitIdHelper.SetIdGenerator(new IdGeneratorOptions(1)); // 不同应用的配置文件值不同， SnowFlakeSingle 长度 19，偏长
 
-        services.AddSingleton<ISqlSugarClient>(sp => MakeSqlSugarScope(sp, services)); // 单例注册
-        services.AddScoped(typeof(SqlSugarRepository<>)); // 注册仓储
+        services.AddSingleton<ISqlSugarClient>(sp => MakeSqlSugarScope(sp, services)); // 需注册为 Singleton
+        services.AddScoped(typeof(SqlSugarRepository<>)); // Scoped 可能会出现异常：This MySqlConnection is already in use. See https://fl.vu/mysql-conn-reuse 
     }
 
     private static SqlSugarScope MakeSqlSugarScope(IServiceProvider sp, IServiceCollection services)
@@ -52,19 +52,20 @@ public static class SqlSugarSetup
                 // 设置超时时间
                 dbProvider.Ado.CommandTimeOut = 30;
 
-#if DEBUG
-                // 打印SQL语句
-                dbProvider.Aop.OnLogExecuting = (sql, pars) =>
+                if (dbOptions.EnabledSqlLog)
                 {
-                    logger.LogInformation("【执行SQL】{NewLine} {SQL}", Environment.NewLine, UtilMethods.GetSqlString(config.DbType, sql, pars));
-                };
+                    // 打印SQL语句
+                    dbProvider.Aop.OnLogExecuting = (sql, pars) =>
+                    {
+                        logger.LogInformation("【执行SQL】{NewLine} {SQL}", Environment.NewLine, UtilMethods.GetSqlString(config.DbType, sql, pars));
+                    };
 
-                dbProvider.Aop.OnError = (ex) =>
-                {
-                    logger.LogError("【错误SQL】{Message} {NewLine} {SQL}",
-                        ex.Message, Environment.NewLine, UtilMethods.GetSqlString(config.DbType, ex.Sql, (SugarParameter[])ex.Parametres));
-                };
-#endif
+                    dbProvider.Aop.OnError = (ex) =>
+                    {
+                        logger.LogError("【错误SQL】{Message} {NewLine} {SQL}",
+                            ex.Message, Environment.NewLine, UtilMethods.GetSqlString(config.DbType, ex.Sql, (SugarParameter[])ex.Parametres));
+                    };
+                }
 
                 // 数据审计
                 dbProvider.Aop.DataExecuting = (oldValue, entityInfo) =>

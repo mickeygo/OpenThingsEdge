@@ -12,7 +12,7 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         _snTransitRecordRepo = snTransitRecordRepo;
     }
 
-    public async Task<List<OEEGroupDto>> AnalysisOEEAsync(OEEQueryInput query)
+    public Task<List<OEEGroupDto>> AnalysisOEEAsync(OEEQueryInput query)
     {
         // 基本指标：
         // => 最大操作时间：代表该设施在一定期间内能实际运转的时间，若设备本身可完全由厂内使用，则为日历时间。
@@ -50,16 +50,16 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
         exp.Or(s => s.IsEnded && query.StartTime <= s.EndTime && s.EndTime <= query.EndTime);
         exp.Or(s => s.StartTime <= query.StartTime && ((s.IsEnded && query.EndTime <= s.EndTime) || !s.IsEnded));
 
-        var loadings = await _equipStateRepo.AsQueryable()
+        var loadings = _equipStateRepo.AsQueryable()
             .WhereIF(!string.IsNullOrEmpty(query.Line), s => s.Line == query.Line)
             .Where(exp.ToExpression())
-            .ToListAsync();
+            .ToList();
 
         // 生产记录（当前工位已完工的）
-        var records = await _snTransitRecordRepo.AsQueryable()
+        var records = _snTransitRecordRepo.AsQueryable()
             .Where(s => s.EntryTime >= query.StartTime)
             .Where(s => s.IsArchived && s.ArchiveTime <= query.EndTime)
-            .ToListAsync();
+            .ToList();
 
         // 分组聚合
         var loadingGroup = CalOeeGroup(loadings.Where(s => s.RunningState == EquipmentRunningState.Running), query.StartTime, query.EndTime);
@@ -128,7 +128,7 @@ internal sealed class EquipmentStatisticsService : IEquipmentStatisticsService, 
             }
         }
 
-        return oeeGroups;
+        return Task.FromResult(oeeGroups);
     }
 
     /// <summary>

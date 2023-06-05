@@ -17,12 +17,6 @@ public sealed class Channel
     public string? Name { get; init; }
 
     /// <summary>
-    /// 驱动类型。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public ChannelModel Model { get; init; } = ChannelModel.Siemens;
-
-    /// <summary>
     /// 标记要旨，可用于设置重要信息。
     /// </summary>
     [NotNull]
