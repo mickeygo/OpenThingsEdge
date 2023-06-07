@@ -14,29 +14,11 @@ namespace ThingsEdge.Server.Controllers;
 [AllowAnonymous]
 public class IoTGatewayController : Controller
 {
-    private readonly IExchange _exchange;
     private readonly ILogger _logger;
 
-    public IoTGatewayController(IExchange exchange, ILogger<IoTGatewayController> logger)
+    public IoTGatewayController(ILogger<IoTGatewayController> logger)
     {
-        _exchange = exchange;
         _logger = logger;
-    }
-
-    [HttpGet]
-    [Route("start")]
-    public async Task<IActionResult> Start()
-    {
-        await _exchange.StartAsync();
-        return Ok("Exchange started.");
-    }
-
-    [HttpGet]
-    [Route("shutdown")]
-    public async Task<IActionResult> Shutdown()
-    {
-        await _exchange.ShutdownAsync();
-        return Ok("Exchange shutdown.");
     }
 
     [HttpPost]

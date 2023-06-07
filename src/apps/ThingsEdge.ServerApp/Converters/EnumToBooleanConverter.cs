@@ -1,8 +1,9 @@
 ﻿namespace ThingsEdge.ServerApp.Converters;
 
 /// <summary>
-/// 枚举类型 <see cref="ThemeType"/> 转换为bool类型。
+/// 枚举类型 <see cref="ThemeType"/> 转换为 <see cref="bool"/> 类型。
 /// </summary>
+/// <exception cref="ArgumentException"></exception>
 internal sealed class EnumToBooleanConverter : IValueConverter
 {
     public EnumToBooleanConverter()

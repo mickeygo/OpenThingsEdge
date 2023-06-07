@@ -1,6 +1,4 @@
-﻿using SqlSugar;
-
-namespace ThingsEdge.Application.Infrastructure;
+﻿namespace ThingsEdge.Application.Domain.Entities;
 
 /// <summary>
 /// 表示实现的对象为实体。
@@ -38,23 +36,23 @@ public abstract class EntityBaseId : IEntity
 /// <summary>
 /// 带审计的实体基类。
 /// </summary>
-public abstract class EntityBase : EntityBaseId
+public abstract class EntityBase : EntityBaseId, IDeletedFilter
 {
     /// <summary>
     /// 是否已删除
     /// </summary>
-    [DisplayName("是否已删除")]
+    [SugarColumn(ColumnDescription = "软删除")]
     public bool IsDelete { get; set; }
 
     /// <summary>
     /// 创建时间
     /// </summary>
-    [DisplayName("创建时间")]
+    [SugarColumn(ColumnDescription = "创建时间", IsOnlyIgnoreUpdate = true)]
     public DateTime CreateTime { get; set; }
 
     /// <summary>
     /// 更新时间
     /// </summary>
-    [DisplayName("更新时间")]
+    [SugarColumn(ColumnDescription = "更新时间", IsOnlyIgnoreInsert = true)]
     public DateTime UpdateTime { get; set; }
 }

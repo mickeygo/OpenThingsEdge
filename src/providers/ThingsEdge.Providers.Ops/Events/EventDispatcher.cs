@@ -33,6 +33,10 @@ internal sealed class EventDispatcher : ISingletonDependency
         {
             await _publisher.Publish(switchEvent, PublishStrategy.ParallelNoWait).ConfigureAwait(false);
         }
+        else if (@event is ExchangeChangedEvent exchangeChangedEvent)
+        {
+            await _publisher.Publish(exchangeChangedEvent, PublishStrategy.ParallelNoWait).ConfigureAwait(false);
+        }
         else if (@event is LoggingMessageEvent loggingMessageEvent)
         {
             await _publisher.Publish(loggingMessageEvent, PublishStrategy.ParallelNoWait).ConfigureAwait(false);

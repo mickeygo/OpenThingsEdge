@@ -1,0 +1,51 @@
+﻿@page "/settings/options"
+@inherits ProComponentBase
+@inject IExchange _exchange
+
+<MCard>
+    <MCardText Class="pa-6">
+        <h6>服务运行状态</h6>
+        <MRow>
+            <MCol>
+                <MSwitch Inset Color="success"
+                         Disabled="_loading"
+                         Loading="_loading"
+                         @bind-Value="_isRunning"
+                         TValue="bool"
+                         OnClick="ChangeExchangeAsync"
+                         Label="@(_isRunning ? "运行中" : "停止")">
+                </MSwitch>
+            </MCol>
+        </MRow>
+    </MCardText>
+</MCard>
+
+@code {
+    private bool _loading;
+    private bool _isRunning;
+
+    protected override void OnInitialized()
+    {
+        _isRunning = _exchange.IsRunning;
+
+        base.OnInitialized();
+    }
+
+    async Task ChangeExchangeAsync()
+    {
+        _loading = true;
+
+        await Task.Delay(2000);
+        if (!_exchange.IsRunning)
+        {
+            await _exchange.StartAsync();
+        }
+        else
+        {
+            await _exchange.ShutdownAsync();
+        }
+
+        _isRunning = _exchange.IsRunning;
+        _loading = false;
+    }
+}

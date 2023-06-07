@@ -3,7 +3,7 @@
 public partial class DataViewModel : AbstractObservableNavViewModel
 {
     [ObservableProperty]
-    private IEnumerable<DataColor> _colors;
+    private IEnumerable<DataColor> _colors = null!;
 
     protected override void Initialize()
     {

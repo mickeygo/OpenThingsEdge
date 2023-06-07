@@ -1,5 +1,8 @@
 ﻿namespace ThingsEdge.ServerApp.Models;
 
+/// <summary>
+/// 导航项集合
+/// </summary>
 public sealed class NavCollection
 {
     [NotNull]

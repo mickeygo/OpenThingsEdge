@@ -18,7 +18,7 @@ public static class SqlSugarSetup
         YitIdHelper.SetIdGenerator(new IdGeneratorOptions(1)); // 不同应用的配置文件值不同， SnowFlakeSingle 长度 19，偏长
 
         services.AddSingleton<ISqlSugarClient>(sp => MakeSqlSugarScope(sp, services)); // 需注册为 Singleton
-        services.AddScoped(typeof(SqlSugarRepository<>)); // Scoped 可能会出现异常：This MySqlConnection is already in use. See https://fl.vu/mysql-conn-reuse 
+        services.AddScoped(typeof(SqlSugarRepository<>)); // 仓储注册
     }
 
     private static SqlSugarScope MakeSqlSugarScope(IServiceProvider sp, IServiceCollection services)
@@ -47,6 +47,7 @@ public static class SqlSugarSetup
         {
             dbOptions.ConnectionConfigs?.ForEach(config =>
             {
+                // GetConnectionScope 与 GetConnectionScopeWithAttr 对应
                 var dbProvider = db.GetConnectionScope((string)config.ConfigId);
 
                 // 设置超时时间
@@ -76,14 +77,14 @@ public static class SqlSugarSetup
                         // 主键(long类型)且没有值的---赋值雪花Id
                         if (entityInfo.EntityColumnInfo.IsPrimarykey && entityInfo.EntityColumnInfo.PropertyInfo.PropertyType == typeof(long))
                         {
-                            var id = oldValue; // entityInfo.EntityColumnInfo.PropertyInfo.GetValue(entityInfo.EntityValue);
-                            if (id == null || (long)id == 0)
+                            var id = oldValue;
+                            if (id is null || (long)id == 0)
                             {
                                 entityInfo.SetValue(YitIdHelper.NextId());
                             }
                         }
 
-                        // 创建时间和更新时间一起更新。
+                        // 自动设置创建时间，这里更新时间一起设置。
                         if (entityInfo.PropertyName == nameof(EntityBase.CreateTime) || entityInfo.PropertyName == nameof(EntityBase.UpdateTime))
                         {
                             entityInfo.SetValue(DateTime.Now);
@@ -96,6 +97,11 @@ public static class SqlSugarSetup
                             entityInfo.SetValue(DateTime.Now);
                         }
                     }
+
+                    // 超管时排除各种过滤器
+
+                    // 配置实体软删除过滤器
+                    db.QueryFilter.AddTableFilter<IDeletedFilter>(u => u.IsDelete == false);
                 };
             });
         });

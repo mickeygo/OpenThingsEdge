@@ -34,13 +34,19 @@
   {
     "Id": 91,
     "Title": "设置",
-    "Icon": "mdi-application-cog",
+    "Icon": "mdi-cog-outline",
     "Children": [
       {
         "Id": 92,
         "Title": "变量",
-        "Icon": "mdi-cog-box",
+        "Icon": "mdi-cog",
         "Href": "/settings/variable"
+      },
+      {
+        "Id": 93,
+        "Title": "选项",
+        "Icon": "mdi-cog",
+        "Href": "/settings/options"
       }
     ]
   }

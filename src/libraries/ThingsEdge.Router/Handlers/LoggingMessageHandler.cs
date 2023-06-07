@@ -11,11 +11,13 @@ internal sealed class LoggingMessageHandler : INotificationHandler<LoggingMessag
 {
     public async Task Handle(LoggingMessageEvent notification, CancellationToken cancellationToken)
     {
-        await ChannelFactory.LoggingChannel.TryWriteAsync(new LoggingMessage
-        {
-            LoggedTime = notification.EventTime,
-            Level = notification.Level,
-            Message = notification.Message,
-        }, cancellationToken).ConfigureAwait(false);
+        //await ChannelFactory.LoggingChannel.TryWriteAsync(new LoggingMessage
+        //{
+        //    LoggedTime = notification.EventTime,
+        //    Level = notification.Level,
+        //    Message = notification.Message,
+        //}, cancellationToken).ConfigureAwait(false);
+
+        await Task.CompletedTask;
     }
 }
