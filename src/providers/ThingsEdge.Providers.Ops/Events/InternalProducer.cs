@@ -13,6 +13,6 @@ internal sealed class InternalProducer : IProducer, ISingletonDependency
 
     public async ValueTask ProduceAsync(IEvent item, CancellationToken cancellationToken = default)
     {
-        await _broker.WriteAsync(item, cancellationToken).ConfigureAwait(false);
+        await _broker.QueueAsync(item, cancellationToken).ConfigureAwait(false);
     }
 }

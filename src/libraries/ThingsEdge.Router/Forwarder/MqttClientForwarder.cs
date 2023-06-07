@@ -1,19 +1,20 @@
-﻿using Nito.AsyncEx;
-using ThingsEdge.Router.Transport.MQTT;
+﻿using ThingsEdge.Router.Transport.MQTT;
 
 namespace ThingsEdge.Router.Forwarder;
 
-internal sealed partial class MqttClientForwarder : IForwarder, IAsyncDisposable
+internal sealed partial class MqttClientForwarder : IForwarder
 {
+    private readonly IMQTTManagedClient _managedMqttClient;
     private readonly MQTTClientOptions _mqttClientOptions;
     private readonly ILogger _logger;
-    private readonly AsyncLock _asyncLock = new();
-    private IMQTTManagedClient? _managedMqttClient;
 
     public ForworderSource Source => ForworderSource.MQTT;
 
-    public MqttClientForwarder(IOptionsMonitor<MQTTClientOptions> mqttClientOptions, ILogger<MqttClientForwarder> logger)
+    public MqttClientForwarder(IMQTTManagedClient managedMqttClient,
+        IOptionsMonitor<MQTTClientOptions> mqttClientOptions, 
+        ILogger<MqttClientForwarder> logger)
     {
+        _managedMqttClient = managedMqttClient;
         _mqttClientOptions = mqttClientOptions.CurrentValue;
         _logger = logger;
     }
@@ -22,19 +23,6 @@ internal sealed partial class MqttClientForwarder : IForwarder, IAsyncDisposable
     {
         try
         {
-            // 双检锁（本实例需注册为单例）
-            if (_managedMqttClient is null)
-            {
-                using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    if (_managedMqttClient is null)
-                    {
-                        _managedMqttClient = MQTTClientFactory.CreateManagedClient(_mqttClientOptions);
-                        await _managedMqttClient.StartAsync();
-                    }
-                }
-            }
-
             // 默认格式 {ChannelName}/{DeviceName}/{TagGroupName}, eg: line01/device01/op010
             var topicFormater = _mqttClientOptions.TopicFormater ?? "{ChannelName}/{DeviceName}/{TagGroupName}";
             var match = TopicRegex().Replace(topicFormater, match =>
@@ -75,15 +63,6 @@ internal sealed partial class MqttClientForwarder : IForwarder, IAsyncDisposable
             }
 
             return str;
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_managedMqttClient is not null)
-        {
-            await _managedMqttClient.StopAsync();
-            _managedMqttClient.Dispose();
         }
     }
 

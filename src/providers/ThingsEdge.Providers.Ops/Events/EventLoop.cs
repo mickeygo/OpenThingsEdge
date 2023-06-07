@@ -13,12 +13,10 @@ internal sealed class EventLoop : ISingletonDependency
 
     public async Task Loop(CancellationToken cancellationToken = default)
     {
-        while (await _broker.WaitToReadAsync().ConfigureAwait(false))
+        while (!cancellationToken.IsCancellationRequested)
         {
-            while (_broker.TryRead(out var @event))
-            {
-                await _dispatcher.DispatchAsync(@event).ConfigureAwait(false);
-            }
+            var @event = await _broker.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            await _dispatcher.DispatchAsync(@event).ConfigureAwait(false);
         }
     }
 }
