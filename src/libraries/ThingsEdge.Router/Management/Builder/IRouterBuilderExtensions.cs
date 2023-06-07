@@ -134,9 +134,10 @@ public static class IRouterBuilderExtensions
             }
             
             InternalForwarderHub.Default.Register<MqttClientForwarder>(); // 注册 MQTT Forward
+
+            // 注册并启动托管的 MQTT 客户端
             services.AddSingleton<IMQTTManagedClient, MQTTManagedClient>(sp =>
             {
-                // 注册并启动托管的MQTT
                 var mqttClientOptions = sp.GetRequiredService<IOptions<MQTTClientOptions>>().Value;
                 var client = (MQTTManagedClient)MQTTClientFactory.CreateManagedClient(mqttClientOptions);
                 client.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
