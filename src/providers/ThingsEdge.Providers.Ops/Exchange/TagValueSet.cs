@@ -46,6 +46,33 @@ internal static class TagValueSet
     }
 
     /// <summary>
+    /// 获取指定 key 的值。若没有找到或是强制转换异常，会返回 false。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="tagId"></param>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public static bool TryGet<T>(string tagId, [MaybeNullWhen(false)]out T obj)
+    {
+        obj = default;
+        if(_map.TryGetValue(tagId, out var obj2))
+        {
+            try
+            {
+                obj = (T)obj2;
+                return true;
+            }
+            catch
+            {
+
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// 清空状态的缓存数据。
     /// </summary>
     public static void Clear() => _map.Clear();

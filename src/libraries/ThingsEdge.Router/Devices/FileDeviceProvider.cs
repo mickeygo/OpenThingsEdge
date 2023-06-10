@@ -24,6 +24,10 @@ public sealed class FileDeviceProvider : IDeviceProvider
         }
 
         var context = File.ReadAllText(Path.GetFullPath(FilePath));
-        return JsonSerializer.Deserialize<List<Channel>>(context) ?? new(0);
+        return JsonSerializer.Deserialize<List<Channel>>(context, new JsonSerializerOptions
+        {
+            ReadCommentHandling = JsonCommentHandling.Skip, // 允许注释
+            AllowTrailingCommas = true, // 允许尾随逗号
+        }) ?? new(0);
     }
 }

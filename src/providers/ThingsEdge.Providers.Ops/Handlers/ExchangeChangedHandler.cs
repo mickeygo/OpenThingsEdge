@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Events;
+using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Snapshot;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
@@ -17,6 +18,7 @@ internal class ExchangeChangedHandler : INotificationHandler<ExchangeChangedEven
         if (notification.State == RunningState.Stop)
         {
             _tagDataSnapshot.Clear();
+            TagValueSet.Clear();
         }
 
         return Task.CompletedTask;

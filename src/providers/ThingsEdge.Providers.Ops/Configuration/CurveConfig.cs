@@ -11,6 +11,12 @@ public sealed class CurveConfig
     public string? LocalDirectory { get; init; }
 
     /// <summary>
+    /// 曲线存储文件格式，JSON / CSV，默认为 CSV 格式。
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public CurveFileExt FileExt { get; init; } = CurveFileExt.CSV;
+
+    /// <summary>
     /// 是否允许根据SN来打包数据，在 SN 存在的条件下为 true 时会 SN 建立文件夹，默认为 true。
     /// </summary>
     public bool AllowCategoryBySN { get; set; } = true;

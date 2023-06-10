@@ -1,6 +1,6 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 
-namespace ThingsEdge.Providers.Ops.Handlers;
+namespace ThingsEdge.Providers.Ops.Handlers.Curve;
 
 /// <summary>
 /// 曲线存储器。
@@ -9,7 +9,7 @@ internal sealed class CurveStorage : ISingletonDependency
 {
     private static readonly string DefaultCurvesDirectory = Path.Combine(AppContext.BaseDirectory, "curves");
 
-    private readonly OpsConfig _opsConfig;
+    private readonly CurveConfig _curveConfig;
 
     /// <summary>
     /// 曲线存储命名的分隔符。
@@ -18,7 +18,7 @@ internal sealed class CurveStorage : ISingletonDependency
 
     public CurveStorage(IOptionsMonitor<OpsConfig> opsConfig)
     {
-        _opsConfig = opsConfig.CurrentValue;
+        _curveConfig = opsConfig.CurrentValue.Curve;
     }
 
     /// <summary>
@@ -36,11 +36,11 @@ internal sealed class CurveStorage : ISingletonDependency
         var curvesDir = LocalCurvesDirectory();
 
         StringBuilder sb = new();
-       
+
         if (!string.IsNullOrWhiteSpace(sn))
         {
             // SN 分组 ==> XXX/SN001/
-            if (_opsConfig.Curve.AllowCategoryBySN)
+            if (_curveConfig.AllowCategoryBySN)
             {
                 curvesDir = Path.Combine(curvesDir, sn); // sn
             }
@@ -80,9 +80,9 @@ internal sealed class CurveStorage : ISingletonDependency
             sb.Append(DateTime.Now.ToString("yyyyMMddHHmmss")); // => SN001_2_yyyyMMddHHmmss
         }
 
-        var filepath = Path.Combine(curvesDir, $"{sb}.csv"); // => SN001_2_yyyyMMddHHmmss.csv
+        var filepath = Path.Combine(curvesDir, $"{sb}.{FileExt}"); // => SN001_2_yyyyMMddHHmmss.csv
 
-        // 考虑目录中文件存储的尺寸
+        // TODO: 考虑目录中文件存储的大小，在存储空间不足时进行删除
         // 1）文件不删除
         // 2）文件按保存时间删除
         // 3）文件按保存数量删除
@@ -92,7 +92,7 @@ internal sealed class CurveStorage : ISingletonDependency
     }
 
     /// <summary>
-    /// 推送文件。
+    /// 尝试将文件拷贝到远程服务器（若设置了允许拷贝）。
     /// </summary>
     /// <param name="filepath">要推送的文件。</param>
     /// <returns></returns>
@@ -106,13 +106,13 @@ internal sealed class CurveStorage : ISingletonDependency
             return tcs.Task;
         }
 
-        if (!_opsConfig.Curve.AllowCopy)
+        if (!_curveConfig.AllowCopy)
         {
             tcs.TrySetResult((true, default));
             return tcs.Task;
         }
 
-        var dir0 = _opsConfig.Curve.RemoteDirectory;
+        var dir0 = _curveConfig.RemoteDirectory;
         if (string.IsNullOrWhiteSpace(dir0))
         {
             tcs.TrySetResult((true, default));
@@ -129,7 +129,7 @@ internal sealed class CurveStorage : ISingletonDependency
                 return tcs.Task;
             }
 
-            var destFileName  = Path.Combine(dir0, path2!);
+            var destFileName = Path.Combine(dir0, path2!);
             var dir2 = Path.GetDirectoryName(destFileName)!;
             if (!Directory.Exists(dir2))
             {
@@ -170,7 +170,7 @@ internal sealed class CurveStorage : ISingletonDependency
 
     private string LocalCurvesDirectory()
     {
-        var curvesDir = _opsConfig.Curve.LocalDirectory;
+        var curvesDir = _curveConfig.LocalDirectory;
         if (string.IsNullOrWhiteSpace(curvesDir))
         {
             return DefaultCurvesDirectory;
@@ -178,4 +178,13 @@ internal sealed class CurveStorage : ISingletonDependency
 
         return Path.GetFullPath(curvesDir);
     }
+
+    private string FileExt =>
+        _curveConfig.FileExt switch
+        {
+            CurveFileExt.JSON => "json",
+            CurveFileExt.CSV => "csv",
+            _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
+        };
+
 }

@@ -1,6 +1,7 @@
 ﻿using ThingsEdge.Common.EventBus;
 using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Providers.Ops.Handlers.Curve;
 using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Events;
 
@@ -90,8 +91,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(sn, tagGroup?.Name, no)); 
 
                 // 添加头信息
-                var headers = string.Join(",", notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve).Select(s => s.Keynote));
-                await writer.WriteLineAsync(headers).ConfigureAwait(false);
+                var header = notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve).Select(s => s.Keynote);
+                writer.WriteHeader(header);
             }
             else if (notification.State == SwitchState.Off)
             {
@@ -152,7 +153,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         {
             try
             {
-                await writer2.WriteLineAsync(string.Join(",", normalPaydatas!.Select(s => s.GetString()))).ConfigureAwait(false);
+                writer2.WriteLineBody(normalPaydatas!);
             }
             catch (Exception ex)
             {

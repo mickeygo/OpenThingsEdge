@@ -1,4 +1,5 @@
 global using System.Collections;
+global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.Diagnostics.Contracts;
 global using System.Net.NetworkInformation;

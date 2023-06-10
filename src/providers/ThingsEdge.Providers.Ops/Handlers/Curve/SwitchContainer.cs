@@ -1,14 +1,18 @@
-﻿namespace ThingsEdge.Providers.Ops.Handlers;
+﻿using ThingsEdge.Providers.Ops.Configuration;
+
+namespace ThingsEdge.Providers.Ops.Handlers.Curve;
 
 /// <summary>
 /// Switch 数据容器
 /// </summary>
 internal sealed class SwitchContainer : ISingletonDependency
 {
-    private readonly ConcurrentDictionary<string, StreamWriterWrapper> _container = new();
+    private readonly ConcurrentDictionary<string, ICurveWriter> _container = new();
+    private readonly CurveConfig _curveConfig;
 
-    public SwitchContainer()
+    public SwitchContainer(IOptionsMonitor<OpsConfig> opsConfig)
     {
+        _curveConfig = opsConfig.CurrentValue.Curve;
     }
 
     /// <summary>
@@ -26,7 +30,7 @@ internal sealed class SwitchContainer : ISingletonDependency
     /// </summary>
     /// <param name="key">对象唯一值。</param>
     /// <returns></returns>
-    public bool TryGet(string key, [MaybeNullWhen(false)] out StreamWriterWrapper value)
+    public bool TryGet(string key, [MaybeNullWhen(false)] out ICurveWriter value)
     {
         value = default;
         if (_container.TryGetValue(key, out var writer))
@@ -44,11 +48,16 @@ internal sealed class SwitchContainer : ISingletonDependency
     /// <param name="key">对象唯一值。</param>
     /// <param name="path">文件路径。</param>
     /// <returns></returns>
-    public StreamWriterWrapper GetOrCreate(string key, string path)
+    public ICurveWriter GetOrCreate(string key, string path)
     {
         return _container.GetOrAdd(key, s =>
         {
-            return new StreamWriterWrapper(path);
+            return _curveConfig.FileExt switch
+            {
+                CurveFileExt.CSV => new CsvCurveWriter(path),
+                CurveFileExt.JSON => new JsonCurveWriter(path),
+                _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
+            };
         });
     }
 
@@ -64,6 +73,7 @@ internal sealed class SwitchContainer : ISingletonDependency
         if (_container.TryRemove(key, out var writer))
         {
             filepath = writer.FilePath;
+            writer.SaveAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             writer.Close();
 
             return true;
