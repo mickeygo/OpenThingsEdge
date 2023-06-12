@@ -42,12 +42,12 @@ public sealed class RESTfulDestinationOptions
     public string? HealthRequestUrl { get; set; } = "/api/health";
 
     /// <summary>
-    /// 目标服务接收通知数据的地址，默认为 "/api/iotgateway/notice"。
+    /// 目标服务接收数据的地址，默认为 "/api/iotgateway"。
     /// </summary>
-    public string? NoticeRequestUrl { get; set; } = "/api/iotgateway/notice";
+    public string? RequestUrl { get; set; } = "/api/iotgateway";
 
     /// <summary>
-    /// 目标服务接收触发数据的地址，默认为 "/api/iotgateway/trigger"。
+    /// 自定义目标服务接收数据的地址，未设置会使用 RequestUrl 值代替。
     /// </summary>
-    public string? TriggerRequestUrl { get; set; } = "/api/iotgateway/trigger";
+    public Func<RESTfulForwardRouterArgs, string>? RequestUrlFunc;
 }

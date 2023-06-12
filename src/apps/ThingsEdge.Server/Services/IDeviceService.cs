@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Server.Models;
-
-namespace ThingsEdge.Server.Services;
+﻿namespace ThingsEdge.Server.Services;
 
 /// <summary>
 /// 设备服务。
@@ -9,5 +7,5 @@ public interface IDeviceService
 {
     List<TreeModel> GetDeviceTree();
 
-    List<TagModel> GetTags(string id, string? category);
+    List<TagModel>? GetTags(string id, string? category);
 }

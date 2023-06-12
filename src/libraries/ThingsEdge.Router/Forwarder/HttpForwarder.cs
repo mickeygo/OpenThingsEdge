@@ -12,11 +12,11 @@ internal sealed class HttpForwarder : IForwarder
     private readonly ILogger _logger;
 
     public HttpForwarder(IHttpClientFactory httpClientFactory, 
-        IOptions<RESTfulDestinationOptions> restfulOptions, 
+        IOptionsMonitor<RESTfulDestinationOptions> restfulOptions, 
         ILogger<HttpForwarder> logger)
     {
         _httpClientFactory = httpClientFactory;
-        _restfulOptions = restfulOptions.Value;
+        _restfulOptions = restfulOptions.CurrentValue;
         _logger = logger;
     }
 
@@ -33,12 +33,12 @@ internal sealed class HttpForwarder : IForwarder
                 JsonSerializer.Serialize(message.Values.Select(s => new { s.TagName, s.Address, s.DataType, s.Length, s.Value })));
 
             // 路由适配
-            var requestUri = message.Flag switch
+            var requestUri = _restfulOptions.RequestUrlFunc?.Invoke(new()
             {
-                TagFlag.Notice => _restfulOptions.NoticeRequestUrl,
-                TagFlag.Trigger => _restfulOptions.TriggerRequestUrl,
-                _ => "",
-            };
+                Schema = message.Schema,
+                Flag = message.Flag,
+                TagName = message.Self().TagName,
+            }) ?? _restfulOptions.RequestUrl;
 
             // 注：虽然后做超时处理，但数据接收端还是要做幂等处理来预防重复数据。
             var resp = await httpClient.PostAsJsonAsync(requestUri, message, cancellationToken).ConfigureAwait(false);

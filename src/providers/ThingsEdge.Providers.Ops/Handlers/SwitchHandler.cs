@@ -66,8 +66,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                     else
                     {
-                        string msg = $"读取SwitchSN标记值失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}, 错误: {err1}";
-                        await LogAndPublishError(msg).ConfigureAwait(false);
+                        _logger.LogError("[Switch] 读取SwitchSN标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
+                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err1);
                     }
                 }
 
@@ -82,8 +82,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                     else
                     {
-                        string msg = $"读取SwitchNo标记值失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}, 错误: {err3}";
-                        await LogAndPublishError(msg).ConfigureAwait(false);
+                        _logger.LogError("[Switch] 读取SwitchNo标记值失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
+                            notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err3);
                     }
                 }
 
@@ -102,8 +102,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     var (ok, err) = await _curveStorage.TryCopyAsync(filepath, cancellationToken).ConfigureAwait(false);
                     if (!ok)
                     {
-                        string msg = $"拷贝曲线失败，文件：{Path.GetFileName(filepath)}, 错误：{err}";
-                        await LogAndPublishError(msg).ConfigureAwait(false);
+                        _logger.LogError("[Switch] 拷贝曲线失败，文件：{Filepath}, 错误：{Err}", Path.GetFileName(filepath), err);
                     }
                 }
             }
@@ -115,7 +114,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             _tagDataSnapshot.Change(message.Values);
 
             // 发布标记数据请求事件。
-            await _publisher.Publish(MessageRequestPostingEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+            await _publisher.Publish(MessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
             return;
         }
@@ -129,8 +128,8 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         // 检测是否已到达写入行数的上限，用于防止写入数据过程导致数据过大。
         if (writer2.WrittenCount > AllowMaxWriteCount)
         {
-            string msg = $"文件写入数据已达到设置上限, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}";
-            await LogAndPublishError(msg).ConfigureAwait(false);
+            _logger.LogError("[Switch] 文件写入数据已达到设置上限, 设备: {Name}, 标记: {Name}，地址: {Address}", 
+                notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
 
             return;
         }
@@ -139,9 +138,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
         if (!ok2)
         {
-            string msg = $"批量读取子标记值失败, 设备: {notification.Device.Name}, 错误: {err2}";
-            await LogAndPublishError(msg).ConfigureAwait(false);
-
+            _logger.LogError("[Switch] 批量读取子标记值失败, 设备: {Name}, 错误: {Err}", notification.Device.Name, err2);
             return;
         }
 
@@ -157,23 +154,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             }
             catch (Exception ex)
             {
-                string msg = $"曲线数据写入文件失败, 设备: {notification.Device.Name}, 标记: {notification.Tag.Name}，地址: {notification.Tag.Address}";
-                await LogAndPublishError(msg, ex).ConfigureAwait(false);
+                _logger.LogError(ex, "[Switch] 曲线数据写入文件失败, 设备: {Name}, 标记: {Name}，地址: {Address}",
+                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
             }
         }
-    }
-
-    private async Task LogAndPublishError(string msg, Exception? ex = default)
-    {
-        if (ex is null)
-        {
-            _logger.LogError(msg);
-        }
-        else
-        {
-            _logger.LogError(ex, msg);
-        }
-
-        await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
     }
 }

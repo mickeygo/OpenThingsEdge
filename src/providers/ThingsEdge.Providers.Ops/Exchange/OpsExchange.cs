@@ -2,7 +2,6 @@
 using ThingsEdge.Providers.Ops.Exchange.Monitors;
 using ThingsEdge.Router;
 using ThingsEdge.Router.Devices;
-using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -30,12 +29,6 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
         _driverConnectorManager = driverConnectorManager;
         _monitorLoop = monitorLoop;
         _logger = logger;
-
-        // 注册监控器
-        MonitorLoop.Register<HeartbeatMonitor>();
-        MonitorLoop.Register<NoticeMonitor>();
-        MonitorLoop.Register<TriggerMonitor>();
-        MonitorLoop.Register<SwitchMonitor>();
     }
 
     public bool IsRunning { get; private set; }
@@ -50,7 +43,6 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
 
         _logger.LogInformation("[Engine] 引擎启动");
         await _producer.ProduceAsync(new ExchangeChangedEvent { State = RunningState.Startup }).ConfigureAwait(false);
-        await _producer.ProduceAsync(LoggingMessageEvent.Info("[Engine] 引擎启动")).ConfigureAwait(false);
 
         _cts = new();
 
@@ -68,10 +60,8 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
 
     public async Task ShutdownAsync()
     {
-        string msg = "[Engine] 引擎已停止";
         if (!IsRunning)
         {
-            await _producer.ProduceAsync(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
             return;
         }
         IsRunning = false;
@@ -89,9 +79,8 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
         //cts?.Dispose(); // Dispose 会导致部分问题
         _driverConnectorManager.Close();
 
-        _logger.LogInformation(msg);
+        _logger.LogInformation("[Engine] 引擎已停止");
         await _producer.ProduceAsync(new ExchangeChangedEvent { State = RunningState.Stop }).ConfigureAwait(false);
-        await _producer.ProduceAsync(LoggingMessageEvent.Info(msg)).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()

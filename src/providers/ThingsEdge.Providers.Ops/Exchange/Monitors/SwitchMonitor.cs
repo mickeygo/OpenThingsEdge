@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
-using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Exchange.Monitors;
 
@@ -66,9 +65,8 @@ internal sealed class SwitchMonitor : AbstractMonitor, ITransientDependency
                     }
                     catch (Exception ex)
                     {
-                        string msg = $"[SwitchMonitor] Switch 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
-                        _logger.LogError(ex, msg);
-                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                        _logger.LogError(ex, "[SwitchMonitor] Switch 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
+                                device.Name, tag.Name, tag.Address);
                     }
                 }
             });
@@ -173,9 +171,8 @@ internal sealed class SwitchMonitor : AbstractMonitor, ITransientDependency
                     }
                     catch (Exception ex)
                     {
-                        string msg = $"[SwitchMonitor] Switch 开关数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
-                        _logger.LogError(ex, msg);
-                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                        _logger.LogError(ex, "[SwitchMonitor] Switch 开关数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
+                               device.Name, tag.Name, tag.Address);
                     }
                 }
 

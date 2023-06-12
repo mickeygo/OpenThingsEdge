@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
-using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Exchange.Monitors;
 
@@ -51,9 +50,8 @@ internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
                         var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
                         if (!ok)
                         {
-                            string msg = $"[TriggerMonitor] Trigger 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
-                            _logger.LogError(msg);
-                            await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                            _logger.LogError("[TriggerMonitor] Trigger 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{Address}，错误：{err}",
+                                device.Name, tag.Name, tag.Address, err);
 
                             continue;
                         }
@@ -80,9 +78,8 @@ internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
                     }
                     catch (Exception ex)
                     {
-                        string msg = $"[TriggerMonitor] Trigger 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
-                        _logger.LogError(ex, msg);
-                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                        _logger.LogError(ex, "[TriggerMonitor] Trigger 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{Address}",
+                            device.Name, tag.Name, tag.Address);
                     }
                 }
             });

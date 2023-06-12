@@ -42,7 +42,7 @@ internal sealed class DeviceHeartbeatApiHandler : IDeviceHeartbeatApi
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[DeviceHeartbeatApiHandler] 心跳数据预处理异常。");
+            _logger.LogError(ex, "[{ApiHandler}] 心跳数据预处理异常。", nameof(DeviceHeartbeatApiHandler));
         }
     }
 }

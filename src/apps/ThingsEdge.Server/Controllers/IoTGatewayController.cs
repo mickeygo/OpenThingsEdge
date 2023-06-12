@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ThingsEdge.Contracts;
-using ThingsEdge.Router;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace ThingsEdge.Server.Controllers;
@@ -22,16 +20,8 @@ public class IoTGatewayController : Controller
     }
 
     [HttpPost]
-    [Route("notice")]
-    public IActionResult Notice(RequestMessage message)
-    {
-        var ret = new HttpResponseResult();
-        return Json(ret);
-    }
-
-    [HttpPost]
-    [Route("trigger")]
-    public IActionResult Trigger(RequestMessage message)
+    [Route("")]
+    public IActionResult Post(RequestMessage message)
     {
         var ret = new HttpResponseResult();
         return Json(ret);

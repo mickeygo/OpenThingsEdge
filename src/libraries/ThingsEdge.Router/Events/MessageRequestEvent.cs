@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 消息请求预处理事件。
+/// 消息请求处理事件。
 /// </summary>
-public sealed class MessageRequestPostingEvent : INotification, IEvent
+public sealed class MessageRequestEvent : INotification, IEvent
 {
     /// <summary>
     /// 事件创建时间。
@@ -21,9 +21,9 @@ public sealed class MessageRequestPostingEvent : INotification, IEvent
     /// </summary>
     public PayloadData? LastPayload { get; init; }
 
-    public static MessageRequestPostingEvent Create(RequestMessage message, PayloadData? lastPayload = null)
+    public static MessageRequestEvent Create(RequestMessage message, PayloadData? lastPayload = null)
     {
-        return new MessageRequestPostingEvent
+        return new MessageRequestEvent
         {
             Message = message,
             LastPayload = lastPayload,

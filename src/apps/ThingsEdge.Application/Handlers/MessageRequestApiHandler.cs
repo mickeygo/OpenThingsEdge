@@ -6,7 +6,7 @@ using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Application.Handlers;
 
-internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
+internal class MessageRequestApiHandler : IMessageRequestApi
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -17,13 +17,13 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
     private readonly ApplicationConfig _appConfig;
     private readonly ILogger _logger;
 
-    public MessageRequestPostingApiHandler(IServiceProvider serviceProvider, 
+    public MessageRequestApiHandler(IServiceProvider serviceProvider, 
         IAlarmService alarmService,
         EquipmentStateManager equipmentStateManager, 
         IEntryService entryService,
         IArchiveService archiveService,
         IOptions<ApplicationConfig> appConfig,
-        ILogger<MessageRequestPostingApiHandler> logger)
+        ILogger<MessageRequestApiHandler> logger)
     {
         _serviceProvider = serviceProvider;
         _alarmService = alarmService;
@@ -91,7 +91,7 @@ internal class MessageRequestPostingApiHandler : IMessageRequestPostingApi
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[MessageRequestPostingApiHandler] 请求数据预处理异常。");
+            _logger.LogError(ex, "[{ApiHandler}] 请求数据预处理异常。", nameof(MessageRequestApiHandler));
         }
 
         EquipmentCodeInput GetEquipmentCodeInput()

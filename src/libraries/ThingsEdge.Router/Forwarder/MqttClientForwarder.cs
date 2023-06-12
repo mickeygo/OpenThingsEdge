@@ -2,7 +2,7 @@
 
 namespace ThingsEdge.Router.Forwarder;
 
-internal sealed partial class MqttClientForwarder : IForwarder
+internal sealed class MqttClientForwarder : IForwarder
 {
     private readonly IMQTTManagedClient _managedMqttClient;
     private readonly MQTTClientOptions _mqttClientOptions;
@@ -11,7 +11,7 @@ internal sealed partial class MqttClientForwarder : IForwarder
     public ForworderSource Source => ForworderSource.MQTT;
 
     public MqttClientForwarder(IMQTTManagedClient managedMqttClient,
-        IOptionsMonitor<MQTTClientOptions> mqttClientOptions, 
+        IOptionsMonitor<MQTTClientOptions> mqttClientOptions,
         ILogger<MqttClientForwarder> logger)
     {
         _managedMqttClient = managedMqttClient;
@@ -23,21 +23,13 @@ internal sealed partial class MqttClientForwarder : IForwarder
     {
         try
         {
-            // 默认格式 {ChannelName}/{DeviceName}/{TagGroupName}, eg: line01/device01/op010
-            var topicFormater = _mqttClientOptions.TopicFormater ?? "{ChannelName}/{DeviceName}/{TagGroupName}";
-            var match = TopicRegex().Replace(topicFormater, match =>
+            var topic = _mqttClientOptions.TopicFormaterFunc?.Invoke(new()
             {
-                return match.Value switch
-                {
-                    "{ChannelName}" => MatchToLower(message.Schema.ChannelName),
-                    "{DeviceName}" => MatchToLower(message.Schema.DeviceName),
-                    "{TagGroupName}" => MatchToLower(message.Schema.TagGroupName ?? ""),
-                    _ => "",
-                };
-            });
+                Schema = message.Schema,
+                Flag = message.Flag,
+                TagName = message.Self().TagName,
+            }) ?? MQTTClientTopicFormater.Default(message.Schema, _mqttClientOptions.TopicFormater, _mqttClientOptions.TopicFormatMatchLower);
 
-            // 移除首尾斜杠
-            var topic = match.Trim('/');
             await _managedMqttClient.EnqueueAsync(topic, JsonSerializer.Serialize(message)).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
@@ -47,25 +39,11 @@ internal sealed partial class MqttClientForwarder : IForwarder
         {
             _logger.LogError(ex, "[MqttClientForwarder] MQTT 服务发布异常。");
         }
-     
+
         // MQTT 忽略返回结果。
         return ResponseResult.FromOk(new ResponseMessage
         {
             Request = message,
         }, Source);
-
-
-        string MatchToLower(string str)
-        {
-            if (_mqttClientOptions.TopicFormatMatchLower)
-            {
-                return str.ToLower();
-            }
-
-            return str;
-        }
     }
-
-    [GeneratedRegex("{ChannelName}|{DeviceName}|{TagGroupName}", RegexOptions.IgnoreCase)]
-    private static partial Regex TopicRegex();
 }

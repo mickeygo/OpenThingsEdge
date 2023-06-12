@@ -37,6 +37,11 @@ public sealed class MQTTClientOptions
     public bool TopicFormatMatchLower { get; set; } = true;
 
     /// <summary>
+    /// Topic 格式器，若设定了该函数，会替代默认的格式器。
+    /// </summary>
+    public Func<MQTTClientTopicFormaterArg, string>? TopicFormaterFunc;
+
+    /// <summary>
     /// MQTT 协议版本，默认为 3.1.1 。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]

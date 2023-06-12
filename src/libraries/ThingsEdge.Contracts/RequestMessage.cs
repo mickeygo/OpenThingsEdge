@@ -8,8 +8,12 @@ public sealed class RequestMessage
     /// <summary>
     /// 请求消息的 Id，可用于追踪。
     /// </summary>
-    [NotNull]
     public string RequestId { get; init; } = Guid.NewGuid().ToString("N");
+
+    /// <summary>
+    /// 消息请求时的时间。
+    /// </summary>
+    public DateTime RequestTime { get; init; } = DateTime.Now;
 
     /// <summary>
     /// 加载的数据头。

@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
-using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Exchange.Monitors;
 
@@ -62,9 +61,8 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
                         var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
                         if (!ok)
                         {
-                            string msg = $"[HeartbeatMonitor] Heartbeat 数据读取异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}，错误：{err}";
-                            _logger.LogError(msg);
-                            await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                            _logger.LogError("[HeartbeatMonitor] Heartbeat 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
+                                device.Name, tag.Name, tag.Address, err);
 
                             continue;
                         }
@@ -89,9 +87,8 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
                     }
                     catch (Exception ex)
                     {
-                        string msg = $"[HeartbeatMonitor] Heartbeat 数据处理异常，设备：{device.Name}，标记：{tag.Name}, 地址：{tag.Address}";
-                        _logger.LogError(ex, msg);
-                        await _producer.ProduceAsync(LoggingMessageEvent.Error(msg)).ConfigureAwait(false);
+                        _logger.LogError(ex, "[HeartbeatMonitor] Heartbeat 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
+                               device.Name, tag.Name, tag.Address);
                     }
                 }
             });

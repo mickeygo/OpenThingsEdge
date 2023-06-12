@@ -1,10 +1,6 @@
-﻿using ThingsEdge.Contracts.Variables;
-using ThingsEdge.Router.Devices;
-using ThingsEdge.Server.Models;
+﻿namespace ThingsEdge.Server.Services.Impl;
 
-namespace ThingsEdge.Server.Services.Impl;
-
-internal sealed class DeviceService : IDeviceService
+internal sealed class DeviceService : IDeviceService, ITransientDependency
 {
     private readonly IDeviceManager _deviceManager;
 
@@ -24,7 +20,7 @@ internal sealed class DeviceService : IDeviceService
             {
                 Id = channel.ChannelId,
                 Name = channel.Name,
-                Category = "Channel",
+                Category = DeviceTreeCategory.Channel,
             };
             devices.Add(model1);
 
@@ -34,7 +30,7 @@ internal sealed class DeviceService : IDeviceService
                 {
                     Id = device.DeviceId,
                     Name = device.Name,
-                    Category = "Device",
+                    Category = DeviceTreeCategory.Device,
                 };
 
                 model1.Children ??= new();
@@ -46,7 +42,7 @@ internal sealed class DeviceService : IDeviceService
                     {
                         Id = tagGroup.TagGroupId,
                         Name = tagGroup.Name,
-                        Category = "TagGroup",
+                        Category = DeviceTreeCategory.TagGroup,
                     };
 
                     model2.Children ??= new();
@@ -61,27 +57,27 @@ internal sealed class DeviceService : IDeviceService
             {
                  Id = "0",
                  Name = "项目",
-                 Category = "",
+                 Category = DeviceTreeCategory.Project,
                  Children = devices,
             }
         };
     }
 
-    public List<TagModel> GetTags(string id, string? category)
+    public List<TagModel>? GetTags(string id, string? category)
     {
-        if (category == "Device")
+        if (category == DeviceTreeCategory.Device)
         {
             var device = _deviceManager.GetDevice(id);
             return device?.Tags.SelectMany(From).ToList() ?? new(0);
         }
 
-        if (category == "TagGroup")
+        if (category == DeviceTreeCategory.TagGroup)
         {
             var tagGroup = _deviceManager.GetDevices().SelectMany(s => s.TagGroups).FirstOrDefault(s => s.TagGroupId == id);
             return tagGroup?.Tags.SelectMany(From).ToList() ?? new(0);
         }
 
-        return new(0);
+        return default;
     }
 
     private static List<TagModel> From(Tag tag)

@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Variables;
-
-namespace ThingsEdge.Server.Models;
+﻿namespace ThingsEdge.Server.Models;
 
 /// <summary>
 /// Tag 实体。

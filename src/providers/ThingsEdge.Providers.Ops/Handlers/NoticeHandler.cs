@@ -49,15 +49,14 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         _tagDataSnapshot.Change(message.Values);
 
         // 发布标记数据请求事件（不用等待）。
-        await _publisher.Publish(MessageRequestPostingEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(MessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
-            string msg = $"推送消息失败，设备: {message.Schema.DeviceName}, 标记: {notification.Tag.Name}, 地址: {notification.Tag.Address}, 错误: {result.ErrorMessage}";
-            _logger.LogError(msg);
-            await _publisher.Publish(LoggingMessageEvent.Error(msg), PublishStrategy.AsyncContinueOnException).ConfigureAwait(false);
+            _logger.LogError("[Notice] 推送消息失败，设备: {DeviceName}, 标记: {Name}, 地址: {Address}, 错误: {ErrorMessage}",
+                message.Schema.DeviceName, notification.Tag.Name, notification.Tag.Address, result.ErrorMessage);
         }
     }
 }
