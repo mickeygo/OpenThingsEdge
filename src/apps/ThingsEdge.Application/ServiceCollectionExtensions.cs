@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
             // 注册处理 Api
             services.AddTransient<IDeviceHeartbeatApi, DeviceHeartbeatApiHandler>();
-            services.AddTransient<IMessageRequestApi, MessageRequestApiHandler>();
+            services.AddTransient<IDirectMessageRequestApi, DirectMessageRequestApiHandler>();
         });
     }
 }

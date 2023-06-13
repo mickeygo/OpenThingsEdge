@@ -77,7 +77,7 @@ public static class IRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            InternalForwarderHub.Default.Register<HttpForwarder>(); // 注册 Http Forward
+            InternalForwarderHub.Default.Register<HttpForwarder>(); // 注册 Http Forwarder
 
             // 配置 HttpClient
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
@@ -133,7 +133,7 @@ public static class IRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
             
-            InternalForwarderHub.Default.Register<MqttClientForwarder>(); // 注册 MQTT Forward
+            InternalForwarderHub.Default.Register<MqttClientForwarder>(); // 注册 MQTT Forwarder
 
             // 注册并启动托管的 MQTT 客户端
             services.AddSingleton<IMQTTManagedClient, MQTTManagedClient>(sp =>

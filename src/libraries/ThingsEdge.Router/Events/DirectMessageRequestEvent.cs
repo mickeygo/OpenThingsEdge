@@ -3,7 +3,7 @@
 /// <summary>
 /// 消息请求处理事件。
 /// </summary>
-public sealed class MessageRequestEvent : INotification, IEvent
+public sealed class DirectMessageRequestEvent : INotification, IEvent
 {
     /// <summary>
     /// 事件创建时间。
@@ -21,9 +21,9 @@ public sealed class MessageRequestEvent : INotification, IEvent
     /// </summary>
     public PayloadData? LastPayload { get; init; }
 
-    public static MessageRequestEvent Create(RequestMessage message, PayloadData? lastPayload = null)
+    public static DirectMessageRequestEvent Create(RequestMessage message, PayloadData? lastPayload = null)
     {
-        return new MessageRequestEvent
+        return new DirectMessageRequestEvent
         {
             Message = message,
             LastPayload = lastPayload,

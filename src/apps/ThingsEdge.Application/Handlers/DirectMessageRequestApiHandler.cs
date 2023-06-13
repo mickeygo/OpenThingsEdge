@@ -6,7 +6,7 @@ using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Application.Handlers;
 
-internal class MessageRequestApiHandler : IMessageRequestApi
+internal sealed class DirectMessageRequestApiHandler : IDirectMessageRequestApi
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -17,13 +17,13 @@ internal class MessageRequestApiHandler : IMessageRequestApi
     private readonly ApplicationConfig _appConfig;
     private readonly ILogger _logger;
 
-    public MessageRequestApiHandler(IServiceProvider serviceProvider, 
+    public DirectMessageRequestApiHandler(IServiceProvider serviceProvider, 
         IAlarmService alarmService,
         EquipmentStateManager equipmentStateManager, 
         IEntryService entryService,
         IArchiveService archiveService,
         IOptions<ApplicationConfig> appConfig,
-        ILogger<MessageRequestApiHandler> logger)
+        ILogger<DirectMessageRequestApiHandler> logger)
     {
         _serviceProvider = serviceProvider;
         _alarmService = alarmService;
@@ -84,14 +84,15 @@ internal class MessageRequestApiHandler : IMessageRequestApi
                     var sn = requestMessage.GetData(_appConfig.TagDefine.PLC_Archive_SN)?.GetString();
                     if (!string.IsNullOrEmpty(sn))
                     {
-                        await _archiveService.ArchiveAsync(requestMessage.Schema.ChannelName, station, sn);
+                        int pass = requestMessage.GetData(_appConfig.TagDefine.PLC_Archive_Pass)?.GetInt() ?? 1;
+                        await _archiveService.ArchiveAsync(requestMessage.Schema.ChannelName, station, sn, pass);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[{ApiHandler}] 请求数据预处理异常。", nameof(MessageRequestApiHandler));
+            _logger.LogError(ex, "[{ApiHandler}] 请求数据预处理异常。", nameof(DirectMessageRequestApiHandler));
         }
 
         EquipmentCodeInput GetEquipmentCodeInput()

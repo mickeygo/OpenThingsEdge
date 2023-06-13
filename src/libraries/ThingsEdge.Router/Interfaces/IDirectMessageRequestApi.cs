@@ -3,7 +3,7 @@
 /// <summary>
 /// 设备请求预处理接口。
 /// </summary>
-public interface IMessageRequestApi
+public interface IDirectMessageRequestApi
 {
     /// <summary>
     /// 请求消息。

@@ -49,7 +49,7 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
         _tagDataSnapshot.Change(message.Values);
 
         // 发布标记数据请求事件（不用等待）。
-        await _publisher.Publish(MessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
         // 发送消息。
         var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);

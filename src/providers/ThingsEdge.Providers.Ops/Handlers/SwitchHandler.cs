@@ -114,7 +114,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             _tagDataSnapshot.Change(message.Values);
 
             // 发布标记数据请求事件。
-            await _publisher.Publish(MessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+            await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
             return;
         }

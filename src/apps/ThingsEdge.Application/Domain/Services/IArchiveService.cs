@@ -11,6 +11,7 @@ public interface IArchiveService
     /// <param name="line">线体</param>
     /// <param name="station">工站</param>
     /// <param name="sn">SN</param>
+    /// <param name="pass">出站状态</param>
     /// <returns></returns>
-    Task ArchiveAsync(string line, string station, string sn);
+    Task ArchiveAsync(string line, string station, string sn, int pass);
 }

@@ -73,7 +73,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         _tagDataSnapshot.Change(message.Values);
 
         // 不管读取是否成功，都发布标记数据请求事件（不用等待）。
-        await _publisher.Publish(MessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+        await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
         // 读取数据出错，直接退出
         if (!ok)
