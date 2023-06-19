@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-
-namespace ThingsEdge.Common.Queue;
+﻿namespace ThingsEdge.Common.TaskQueue;
 
 /// <summary>
 /// 监控事件示例

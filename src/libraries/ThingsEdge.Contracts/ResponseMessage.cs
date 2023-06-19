@@ -12,15 +12,15 @@ public sealed class ResponseMessage
     public RequestMessage? Request { get; init; }
 
     /// <summary>
-    /// 标记 Code，对于由 <see cref="TagFlag.Trigger"/> 触发的数据回写时会根据此码设置设备值。
+    /// 响应状态，由 <see cref="TagFlag.Trigger"/> 触发标记产生的数据在响应时会将此状态回写给触发标记。
     /// </summary>
     public int State { get; init; }
 
     /// <summary>
     /// 数据回写集合。
     /// Key 为标记名称，Value 为值。
-    /// 若没有要回写的数据时，可返回null或空集合。
+    /// 在没有要回写的数据时，可返回null或空集合。
     /// </summary>
-    /// <remarks>回写时标记名会校验是否有设定，值会校验是否可转换为设定标记的类型。</remarks>
+    /// <remarks>回写时会检查标记名称在对应的变量表中有无设定；值会根据标记设定的类型进行转换，转换失败时会产生异常。</remarks>
     public Dictionary<string, object>? CallbackItems { get; init; }
 }

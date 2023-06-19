@@ -14,7 +14,7 @@ public static class EnumUtil
     public static Dictionary<int, string> FetchDictionary<TEnum>(bool showDisplayNameAttr = false)
        where TEnum : Enum
     {
-        var fileds = typeof(TEnum).GetFields(BindingFlags.Static | BindingFlags.Public);
+        var fileds = typeof(TEnum).GetFields(BindingFlags.Static | BindingFlags.Public); // 排除内置的 "value__" 字段
         Dictionary<int, string> map = new(fileds.Length);
         foreach (var field in fileds)
         {
@@ -44,7 +44,7 @@ public static class EnumUtil
     public static IEnumerable<string> FetchStrings<TEnum>(bool showDisplayNameAttr = false)
       where TEnum : Enum
     {
-        var fileds = typeof(TEnum).GetFields(BindingFlags.Static | BindingFlags.Public);
+        var fileds = typeof(TEnum).GetFields(BindingFlags.Static | BindingFlags.Public); // 排除内置的 "value__" 字段
         foreach (var field in fileds)
         {
             if (showDisplayNameAttr)
@@ -55,7 +55,7 @@ public static class EnumUtil
                     yield return attr.Name;
                 }
             }
-
+            
             yield return field.Name;
         }
     }

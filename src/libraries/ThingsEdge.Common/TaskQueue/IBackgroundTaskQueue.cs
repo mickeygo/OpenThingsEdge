@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Common.Queue;
+﻿namespace ThingsEdge.Common.TaskQueue;
 
 /// <summary>
 /// 后台任务队列接口

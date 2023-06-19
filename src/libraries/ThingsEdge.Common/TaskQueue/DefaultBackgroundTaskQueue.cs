@@ -1,6 +1,6 @@
 ﻿using System.Threading.Channels;
 
-namespace ThingsEdge.Common.Queue;
+namespace ThingsEdge.Common.TaskQueue;
 
 internal sealed class DefaultBackgroundTaskQueue : IBackgroundTaskQueue
 {

@@ -47,7 +47,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
         if (!ok)
         {
-            _logger.LogError("[Trigger] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}", 
+            _logger.LogError("[Trigger] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err);
 
             // 写入错误代码到设备
@@ -56,7 +56,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 var (ok5, _, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrorCode.MultiReadItemError).ConfigureAwait(false);
                 if (!ok5)
                 {
-                    _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}", 
+                    _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err5);
                 }
             }
@@ -85,7 +85,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
-            _logger.LogError("[Trigger] 推送消息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}", 
+            _logger.LogError("[Trigger] 推送消息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address, result.ErrorMessage);
 
             // 写入错误代码到设备
@@ -94,7 +94,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 var (ok4, _, err4) = await notification.Connector.WriteAsync(notification.Tag, result.Code).ConfigureAwait(false);
                 if (!ok4)
                 {
-                    _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}", 
+                    _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err4);
                 }
             }
@@ -146,11 +146,15 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
         if (!ok3)
         {
-            _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}", 
+            _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err3);
         }
 
         // 设置回写的标记状态快照。
         _tagDataSnapshot.Change(notification.Tag, formatedData3!);
+
+        // 思考：若标志位回写失败，致标志位值则不会发生跳变（值始终为 1），这样导致该标志位后续的处理逻辑直接被跳过。
+        //  这里处理方式是：即使回写失败，也会更改标志位值。逻辑中的数据需做幂等处理（对已处理的数据直接返回 OK 状态）。
+        _ = TagValueSet.CompareAndSwap(notification.Tag.TagId, tagCode);
     }
 }

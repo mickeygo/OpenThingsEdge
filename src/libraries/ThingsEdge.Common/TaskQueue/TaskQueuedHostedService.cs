@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-
-namespace ThingsEdge.Common.Queue;
+﻿namespace ThingsEdge.Common.TaskQueue;
 
 /// <summary>
 /// 任务队列的后台服务
