@@ -9,15 +9,15 @@ namespace ThingsEdge.Providers.Ops.Exchange.Monitors;
 internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
 {
     private readonly IProducer _producer;
-    private readonly OpsConfig _opsConfig;
+    private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
     public TriggerMonitor(IProducer producer,
-        IOptionsMonitor<OpsConfig> opsConfig,
+        IOptionsMonitor<OpsConfig> config,
         ILogger<TriggerMonitor> logger)
     {
         _producer = producer;
-        _opsConfig = opsConfig.CurrentValue;
+        _config = config.CurrentValue;
         _logger = logger;
     }
 
@@ -28,7 +28,7 @@ internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
         {
             _ = Task.Run(async () =>
             {
-                int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _opsConfig.DefaultScanRate;
+                int pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : _config.DefaultScanRate;
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try

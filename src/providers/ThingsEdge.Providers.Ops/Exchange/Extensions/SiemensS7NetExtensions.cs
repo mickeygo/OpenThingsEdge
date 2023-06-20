@@ -8,6 +8,13 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 public static class SiemensS7NetExtensions
 {
     /// <summary>
+    /// 针对于S7协议，一起读取运行的最多 PDU 长度（byte数量），为0时会使用从CPU中读取的 PDU 长度。  
+    /// </summary>
+    public const int ConsistentPDULength1 = 462;
+
+    public const int ConsistentPDULength2 = 32;
+
+    /// <summary>
     /// S7 协议批量读取。
     /// </summary>
     /// <param name="siemensS7Net"></param>
@@ -22,9 +29,9 @@ public static class SiemensS7NetExtensions
         //  变量的一致性则由系统保证。因此，使用指令 "PUT" / "GET" 或者在读/写变量（例如，由 OP 或 OS 读/写）时可以在保持一致性的情况下访问这些通信区。
         int allowMaxByte = siemensS7Net.CurrentPlc switch
         {
-            SiemensPLCS.S1500 or SiemensPLCS.S400 => 462,
-            SiemensPLCS.S1200 => 462,
-            SiemensPLCS.S300 => 32,
+            SiemensPLCS.S1500 or SiemensPLCS.S400 => ConsistentPDULength1,
+            SiemensPLCS.S1200 => ConsistentPDULength1,
+            SiemensPLCS.S300 => ConsistentPDULength2,
             SiemensPLCS.S200 or SiemensPLCS.S200Smart => throw new NotImplementedException(),
             _ => throw new NotImplementedException(),
         };

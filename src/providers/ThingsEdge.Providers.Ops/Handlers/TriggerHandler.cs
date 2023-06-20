@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Snapshot;
@@ -15,16 +16,19 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
     private readonly IEventPublisher _publisher;
     private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly IForwarderFactory _forwarderFactory;
+    private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
     public TriggerHandler(IEventPublisher publisher,
         ITagDataSnapshot tagDataSnapshot,
-        IForwarderFactory forwarderFactory, 
+        IForwarderFactory forwarderFactory,
+        IOptionsMonitor<OpsConfig> config,
         ILogger<TriggerHandler> logger)
     {
         _publisher = publisher;
         _tagDataSnapshot = tagDataSnapshot;
         _forwarderFactory = forwarderFactory;
+        _config = config.CurrentValue;
         _logger = logger;
     }
 
@@ -44,7 +48,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         message.Values.Add(notification.Self);
 
         // 读取触发标记下的子数据。
-        var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags).ConfigureAwait(false);
+        var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags, _config.AllowReadMulti).ConfigureAwait(false);
         if (!ok)
         {
             _logger.LogError("[Trigger] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
@@ -58,6 +62,8 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                 {
                     _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err5);
+
+                    ResetTagSet(notification.Tag.TagId);
                 }
             }
         }
@@ -91,11 +97,13 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
             {
-                var (ok4, _, err4) = await notification.Connector.WriteAsync(notification.Tag, result.Code).ConfigureAwait(false);
+                var (ok4, _, err4) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqOne(result.Code)).ConfigureAwait(false);
                 if (!ok4)
                 {
                     _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err4);
+
+                    ResetTagSet(notification.Tag.TagId);
                 }
             }
 
@@ -142,19 +150,38 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         }
 
         // 回写标记状态。
-        int tagCode = tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
-        var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, tagCode).ConfigureAwait(false);
+        int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
+        var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqOne(tagCode)).ConfigureAwait(false);
         if (!ok3)
         {
             _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err3);
+
+            ResetTagSet(notification.Tag.TagId);
         }
 
         // 设置回写的标记状态快照。
         _tagDataSnapshot.Change(notification.Tag, formatedData3!);
+    }
 
-        // 思考：若标志位回写失败，致标志位值则不会发生跳变（值始终为 1），这样导致该标志位后续的处理逻辑直接被跳过。
-        //  这里处理方式是：即使回写失败，也会更改标志位值。逻辑中的数据需做幂等处理（对已处理的数据直接返回 OK 状态）。
-        _ = TagValueSet.CompareAndSwap(notification.Tag.TagId, tagCode);
+    /// <summary>
+    /// 若标志值回写失败，标志位值不会发生跳变（PLC值和TagSet值都为1），这样导致该标志位后续的处理逻辑直接被跳过。
+    /// </summary>
+    /// <remarks>
+    /// 这里处理方式是：在回写失败时，强制更改内存中标志位值。注：接收数据后的逻辑需要做幂等处理（对已处理的数据直接返回 OK 状态）。
+    /// </remarks>
+    /// <param name="tagId"></param>
+    private void ResetTagSet(string tagId)
+    {
+        if (_config.ResetTagSetWhenCallbackError)
+        {
+            _ = TagValueSet.CompareAndSwap(tagId, -1);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ChangeWhenEqOne(int tagCode)
+    {
+        return tagCode == 1 ? 0 : tagCode;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Handlers.Curve;
@@ -18,18 +19,21 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
     private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly SwitchContainer _container;
     private readonly CurveStorage _curveStorage;
+    private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
-    public SwitchHandler(IEventPublisher publisher, 
+    public SwitchHandler(IEventPublisher publisher,
         ITagDataSnapshot tagDataSnapshot,
-        SwitchContainer container, 
-        CurveStorage curveStorage, 
+        SwitchContainer container,
+        CurveStorage curveStorage,
+        IOptionsMonitor<OpsConfig> config,
         ILogger<SwitchHandler> logger)
     {
         _publisher = publisher;
         _tagDataSnapshot = tagDataSnapshot;
         _container = container;
         _curveStorage = curveStorage;
+        _config = config.CurrentValue;
         _logger = logger;
     }
 
@@ -88,7 +92,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 }
 
                 // 获取或创建数据写入器（即使 sn 和 no 读取失败继续）
-                var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(sn, tagGroup?.Name, no)); 
+                var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(sn, tagGroup?.Name, no));
 
                 // 添加头信息
                 var header = notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve).Select(s => s.Keynote);
@@ -114,13 +118,14 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             _tagDataSnapshot.Change(message.Values);
 
             // 发布标记数据请求事件。
-            await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+            await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload),
+                PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
             return;
         }
 
         // 开关数据
-        if(!_container.TryGet(notification.Tag.TagId, out var writer2))
+        if (!_container.TryGet(notification.Tag.TagId, out var writer2))
         {
             return;
         }
@@ -128,14 +133,15 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         // 检测是否已到达写入行数的上限，用于防止写入数据过程导致数据过大。
         if (writer2.WrittenCount > AllowMaxWriteCount)
         {
-            _logger.LogError("[Switch] 文件写入数据已达到设置上限, 设备: {Name}, 标记: {Name}，地址: {Address}", 
+            _logger.LogError("[Switch] 文件写入数据已达到设置上限, 设备: {Name}, 标记: {Name}，地址: {Address}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
 
             return;
         }
 
         // 读取触发标记下的子数据。
-        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve)).ConfigureAwait(false);
+        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(
+                notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve), _config.AllowReadMulti).ConfigureAwait(false);
         if (!ok2)
         {
             _logger.LogError("[Switch] 批量读取子标记值失败, 设备: {Name}, 错误: {Err}", notification.Device.Name, err2);

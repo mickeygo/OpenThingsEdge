@@ -3,6 +3,9 @@ using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Events;
 
+/// <summary>
+/// 事件 Broker。
+/// </summary>
 internal sealed class InternalEventBroker : ISingletonDependency
 {
     private const int _capacity = 1024;
@@ -19,6 +22,12 @@ internal sealed class InternalEventBroker : ISingletonDependency
         });
     }
 
+    /// <summary>
+    /// 将事件写入队列。
+    /// </summary>
+    /// <param name="item">加入队列的事件项</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async ValueTask QueueAsync(IEvent item, CancellationToken cancellationToken = default)
     {
         await _queue.Writer.WriteAsync(item, cancellationToken).ConfigureAwait(false);
@@ -32,6 +41,6 @@ internal sealed class InternalEventBroker : ISingletonDependency
     public async ValueTask<IEvent> DequeueAsync(CancellationToken cancellationToken)
     {
         // 效果等于 WaitToReadAsync + TryRead
-        return await _queue.Reader.ReadAsync(cancellationToken);
+        return await _queue.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
     }
 }

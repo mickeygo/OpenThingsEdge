@@ -149,12 +149,12 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加自定义的转发服务。
+    /// 添加本地的转发服务。
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddCustomForwarder<TForwarder>(this IRouterBuilder builder)
-        where TForwarder : class, IForwarder
+    public static IRouterBuilder AddNativeForwarder<TForwarder>(this IRouterBuilder builder)
+        where TForwarder : AbstractNativeForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {

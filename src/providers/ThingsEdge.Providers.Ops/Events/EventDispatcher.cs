@@ -17,6 +17,7 @@ internal sealed class EventDispatcher : ISingletonDependency
 
     public async Task DispatchAsync(IEvent @event)
     {
+        // 事件处理都采用异步不阻塞的方式，也无需等待返回结果
         if (@event is HeartbeatEvent heartbeatEvent)
         {
             await _publisher.Publish(heartbeatEvent, PublishStrategy.ParallelNoWait).ConfigureAwait(false);

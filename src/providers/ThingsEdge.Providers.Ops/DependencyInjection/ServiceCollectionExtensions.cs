@@ -1,5 +1,6 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
+using ThingsEdge.Providers.Ops.Exchange.Monitors;
 
 namespace ThingsEdge.Router;
 
@@ -22,6 +23,12 @@ public static class ServiceCollectionExtensions
             services.AddHostedService<OpsHostedService>();
         });
 
+        // 注册监控器
+        MonitorLoop.Register<HeartbeatMonitor>();
+        MonitorLoop.Register<NoticeMonitor>();
+        MonitorLoop.Register<TriggerMonitor>();
+        MonitorLoop.Register<SwitchMonitor>();
+
         return builder;
     }
 }
@@ -37,7 +44,10 @@ internal sealed class OpsHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _ = _eventLoop.Loop(cancellationToken);
+        _ = Task.Run(async () =>
+        {
+            await _eventLoop.Loop(cancellationToken).ConfigureAwait(false);
+        });
 
         return Task.CompletedTask;
     }

@@ -35,7 +35,7 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
                     {
                         await Task.Delay(pollingInterval, cancellationToken).ConfigureAwait(false);
 
-                        // 第一次检测
+                        // 第二次检测
                         if (cancellationToken.IsCancellationRequested)
                         {
                             if (!TagValueSet.CompareAndSwap(tag.TagId, false))
@@ -70,6 +70,7 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
                         // 心跳标记数据类型必须为 bool 或 int16
                         if (CheckOn(data!))
                         {
+                            // 数据回写失败不影响，下一次轮询继续处理
                             await connector.WriteAsync(tag, SetOff2(tag)).ConfigureAwait(false);
 
                             if (!TagValueSet.CompareAndSwap(tag.TagId, true))

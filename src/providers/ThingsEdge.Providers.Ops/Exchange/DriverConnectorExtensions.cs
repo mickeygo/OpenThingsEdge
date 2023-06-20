@@ -27,7 +27,7 @@ public static class DriverConnectorExtensions
     /// </summary>
     /// <remarks>
     /// 读取值中任何一个出错，会中断读取并返回错误。对于不支持一次性读取多个地址的设备，会采用逐一读取方式。
-    /// 在一次性读取时，目前三菱地址必须要保证是连续的，西门子地址可以为离散的。
+    /// 目前只有西门子S7和三菱MC驱动支持批量读取，且三菱地址必须要保证是连续的，西门子地址可以为离散的。
     /// </remarks>
     /// <param name="connector"></param>
     /// <param name="tags">批量读取的标记集合。</param>

@@ -16,17 +16,20 @@ public sealed class OpsConfig
     public int SwitchScanRate { get; init; } = 100;
 
     /// <summary>
-    /// 是否尝试批量读取。
+    /// 是否尝试批量读取，默认为 true。
     /// </summary>
     /// <remarks>
-    /// 注：S7 批量读取地址可以是离散的；MelsecMc 批量读取地址必须是连续的。
+    /// <para>西门子S7驱动支持离散批量读取，可以始终设置为 true；</para>
+    /// <para>三菱MC协议驱动目前支持连续批量读取，若非连续地址需要设置为 false；</para>
+    /// <para>其他协议驱动目前还不支持批量读取，内部会采取逐一方式进行读取。</para>
     /// </remarks>
     public bool AllowReadMulti { get; init; } = true;
 
     /// <summary>
-    /// 针对于S7协议，一起读取运行的最多 PDU 长度（byte数量），为0时会使用从CPU中读取的 PDU 长度。  
+    /// 在触发标志位值回写失败时，是否重置TagSet值，默认为 false。
     /// </summary>
-    public int AllowMaxPDULength { get; init; } = 462;
+    /// <remarks>触发标志位重置值，可以防止PLC值与TagSet值一致导致跳过后续处理逻辑</remarks>
+    public bool ResetTagSetWhenCallbackError { get; init; }
 
     /// <summary>
     /// 曲线数据配置。
