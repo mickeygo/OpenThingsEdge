@@ -101,8 +101,7 @@ internal static class DriverReadWriteUtil
     /// <returns></returns>
     /// <remarks>要写入的数据必须与标记的数据类型匹配，或是可转换为标记设定的类型。</remarks>
     /// <exception cref="FormatException"></exception>
-    /// <exception cref="InvalidCastException"></exception>
-    /// <exception cref="OverflowException"></exception>
+    /// <exception cref="NotImplementedException"></exception>
     public static async Task<(bool ok, string err)> WriteAsync(IReadWriteNet driver, Tag tag, object data)
     {
         // 非数组

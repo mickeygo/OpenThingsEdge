@@ -1,79 +1,106 @@
-﻿using DeepEqual.Syntax;
-
-namespace ThingsEdge.Providers.Ops.Exchange;
+﻿namespace ThingsEdge.Providers.Ops.Exchange;
 
 /// <summary>
 /// 标记数据值存储，主要用于数据比较。
 /// </summary>
 internal static class TagValueSet
 {
-    private static readonly ConcurrentDictionary<string, object> _map = new();
+    private static readonly ConcurrentDictionary<string, InternalData> _map = new();
 
     /// <summary>
-    /// 比较值，若值不同则写入新的值。
+    /// 比较值，若新值与旧值不同或旧值不存在，则写入新的值。
     /// </summary>
     /// <param name="tagId">标记 Id</param>
     /// <param name="newValue">新值</param>
-    /// <returns>true 表示旧值与新写入的值相同；false 表示不同（或第一次写入）。</returns>
-    public static bool CompareAndSwap(string tagId, object newValue)
+    /// <param name="checkAckWhenEqual">当新值与旧值相等时，是否检测是否有 Ack。</param>
+    /// <returns>
+    /// <para>第一次写入时，返回 false；</para>
+    /// <para>旧值与新值相同时，返回 true；</para>
+    /// <para>
+    /// 旧值与新值若不同，不检查 ack 时，直接返回 false；
+    /// 若相同，且开启检查 ack，有 ack 处理则返回 false，否则返回 true。
+    /// 执行函数后 ack 会重置为 false 状态。
+    /// </para>
+    /// </returns>
+    public static bool CompareAndSwap(string tagId, object newValue, bool checkAckWhenEqual = false)
     {
         // 初始状态，不包含数据。
-        if (!_map.TryGetValue(tagId, out var oldState))
+        if (!_map.TryGetValue(tagId, out var data))
         {
-            _map.GetOrAdd(tagId, newValue);
+            _ = _map.GetOrAdd(tagId, new InternalData { Value = newValue });
             return false;
         }
-        
-        if (oldState.IsDeepEqual(newValue))
+
+        // 始终重置回执状态
+        bool ack = data.Ack;
+        if (ack)
         {
-            return true;
+            data.Ack = false;
         }
 
-        _map.TryUpdate(tagId, newValue, oldState);
+        // 新旧值比较相等
+        if (DeepEqual.Syntax.ObjectExtensions.IsDeepEqual(newValue, data.Value))
+        {
+            data.Version++;
+
+            return !checkAckWhenEqual || !ack;
+        }
+
+        // 新旧值比较不相等，更改对象的值（不替换 value）
+        data.Value = newValue;
+        data.Version = 1;
+        data.AckVersion = 0;
 
         return false;
     }
 
     /// <summary>
-    /// 获取指定key的值，若没有找到，返回 null。
+    /// 回执数据。
     /// </summary>
     /// <param name="tagId">标记 Id</param>
-    /// <returns></returns>
-    public static object? Get(string tagId)
+    /// <param name="maxAckVersion">允许的最大回执版本号，当值版本号超过设置的后，不会再设置 Ack 为 true，默认为 null。</param>
+    public static void Ack(string tagId, int? maxAckVersion = null)
     {
-        _map.TryGetValue(tagId, out var obj);
-        return obj;
-    }
-
-    /// <summary>
-    /// 获取指定 key 的值。若没有找到或是强制转换异常，会返回 false。
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="tagId"></param>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public static bool TryGet<T>(string tagId, [MaybeNullWhen(false)]out T obj)
-    {
-        obj = default;
-        if(_map.TryGetValue(tagId, out var obj2))
+        if (_map.TryGetValue(tagId, out var data))
         {
-            try
+            if (maxAckVersion is not null)
             {
-                obj = (T)obj2;
-                return true;
+                if (++data.AckVersion <= maxAckVersion)
+                {
+                    data.Ack = true;
+                }
             }
-            catch
+            else
             {
-
-                return false;
+                data.Ack = true;
+                ++data.AckVersion;
             }
         }
-
-        return false;
     }
 
     /// <summary>
     /// 清空状态的缓存数据。
     /// </summary>
     public static void Clear() => _map.Clear();
+
+    class InternalData
+    {
+        [NotNull]
+        public object? Value { get; set; }
+
+        /// <summary>
+        /// 是否有回执，默认 false。
+        /// </summary>
+        public bool Ack { get; set; }
+
+        /// <summary>
+        /// 已设置 Ack 的次数。
+        /// </summary>
+        public int AckVersion { get; set; }
+
+        /// <summary>
+        /// 相同值比较次数，值更新后版本重置为 1
+        /// </summary>
+        public int Version { get; set; } = 1;
+    }
 }

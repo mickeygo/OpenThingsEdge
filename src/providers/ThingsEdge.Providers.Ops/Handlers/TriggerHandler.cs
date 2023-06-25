@@ -63,7 +63,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                     _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err5);
 
-                    ResetTagSet(notification.Tag.TagId);
+                    AckTagSet(notification.Tag.TagId);
                 }
             }
         }
@@ -103,7 +103,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
                     _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err4);
 
-                    ResetTagSet(notification.Tag.TagId);
+                    AckTagSet(notification.Tag.TagId);
                 }
             }
 
@@ -157,7 +157,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err3);
 
-            ResetTagSet(notification.Tag.TagId);
+            AckTagSet(notification.Tag.TagId);
         }
 
         // 设置回写的标记状态快照。
@@ -168,14 +168,15 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
     /// 若标志值回写失败，标志位值不会发生跳变（PLC值和TagSet值都为1），这样导致该标志位后续的处理逻辑直接被跳过。
     /// </summary>
     /// <remarks>
-    /// 这里处理方式是：在回写失败时，强制更改内存中标志位值。注：接收数据后的逻辑需要做幂等处理（对已处理的数据直接返回 OK 状态）。
+    /// 这里处理方式是：在回写失败时，设置回执（Trigger 监控器中必须启动回执比较）。注：接收数据后的逻辑需要做幂等处理（对已处理的数据直接返回 OK 状态）。
     /// </remarks>
     /// <param name="tagId"></param>
-    private void ResetTagSet(string tagId)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void AckTagSet(string tagId)
     {
-        if (_config.ResetTagSetWhenCallbackError)
+        if (_config.AckWhenCallbackError)
         {
-            _ = TagValueSet.CompareAndSwap(tagId, -1);
+            TagValueSet.Ack(tagId, _config.AckMaxVersion);
         }
     }
 

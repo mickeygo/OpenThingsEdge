@@ -26,10 +26,15 @@ public sealed class OpsConfig
     public bool AllowReadMulti { get; init; } = true;
 
     /// <summary>
-    /// 在触发标志位值回写失败时，是否重置TagSet值，默认为 false。
+    /// 在触发标志位值回写失败时，是否触发回执值，默认为 false。
     /// </summary>
-    /// <remarks>触发标志位重置值，可以防止PLC值与TagSet值一致导致跳过后续处理逻辑</remarks>
-    public bool ResetTagSetWhenCallbackError { get; init; }
+    /// <remarks>触发标志位重置值，可以防止 PLC 值与 TagSe 值一致导致跳过处理逻辑</remarks>
+    public bool AckWhenCallbackError { get; init; }
+
+    /// <summary>
+    /// 在触发标志位值回写失败时，允许触发回执的最大次数，默认为 3。
+    /// </summary>
+    public int AckMaxVersion { get; init; }
 
     /// <summary>
     /// 曲线数据配置。

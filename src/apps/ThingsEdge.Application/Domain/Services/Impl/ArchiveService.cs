@@ -14,6 +14,13 @@ internal sealed class ArchiveService : IArchiveService, ITransientDependency
 
     public async Task ArchiveAsync(string line, string station, string sn, int pass)
     {
+        // 检查SN在指定工位是否已出站
+        var transitRecord = await _snTransitRecordRepo.GetFirstAsync(s => s.Line == line && s.Station == station && s.SN == sn && !s.IsArchived);
+        if (transitRecord is null)
+        {
+            return;
+        }
+
         // 新增过站记录明细
         await _snTransitRecordLogRepo.InsertAsync(new SnTransitRecordLog
         {
@@ -24,17 +31,13 @@ internal sealed class ArchiveService : IArchiveService, ITransientDependency
             RecordTime = DateTime.Now,
         });
 
-        // 检查SN在指定工位是否已出站
-        var transitRecord = await _snTransitRecordRepo.GetFirstAsync(s => s.Line == line && s.Station == station && s.SN == sn && !s.IsArchived);
-        if (transitRecord is not null)
+        // 过站
+        transitRecord.Archive(pass);
+        await _snTransitRecordRepo.AsUpdateable(transitRecord).UpdateColumns(s => new
         {
-            transitRecord.Archive(pass);
-            await _snTransitRecordRepo.AsUpdateable(transitRecord).UpdateColumns(s => new
-            {
-                s.IsArchived,
-                s.ArchiveTime,
-                s.CycleTime,
-            }).ExecuteCommandAsync();
-        }
+            s.IsArchived,
+            s.ArchiveTime,
+            s.CycleTime,
+        }).ExecuteCommandAsync();
     }
 }
