@@ -5,10 +5,14 @@
 /// </summary>
 public sealed class FileDeviceProvider : IDeviceProvider
 {
-    /// <summary>
-    /// 置件文配路径，默认为 "[执行目录]/config/tags.conf"，可以为相对路径。
-    /// </summary>
-    public string? FilePath { get; set; } = Path.Combine(AppContext.BaseDirectory, "config", "tags.conf");
+    private readonly string _configDirectory;
+    private readonly string _tagsPath;
+
+    public FileDeviceProvider()
+    {
+        _configDirectory = Path.Combine(AppContext.BaseDirectory, "config"); // "[执行目录]/config/"
+        _tagsPath = Path.Combine(_configDirectory, "tags.conf");
+    }
 
     /// <summary>
     /// 获取通道数据。
@@ -16,18 +20,128 @@ public sealed class FileDeviceProvider : IDeviceProvider
     /// <returns></returns>
     /// <exception cref="DirectoryNotFoundException"></exception>
     /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="JsonException"></exception>
     public List<Channel> GetChannels()
     {
-        if (string.IsNullOrEmpty(FilePath))
+        // 若有单文件，会从单文件中解析；若不存在，会从文件中解析。
+        if (Path.Exists(_tagsPath))
         {
-            return new(0);
+            return GetChannelsFromSingleFile();
         }
 
-        var context = File.ReadAllText(Path.GetFullPath(FilePath));
-        return JsonSerializer.Deserialize<List<Channel>>(context, new JsonSerializerOptions
+        return GetChannelsFromFolder();
+    }
+
+    /// <summary>
+    /// 从单一文件中解析
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="JsonException"></exception>
+    private List<Channel> GetChannelsFromSingleFile()
+    {
+        var text = File.ReadAllText(Path.GetFullPath(_tagsPath));
+        return JsonDeserialize<List<Channel>>(text) ?? new(0);
+    }
+
+    /// <summary>
+    /// 从文件夹中解析
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="JsonException"></exception>
+    private List<Channel> GetChannelsFromFolder()
+    {
+        // 目录结构:
+        // 执行目录/config:
+        //  w-- tags.conf
+        //  d-- channels
+        //    d-- [Line01]
+        //      w-- channel.conf
+        //        d-- [S7-1200]
+        //          w-- device.conf
+        //          w-- OP010.conf
+        //          w-- OP020.conf
+        //        d-- [S7-1500]
+        //          w-- device.conf
+        //          w-- OP030.conf
+        //          w-- OP040.conf
+
+        List<Channel> channels = new();
+
+        var channelsDirPath = Path.Combine(_configDirectory, "channels");
+        var channelsDirInfo = new DirectoryInfo(channelsDirPath);
+        if (!channelsDirInfo.Exists)
+        {
+            return channels;
+        }
+
+        foreach (var channelDirInfo in channelsDirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly))
+        {
+            var channelConf = channelDirInfo.EnumerateFiles("channel.conf", SearchOption.AllDirectories).FirstOrDefault();
+            if (channelConf is null)
+            {
+                continue;
+            }
+
+            // 解析 channelConf
+            var text1 = ReadAllText(channelConf);
+            var channel = JsonDeserialize<Channel>(text1);
+            if (channel is null)
+            {
+                continue;
+            }
+
+            channels.Add(channel);
+
+            foreach (var deviceDirInfo in channelDirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly))
+            {
+                var confs = deviceDirInfo.EnumerateFiles("*.conf", SearchOption.AllDirectories);
+
+                var deviceConf = confs.FirstOrDefault(s => s.Name == "device.conf");
+                if (deviceConf is null)
+                {
+                    continue;
+                }
+
+                // 解析 device.conf
+                var text2 = ReadAllText(deviceConf);
+                var device = JsonDeserialize<Device>(text2);
+                if (device is null)
+                {
+                    continue;
+                }
+
+                channel.Devices.Add(device);
+
+                foreach (var groupConf in confs.Where(s => s.Name != "device.conf"))
+                {
+                    // 解析 group.conf
+                    var text3 = ReadAllText(groupConf);
+                    var tagGroup = JsonDeserialize<TagGroup>(text3);
+                    if (tagGroup is null)
+                    {
+                        continue;
+                    }
+
+                    device.TagGroups.Add(tagGroup);
+                }
+            }
+        }
+
+        return channels;
+    }
+
+    private static T? JsonDeserialize<T>(string json)
+    {
+        return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
         {
             ReadCommentHandling = JsonCommentHandling.Skip, // 允许注释
             AllowTrailingCommas = true, // 允许尾随逗号
-        }) ?? new(0);
+        });
+    }
+
+    private static string ReadAllText(FileInfo fileInfo)
+    {
+        using var sr = fileInfo.OpenText();
+        return sr.ReadToEnd();
     }
 }
