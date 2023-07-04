@@ -22,7 +22,7 @@ internal abstract class AbstractMonitor
     /// <param name="data"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    protected static bool CheckOn(PayloadData data)
+    internal static bool CheckOn(PayloadData data)
     {
         if (data.IsArray())
         {
@@ -44,7 +44,7 @@ internal abstract class AbstractMonitor
     /// <param name="tag"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    protected static PayloadData SetOff(Tag tag)
+    internal static PayloadData SetOff(Tag tag)
     {
         object obj = SetOff2(tag);
         var data = PayloadData.FromTag(tag);
@@ -59,7 +59,7 @@ internal abstract class AbstractMonitor
     /// <param name="tag"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    protected static object SetOff2(Tag tag)
+    internal static object SetOff2(Tag tag)
     {
         if (tag.IsArray())
         {

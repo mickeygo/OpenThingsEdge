@@ -4,6 +4,7 @@ using Ops.Communication.Profinet.AllenBradley;
 using Ops.Communication.Profinet.Melsec;
 using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Profinet.Siemens;
+using ErrCode = Ops.Communication.ErrorCode;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -122,6 +123,19 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                     // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
                     networkDevice.SocketReadErrorClosedDelegate = code =>
                     {
+                        // TODO: 根据错误代码来判断是否断开连接
+                        // 若错误代码非连接关闭，累计达到错误次数阙值后断开连接
+                        //if (code == (int)ErrCode.SocketRemoteCloseException)
+                        //{
+
+                        //}
+
+                        connector.ErrorCount++;
+                        if (connector.ErrorCount >= 5)
+                        {
+
+                        }
+
                         if (connector.ConnectedStatus != ConnectionStatus.Disconnected)
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;

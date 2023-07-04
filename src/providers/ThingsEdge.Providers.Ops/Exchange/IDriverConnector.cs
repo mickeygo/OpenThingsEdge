@@ -44,8 +44,12 @@ public interface IDriverConnector
     /// </summary>
     /// <remarks></remarks>
     bool CanConnect { get; }
-}
 
+    /// <summary>
+    /// 当前错误次数
+    /// </summary>
+    long ErrorCount { get; set; }
+}
 
 /// <summary>
 /// 连接状态
