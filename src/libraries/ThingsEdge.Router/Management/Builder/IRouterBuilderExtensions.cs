@@ -120,10 +120,10 @@ public static class IRouterBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="configName">MQTT配置名称</param>
+    /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder, 
-        Action<MQTTClientOptions>? postDelegate = null, string configName = "MQTT")
+        Action<MQTTClientOptions>? postDelegate = null, string configName = "MqttBroker")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {

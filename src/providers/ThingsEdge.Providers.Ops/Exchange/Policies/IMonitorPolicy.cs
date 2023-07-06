@@ -13,9 +13,9 @@ public interface IMonitorPolicy
     bool Validate(PayloadData data) => true;
 
     /// <summary>
-    /// 写入给设备的数据，null 表示不写入。
+    /// 写入给设备的数据，返回 null 表示不写入。
     /// </summary>
-    /// <param name="data">要写入设备的数据</param>
+    /// <param name="tag">要写入的设备标记</param>
     /// <returns></returns>
-    object? Return(PayloadData data) => null;
+    object? Return(Tag tag) => null;
 }

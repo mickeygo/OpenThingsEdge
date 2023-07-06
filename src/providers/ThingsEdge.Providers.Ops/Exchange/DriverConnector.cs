@@ -26,8 +26,6 @@ public sealed class DriverConnector : IDriverConnector
 
     public bool CanConnect => Available && DriverStatus == DriverStatus.Normal && ConnectedStatus == ConnectionStatus.Connected;
 
-    public long ErrorCount { get; set; }
-
     public DriverConnector(string id, string host, int port, IReadWriteNet driver)
     {
         Id = id;

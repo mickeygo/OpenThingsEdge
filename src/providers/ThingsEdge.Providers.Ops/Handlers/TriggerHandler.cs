@@ -180,6 +180,11 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         }
     }
 
+    /// <summary>
+    /// 将返回的状态值更改为0。
+    /// </summary>
+    /// <param name="tagCode"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ChangeWhenEqOne(int tagCode)
     {

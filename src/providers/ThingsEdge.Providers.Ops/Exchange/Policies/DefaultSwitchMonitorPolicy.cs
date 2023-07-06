@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Providers.Ops.Exchange.Policies;
 
 /// <summary>
-/// 默认心跳监控策略
+/// 默认开关监控策略
 /// </summary>
-internal sealed class DefaultHeartbeatMonitorPolicy : IMonitorPolicy
+internal sealed class DefaultSwitchMonitorPolicy : IMonitorPolicy
 {
     public bool Validate(PayloadData data)
     {
@@ -29,7 +29,7 @@ internal sealed class DefaultHeartbeatMonitorPolicy : IMonitorPolicy
             throw new InvalidOperationException("Tag 数据类型不能为数组");
         }
 
-        return tag.DataType switch
+        object obj = tag.DataType switch
         {
             TagDataType.Bit => false,
             TagDataType.Byte => (byte)0,
@@ -37,5 +37,10 @@ internal sealed class DefaultHeartbeatMonitorPolicy : IMonitorPolicy
             TagDataType.Int => (short)0,
             _ => throw new InvalidOperationException("Tag 数据类型必须为 bool 或 short。"),
         };
+
+        var data = PayloadData.FromTag(tag);
+        data.Value = obj;
+
+        return data;
     }
 }

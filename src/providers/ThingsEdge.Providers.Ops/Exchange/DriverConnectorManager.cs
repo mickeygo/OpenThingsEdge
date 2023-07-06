@@ -123,22 +123,19 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                     // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
                     networkDevice.SocketReadErrorClosedDelegate = code =>
                     {
-                        // TODO: 根据错误代码来判断是否断开连接
-                        // 若错误代码非连接关闭，累计达到错误次数阙值后断开连接
-                        //if (code == (int)ErrCode.SocketRemoteCloseException)
-                        //{
-
-                        //}
-
-                        connector.ErrorCount++;
-                        if (connector.ErrorCount >= 5)
-                        {
-
-                        }
-
-                        if (connector.ConnectedStatus != ConnectionStatus.Disconnected)
+                        // 根据错误代码来判断是否断开连接
+                        if (networkDevice.IsSocketError)
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
+
+                            if (code is (int)ErrCode.SocketConnectionAborted
+                                    or (int)ErrCode.RemoteClosedConnection
+                                    or (int)ErrCode.ReceiveDataTimeout
+                                    or (int)ErrCode.SocketSendException
+                                    or (int)ErrCode.SocketReceiveException)
+                            {
+                                _logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
+                            }
                         }
                     };
 
@@ -152,7 +149,7 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                             var ret = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                             if (!ret.IsSuccess)
                             {
-                                _logger.LogWarning("尝试连接服务失败，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
+                                _logger.LogWarning("尝试连接服务失败，错误：{Message}，主机：{Host}，端口：{Port}", ret.Message, connector.Host, connector.Port);
                             }
 
                             _fristConnectSuccessful = ret.IsSuccess;
@@ -164,7 +161,7 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "尝试连接服务错误，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
+                        _logger.LogError(ex, "尝试连接服务异常，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
                     }
                 }
             }
@@ -183,6 +180,8 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
         {
             await Task.Delay(3000).ConfigureAwait(false); // 延迟3s后开始监听
 
+            HashSet<string> pingSuccessHosts = new(); // 存放已 Ping 成功的主机信息。
+
             // PeriodicTimer 定时器，可以让任务不堆积，不会因上一个任务阻塞在下个任务开始时导致多个任务同时进行。
             _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(2));
             while (await _periodicTimer.WaitForNextTickAsync().ConfigureAwait(false))
@@ -195,13 +194,25 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                     {
                         try
                         {
-                            connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
+                            // 若连接器 Host 相同，每次轮询只需要 Ping 一次即可
+                            if (pingSuccessHosts.Contains(connector.Host))
+                            {
+                                connector.Available = true;
+                            }
+                            else
+                            {
+                                connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
+                                if (connector.Available)
+                                {
+                                    pingSuccessHosts.Add(connector.Host);
+                                }
+                            }
 
                             // 注： networkDevice 中连接成功一次，即使服务器断开一段时间后再恢复，连接依旧可用，
                             // 所以，在连接成功一次后，不要再重复连接。
                             if (connector.Available && connector.ConnectedStatus == ConnectionStatus.Disconnected)
                             {
-                                // 内部 Socket 异常，或是还没有连接过服务器
+                                // 内部 Socket 异常，或是第一次尝试连接过服务器失败
                                 if (networkDevice.IsSocketError || !_fristConnectSuccessful)
                                 {
                                     var result = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
@@ -219,6 +230,9 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                         }
                     }
                 }
+
+                // 一次循环结束后，清空已 Ping 的主机
+                pingSuccessHosts.Clear();
             }
         });
 

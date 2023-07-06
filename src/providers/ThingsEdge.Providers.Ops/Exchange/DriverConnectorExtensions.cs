@@ -18,8 +18,6 @@ public static class DriverConnectorExtensions
             return (false, default, "已与设备断开连接");
         }
 
-        // TODO：读取数据，未断开连接，采用重设机制
-
         var result = await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
         return (result.IsSuccess(), result.Data, result.ErrorMessage);
     }
@@ -46,15 +44,11 @@ public static class DriverConnectorExtensions
         {
             if (connector.Driver is SiemensS7Net siemensS7Net)
             {
-                // TODO：批量读取数据，未断开连接，采用重设机制
-
                 return await siemensS7Net.ReadMultiAsync(tags).ConfigureAwait(false);
             }
 
             if (connector.Driver is MelsecMcNet melsecMcNet)
             {
-                // TODO：批量读取数据，未断开连接，采用重设机制
-
                 return await melsecMcNet.ReadContinuationAsync(tags).ConfigureAwait(false);
             }
         }
@@ -103,8 +97,6 @@ public static class DriverConnectorExtensions
                     return (false, default, err1);
                 }
             }
-
-            // TODO：写入数据，未断开连接，采用重设机制
 
             var (ok2, err2) = await DriverReadWriteUtil.WriteAsync(connector.Driver, tag, data2!).ConfigureAwait(false);
             return (ok2, data2!, err2);
