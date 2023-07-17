@@ -1,12 +1,12 @@
 ﻿@inherits ProComponentBase
 @inject NavHelper NavHelper
 
-<PPageTabs @ref="PPageTabs" 
-    TabClass="px-6 rounded-t-xl" 
-    TabOptions="@TabOptions" 
-    Ripple="false" 
-    HideSlider
-    SelfPatterns="@SelfPatterns">
+<PPageTabs @ref="PPageTabs"
+           TabClass="px-6 rounded-t-xl"
+           TabOptions="@TabOptions"
+           Ripple="false"
+           HideSlider
+           SelfPatterns="@SelfPatterns">
     <ChildContent>
         @ChildContent
     </ChildContent>
@@ -31,4 +31,5 @@
 
         return new TabOptions(title, icon, titleClass);
     }
+
 }
