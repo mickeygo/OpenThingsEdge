@@ -35,7 +35,7 @@ public sealed class Tag
     public TagDataType DataType { get; init; }
 
     /// <summary>
-    /// 客户端范围模式，默认可读写。
+    /// 客户端访问模式，默认可读写。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ClientAccessMode ClientAccess { get; init; } = ClientAccessMode.ReadAndWrite;

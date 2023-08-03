@@ -35,7 +35,7 @@ public sealed class Device
     public int Port { get; init; }
 
     /// <summary>
-    /// 标记要旨，可用于设置重要信息。
+    /// 设备要旨，可用于设置重要信息。
     /// </summary>
     [NotNull]
     public string? Keynote { get; init; } = string.Empty;

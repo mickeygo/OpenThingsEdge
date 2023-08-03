@@ -6,7 +6,7 @@ public static class PayloadDataExtensions2
     /// 将对象转换为 <see cref="string"/> 类型。
     /// 若对象是数组或是数字，会返回其序列化中的原始文本。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
@@ -32,7 +32,7 @@ public static class PayloadDataExtensions2
     /// <summary>
     /// 将对象转换为 <see cref="bool"/> 值。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
@@ -56,7 +56,7 @@ public static class PayloadDataExtensions2
     /// <summary>
     /// 将对象转换为 <see cref="byte"/> 值。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
@@ -80,7 +80,7 @@ public static class PayloadDataExtensions2
     /// <summary>
     /// 将对象转换为 <see cref="int"/> 类型。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
@@ -104,7 +104,7 @@ public static class PayloadDataExtensions2
     /// <summary>
     /// 将对象转换为 <see cref="double"/> 类型。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
@@ -129,12 +129,12 @@ public static class PayloadDataExtensions2
     /// 将对象转换为 <see cref="bool[]"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="JsonException"></exception>
-    public static bool[]? FetchBooleanArray(this PayloadData payload)
+    public static bool[] FetchBooleanArray(this PayloadData payload)
     {
         if (payload.Value is not JsonElement jsonElement)
         {
@@ -147,19 +147,19 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data;
+        return data ?? Array.Empty<bool>();
     }
 
     /// <summary>
     /// 将对象转换为 <see cref="byte[]"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="JsonException"></exception>
-    public static byte[]? FetchByteArray(this PayloadData payload)
+    public static byte[] FetchByteArray(this PayloadData payload)
     {
         if (payload.Value is not JsonElement jsonElement)
         {
@@ -172,19 +172,19 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data;
+        return data ?? Array.Empty<byte>();
     }
 
     /// <summary>
     /// 将对象转换为 <see cref="int[]"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="JsonException"></exception>
-    public static int[]? FetchIntArray(this PayloadData payload)
+    public static int[] FetchIntArray(this PayloadData payload)
     {
         if (payload.Value is not JsonElement jsonElement)
         {
@@ -197,19 +197,19 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data;
+        return data ?? Array.Empty<int>();
     }
 
     /// <summary>
     /// 将对象转换为 <see cref="double[]"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>用于 Json 序列后解析对象。</remarks>
+    /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
     /// <param name="payload"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="JsonException"></exception>
-    public static double[]? FetchDoubleArray(this PayloadData payload)
+    public static double[] FetchDoubleArray(this PayloadData payload)
     {
         if (payload.Value is not JsonElement jsonElement)
         {
@@ -222,6 +222,6 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data;
+        return data ?? Array.Empty<double>();
     }
 }
