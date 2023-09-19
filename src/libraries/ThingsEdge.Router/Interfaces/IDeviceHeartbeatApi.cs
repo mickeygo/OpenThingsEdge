@@ -1,6 +1,4 @@
-﻿using ThingsEdge.Contracts.Variables;
-
-namespace ThingsEdge.Router.Interfaces;
+﻿namespace ThingsEdge.Router.Interfaces;
 
 /// <summary>
 /// 设备心跳接口。
