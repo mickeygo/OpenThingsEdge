@@ -1,12 +1,15 @@
 ﻿namespace ThingsEdge.Contracts;
 
+/// <summary>
+/// <see cref="RequestMessage"/> 对象扩展。
+/// </summary>
 public static class RequestMessageExtensions
 {
     /// <summary>
     /// 获取对象值，若没找标记，则返回 null。
     /// 若对象是数组或是数字，会返回其序列化中的原始文本。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -38,7 +41,7 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="bool"/> 值，若没找到，返回 null。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -71,7 +74,7 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="byte"/> 值，若没找到，返回 null。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -100,7 +103,7 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="int"/> 值，若没找到，返回 null。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -129,7 +132,7 @@ public static class RequestMessageExtensions
     /// <summary>
     /// 获取 <see cref="double"/> 值，若没找到，返回 null。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -159,7 +162,7 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="bool"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -198,7 +201,7 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="byte"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -233,7 +236,7 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="int"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>
@@ -268,7 +271,7 @@ public static class RequestMessageExtensions
     /// 获取 <see cref="double"/> 数组，若没找到，返回 null。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
-    /// <remarks>数据是从 <see cref="JsonElement"/> 元素中提取。</remarks>
+    /// <remarks>获取的值必须为 System.Text.Json.<see cref="JsonElement"/> 类型，否则会抛出异常。</remarks>
     /// <param name="requestMessage"></param>
     /// <param name="tagName">标记名称</param>
     /// <returns></returns>

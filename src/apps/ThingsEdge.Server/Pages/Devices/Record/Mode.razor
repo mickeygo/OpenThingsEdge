@@ -15,7 +15,7 @@
             @if (context.Header.Value == nameof(EquipmentModeRecord.RunningMode))
             {
                 <MChip Color="@GetColor(context.Item.RunningMode)">
-                    @context.Item.RunningMode.DisplayName()
+                    @context.Item.RunningMode.Description()
                 </MChip>
             }
             else

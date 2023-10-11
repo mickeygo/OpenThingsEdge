@@ -45,7 +45,26 @@ public sealed class PayloadData
     /// 标记要旨，可用于记录重要信息。
     /// </summary>
     [NotNull]
-    public string? Keynote { get; init; } = string.Empty;
+    public string? Keynote { get; init; }
+
+    /// <summary>
+    /// 数据身份标记。
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TagIdentity Identity { get; init; }
+
+    /// <summary>
+    /// 标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。
+    /// </summary>
+    /// <remarks>注：分组中的数据类型要保持一致，如果是数组，组内各标记数据类型也应都为数组，且长度一致。</remarks>
+    [NotNull]
+    public string? Group { get; init; }
+
+    /// <summary>
+    /// 标记值的用途标识
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TagVauleUsage VauleUsage { get; init; }
 
     /// <summary>
     /// 标记是否为数组对象。
@@ -73,6 +92,9 @@ public sealed class PayloadData
             DataType = tag.DataType,
             Length = tag.Length,
             Keynote = tag.Keynote,
+            Identity = tag.Identity,
+            Group = tag.Group,
+            VauleUsage = tag.VauleUsage,
         };
     }
 }

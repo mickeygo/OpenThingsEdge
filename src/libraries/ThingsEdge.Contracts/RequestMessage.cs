@@ -47,7 +47,7 @@ public sealed class RequestMessage
     /// <summary>
     /// 获取标记触发点的数据。
     /// </summary>
-    /// <remarks>通知数据为其本身，触发数据和开关数据为信号标记值，心跳事件没有触发点值，调用后会出现异常。</remarks>
+    /// <remarks>通知数据为其本身，触发数据和开关数据为信号标记值；心跳事件没有触发点值，调用后会出现异常。</remarks>
     /// <returns></returns>
     public PayloadData Self()
     {
@@ -55,15 +55,22 @@ public sealed class RequestMessage
     }
 
     /// <summary>
-    /// 获取除标记触发点以外子集合的所有数据。
+    /// 获取除标记触发点以外子集合中的所有数据。
     /// </summary>
+    /// <param name="identity">标记身份标识。</param>
     /// <returns></returns>
-    public IReadOnlyList<PayloadData> Children()
+    public IReadOnlyList<PayloadData> Children(TagIdentity? identity = null)
     {
         if (Values.Count <= 1)
         {
             return Array.Empty<PayloadData>();
         }
-        return Values.Skip(1).ToList();
+
+        if (identity is null)
+        {
+            return Values.Skip(1).ToImmutableList();
+        }
+
+        return Values.Skip(1).Where(s => s.Identity == identity).ToImmutableList();
     }
 }

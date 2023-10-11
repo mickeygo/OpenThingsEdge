@@ -1,12 +1,15 @@
 ﻿namespace ThingsEdge.Common.DependencyInjection;
 
+/// <summary>
+/// Common 服务依赖扩展
+/// </summary>
 public static class DependencyInjectionServiceCollectionExtensions
 {
     /// <summary>
     /// 根据指定的 <see cref="ITransientDependency"/>、<see cref="IScopedDependency"/> 和 <see cref="ISingletonDependency"/> 接口注册带有相应生命周期的服务。
     /// </summary>
     /// <remarks>注：若有对象有多个接口，只注册第一个</remarks>
-    /// <param name="services">.</param>
+    /// <param name="services">服务</param>
     /// <param name="assembly">检索的程序集</param>
     /// <returns></returns>
     public static IServiceCollection AddAutoDependencyInjection(this IServiceCollection services, Assembly assembly)

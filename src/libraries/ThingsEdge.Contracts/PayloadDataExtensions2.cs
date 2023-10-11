@@ -1,5 +1,8 @@
 ﻿namespace ThingsEdge.Contracts;
 
+/// <summary>
+/// <see cref="PayloadData"/> 基于 System.Text.Json.<see cref="JsonElement"/> 类型提取数据的扩展对象。
+/// </summary>
 public static class PayloadDataExtensions2
 {
     /// <summary>

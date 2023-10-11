@@ -10,7 +10,6 @@ public static class TagFormater
     /// </summary>
     /// <param name="tag">数据对应的标记。</param>
     /// <param name="obj">要格式的数据。</param>
-    /// <param name="forceConvert">是否要强制转换对应的数据类型</param>
     /// <returns></returns>
     public static (bool ok, object? data, string? err) Format(Tag tag, object obj)
     {

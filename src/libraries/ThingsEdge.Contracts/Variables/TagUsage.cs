@@ -7,32 +7,26 @@
 public enum TagUsage : int
 {
     /// <summary>
-    /// 主数据，默认。
+    /// 默认
     /// </summary>
-    [Display(Name = "主数据")] 
-    Master = 1,
+    [Description("默认")]
+    None = 0,
 
     /// <summary>
-    /// 工艺参数数据（过程数据）。
+    /// 表示此标记为曲线数据要绑定的 SN。
     /// </summary>
-    [Display(Name = "工艺参数数据")]
-    Technology,
-
-    /// <summary>
-    /// 表示此标记为曲线数据要绑定的SN。
-    /// </summary>
-    [Display(Name = "SN")]
+    [Description("曲线 SN")]
     SwitchSN,
 
     /// <summary>
-    /// 表示此标记为曲线数据要绑定的SN对应的序号。
+    /// 表示此标记为曲线数据要绑定的 SN 对应的序号。
     /// </summary>
-    [Display(Name = "序号")] 
+    [Description("曲线序号")]
     SwitchNo,
 
     /// <summary>
     /// 表示此标记为曲线数据。
     /// </summary>
-    [Display(Name = "曲线数据")] 
+    [Description("曲线数据")]
     SwitchCurve,
 }

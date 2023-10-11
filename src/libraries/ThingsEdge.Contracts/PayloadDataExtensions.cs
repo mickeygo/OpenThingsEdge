@@ -8,6 +8,9 @@ using LReal = System.Double;
 
 namespace ThingsEdge.Contracts;
 
+/// <summary>
+/// <see cref="PayloadData"/> 直接提取数据的扩展对象。
+/// </summary>
 public static class PayloadDataExtensions
 {
     /// <summary>

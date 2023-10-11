@@ -55,7 +55,7 @@ public sealed class Tag
     /// 用途分类。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagUsage Usage { get; init; } = TagUsage.Master;
+    public TagUsage Usage { get; init; } = TagUsage.None;
 
     /// <summary>
     /// 是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 <see cref="PublishMode.OnlyDataChanged"/>。
@@ -77,6 +77,24 @@ public sealed class Tag
     /// </summary>
     [NotNull]
     public string? Description { get; init; } = string.Empty;
+
+    /// <summary>
+    /// 标记身份标识，默认为 "Master"。
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TagIdentity Identity { get; init; } = TagIdentity.Master;
+
+    /// <summary>
+    /// 标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。
+    /// </summary>
+    /// <remarks>注：分组中的数据类型要保持一致，如果是数组，组内各标记数据类型也应都为数组，且长度一致。</remarks>
+    [NotNull]
+    public string? Group { get; init; } = string.Empty;
+
+    /// <summary>
+    /// 标记值的用途标识。
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TagVauleUsage VauleUsage { get; init; } = TagVauleUsage.Numerical;
 
     /// <summary>
     /// 只有 <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。

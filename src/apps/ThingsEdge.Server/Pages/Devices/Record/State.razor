@@ -14,7 +14,7 @@
             @if (context.Header.Value == nameof(EquipmentStateRecord.RunningState))
             {
                 <MChip Color="@GetColor(context.Item.RunningState)">
-                    @context.Item.RunningState.DisplayName()
+                    @context.Item.RunningState.Description()
                 </MChip>
             }
             else if (context.Header.Value == nameof(EquipmentStateRecord.Duration))
