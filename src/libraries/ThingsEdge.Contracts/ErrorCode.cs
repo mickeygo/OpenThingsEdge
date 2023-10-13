@@ -46,6 +46,18 @@ public enum ErrorCode : int
     HttpResponseJsonError,
 
     /// <summary>
+    /// Native 请求错误
+    /// </summary>
+    [Description("Native 请求错误")]
+    NativeError,
+
+    /// <summary>
+    /// Native 请求超时错误。
+    /// </summary>
+    [Description("Native 请求超时错误")]
+    NativeRequestTimedOut,
+
+    /// <summary>
     /// 批量读取子数据错误。
     /// </summary>
     [Description("批量读取子数据错误")]

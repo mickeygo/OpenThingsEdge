@@ -152,13 +152,15 @@ public static class IRouterBuilderExtensions
     /// 添加本地的转发服务。
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="lifetime"><typeparamref name="TForwarder"/>注册的生命周期。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeForwarder<TForwarder>(this IRouterBuilder builder)
-        where TForwarder : AbstractNativeForwarder
+    public static IRouterBuilder AddNativeForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+        where TForwarder : INativeForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
-            InternalForwarderHub.Default.Register<TForwarder>();
+            services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TForwarder), lifetime));
+            InternalForwarderHub.Default.Register<NativeForwarder>(); // 注册 Native Forwarder
         });
 
         return builder;
