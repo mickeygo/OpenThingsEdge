@@ -73,6 +73,12 @@ public sealed class Tag
     public string? Keynote { get; init; } = string.Empty;
 
     /// <summary>
+    /// 标记显示名称。
+    /// </summary>
+    [NotNull]
+    public string? DisplayName { get; init; } = string.Empty;
+
+    /// <summary>
     /// 标记说明。
     /// </summary>
     [NotNull]

@@ -48,6 +48,12 @@ public sealed class PayloadData
     public string? Keynote { get; init; }
 
     /// <summary>
+    /// 标记显示名称。
+    /// </summary>
+    [NotNull]
+    public string? DisplayName { get; init; }
+
+    /// <summary>
     /// 数据身份标记。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -92,6 +98,7 @@ public sealed class PayloadData
             DataType = tag.DataType,
             Length = tag.Length,
             Keynote = tag.Keynote,
+            DisplayName = tag.DisplayName,
             Identity = tag.Identity,
             Group = tag.Group,
             VauleUsage = tag.VauleUsage,
