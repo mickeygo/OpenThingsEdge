@@ -129,7 +129,7 @@ public static class PayloadDataExtensions2
     }
 
     /// <summary>
-    /// 将对象转换为 <see cref="bool[]"/> 数组。
+    /// 将对象转换为 <see cref="bool"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
     /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
@@ -154,7 +154,7 @@ public static class PayloadDataExtensions2
     }
 
     /// <summary>
-    /// 将对象转换为 <see cref="byte[]"/> 数组。
+    /// 将对象转换为 <see cref="byte"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
     /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
@@ -179,7 +179,7 @@ public static class PayloadDataExtensions2
     }
 
     /// <summary>
-    /// 将对象转换为 <see cref="int[]"/> 数组。
+    /// 将对象转换为 <see cref="int"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
     /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
@@ -204,7 +204,7 @@ public static class PayloadDataExtensions2
     }
 
     /// <summary>
-    /// 将对象转换为 <see cref="double[]"/> 数组。
+    /// 将对象转换为 <see cref="double"/> 数组。
     /// 若对象是单一值，会转成含有一个值的数组。
     /// </summary>
     /// <remarks>用于 System.Text.Json.<see cref="JsonElement"/> 序列后解析对象。</remarks>
