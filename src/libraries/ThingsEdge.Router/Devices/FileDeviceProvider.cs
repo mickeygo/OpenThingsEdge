@@ -76,7 +76,7 @@ public sealed class FileDeviceProvider : IDeviceProvider
 
         foreach (var channelDirInfo in channelsDirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly))
         {
-            var channelConf = channelDirInfo.EnumerateFiles("channel.conf", SearchOption.AllDirectories).FirstOrDefault();
+            var channelConf = channelDirInfo.EnumerateFiles("channel.conf", SearchOption.TopDirectoryOnly).FirstOrDefault();
             if (channelConf is null)
             {
                 continue;
@@ -94,7 +94,7 @@ public sealed class FileDeviceProvider : IDeviceProvider
 
             foreach (var deviceDirInfo in channelDirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly))
             {
-                var confs = deviceDirInfo.EnumerateFiles("*.conf", SearchOption.AllDirectories);
+                var confs = deviceDirInfo.EnumerateFiles("*.conf", SearchOption.TopDirectoryOnly);
 
                 var deviceConf = confs.FirstOrDefault(s => s.Name == "device.conf");
                 if (deviceConf is null)
