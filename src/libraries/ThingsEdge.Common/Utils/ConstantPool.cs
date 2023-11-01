@@ -41,7 +41,7 @@ public abstract class ConstantPool
         return c;
     }
 
-    /// <summary>Returns <c>true</c> if a <see cref="AttributeKey{T}" /> exists for the given <c>name</c>.</summary>
+    /// <summary>Returns <c>true</c> if a 'AttributeKey' exists for the given <c>name</c>.</summary>
     public bool Exists(string name)
     {
         CheckNotNullAndNotEmpty(name);

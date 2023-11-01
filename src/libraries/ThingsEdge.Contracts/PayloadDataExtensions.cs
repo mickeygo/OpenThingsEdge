@@ -17,13 +17,15 @@ public static class PayloadDataExtensions
     /// 提取对象文本值，若值不为 <see cref="string"/> 类型时，会字符串转换。
     /// </summary>
     /// <remarks>注：对于非字符串数据，会转换为字符串；对于数组数据，进行 JSON 序列化，返回的是 JSON 数组格式文本。</remarks>
+    /// <param name="payload"></param>
+    /// <param name="isTrimString">是否移除字符串首尾 '\0' 和 ' ' 字符，默认为 true。</param>
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
-    public static string GetString(this PayloadData payload)
+    public static string GetString(this PayloadData payload, bool isTrimString = true)
     {
         var v = payload.GetValue();
         return v.Match(
-            t0 => t0,
+            t0 => isTrimString ? t0.Trim('\0', ' ') : t0,
             t1 => t1.ToString(),
             t2 => t2.ToString(),
             t3 => t3.ToString(),
@@ -46,13 +48,16 @@ public static class PayloadDataExtensions
     /// <summary>
     /// 提取对象值，并将值转换为字符串数组，若是单一值，会组合成只有一个元素的数组。
     /// </summary>
+    /// <remarks>注：对于非字符串数据，会转换为字符串；对于数组数据，进行 JSON 序列化，返回的是 JSON 数组格式文本。</remarks>
+    /// <param name="payload"></param>
+    /// <param name="isTrimString">是否移除字符串首尾 '\0' 和 ' ' 字符，默认为 true。</param>
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
-    public static string[] GetStringArray(this PayloadData payload)
+    public static string[] GetStringArray(this PayloadData payload, bool isTrimString = true)
     {
         var v = payload.GetValue();
         return v.Match(
-            t0 => new[] { t0 },
+            t0 => new[] { isTrimString ? t0.Trim('\0', ' ') : t0 },
             t1 => new[] { t1.ToString() },
             t2 => new[] { t2.ToString() },
             t3 => new[] { t3.ToString() },

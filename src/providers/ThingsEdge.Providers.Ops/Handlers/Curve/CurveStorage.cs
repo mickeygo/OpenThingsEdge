@@ -95,6 +95,7 @@ internal sealed class CurveStorage : ISingletonDependency
     /// 尝试将文件拷贝到远程服务器（若设置了允许拷贝）。
     /// </summary>
     /// <param name="filepath">要推送的文件。</param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<(bool ok, string? err)> TryCopyAsync(string filepath, CancellationToken cancellationToken)
     {

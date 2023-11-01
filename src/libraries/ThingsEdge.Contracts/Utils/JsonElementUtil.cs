@@ -209,7 +209,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="bool[]"/> 类型对象。
+    ///  获取 bool[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -245,7 +245,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="byte[]"/> 类型对象。
+    ///  获取 byte[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -277,7 +277,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="ushort[]"/> 类型对象。
+    ///  获取 ushort[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -309,7 +309,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="short[]"/> 类型对象。
+    ///  获取 short[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -341,7 +341,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="uint[]"/> 类型对象。
+    ///  获取 uint[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -373,7 +373,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="int[]"/> 类型对象。
+    ///  获取 int[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -405,7 +405,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="float[]"/> 类型对象。
+    ///  获取 float[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>
@@ -437,7 +437,7 @@ public static class JsonElementUtil
     }
 
     /// <summary>
-    ///  获取 <see cref="double[]"/> 类型对象。
+    ///  获取 double[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
     /// <param name="canInclude">是否单一值也以数组形式返回。</param>

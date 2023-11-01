@@ -27,6 +27,7 @@ public static class IDeviceManagerExtensions
     /// <summary>
     /// 获取指定通道下指定名称的设备。
     /// </summary>
+    /// <param name="deviceManager"></param>
     /// <param name="channelName">通道名称</param>
     /// <param name="deviceName">设备名称</param>
     /// <returns></returns>
@@ -45,6 +46,7 @@ public static class IDeviceManagerExtensions
     /// <summary>
     /// 获取指定的设备。
     /// </summary>
+    /// <param name="deviceManager"></param>
     /// <param name="deviceId">设备Id。</param>
     /// <returns></returns>
     public static Device? GetDevice(this IDeviceManager deviceManager, string deviceId)
@@ -53,9 +55,10 @@ public static class IDeviceManagerExtensions
         return devices.FirstOrDefault(s => s.DeviceId == deviceId);
     }
 
-    // <summary>
+    /// <summary>
     /// 获取指定的设备。
     /// </summary>
+    /// <param name="deviceManager"></param>
     /// <param name="deviceId">设备Id。</param>
     /// <returns></returns>
     public static (string? channelName, Device? device) GetDevice2(this IDeviceManager deviceManager, string deviceId)

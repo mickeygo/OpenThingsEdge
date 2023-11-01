@@ -22,5 +22,5 @@ internal sealed class DefaultPlatform : IPlatform
 
     int IPlatform.GetCurrentProcessId() => _processId;
 
-    byte[] IPlatform.GetDefaultDeviceId() => MacAddressUtil.GetBestAvailableMac();
+    byte[] IPlatform.GetDefaultDeviceId() => MacAddressUtil.GetBestAvailableMac()!;
 }

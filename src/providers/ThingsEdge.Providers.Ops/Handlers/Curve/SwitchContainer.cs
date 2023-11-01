@@ -29,6 +29,7 @@ internal sealed class SwitchContainer : ISingletonDependency
     /// 尝试获取对象。
     /// </summary>
     /// <param name="key">对象唯一值。</param>
+    /// <param name="value"></param>
     /// <returns></returns>
     public bool TryGet(string key, [MaybeNullWhen(false)] out ICurveWriter value)
     {

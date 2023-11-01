@@ -73,6 +73,11 @@ public sealed class PayloadData
     public TagVauleUsage VauleUsage { get; init; }
 
     /// <summary>
+    /// 数据创建时间，可用于诊断。
+    /// </summary>
+    public DateTime CreatedTime { get; init; } = DateTime.Now;
+
+    /// <summary>
     /// 标记是否为数组对象。
     /// 当值不为 String 类型（包含 S7String 和 S7WString）且设定的长度大于 0 时，判定为数组。
     /// </summary>

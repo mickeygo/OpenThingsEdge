@@ -99,6 +99,7 @@ public sealed class Tag
 
     /// <summary>
     /// 标记值的用途标识。
+    /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TagVauleUsage VauleUsage { get; init; } = TagVauleUsage.Numerical;
 
