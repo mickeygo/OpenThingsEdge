@@ -3,7 +3,7 @@
 /// <summary>
 /// 标记的值用途。
 /// </summary>
-public enum TagVauleUsage
+public enum TagValueUsage
 {
     /// <summary>
     /// 编号

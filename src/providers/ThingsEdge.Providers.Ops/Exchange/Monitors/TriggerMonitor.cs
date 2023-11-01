@@ -36,7 +36,7 @@ internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
                         await Task.Delay(pollingInterval, cancellationToken).ConfigureAwait(false);
 
                         // 第一次检测
-                        if (cancellationToken .IsCancellationRequested)
+                        if (cancellationToken.IsCancellationRequested)
                         {
                             break;
                         }

@@ -101,7 +101,7 @@ public sealed class Tag
     /// 标记值的用途标识。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagVauleUsage VauleUsage { get; init; } = TagVauleUsage.Numerical;
+    public TagValueUsage ValueUsage { get; init; } = TagValueUsage.Numerical;
 
     /// <summary>
     /// 只有 <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。

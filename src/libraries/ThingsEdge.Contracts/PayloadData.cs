@@ -70,7 +70,7 @@ public sealed class PayloadData
     /// 标记值的用途标识
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagVauleUsage VauleUsage { get; init; }
+    public TagValueUsage ValueUsage { get; init; }
 
     /// <summary>
     /// 数据创建时间，可用于诊断。
@@ -106,7 +106,7 @@ public sealed class PayloadData
             DisplayName = tag.DisplayName,
             Identity = tag.Identity,
             Group = tag.Group,
-            VauleUsage = tag.VauleUsage,
+            ValueUsage = tag.ValueUsage,
         };
     }
 }
