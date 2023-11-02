@@ -136,6 +136,7 @@ public sealed class FileDeviceProvider : IDeviceProvider
         {
             ReadCommentHandling = JsonCommentHandling.Skip, // 允许注释
             AllowTrailingCommas = true, // 允许尾随逗号
+            PropertyNameCaseInsensitive = true, // 属性名称匹配不区分大小写
         });
     }
 
