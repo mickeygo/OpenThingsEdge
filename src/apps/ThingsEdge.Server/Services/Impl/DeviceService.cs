@@ -2,16 +2,16 @@
 
 internal sealed class DeviceService : IDeviceService, ITransientDependency
 {
-    private readonly IDeviceManager _deviceManager;
+    private readonly IDeviceFactory _deviceFactory;
 
-    public DeviceService(IDeviceManager deviceManager)
+    public DeviceService(IDeviceFactory deviceFactory)
     {
-        _deviceManager = deviceManager;
+        _deviceFactory = deviceFactory;
     }
 
     public List<TreeModel> GetDeviceTree()
     {
-        var channels = _deviceManager.GetChannels();
+        var channels = _deviceFactory.GetChannels();
         List<TreeModel> devices = new(channels.Count);
 
         foreach (var channel in channels)
@@ -67,13 +67,13 @@ internal sealed class DeviceService : IDeviceService, ITransientDependency
     {
         if (category == DeviceTreeCategory.Device)
         {
-            var device = _deviceManager.GetDevice(id);
+            var device = _deviceFactory.GetDevice(id);
             return device?.Tags.SelectMany(From).ToList() ?? new(0);
         }
 
         if (category == DeviceTreeCategory.TagGroup)
         {
-            var tagGroup = _deviceManager.GetDevices().SelectMany(s => s.TagGroups).FirstOrDefault(s => s.TagGroupId == id);
+            var tagGroup = _deviceFactory.GetDevices().SelectMany(s => s.TagGroups).FirstOrDefault(s => s.TagGroupId == id);
             return tagGroup?.Tags.SelectMany(From).ToList() ?? new(0);
         }
 

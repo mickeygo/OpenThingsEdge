@@ -45,7 +45,7 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加设备文件提供者。
+    /// 添加设备基于本地文件的提供者。
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
@@ -53,8 +53,25 @@ public static class IRouterBuilderExtensions
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.AddSingleton<IDeviceManager, DefaultDeviceManager>();
+            services.AddSingleton<IDeviceFactory, DefaultDeviceFactory>();
             services.AddSingleton<IDeviceProvider, FileDeviceProvider>();
+        });
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加自定义设备提供者。
+    /// </summary>
+    /// <typeparam name="TProvider"></typeparam>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static IRouterBuilder AddDeviceCustomProvider<TProvider>(this IRouterBuilder builder)
+        where TProvider : class, IDeviceProvider
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<IDeviceFactory, DefaultDeviceFactory>();
+            services.AddSingleton<IDeviceProvider, TProvider>();
         });
         return builder;
     }

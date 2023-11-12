@@ -111,8 +111,8 @@ internal sealed class DirectMessageRequestApiHandler : IDirectMessageRequestApi
             }
 
             // 标记归属于设备，查找设备下所有分组
-            var deviceManager = _serviceProvider.GetRequiredService<IDeviceManager>();
-            var device = deviceManager.GetDevice(requestMessage.Schema.ChannelName, requestMessage.Schema.DeviceName);
+            var deviceFactory= _serviceProvider.GetRequiredService<IDeviceFactory>();
+            var device = deviceFactory.GetDevice(requestMessage.Schema.ChannelName, requestMessage.Schema.DeviceName);
             if (device != null)
             {
                 input.EquipmentCodes.AddRange(device.TagGroups.Select(s => s.Name));

@@ -13,19 +13,19 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
     private CancellationTokenSource? _cts;
 
     private readonly IProducer _producer;
-    private readonly IDeviceManager _deviceManager;
+    private readonly IDeviceFactory _deviceFactory;
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly MonitorLoop _monitorLoop;
     private readonly ILogger _logger;
 
     public OpsExchange(IProducer producer,
-        IDeviceManager deviceManager,
+        IDeviceFactory deviceFactory,
         DriverConnectorManager driverConnectorManager,
         MonitorLoop monitorLoop,
         ILogger<OpsExchange> logger)
     {
         _producer = producer;
-        _deviceManager = deviceManager;
+        _deviceFactory = deviceFactory;
         _driverConnectorManager = driverConnectorManager;
         _monitorLoop = monitorLoop;
         _logger = logger;
@@ -46,14 +46,14 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
 
         _cts = new();
 
-        var devices = _deviceManager.ReloadDevices();
+        var devices = _deviceFactory.ReloadDevices();
         _driverConnectorManager.Load(devices);
         await _driverConnectorManager.ConnectAsync().ConfigureAwait(false);
 
         // 获取所有驱动，并监控设备数据
         foreach (var connector in _driverConnectorManager.GetAllDriver())
         {
-            var (channelName, device) = _deviceManager.GetDevice2(connector.Id);
+            var (channelName, device) = _deviceFactory.GetDevice2(connector.Id);
             _monitorLoop.Monitor(connector, channelName!, device!, _cts.Token);
         }
     }
