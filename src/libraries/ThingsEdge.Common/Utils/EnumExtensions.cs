@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace ThingsEdge.Common.Utils;
+﻿namespace ThingsEdge.Common.Utils;
 
 public static class EnumExtensions
 {
@@ -12,7 +10,7 @@ public static class EnumExtensions
     public static string Description(this Enum value)
     {
         var field = value.GetType().GetField(value.ToString());
-        var attr = field!.GetCustomAttribute<DescriptionAttribute>();
+        var attr = field!.GetCustomAttribute<DescriptionAttribute>(false);
         if (!string.IsNullOrEmpty(attr?.Description))
         {
             return attr.Description;

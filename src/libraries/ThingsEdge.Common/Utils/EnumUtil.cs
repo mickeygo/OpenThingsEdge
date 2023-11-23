@@ -21,7 +21,7 @@ public static class EnumUtil
             string v = field.Name;
             if (showDescriptionAttr)
             {
-                var attr = field.GetCustomAttribute<DescriptionAttribute>();
+                var attr = field.GetCustomAttribute<DescriptionAttribute>(false);
                 if (!string.IsNullOrEmpty(attr?.Description))
                 {
                     v = attr.Description;
@@ -49,7 +49,7 @@ public static class EnumUtil
         {
             if (showDescriptionAttr)
             {
-                var attr = field.GetCustomAttribute<DescriptionAttribute>();
+                var attr = field.GetCustomAttribute<DescriptionAttribute>(false);
                 if (!string.IsNullOrEmpty(attr?.Description))
                 {
                     yield return attr.Description;
