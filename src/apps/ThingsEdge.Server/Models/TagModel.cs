@@ -53,10 +53,10 @@ public sealed class TagModel
     public TagFlag Flag { get; set; }
 
     /// <summary>
-    /// 用途分类。
+    /// 曲线用途分类。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagUsage Usage { get; set; }
+    public TagCurveUsage CurveUsage { get; set; }
 
     /// <summary>
     /// 是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 <see cref="PublishMode.OnlyDataChanged"/>。

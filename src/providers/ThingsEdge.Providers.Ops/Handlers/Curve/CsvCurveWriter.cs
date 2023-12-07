@@ -29,7 +29,7 @@ internal sealed class CsvCurveWriter : ICurveWriter
         _header.AddRange(header);
     }
 
-    public void WriteLineBody(IEnumerable<PayloadData> item)
+    public void WriteLineBody(IEnumerable<PayloadData> items)
     {
         if (IsClosed)
         {
@@ -37,7 +37,7 @@ internal sealed class CsvCurveWriter : ICurveWriter
         }
 
         ++WrittenCount;
-        _body.Add(item);
+        _body.Add(items);
     }
 
     public async Task SaveAsync()
@@ -48,10 +48,36 @@ internal sealed class CsvCurveWriter : ICurveWriter
         }
 
         using StreamWriter sw = new(FilePath);
-        await sw.WriteLineAsync(string.Join(",", _header.Select(s => VaildCsv(s)))).ConfigureAwait(false);
+        await sw.WriteLineAsync(string.Join(",", _header.Select(VaildCsv))).ConfigureAwait(false);
         foreach (var items in _body)
         {
-            await sw.WriteLineAsync(string.Join(",", items.Select(s => VaildCsv(s.GetString())))).ConfigureAwait(false);
+            var first = items.First();
+
+            // body 非数组
+            if (!first.IsArray())
+            {
+                await sw.WriteLineAsync(string.Join(",", items.Select(s => VaildCsv(s.GetString())))).ConfigureAwait(false);
+            }
+            else
+            {
+                // body 为数组
+                List<string[]> matrix = new(_header.Count);
+                foreach (var header in _header)
+                {
+                    var payload = items.First(s => s.DisplayName == header);
+                    matrix.Add(payload.GetStringArray());
+                }
+
+                for (int i = 0; i < matrix[0].Length; i++)
+                {
+                    List<string> data = new(matrix.Count);
+                    foreach (var item in matrix)
+                    {
+                        data.Add(item[i]);
+                    }
+                    await sw.WriteLineAsync(string.Join(",", data.Select(VaildCsv))).ConfigureAwait(false);
+                }
+            }
         }
     }
 

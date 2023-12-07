@@ -63,9 +63,10 @@ internal static class TagValueSet
     {
         if (_map.TryGetValue(tagId, out var data))
         {
+            ++data.AckVersion;
             if (maxAckVersion is not null)
             {
-                if (++data.AckVersion <= maxAckVersion)
+                if (data.AckVersion <= maxAckVersion)
                 {
                     data.Ack = true;
                 }
@@ -73,7 +74,6 @@ internal static class TagValueSet
             else
             {
                 data.Ack = true;
-                ++data.AckVersion;
             }
         }
     }

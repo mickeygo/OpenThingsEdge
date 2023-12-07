@@ -13,25 +13,20 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// </summary>
 internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 {
-    private const int AllowMaxWriteCount = 3072; // 文件中允许写入最大的次数。
-
     private readonly IEventPublisher _publisher;
     private readonly ITagDataSnapshot _tagDataSnapshot;
-    private readonly SwitchContainer _container;
     private readonly CurveStorage _curveStorage;
     private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
     public SwitchHandler(IEventPublisher publisher,
         ITagDataSnapshot tagDataSnapshot,
-        SwitchContainer container,
         CurveStorage curveStorage,
         IOptionsMonitor<OpsConfig> config,
         ILogger<SwitchHandler> logger)
     {
         _publisher = publisher;
         _tagDataSnapshot = tagDataSnapshot;
-        _container = container;
         _curveStorage = curveStorage;
         _config = config.CurrentValue;
         _logger = logger;
@@ -59,7 +54,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             {
                 string? sn = null, no = null;
                 // 码和序号
-                var snTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == TagUsage.SwitchSN);
+                var snTag = notification.Tag.NormalTags.FirstOrDefault(s => s.CurveUsage == TagCurveUsage.SwitchSN);
                 if (snTag != null)
                 {
                     var (ok1, data1, err1) = await notification.Connector.ReadAsync(snTag).ConfigureAwait(false);
@@ -75,7 +70,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     }
                 }
 
-                var noTag = notification.Tag.NormalTags.FirstOrDefault(s => s.Usage == TagUsage.SwitchNo);
+                var noTag = notification.Tag.NormalTags.FirstOrDefault(s => s.CurveUsage == TagCurveUsage.SwitchNo);
                 if (noTag != null)
                 {
                     var (ok3, data3, err3) = await notification.Connector.ReadAsync(noTag).ConfigureAwait(false);
@@ -92,23 +87,15 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 }
 
                 // 获取或创建数据写入器（即使 sn 和 no 读取失败继续）
-                var writer = _container.GetOrCreate(notification.Tag.TagId, _curveStorage.BuildCurveFilePath(sn, tagGroup?.Name, no));
+                var writer = _curveStorage.GetOrCreate(notification.Tag.TagId, sn, no, notification.Tag.DisplayName, notification.ChannelName, tagGroup?.Name);
 
                 // 添加头信息
-                var header = notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve).Select(s => s.Keynote);
+                var header = notification.Tag.NormalTags.Where(s => s.CurveUsage == TagCurveUsage.SwitchCurve).Select(s => s.DisplayName);
                 writer.WriteHeader(header);
             }
             else if (notification.State == SwitchState.Off)
             {
-                // 可根据返回的文件路径做其他处理。
-                if (_container.TryRemove(notification.Tag.TagId, out var filepath))
-                {
-                    var (ok, err) = await _curveStorage.TryCopyAsync(filepath, cancellationToken).ConfigureAwait(false);
-                    if (!ok)
-                    {
-                        _logger.LogError("[Switch] 拷贝曲线失败，文件：{Filepath}, 错误：{Err}", Path.GetFileName(filepath), err);
-                    }
-                }
+                _curveStorage.Save(notification.Tag.TagId);
             }
 
             // 先提取上一次触发点的值
@@ -124,24 +111,23 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             return;
         }
 
-        // 开关数据
-        if (!_container.TryGet(notification.Tag.TagId, out var writer2))
+        // 开关具体数据
+        var (ok, err, writer2) = _curveStorage.CanWriteBody(notification.Tag.TagId);
+        if (!ok)
         {
-            return;
-        }
-
-        // 检测是否已到达写入行数的上限，用于防止写入数据过程导致数据过大。
-        if (writer2.WrittenCount > AllowMaxWriteCount)
-        {
-            _logger.LogError("[Switch] 文件写入数据已达到设置上限, 设备: {Name}, 标记: {Name}，地址: {Address}",
-                notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+            // 没有设置错误消息时，不记录日志
+            if (!string.IsNullOrEmpty(err))
+            {
+                _logger.LogError("[Switch] 错误：{Err}, 设备: {Name}, 标记: {Name}，地址: {Address}",
+                    err, notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+            }
 
             return;
         }
 
         // 读取触发标记下的子数据。
-        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(
-                notification.Tag.NormalTags.Where(s => s.Usage == TagUsage.SwitchCurve), _config.AllowReadMulti).ConfigureAwait(false);
+        var curveTags = notification.Tag.NormalTags.Where(s => s.CurveUsage == TagCurveUsage.SwitchCurve);
+        var (ok2, normalPaydatas, err2) = await notification.Connector.ReadMultiAsync(curveTags, _config.AllowReadMulti).ConfigureAwait(false);
         if (!ok2)
         {
             _logger.LogError("[Switch] 批量读取子标记值失败, 设备: {Name}, 错误: {Err}", notification.Device.Name, err2);
@@ -151,18 +137,14 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         // 设置标记值快照。
         _tagDataSnapshot.Change(normalPaydatas!);
 
-        // 检测写入对象是否已关闭
-        if (!writer2.IsClosed)
+        try
         {
-            try
-            {
-                writer2.WriteLineBody(normalPaydatas!);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[Switch] 曲线数据写入文件失败, 设备: {Name}, 标记: {Name}，地址: {Address}",
-                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
-            }
+            writer2!.WriteLineBody(normalPaydatas!);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Switch] 曲线数据写入文件失败, 设备: {Name}, 标记: {Name}，地址: {Address}",
+                notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
         }
     }
 }

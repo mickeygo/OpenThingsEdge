@@ -52,12 +52,6 @@ public sealed class Tag
     public TagFlag Flag { get; init; }
 
     /// <summary>
-    /// 用途分类。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagUsage Usage { get; init; } = TagUsage.None;
-
-    /// <summary>
     /// 是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 <see cref="PublishMode.OnlyDataChanged"/>。
     /// </summary>
     /// <remarks>
@@ -89,6 +83,12 @@ public sealed class Tag
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TagIdentity Identity { get; init; } = TagIdentity.Master;
+
+    /// <summary>
+    /// 曲线用途分类。
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TagCurveUsage CurveUsage { get; init; } = TagCurveUsage.None;
 
     /// <summary>
     /// 标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。

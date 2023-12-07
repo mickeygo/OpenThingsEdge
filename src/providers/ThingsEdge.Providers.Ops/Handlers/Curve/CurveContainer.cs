@@ -3,17 +3,11 @@
 namespace ThingsEdge.Providers.Ops.Handlers.Curve;
 
 /// <summary>
-/// Switch 数据容器
+/// 曲线数据容器
 /// </summary>
-internal sealed class SwitchContainer : ISingletonDependency
+internal sealed class CurveContainer : ISingletonDependency
 {
     private readonly ConcurrentDictionary<string, ICurveWriter> _container = new();
-    private readonly CurveConfig _curveConfig;
-
-    public SwitchContainer(IOptionsMonitor<OpsConfig> opsConfig)
-    {
-        _curveConfig = opsConfig.CurrentValue.Curve;
-    }
 
     /// <summary>
     /// 容器中是否包含指定的对象。
@@ -29,14 +23,14 @@ internal sealed class SwitchContainer : ISingletonDependency
     /// 尝试获取对象。
     /// </summary>
     /// <param name="key">对象唯一值。</param>
-    /// <param name="value"></param>
+    /// <param name="writer"></param>
     /// <returns></returns>
-    public bool TryGet(string key, [MaybeNullWhen(false)] out ICurveWriter value)
+    public bool TryGet(string key, [MaybeNullWhen(false)] out ICurveWriter writer)
     {
-        value = default;
-        if (_container.TryGetValue(key, out var writer))
+        writer = default;
+        if (_container.TryGetValue(key, out var writer2))
         {
-            value = writer;
+            writer = writer2;
             return true;
         }
 
@@ -48,12 +42,13 @@ internal sealed class SwitchContainer : ISingletonDependency
     /// </summary>
     /// <param name="key">对象唯一值。</param>
     /// <param name="path">文件路径。</param>
+    /// <param name="curveFileExt">文件类型</param>
     /// <returns></returns>
-    public ICurveWriter GetOrCreate(string key, string path)
+    public ICurveWriter GetOrCreate(string key, string path, CurveFileExt curveFileExt)
     {
         return _container.GetOrAdd(key, s =>
         {
-            return _curveConfig.FileExt switch
+            return curveFileExt switch
             {
                 CurveFileExt.CSV => new CsvCurveWriter(path),
                 CurveFileExt.JSON => new JsonCurveWriter(path),
@@ -68,7 +63,7 @@ internal sealed class SwitchContainer : ISingletonDependency
     /// <param name="key">对象唯一值。</param>
     /// <param name="filepath">移除的文件路径。</param>
     /// <returns></returns>
-    public bool TryRemove(string key, [MaybeNullWhen(false)] out string filepath)
+    public bool TrySaveAndRemove(string key, [MaybeNullWhen(false)] out string filepath)
     {
         filepath = default;
         if (_container.TryRemove(key, out var writer))

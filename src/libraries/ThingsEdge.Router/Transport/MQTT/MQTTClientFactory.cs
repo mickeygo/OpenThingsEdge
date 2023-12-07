@@ -43,7 +43,7 @@ public static class MQTTClientFactory
 
     private static MqttClientOptions BuildMqttClientOptions(MQTTClientOptions options)
         => new MqttClientOptionsBuilder()
-            .WithConnectionUri(options.ConnectionUri)
+            .WithTcpServer(options.ServerUri, options.Port)
             .WithClientId(options.ClientId)
             .WithProtocolVersion(options.ProtocolVersion)
             .Build();

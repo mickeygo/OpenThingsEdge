@@ -111,7 +111,7 @@ internal sealed class DeviceService : IDeviceService, ITransientDependency
                 Description = tag.Description,
                 ScanRate = tag.ScanRate,
                 PublishMode = tag.PublishMode,
-                Usage = tag.Usage,
+                CurveUsage = tag.CurveUsage,
                 ClientAccess = tag.ClientAccess,
             };
             return model;

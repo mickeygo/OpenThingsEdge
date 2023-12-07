@@ -30,9 +30,9 @@ internal interface ICurveWriter
     /// <summary>
     /// 写入一行主体数据
     /// </summary>
-    /// <param name="item">主体信息集合</param>
+    /// <param name="items">主体信息集合</param>
     /// <returns></returns>
-    void WriteLineBody(IEnumerable<PayloadData> item);
+    void WriteLineBody(IEnumerable<PayloadData> items);
 
     /// <summary>
     /// 保存数据

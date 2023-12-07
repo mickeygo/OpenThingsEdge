@@ -20,7 +20,7 @@ internal sealed class VariableViewModel : ITransientDependency
 
     public static IEnumerable<string> TagFlags { get; set; } = EnumUtil.FetchStrings<TagFlag>(true);
 
-    public static IEnumerable<string> TagUsages { get; set; } = EnumUtil.FetchStrings<TagUsage>(true);
+    public static IEnumerable<string> TagUsages { get; set; } = EnumUtil.FetchStrings<TagCurveUsage>(true);
 
     public static List<DataTableHeader<TagModel>> GetHeaders(string? category) 
     {
@@ -34,7 +34,7 @@ internal sealed class VariableViewModel : ITransientDependency
               new (){ Text = "数据类型", Value = nameof(TagModel.DataType), Width = 100 },
               new (){ Text = "扫描速率(ms)", Value = nameof(TagModel.ScanRate), Width = 120 },
               new (){ Text = "标识", Value = nameof(TagModel.Flag), Width = 80 },
-              new (){ Text = "用途", Value = nameof(TagModel.Usage), Width = 100 },
+              new (){ Text = "用途", Value = nameof(TagModel.CurveUsage), Width = 100 },
               new (){ Text = "发布模式", Value = nameof(TagModel.PublishMode), Width = 100 },
               new (){ Text = "要旨", Value = nameof(TagModel.Keynote), Width = 100 },
               new (){ Text = "描述", Value = nameof(TagModel.Description), Width = 120 },

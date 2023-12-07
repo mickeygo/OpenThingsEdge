@@ -8,7 +8,7 @@ namespace ThingsEdge.Providers.Ops.Handlers.Curve;
 /// </summary>
 internal sealed class JsonCurveWriter : ICurveWriter
 {
-    private readonly InternalJsonCurve _jsonCurve = new();
+    private readonly InternalCurveData _curveData = new();
 
     public bool IsClosed { get; private set; }
 
@@ -28,10 +28,10 @@ internal sealed class JsonCurveWriter : ICurveWriter
             return;
         }
 
-        _jsonCurve.Header.AddRange(header);
+        _curveData.Header.AddRange(header);
     }
 
-    public void WriteLineBody(IEnumerable<PayloadData> item)
+    public void WriteLineBody(IEnumerable<PayloadData> items)
     {
         if (IsClosed)
         {
@@ -39,7 +39,7 @@ internal sealed class JsonCurveWriter : ICurveWriter
         }
 
         ++WrittenCount;
-        _jsonCurve.Body.Add(item);
+        _curveData.Body.Add(items);
     }
 
     public async Task SaveAsync()
@@ -49,7 +49,25 @@ internal sealed class JsonCurveWriter : ICurveWriter
             return;
         }
 
-        var content = JsonSerializer.Serialize(_jsonCurve, new JsonSerializerOptions
+        // 转换为 json 格式：
+        // {
+        //   "name1": [v1, v2],
+        //   "name2": [v1, v2],
+        // }
+
+        Dictionary<string, string[]> dict = new(_curveData.Header.Count);
+        foreach (var header in _curveData.Header)
+        {
+            var items = _curveData.Body
+                .SelectMany(s => s)
+                .Where(s => s.DisplayName == header)
+                .OrderBy(s => s.CreatedTime)
+                .SelectMany(s => s.GetStringArray()).ToArray();
+
+            dict[header] = items;
+        }
+
+        var content = JsonSerializer.Serialize(dict, new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.CjkUnifiedIdeographs), // 中日韩统一表意文字（CJK Unified Ideographs）
         });
@@ -66,7 +84,7 @@ internal sealed class JsonCurveWriter : ICurveWriter
         }
     }
 
-    class InternalJsonCurve
+    class InternalCurveData
     {
         public List<string> Header { get; } = new();
 

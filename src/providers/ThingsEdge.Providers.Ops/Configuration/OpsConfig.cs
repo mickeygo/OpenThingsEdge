@@ -34,7 +34,7 @@ public sealed class OpsConfig
     /// <summary>
     /// 在触发标志位值回写失败时，允许触发回执的最大次数，默认为 3。
     /// </summary>
-    public int AckMaxVersion { get; init; }
+    public int AckMaxVersion { get; init; } = 3;
 
     /// <summary>
     /// 曲线数据配置。
