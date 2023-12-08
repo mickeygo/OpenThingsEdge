@@ -87,15 +87,46 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 }
 
                 // 获取或创建数据写入器（即使 sn 和 no 读取失败继续）
-                var writer = _curveStorage.GetOrCreate(notification.Tag.TagId, sn, no, notification.Tag.DisplayName, notification.ChannelName, tagGroup?.Name);
+                try
+                {
+                    CurveModel model = new()
+                    {
+                        SN = sn,
+                        No = no,
+                        CurveName = notification.Tag.DisplayName,
+                        ChannelName = notification.ChannelName,
+                        DeviceName = notification.Device.Name,
+                        GroupName = tagGroup?.Name,
+                    };
+                    var writer = _curveStorage.GetOrCreate(notification.Tag.TagId, model);
 
-                // 添加头信息
-                var header = notification.Tag.NormalTags.Where(s => s.CurveUsage == TagCurveUsage.SwitchCurve).Select(s => s.DisplayName);
-                writer.WriteHeader(header);
+                    // 添加头信息
+                    var header = notification.Tag.NormalTags.Where(s => s.CurveUsage == TagCurveUsage.SwitchCurve).Select(s => s.DisplayName);
+                    writer.WriteHeader(header);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[Switch] Curve Storage 创建或写入头信息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",
+                        notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
+                }
             }
             else if (notification.State == SwitchState.Off)
             {
-                _curveStorage.Save(notification.Tag.TagId);
+                var (ok4, curveModel, path) = _curveStorage.Save(notification.Tag.TagId);
+                if (ok4)
+                {
+                    // 发布曲线通知事件
+                    await _publisher.Publish(new CurveFilePostedEvent
+                    {
+                        ChannelName = curveModel!.ChannelName,
+                        DeviceName = curveModel.DeviceName,
+                        GroupName = curveModel.GroupName,
+                        SN = curveModel.SN ?? "",
+                        No = curveModel.No,
+                        FilePath = path,
+                    },
+                    PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
+                }
             }
 
             // 先提取上一次触发点的值
@@ -118,7 +149,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
             // 没有设置错误消息时，不记录日志
             if (!string.IsNullOrEmpty(err))
             {
-                _logger.LogError("[Switch] 错误：{Err}, 设备: {Name}, 标记: {Name}，地址: {Address}",
+                _logger.LogError("[Switch] 错误：{Err}, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",
                     err, notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
             }
 
@@ -143,7 +174,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Switch] 曲线数据写入文件失败, 设备: {Name}, 标记: {Name}，地址: {Address}",
+            _logger.LogError(ex, "[Switch] 曲线数据写入文件失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",
                 notification.Device.Name, notification.Tag.Name, notification.Tag.Address);
         }
     }

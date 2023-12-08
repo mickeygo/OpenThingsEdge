@@ -141,16 +141,16 @@ IsArray			| 判断标记是否为数组对象。
       "DirIncludeChannelName": true, // 目录是否包含通道名称，默认为 true
       "DirIncludeCurveName": true, // 目录是否包含曲线名称，默认为 true
       "DirIncludeDate": true, // 文件路径是否包含日期，格式为 "yyyyMMdd"，默认为 true
-      "AllowCategoryBySN": true, // 是否允许根据SN来打包数据，在 SN 存在的条件下为 true 时会 SN 建立文件夹，默认为 true
+      "DirIncludeSN": true, // 文件路径是否包含SN，在 SN 存在的条件下为 true 时会按 SN 建立文件夹，默认为 true
       "DirIncludeGroupName": true, // 目录是否包含分组名称，默认为 true
       "SuffixIncludeDatetime": false, // 文件后缀是否包含日期，格式为 "yyyyMMddHHmmss"
-      "AllowMaxWriteCount": 32767, // 文件中允许写入最大的次数，默认为 "short.MaxValue" 
+      "AllowMaxWriteCount": 32767, // 文件中允许写入最大的次数，默认为 4096
       "AllowCopy": false, // 是否要推送文件到远端服务器
       "RemoteRootDirectory": null, // 曲线文件远端存储根目录（共享目录）
-      "RetainedSizeLimit": 0 // 本地文件允许占用的最大空间（单位 M），超过后会删除最原始的文件，0 表示不删除，默认为 0
+      "RetainedDayLimit": 0 // 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除
     }
   },
-  "MqttBroker": { // 
+  "MqttBroker": {
     "ServerUri": "127.0.0.1", // MQTT 服务器地址
     "Port": null, // MQTT 服务器连接地址，为 null 表示使用默认端口
     "ClientId": "ThingsEdge", // 客户端唯一 Id
@@ -161,13 +161,13 @@ IsArray			| 判断标记是否为数组对象。
   },
   "HttpDestination": { // 基于 RESTful 格式的目标服务参数选项
     "BaseAddress": "http://localhost:7214", // 请求服务基地址
-	"Timeout": 10000, // 请求目标超时设置，单位毫秒，默认为 10s
-	"EnableBasicAuth": false, // 目标服务是否启用 Basic Authentication 验证
-	"UserName": null, // 验证使用的用户名
-	"Password": null, // 验证使用的密码
-	"DisableCertificateValidationCheck": true, // 是否禁用凭证检测（https），默认为 true
-	"HealthRequestUrl": null, // 目标服务健康检测地址，默认为 "/api/health"
-	"RequestUrl": null // 目标服务接收数据的地址，默认为 "/api/iotgateway"
+    "Timeout": 10000, // 请求目标超时设置，单位毫秒，默认为 10s
+    "EnableBasicAuth": false, // 目标服务是否启用 Basic Authentication 验证
+    "UserName": null, // 验证使用的用户名
+    "Password": null, // 验证使用的密码
+    "DisableCertificateValidationCheck": true, // 是否禁用凭证检测（https），默认为 true
+    "HealthRequestUrl": null, // 目标服务健康检测地址，默认为 "/api/health"
+    "RequestUrl": null // 目标服务接收数据的地址，默认为 "/api/iotgateway"
   }
 }
 ```

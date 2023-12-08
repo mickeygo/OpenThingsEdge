@@ -9,6 +9,8 @@ internal sealed class CurveStorage : ISingletonDependency
 {
     private static readonly string DefaultCurveRootDirectory = Path.Combine(AppContext.BaseDirectory, "curves");
 
+    private readonly Lazy<RollingFile> _rollingFile;
+
     private readonly CurveContainer _curveContainer;
     private readonly CurveConfig _curveConfig;
 
@@ -16,20 +18,22 @@ internal sealed class CurveStorage : ISingletonDependency
     {
         _curveContainer = curveContainer;
         _curveConfig = opsConfig.CurrentValue.Curve;
+
+        _rollingFile = new(CreateRollingFile(_curveConfig.LocalRootDirectory, _curveConfig.RetainedDayLimit));
     }
 
     /// <summary>
     /// 尝试获取文件写入器。
     /// </summary>
     /// <param name="tagId">对象唯一值。</param>
-    /// <param name="writer"></param>
+    /// <param name="state"></param>
     /// <returns></returns>
-    public bool TryGetWriter(string tagId, [MaybeNullWhen(false)] out ICurveWriter writer)
+    public bool TryGetWriter(string tagId, [MaybeNullWhen(false)] out CurveContainerState state)
     {
-        writer = default;
-        if (_curveContainer.TryGet(tagId, out var writer2))
+        state = default;
+        if (_curveContainer.TryGet(tagId, out var state2))
         {
-            writer = writer2;
+            state = state2;
             return true;
         }
 
@@ -40,18 +44,14 @@ internal sealed class CurveStorage : ISingletonDependency
     /// 构建曲线的写入器。
     /// </summary>
     /// <param name="tagId">标记唯一 Id</param>
-    /// <param name="sn">曲线绑定的 SN</param>
-    /// <param name="no">曲线所属的编号。</param>
-    /// <param name="curveName">曲线名称</param>
-    /// <param name="channelName">通道名称</param>
-    /// <param name="groupName">分组名称。</param>
+    /// <param name="model">曲线模型。</param>
     /// <returns></returns>
     /// <exception cref="IOException"></exception>
     /// <exception cref="PathTooLongException"></exception>
-    public ICurveWriter GetOrCreate(string tagId, string? sn, string? no, string curveName, string channelName, string? groupName)
+    public ICurveWriter GetOrCreate(string tagId, CurveModel model)
     {
-        var curveFilePath = BuildCurveFilePath(sn, no, curveName, channelName, groupName);
-        return _curveContainer.GetOrCreate(tagId, curveFilePath, _curveConfig.FileType);
+        var curveFilePath = BuildCurveFilePath(model);
+        return _curveContainer.GetOrCreate(tagId, curveFilePath, model, _curveConfig.FileType);
     }
 
     /// <summary>
@@ -61,62 +61,50 @@ internal sealed class CurveStorage : ISingletonDependency
     /// <returns></returns>
     public (bool ok, string? err, ICurveWriter? writer) CanWriteBody(string tagId)
     {
-        if (!_curveContainer.TryGet(tagId, out var writer))
+        if (!_curveContainer.TryGet(tagId, out var state))
         {
-            return (false, default, default);
+            return (false, default, default); // 此处不返回错误消息
         }
 
-        if (writer.IsClosed)
+        if (state.Writer.IsClosed)
         {
             return (false, "曲线文件写入器已经关闭", default);
         }
 
-        if (writer.WrittenCount > _curveConfig.AllowMaxWriteCount)
+        if (state.Writer.WrittenCount > _curveConfig.AllowMaxWriteCount)
         {
             return (false, $"曲线文件写入次数已达到设置上限 {_curveConfig.AllowMaxWriteCount}", default);
         }
 
-        return (true, default, writer);
+        return (true, default, state.Writer);
     }
 
     /// <summary>
     /// 保存文件，并拷贝文件到远端（若配置）
     /// </summary>
     /// <param name="tagId">标记 Id</param>
-    public void Save(string tagId)
+    public (bool ok, CurveModel? model, string? path) Save(string tagId)
     {
-        if (_curveContainer.TrySaveAndRemove(tagId, out var filepath))
+        if (_curveContainer.TrySaveAndRemove(tagId, out var state))
         {
             if (_curveConfig.AllowCopy && !string.IsNullOrWhiteSpace(_curveConfig.RemoteRootDirectory))
             {
-                CopyTo(filepath, _curveConfig.RemoteRootDirectory);
+                CopyTo(state.Writer.FilePath, _curveConfig.RemoteRootDirectory);
             }
+
+            // 在设定目录最大容量后，超出容量将进行删除
+            if (_curveConfig.RetainedDayLimit > 0)
+            {
+                _rollingFile.Value.Increment();
+            }
+
+            return (true, state.Model, state.Writer.FilePath);
         }
 
-        // TODO: 考虑目录中文件存储的大小，在存储空间不足时进行删除
-        // 1）文件不删除
-        // 2）文件按保存时间删除
-        // 3）文件按保存数量删除
-        // 4）按磁盘剩余空间来删除
-
-        if (_curveConfig.RetainedSizeLimit > 0)
-        {
-            var rootDirPath = LocalCurveRootDirectory();
-        }        
+        return (false, default, default);
     }
 
-    /// <summary>
-    /// 构建曲线的存储路径，文件命名格式: "[码]_[序号]_[时间]"。
-    /// </summary>
-    /// <param name="sn">曲线绑定的 SN</param>
-    /// <param name="no">曲线所属的编号。</param>
-    /// <param name="curveName">曲线名称</param>
-    /// <param name="channelName">通道名称</param>
-    /// <param name="groupName">分组名称。</param>
-    /// <returns></returns>
-    /// <exception cref="IOException"></exception>
-    /// <exception cref="PathTooLongException"></exception>
-    private string BuildCurveFilePath(string? sn, string? no, string curveName, string channelName, string? groupName)
+    private string BuildCurveFilePath(CurveModel model)
     {
         var now = DateTime.Now;
 
@@ -126,13 +114,13 @@ internal sealed class CurveStorage : ISingletonDependency
         // 文件包含通道名称
         if (_curveConfig.DirIncludeChannelName)
         {
-            curveDir = Path.Combine(curveDir, channelName); // root/L1/
+            curveDir = Path.Combine(curveDir, model.ChannelName); // root/L1/
         }
 
         // 文件包含曲线名称
-        if (_curveConfig.DirIncludeCurveName)
+        if (_curveConfig.DirIncludeCurveName && !string.IsNullOrWhiteSpace(model.CurveName))
         {
-            curveDir = Path.Combine(curveDir, curveName); // root/[L1]/拧紧
+            curveDir = Path.Combine(curveDir, model.CurveName); // root/[L1]/拧紧
         }
 
         // 路径包含日期
@@ -142,31 +130,28 @@ internal sealed class CurveStorage : ISingletonDependency
         }
 
         // 按 SN 打包
-        if (!string.IsNullOrWhiteSpace(sn))
+        if (_curveConfig.DirIncludeSN && !string.IsNullOrWhiteSpace(model.SN))
         {
-            if (_curveConfig.AllowCategoryBySN)
-            {
-                curveDir = Path.Combine(curveDir, sn); // root/[L1]/[拧紧]/[20230101]/SN001/
-            }
+            curveDir = Path.Combine(curveDir, model.SN); // root/[L1]/[拧紧]/[20230101]/SN001/
         }
 
         // SN 内部再分组
-        if (!string.IsNullOrWhiteSpace(groupName) && _curveConfig.DirIncludeGroupName)
+        if (_curveConfig.DirIncludeGroupName && !string.IsNullOrWhiteSpace(model.GroupName))
         {
-            curveDir = Path.Combine(curveDir, groupName); // root/[L1]/[拧紧]/[20230101]/SN001/OP10/
+            curveDir = Path.Combine(curveDir, model.GroupName); // root/[L1]/[拧紧]/[20230101]/[SN001]/OP10/
         }
 
         // 创建对应的文件夹。
         FolderUtil.CreateIfNotExists(curveDir);
 
-        StringBuilder sbFilename = new(sn); // 文件名称
-        if (!string.IsNullOrWhiteSpace(no))
+        StringBuilder sbFilename = new(model.SN); // 文件名称
+        if (!string.IsNullOrWhiteSpace(model.No))
         {
             if (sbFilename.Length > 0)
             {
                 sbFilename.Append(_curveConfig.CurveNamedSeparator);
             }
-            sbFilename.Append(no); // => SN001_2
+            sbFilename.Append(model.No); // => SN001_2
         }
 
         // 当还没有设置文件名信息时，会设置日期为文件名称。
@@ -245,20 +230,30 @@ internal sealed class CurveStorage : ISingletonDependency
     /// <returns></returns>
     private string LocalCurveRootDirectory()
     {
-        var curveRootDir = _curveConfig.LocalRootDirectory;
-        if (string.IsNullOrWhiteSpace(curveRootDir))
+        return LocalCurveRootDirectory(_curveConfig.LocalRootDirectory);
+    }
+
+    private string FileExt =>
+       _curveConfig.FileType switch
+       {
+           CurveFileExt.JSON => "json",
+           CurveFileExt.CSV => "csv",
+           _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
+       };
+
+    private static RollingFile CreateRollingFile(string? localRootDirectory, long retainedSizeLimit)
+    {
+        var rootDir = LocalCurveRootDirectory(localRootDirectory);
+        return new RollingFile(rootDir, retainedSizeLimit);
+    }
+
+    private static string LocalCurveRootDirectory(string? localRootDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(localRootDirectory))
         {
             return DefaultCurveRootDirectory;
         }
 
-        return Path.GetFullPath(curveRootDir);
+        return Path.GetFullPath(localRootDirectory);
     }
-
-    private string FileExt =>
-        _curveConfig.FileType switch
-        {
-            CurveFileExt.JSON => "json",
-            CurveFileExt.CSV => "csv",
-            _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
-        };
 }

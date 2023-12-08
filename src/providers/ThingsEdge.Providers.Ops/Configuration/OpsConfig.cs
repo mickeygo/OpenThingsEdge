@@ -28,7 +28,7 @@ public sealed class OpsConfig
     /// <summary>
     /// 在触发标志位值回写失败时，是否触发回执值，默认为 false。
     /// </summary>
-    /// <remarks>触发标志位重置值，可以防止 PLC 值与 TagSe 值一致导致跳过处理逻辑</remarks>
+    /// <remarks>触发标志位重置值，可以防止 PLC 值与 TagSe 值一致导致跳过处理逻辑；若设置后，后台结束数据需要做幂等处理。</remarks>
     public bool AckWhenCallbackError { get; init; }
 
     /// <summary>

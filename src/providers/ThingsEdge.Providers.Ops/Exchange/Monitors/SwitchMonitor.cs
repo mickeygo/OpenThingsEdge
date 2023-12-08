@@ -36,7 +36,7 @@ internal sealed class SwitchMonitor : AbstractMonitor, ITransientDependency
                 {
                     try
                     {
-                        await mre.WaitAsync().ConfigureAwait(false);
+                        await mre.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                         // 第一次检测
                         if (cancellationToken.IsCancellationRequested)
@@ -58,7 +58,13 @@ internal sealed class SwitchMonitor : AbstractMonitor, ITransientDependency
                         }
 
                         // 记录数据
-                        await _producer.ProduceAsync(new SwitchEvent { Connector = connector, ChannelName = channelName, Device = device, Tag = tag }).ConfigureAwait(false);
+                        await _producer.ProduceAsync(new SwitchEvent
+                        {
+                            Connector = connector,
+                            ChannelName = channelName,
+                            Device = device,
+                            Tag = tag
+                        }).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

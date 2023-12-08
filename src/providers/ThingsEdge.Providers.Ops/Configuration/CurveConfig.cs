@@ -37,9 +37,9 @@ public sealed class CurveConfig
     public bool DirIncludeDate { get; init; } = true;
 
     /// <summary>
-    /// 是否允许根据SN来打包数据，在 SN 存在的条件下为 true 时会 SN 建立文件夹，默认为 true。
+    /// 文件路径是否包含SN，在 SN 存在的条件下为 true 时会按 SN 建立文件夹，默认为 true。
     /// </summary>
-    public bool AllowCategoryBySN { get; init; } = true;
+    public bool DirIncludeSN { get; init; } = true;
 
     /// <summary>
     /// 目录是否包含分组名称，默认为 true。
@@ -52,9 +52,9 @@ public sealed class CurveConfig
     public bool SuffixIncludeDatetime { get; init; }
 
     /// <summary>
-    /// 文件中允许写入最大的次数，默认为 <see cref="short.MaxValue"/>。
+    /// 文件中允许写入最大的次数，默认为 4096。
     /// </summary>
-    public int AllowMaxWriteCount { get; init; } = short.MaxValue;
+    public int AllowMaxWriteCount { get; init; } = 4096;
 
     /// <summary>
     /// 是否要推送文件到远端服务器。
@@ -67,7 +67,7 @@ public sealed class CurveConfig
     public string? RemoteRootDirectory { get; init; }
 
     /// <summary>
-    /// 本地文件占用的最大空间，超过后会删除最原始的文件，0 表示不删除（单位 M）。
+    /// 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除（单位 M）。
     /// </summary>
-    public int RetainedSizeLimit { get; init; }
+    public int RetainedDayLimit { get; init; }
 }
