@@ -3,8 +3,9 @@
 namespace ThingsEdge.Common.EventBus;
 
 /// <summary>
-/// 事件发布器。
+/// 事件发布器。该对象实现者是对 MediatR 的重写，事件对象需实现 <see cref="INotification"/> 接口。
 /// </summary>
+/// <remarks></remarks>
 public interface IEventPublisher
 {
     /// <summary>

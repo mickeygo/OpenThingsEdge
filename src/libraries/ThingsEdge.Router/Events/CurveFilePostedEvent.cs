@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 曲线文件事件
+/// 曲线文件传送通知事件。
 /// </summary>
-public sealed class CurveFilePostedEvent : INotification, IEvent
+public sealed class CurveFilePostedEvent : INotification
 {
     /// <summary>
     /// 事件创建时间。
@@ -19,12 +19,19 @@ public sealed class CurveFilePostedEvent : INotification, IEvent
     [NotNull]
     public string? GroupName { get; init; }
 
+    [NotNull]
     public string? SN { get; init; }
 
     /// <summary>
-    /// 编号，没有则为 0。
+    /// 曲线所属的编号。
     /// </summary>
     public string? No { get; init; }
+
+    /// <summary>
+    /// 曲线名称
+    /// </summary>
+    [NotNull]
+    public string? CurveName { get; set; }
 
     /// <summary>
     /// 本地文件路径

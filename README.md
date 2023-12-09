@@ -126,6 +126,7 @@ IsArray			| 判断标记是否为数组对象。
 
 
 # 配置
+
 ```JSON
 {
   "Ops": {
@@ -171,3 +172,19 @@ IsArray			| 判断标记是否为数组对象。
   }
 }
 ```
+
+# 可处理事件
+
+ 事件名 				| 说明
+:---------------		|:--------
+CurveFilePostedEvent	|曲线文件传送通知事件
+DeviceHeartbeatEvent	|与设备连接的心跳通知事件
+DirectMessageRequestEvent|消息请求处理通知事件 
+
+# API
+
+ 属性名 			| 说明
+:---------------	|:--------
+IExchange			|交换机引擎
+IDeviceReadWrite	|设备数据读写接口
+IDeviceTagDataSnapshot |设备标记快照，用于读取当前的标记值。

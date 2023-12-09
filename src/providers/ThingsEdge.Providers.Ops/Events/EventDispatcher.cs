@@ -1,10 +1,9 @@
 ﻿using ThingsEdge.Common.EventBus;
-using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
-/// 事件派发器
+/// 事件派发器，派发的事件必须实现 <see cref="IMonitorEvent"/> 接口。
 /// </summary>
 internal sealed class EventDispatcher : ISingletonDependency
 {
@@ -15,7 +14,7 @@ internal sealed class EventDispatcher : ISingletonDependency
         _publisher = publisher;
     }
 
-    public async Task DispatchAsync(IEvent @event)
+    public async Task DispatchAsync(IMonitorEvent @event)
     {
         // 事件处理都采用异步不阻塞的方式，也无需等待返回结果
         if (@event is HeartbeatEvent heartbeatEvent)

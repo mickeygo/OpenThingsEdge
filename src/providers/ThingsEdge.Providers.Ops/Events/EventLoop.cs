@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
-/// 事件循环
+/// 事件循环处理器。
 /// </summary>
 internal sealed class EventLoop : ISingletonDependency
 {

@@ -1,11 +1,9 @@
-﻿using ThingsEdge.Router.Events;
-
-namespace ThingsEdge.Providers.Ops.Events;
+﻿namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
 /// 标记 <see cref="TagFlag.Notice"/> 事件。
 /// </summary>
-internal sealed class NoticeEvent : INotification, IEvent
+internal sealed class NoticeEvent : INotification, IMonitorEvent
 {
     /// <summary>
     /// 通道名称

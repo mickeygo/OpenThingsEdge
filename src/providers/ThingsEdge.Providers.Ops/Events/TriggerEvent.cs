@@ -1,12 +1,11 @@
 ﻿using ThingsEdge.Providers.Ops.Exchange;
-using ThingsEdge.Router.Events;
 
 namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
 /// 标记 <see cref="TagFlag.Trigger"/> 事件。
 /// </summary>
-internal sealed class TriggerEvent : INotification, IEvent
+internal sealed class TriggerEvent : INotification, IMonitorEvent
 {
     /// <summary>
     /// 连接驱动

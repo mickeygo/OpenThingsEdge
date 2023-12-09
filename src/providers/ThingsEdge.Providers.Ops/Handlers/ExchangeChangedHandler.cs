@@ -4,7 +4,7 @@ using ThingsEdge.Providers.Ops.Snapshot;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
-internal class ExchangeChangedHandler : INotificationHandler<ExchangeChangedEvent>
+internal sealed class ExchangeChangedHandler : INotificationHandler<ExchangeChangedEvent>
 {
     private readonly ITagDataSnapshot _tagDataSnapshot;
 

@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 消息请求处理事件。
+/// 消息请求处理通知事件。
 /// </summary>
-public sealed class DirectMessageRequestEvent : INotification, IEvent
+public sealed class DirectMessageRequestEvent : INotification
 {
     /// <summary>
     /// 事件创建时间。

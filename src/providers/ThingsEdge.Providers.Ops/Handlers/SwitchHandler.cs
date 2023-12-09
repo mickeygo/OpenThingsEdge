@@ -123,6 +123,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                         GroupName = curveModel.GroupName,
                         SN = curveModel.SN ?? "",
                         No = curveModel.No,
+                        CurveName = curveModel.CurveName,
                         FilePath = path,
                     },
                     PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);

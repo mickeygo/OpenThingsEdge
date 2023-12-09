@@ -1,9 +1,7 @@
-﻿using ThingsEdge.Router.Events;
-
-namespace ThingsEdge.Providers.Ops.Events;
+﻿namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
-/// 消息事件生产者
+/// 消息内部事件生产者，要发布是事件需实现 <see cref="IMonitorEvent"/> 接口。
 /// </summary>
 internal interface IProducer
 {
@@ -13,5 +11,5 @@ internal interface IProducer
     /// <param name="item"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ValueTask ProduceAsync(IEvent item, CancellationToken cancellationToken = default);
+    ValueTask ProduceAsync(IMonitorEvent item, CancellationToken cancellationToken = default);
 }

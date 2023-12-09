@@ -5,7 +5,7 @@ namespace ThingsEdge.Router.Events;
 /// <summary>
 /// 日志消息记录事件。
 /// </summary>
-public sealed class LoggingMessageEvent : INotification, IEvent
+public sealed class LoggingMessageEvent : INotification
 {
     /// <summary>
     /// 事件创建时间。

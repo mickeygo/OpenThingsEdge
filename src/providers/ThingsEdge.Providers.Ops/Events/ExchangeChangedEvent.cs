@@ -1,11 +1,9 @@
-﻿using ThingsEdge.Router.Events;
-
-namespace ThingsEdge.Providers.Ops.Events;
+﻿namespace ThingsEdge.Providers.Ops.Events;
 
 /// <summary>
 /// 引擎状态更改事件
 /// </summary>
-internal sealed class ExchangeChangedEvent : INotification, IEvent
+internal sealed class ExchangeChangedEvent : INotification, IMonitorEvent
 {
     /// <summary>
     /// 引擎状态
