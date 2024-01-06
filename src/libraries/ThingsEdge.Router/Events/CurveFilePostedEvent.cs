@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 曲线文件传送通知事件。
+/// 曲线文件传送通知事件，其中 <see cref="TagFlag.Switch"/> 会发布此事件
 /// </summary>
 public sealed class CurveFilePostedEvent : INotification
 {

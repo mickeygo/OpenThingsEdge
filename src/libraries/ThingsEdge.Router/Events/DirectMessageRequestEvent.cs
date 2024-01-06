@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 消息请求处理通知事件。
+/// 消息请求处理通知事件，其中 <see cref="TagFlag.Notice"/>、<see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Switch"/> 会发布此事件。
 /// </summary>
 public sealed class DirectMessageRequestEvent : INotification
 {

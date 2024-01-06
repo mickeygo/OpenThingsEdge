@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Events;
 
 /// <summary>
-/// 与设备连接的心跳通知事件。
+/// 与设备连接的心跳通知事件，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件
 /// </summary>
 public sealed class DeviceHeartbeatEvent : INotification
 {

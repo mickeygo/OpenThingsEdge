@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Interfaces;
 
 /// <summary>
-/// 设备心跳接口。
+/// 设备心跳接口，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件 。
 /// </summary>
 public interface IDeviceHeartbeatApi
 {

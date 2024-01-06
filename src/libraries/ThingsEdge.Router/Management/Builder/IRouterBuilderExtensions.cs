@@ -3,6 +3,7 @@ using ThingsEdge.Router.Configuration;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Forwarder;
 using ThingsEdge.Router.Handlers.Health;
+using ThingsEdge.Router.Interfaces;
 using ThingsEdge.Router.Transport.MQTT;
 
 namespace ThingsEdge.Router;
@@ -77,7 +78,7 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 HTTP 转发服务。
+    /// 添加 HTTP 转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
@@ -133,7 +134,7 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 MQTT 客户端转发服务。
+    /// 添加 MQTT 客户端转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
@@ -166,7 +167,7 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加本地的转发服务。
+    /// 添加本地的转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="lifetime"><typeparamref name="TForwarder"/>注册的生命周期。</param>
@@ -178,6 +179,60 @@ public static class IRouterBuilderExtensions
         {
             services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TForwarder), lifetime));
             InternalForwarderHub.Default.Register<NativeForwarder>(); // 注册 Native Forwarder
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加设备心跳信息处理服务，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件。
+    /// </summary>
+    /// <typeparam name="IHandler"></typeparam>
+    /// <param name="builder"></param>
+    /// <param name="lifetime"><typeparamref name="IHandler"/>注册的生命周期。</param>
+    /// <returns></returns>
+    public static IRouterBuilder AddDeviceHeartbeatHandler<IHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+        where IHandler : IDeviceHeartbeatApi
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.Add(new ServiceDescriptor(typeof(IDeviceHeartbeatApi), typeof(IHandler), lifetime));
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加设备心跳信息处理服务，其中 <see cref="TagFlag.Notice"/>、<see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// </summary>
+    /// <typeparam name="IHandler"></typeparam>
+    /// <param name="builder"></param>
+    /// <param name="lifetime"><typeparamref name="IHandler"/>注册的生命周期。</param>
+    /// <returns></returns>
+    public static IRouterBuilder AddDirectMessageRequestHandler<IHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+        where IHandler : IDirectMessageRequestApi
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.Add(new ServiceDescriptor(typeof(IDirectMessageRequestApi), typeof(IHandler), lifetime));
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加曲线文件信息处理服务，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// </summary>
+    /// <typeparam name="IHandler"></typeparam>
+    /// <param name="builder"></param>
+    /// <param name="lifetime"><typeparamref name="IHandler"/>注册的生命周期。</param>
+    /// <returns></returns>
+    public static IRouterBuilder AddCurveFilePostedHandler<IHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+       where IHandler : ICurveFilePostedApi
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.Add(new ServiceDescriptor(typeof(ICurveFilePostedApi), typeof(IHandler), lifetime));
         });
 
         return builder;
