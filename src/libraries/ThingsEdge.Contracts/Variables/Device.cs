@@ -53,6 +53,12 @@ public sealed class Device
     public List<Tag>? Tags { get; init; } = new();
 
     /// <summary>
+    /// 隶属于设备的回写标记集合。
+    /// </summary>
+    [NotNull]
+    public List<Tag>? CallbackTags { get; init; } = new();
+
+    /// <summary>
     /// 从所有标记分组中获取指定标识的标记集合。
     /// </summary>
     /// <param name="flag">标识</param>

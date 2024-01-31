@@ -124,7 +124,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             {
                 // 通过 tagName 找到对应的 Tag 标记。
                 // 注意：回写标记与触发标记处于同一级别，位于设备下或是分组中。
-                Tag? tag2 = (tagGroup?.Tags ?? notification.Device.Tags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                Tag? tag2 = (tagGroup?.CallbackTags ?? notification.Device.CallbackTags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
                 if (tag2 == null)
                 {
                     _logger.LogError("[Trigger] 地址表中没有找到要回写的标记, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",

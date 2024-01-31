@@ -27,4 +27,10 @@ public sealed class TagGroup
     /// </summary>
     [NotNull]
     public List<Tag>? Tags { get; init; } = new();
+
+    /// <summary>
+    /// 隶属于分组的回写标记集合。
+    /// </summary>
+    [NotNull]
+    public List<Tag>? CallbackTags { get; init; } = new();
 }
