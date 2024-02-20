@@ -20,7 +20,7 @@ public sealed class OpsConfig
     /// </summary>
     /// <remarks>
     /// <para>西门子S7驱动支持离散批量读取，可以始终设置为 true；</para>
-    /// <para>三菱MC协议驱动目前支持连续批量读取，若非连续地址需要设置为 false；</para>
+    /// <para>三菱MC协议驱动目前支持连续批量读取，只适用于连续地址，非连续地址需设置为 false；</para>
     /// <para>其他协议驱动目前还不支持批量读取，内部会采取逐一方式进行读取。</para>
     /// </remarks>
     public bool AllowReadMulti { get; init; } = true;

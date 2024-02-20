@@ -104,11 +104,11 @@ public sealed class Tag
     public TagValueUsage ValueUsage { get; init; } = TagValueUsage.Numerical;
 
     /// <summary>
-    /// 只有 <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
+    /// <see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Notice"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
     /// </summary>
     /// <remarks><see cref="TagFlag.Switch"/> 类型标记，在开关为 On 状态也会筛选数据并一起推送。</remarks>
     [NotNull]
-    public List<Tag>? NormalTags { get; init; } = new();
+    public List<Tag>? NormalTags { get; init; } = [];
 
     /// <summary>
     /// 标记是否为数组对象。

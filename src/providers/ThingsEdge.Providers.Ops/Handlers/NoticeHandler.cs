@@ -1,5 +1,7 @@
 ﻿using ThingsEdge.Common.EventBus;
+using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
+using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Snapshot;
 using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
@@ -14,16 +16,19 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
     private readonly IEventPublisher _publisher;
     private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly IForwarderFactory _forwarderFactory;
+    private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
     public NoticeHandler(IEventPublisher publisher, 
         ITagDataSnapshot tagDataSnapshot,
-        IForwarderFactory forwarderFacory, 
+        IForwarderFactory forwarderFacory,
+        IOptionsMonitor<OpsConfig> config,
         ILogger<NoticeHandler> logger)
     {
         _publisher = publisher;
         _tagDataSnapshot = tagDataSnapshot;
         _forwarderFactory = forwarderFacory;
+        _config = config.CurrentValue;
         _logger = logger;
     }
 
@@ -41,6 +46,21 @@ internal sealed class NoticeHandler : INotificationHandler<NoticeEvent>
             Flag = notification.Tag.Flag,
         };
         message.Values.Add(notification.Self);
+
+        if (notification.Tag.NormalTags.Count > 0)
+        {
+            // 读取触发标记下的子数据。
+            var (ok, normalPaydatas, err) = await notification.Connector.ReadMultiAsync(notification.Tag.NormalTags, _config.AllowReadMulti).ConfigureAwait(false);
+            if (!ok)
+            {
+                _logger.LogError("[Notice] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
+                    notification.Device.Name, notification.Tag.Name, notification.Tag.Address, err);
+            }
+            else
+            {
+                message.Values.AddRange(normalPaydatas!);
+            }
+        }
 
         // 先提取上一次触发点的值
         var lastPayload = _tagDataSnapshot.Get(notification.Tag.TagId)?.Data;

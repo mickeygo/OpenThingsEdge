@@ -65,6 +65,7 @@ internal sealed class NoticeMonitor : AbstractMonitor, ITransientDependency
                         // 发布通知事件
                         await _producer.ProduceAsync(new NoticeEvent
                         {
+                            Connector = connector,
                             ChannelName = channelName,
                             Device = device,
                             Tag = tag,

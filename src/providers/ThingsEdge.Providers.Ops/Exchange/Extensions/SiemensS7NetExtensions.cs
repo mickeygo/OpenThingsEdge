@@ -38,13 +38,13 @@ public static class SiemensS7NetExtensions
         allowMaxByte = Math.Min(allowMaxByte, siemensS7Net.PDULength);
 
         List<PayloadData> list = new(tags.Count());
-        List<List<Tag>> matrix = new();
+        List<List<Tag>> matrix = [];
         int sum = 0, row = 0;
         foreach (var tag in tags)
         {
             if (matrix.Count == 0)
             {
-                matrix.Add(new());
+                matrix.Add([]);
             }
 
             int n = TagToByteLength(tag);
@@ -55,7 +55,7 @@ public static class SiemensS7NetExtensions
                 row++;
                 sum = n;
 
-                matrix.Add(new());
+                matrix.Add([]);
             }
 
             matrix[row].Add(tag);
@@ -87,7 +87,7 @@ public static class SiemensS7NetExtensions
             lengths.Add((ushort)TagToByteLength(tag)); // 数据长度
         }
 
-        var result = await siemensS7Net.ReadAsync(addresses.ToArray(), lengths.ToArray()).ConfigureAwait(false);
+        var result = await siemensS7Net.ReadAsync([.. addresses], [.. lengths]).ConfigureAwait(false);
         if (!result.IsSuccess)
         {
             return (false, default, result.Message);
@@ -112,8 +112,8 @@ public static class SiemensS7NetExtensions
                     TagDataType.DInt => siemensS7Net.ByteTransform.TransInt32(result.Content, index),
                     TagDataType.Real => siemensS7Net.ByteTransform.TransSingle(result.Content, index),
                     TagDataType.LReal => siemensS7Net.ByteTransform.TransDouble(result.Content, index),
-                    TagDataType.String or TagDataType.S7String => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length, Encoding.ASCII).TrimEnd('\0'),
-                    TagDataType.S7WString => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length * 2, Encoding.Unicode).TrimEnd('\0'),
+                    TagDataType.String or TagDataType.S7String => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length, Encoding.ASCII),
+                    TagDataType.S7WString => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length * 2, Encoding.Unicode),
                     _ => throw new NotImplementedException(),
                 };
 
