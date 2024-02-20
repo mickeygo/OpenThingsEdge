@@ -11,8 +11,9 @@ public static class SiemensS7NetExtensions
     /// S7 协议批量读取。
     /// </summary>
     /// <param name="siemensS7Net"></param>
-    /// <param name="tags"></param>
-    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this SiemensS7Net siemensS7Net, IEnumerable<Tag> tags)
+    /// <param name="tags">要批量读取的标记集合</param>
+    /// <param name="maxPDUSize">允许最大的 PDU 长度，为 0 时取全局设定值。</param>
+    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this SiemensS7Net siemensS7Net, IEnumerable<Tag> tags, int maxPDUSize = 0)
     {
         // 信息系统->对 PLC 进行编程->指令->通信->S7 通信->数据一致性:
         //  1. 对于 S7 通信指令“PUT”/“GET”，在编程和组态过程中必须考虑到一致性数据区域的大小。这是因为在目标设备（服务器）的用户程序中没有可以用于与用户程序进行通信数据同步的通信块。
@@ -20,14 +21,18 @@ public static class SiemensS7NetExtensions
         //      对于大型数据区域，无法确保数据的一致性。如果要求达到规定的数据一致性，则用户程序中的通信数据不应超过 32 个字节（最多为 8 个字节，视具体版本而定）。
         //  3. 另一方面，在 S7-400 和 S7-1500 中，大小为 462(480-18)字节的块中的通信数据不在循环控制点处理，而是在程序循环期间的固定时间片内完成。
         //      变量的一致性则由系统保证。因此，使用指令 "PUT" / "GET" 或者在读/写变量（例如，由 OP 或 OS 读/写）时可以在保持一致性的情况下访问这些通信区。
-        int allowMaxByte = siemensS7Net.CurrentPlc switch
-        {
-            SiemensPLCS.S1500 or SiemensPLCS.S400 => DriverGlobalSetting.SiemensS7NetOption.S1500_PDULength,
-            SiemensPLCS.S1200 => DriverGlobalSetting.SiemensS7NetOption.S1200_PDULength,
-            SiemensPLCS.S300 => DriverGlobalSetting.SiemensS7NetOption.S300_PDULength,
-            SiemensPLCS.S200 or SiemensPLCS.S200Smart => throw new NotImplementedException(),
-            _ => throw new NotImplementedException(),
-        };
+
+        // 没有指定，使用全局设定
+        int allowMaxByte = maxPDUSize > 0 
+            ? maxPDUSize 
+            : siemensS7Net.CurrentPlc switch
+            {
+                SiemensPLCS.S1500 or SiemensPLCS.S400 => DriverGlobalSetting.SiemensS7NetOption.S1500_PDULength,
+                SiemensPLCS.S1200 => DriverGlobalSetting.SiemensS7NetOption.S1200_PDULength,
+                SiemensPLCS.S300 => DriverGlobalSetting.SiemensS7NetOption.S300_PDULength,
+                SiemensPLCS.S200 or SiemensPLCS.S200Smart => throw new NotImplementedException(),
+                _ => throw new NotImplementedException(),
+            };
 
         // 取最短的长度。
         allowMaxByte = Math.Min(allowMaxByte, siemensS7Net.PDULength);

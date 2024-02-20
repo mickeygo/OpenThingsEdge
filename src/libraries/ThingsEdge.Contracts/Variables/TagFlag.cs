@@ -23,6 +23,7 @@ public enum TagFlag
     /// 该标记用于触发数据发送。
     /// 该标记值改变时，只会触发一次数据发送行为。
     /// </summary>
+    /// <remarks>Trigger 只监听 <see cref="TagDataType.Int"/> 值变化，只有在值为 1 时才会触发。</remarks>
     [Description("触发")]
     Trigger = 2,
 

@@ -7,7 +7,7 @@ public static class MacAddressUtil
     /// Length of a valid MAC address.
     public const int MacAddressLength = 8;
 
-    static readonly byte[] NotFound = { byte.MaxValue };
+    static readonly byte[] NotFound = [byte.MaxValue];
 
     static readonly ILogger? _logger;
 
@@ -22,7 +22,7 @@ public static class MacAddressUtil
         IPAddress bestInetAddr = IPAddress.Loopback;
 
         // Retrieve the list of available network interfaces.
-        Dictionary<NetworkInterface, IPAddress> ifaces = new Dictionary<NetworkInterface, IPAddress>();
+        Dictionary<NetworkInterface, IPAddress> ifaces = [];
         try
         {
             foreach (var iface in NetworkInterface.GetAllNetworkInterfaces())
@@ -49,7 +49,7 @@ public static class MacAddressUtil
             NetworkInterface iface = entry.Key;
             IPAddress inetAddr = entry.Value;
             // todo: netty has a check for whether interface is virtual but it always returns false. There is no equivalent in .NET
-            byte[]? macAddr = iface.GetPhysicalAddress()?.GetAddressBytes();
+            byte[] macAddr = iface.GetPhysicalAddress().GetAddressBytes();
             bool replace = false;
             int res = CompareAddresses(bestMacAddr!, macAddr);
             if (res < 0)
@@ -69,7 +69,7 @@ public static class MacAddressUtil
                 else if (res == 0)
                 {
                     // Cannot tell the difference.  Choose the longer one.
-                    if (bestMacAddr!.Length < macAddr?.Length)
+                    if (bestMacAddr.Length < macAddr.Length)
                     {
                         replace = true;
                     }

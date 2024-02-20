@@ -16,12 +16,12 @@ public static class KepwareServiceCollectionExtensions
             var options = sp.GetRequiredService<IOptions<RESTfulServerOptions>>().Value;
             httpClient.BaseAddress = new Uri($"{options.RESTServerBaseAddress}/iotgateway");
         })
-        .ConfigureHttpMessageHandlerBuilder(builder =>
+        .ConfigurePrimaryHttpMessageHandler((handler, sp) =>
         {
-            var options = builder.Services.GetRequiredService<IOptions<RESTfulServerOptions>>().Value;
+            var options = sp.GetRequiredService<IOptions<RESTfulServerOptions>>().Value;
 
             // SocketsHttpHandler
-            if (builder.PrimaryHandler is HttpClientHandler httpHandler)
+            if (handler is HttpClientHandler httpHandler)
             {
                 if (options.DisableCertificateValidationCheck)
                 {

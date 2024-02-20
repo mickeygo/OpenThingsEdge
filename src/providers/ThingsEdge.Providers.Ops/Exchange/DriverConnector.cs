@@ -15,6 +15,8 @@ public sealed class DriverConnector : IDriverConnector
 
     public int Port { get; }
 
+    public int MaxPDUSize { get; }
+
     [NotNull]
     public IReadWriteNet? Driver { get; }
 
@@ -26,11 +28,12 @@ public sealed class DriverConnector : IDriverConnector
 
     public bool CanConnect => Available && DriverStatus == DriverStatus.Normal && ConnectedStatus == ConnectionStatus.Connected;
 
-    public DriverConnector(string id, string host, int port, IReadWriteNet driver)
+    public DriverConnector(string id, string host, int port, IReadWriteNet driver, int maxPDUSize)
     {
         Id = id;
         Host = host;
         Port = port;
         Driver = driver;
+        MaxPDUSize = maxPDUSize;
     }
 }

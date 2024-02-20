@@ -2,7 +2,7 @@
 
 public class GlobalConfig
 {
-    private readonly CookieStorage? _cookieStorage;
+    private readonly CookieStorage _cookieStorage;
 
     private string? _pageMode;
     private bool _expandOnHover;
@@ -31,7 +31,7 @@ public class GlobalConfig
         set
         {
             _pageMode = value;
-            _cookieStorage?.SetItemAsync(PageModeKey, value);
+            _cookieStorage.SetAsync(PageModeKey, value);
         }
     }
 
@@ -42,7 +42,7 @@ public class GlobalConfig
         {
             _navigationStyle = value;
             NavigationStyleChanged?.Invoke(this, EventArgs.Empty);
-            _cookieStorage?.SetItemAsync(NavigationStyleKey, value);
+            _cookieStorage.SetAsync(NavigationStyleKey, value);
         }
     }
 
@@ -52,7 +52,7 @@ public class GlobalConfig
         set
         {
             _expandOnHover = value;
-            _cookieStorage?.SetItemAsync(ExpandOnHoverCookieKey, value);
+            _cookieStorage.SetAsync(ExpandOnHoverCookieKey, value);
         }
     }
 
@@ -62,7 +62,7 @@ public class GlobalConfig
         set
         {
             _favorite = value;
-            _cookieStorage?.SetItemAsync(FavoriteCookieKey, value);
+            _cookieStorage.SetAsync(FavoriteCookieKey, value);
         }
     }
 

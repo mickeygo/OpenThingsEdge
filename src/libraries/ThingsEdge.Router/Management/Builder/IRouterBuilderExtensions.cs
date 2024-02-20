@@ -115,12 +115,18 @@ public static class IRouterBuilderExtensions
                             "Basic",
                             $"{options.UserName}:{options.Password}");
                 }
-            }).ConfigureHttpMessageHandlerBuilder(builder =>
-            {
-                var options = builder.Services.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
-                // SocketsHttpHandler
-                if (builder.PrimaryHandler is HttpClientHandler httpHandler)
+
+                // 不验证 TLS 凭证
+                if (options.DisableCertificateValidationCheck)
                 {
+
+                }
+            })
+            .ConfigurePrimaryHttpMessageHandler((handler, sp) =>
+            {
+                if (handler is HttpClientHandler httpHandler)
+                {
+                    var options = sp.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
                     // 不验证 TLS 凭证
                     if (options.DisableCertificateValidationCheck)
                     {

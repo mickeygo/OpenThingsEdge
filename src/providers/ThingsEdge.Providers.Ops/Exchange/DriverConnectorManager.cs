@@ -90,7 +90,7 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
 
             // 设置 SocketKeepAliveTime 心跳时间
             driverNet.SocketKeepAliveTime = 60_000;
-            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, deviceInfo.Port, driverNet));
+            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, deviceInfo.Port, driverNet, deviceInfo.MaxPDUSize));
         }
     }
 

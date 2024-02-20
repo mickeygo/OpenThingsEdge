@@ -19,6 +19,14 @@ public interface IDriverConnector
     int Port { get; }
 
     /// <summary>
+    /// 允许一次性读取的最大 PDU 长度（byte数量），0 表示不指定。
+    /// </summary>
+    /// <remarks>
+    /// 西门子 S7 协议批量读取时 PDU 超过最大长度会出现异常，这时可指定最大长度，一次批量读取时内部按最大长度切分到多次读取。
+    /// </remarks>
+    int MaxPDUSize { get; }
+
+    /// <summary>
     /// 连接驱动
     /// </summary>
     [NotNull]

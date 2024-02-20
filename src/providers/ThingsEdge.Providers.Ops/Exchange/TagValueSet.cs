@@ -12,13 +12,13 @@ internal static class TagValueSet
     /// </summary>
     /// <param name="tagId">标记 Id</param>
     /// <param name="newValue">新值</param>
-    /// <param name="checkAckWhenEqual">当新值与旧值相等时，是否检测是否有 Ack。</param>
+    /// <param name="checkAckWhenEqual">当新值与旧值相等时，是否检测是否有 Ack 设置。</param>
     /// <returns>
     /// <para>第一次写入时，返回 false；</para>
-    /// <para>旧值与新值相同时，返回 true；</para>
+    /// <para>旧值与新值相同时，返回 true，否则返回 false；</para>
     /// <para>
     /// 旧值与新值若不同，不检查 ack 时，直接返回 false；
-    /// 若相同，且开启检查 ack，有 ack 处理则返回 false，否则返回 true。
+    /// 若相同，且设置了开启检查 ack，有 ack 处理则返回 false，否则返回 true。
     /// 执行函数后 ack 会重置为 false 状态。
     /// </para>
     /// </returns>
@@ -101,6 +101,6 @@ internal static class TagValueSet
         /// <summary>
         /// 相同值比较次数，值更新后版本重置为 1
         /// </summary>
-        public int Version { get; set; } = 1;
+        public long Version { get; set; } = 1;
     }
 }

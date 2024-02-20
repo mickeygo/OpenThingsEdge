@@ -28,7 +28,7 @@ public abstract class ConstantPool
 
         lock (constants)
         {
-            if (constants.TryGetValue(name, out c))
+            if (constants.TryGetValue(name, out c!))
             {
                 return c;
             }
