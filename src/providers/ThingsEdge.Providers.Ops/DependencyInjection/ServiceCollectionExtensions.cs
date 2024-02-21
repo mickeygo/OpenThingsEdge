@@ -10,10 +10,12 @@ public static class ServiceCollectionExtensions
     /// 添加 OPS Provider 服务。
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="optionsAction">参数选项设置</param>
     /// <param name="configName">配置节点名称，默认为 "Ops"。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddOpsProvider(this IRouterBuilder builder, string configName = "Ops")
+    public static IRouterBuilder AddOpsProvider(this IRouterBuilder builder, Action<OpsOptions>? optionsAction = null, string configName = "Ops")
     {
+        // 注册 EventBus 程序集
         builder.AddEventBusRegisterAssembly(typeof(ServiceCollectionExtensions).Assembly);
 
         builder.Builder.ConfigureServices((hostBuilder, services) =>
@@ -28,6 +30,27 @@ public static class ServiceCollectionExtensions
         MonitorLoop.Register<NoticeMonitor>();
         MonitorLoop.Register<TriggerMonitor>();
         MonitorLoop.Register<SwitchMonitor>();
+
+        // 选项配置
+        OpsOptions options = new();
+        optionsAction?.Invoke(options);
+
+        if (options.TagTriggerConditionValue > 0)
+        {
+            InternalGlobalSetting.TagTriggerConditionValue = options.TagTriggerConditionValue;
+        }
+        if (options.Siemens_PDUSizeS1500 > 0)
+        {
+            InternalGlobalSetting.SiemensS7NetOption.S1500_PDUSize = options.Siemens_PDUSizeS1500;
+        }
+        if (options.Siemens_PDUSizeS1200 > 0)
+        {
+            InternalGlobalSetting.SiemensS7NetOption.S1200_PDUSize = options.Siemens_PDUSizeS1200;
+        }
+        if (options.Siemens_PDUSizeS300 > 0)
+        {
+            InternalGlobalSetting.SiemensS7NetOption.S300_PDUSize = options.Siemens_PDUSizeS300;
+        }
 
         return builder;
     }

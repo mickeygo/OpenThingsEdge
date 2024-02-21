@@ -14,7 +14,7 @@ namespace ThingsEdge.Router;
 public static class IRouterBuilderExtensions
 {
     /// <summary>
-    /// 添加要注入到 EventBus 中的程序集。相同的程序集会进行去重处理。
+    /// 添加要注入到 EventBus 中的程序集。可以注册多个，相同的程序集会进行去重处理。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="assembly">要添加的程序集</param>
@@ -257,7 +257,7 @@ public static class IRouterBuilderExtensions
             services.AddEventBusPublisher(); // 注入 EventBus 事件发布器。
 
             Assembly[] assemblies2 = assemblies?.Length > 0
-                ? builder.EventAssemblies.Concat(assemblies).ToArray()
+                ? [.. builder.EventAssemblies, .. assemblies]
                 : builder.EventAssemblies.ToArray();
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies2));

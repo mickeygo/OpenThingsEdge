@@ -1,11 +1,14 @@
 ﻿namespace ThingsEdge.Router.Transport.MQTT;
 
+/// <summary>
+/// MQTT Topic 格式器
+/// </summary>
 public sealed partial class MQTTClientTopicFormater
 {
     public static string Default(Schema schema, string? topicFormater, bool topicFormatMatchLower)
     {
         topicFormater ??= "{ChannelName}/{DeviceName}/{TagGroupName}";
-        var match = TopicRegex().Replace(topicFormater, match =>
+        string match = TopicRegex().Replace(topicFormater, match =>
         {
             return match.Value switch
             {

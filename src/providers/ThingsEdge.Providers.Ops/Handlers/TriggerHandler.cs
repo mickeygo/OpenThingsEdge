@@ -97,7 +97,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
             {
-                var (ok4, _, err4) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqOne(result.Code)).ConfigureAwait(false);
+                var (ok4, _, err4) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqTriggerCondValue(result.Code)).ConfigureAwait(false);
                 if (!ok4)
                 {
                     _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
@@ -151,7 +151,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 
         // 回写标记状态。
         int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
-        var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqOne(tagCode)).ConfigureAwait(false);
+        var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqTriggerCondValue(tagCode)).ConfigureAwait(false);
         if (!ok3)
         {
             _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
@@ -181,13 +181,13 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
     }
 
     /// <summary>
-    /// 将返回的状态值更改为0。
+    /// 在返回值与触发值相等时，将返回的状态值更改为 0。
     /// </summary>
     /// <param name="tagCode"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ChangeWhenEqOne(int tagCode)
+    private static int ChangeWhenEqTriggerCondValue(int tagCode)
     {
-        return tagCode == 1 ? 0 : tagCode;
+        return tagCode == InternalGlobalSetting.TagTriggerConditionValue ? 0 : tagCode;
     }
 }

@@ -32,7 +32,7 @@ public static class ObjectConvertUtil
             throw new FormatException("被转换的对象必须为枚举类型");
         }
 
-        List<object> result = new();
+        List<object> result = [];
         foreach (var item in enumerable)
         {
             if (typeof(T) == typeof(bool))

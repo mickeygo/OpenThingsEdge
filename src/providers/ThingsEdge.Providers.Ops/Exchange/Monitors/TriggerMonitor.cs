@@ -59,8 +59,8 @@ internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
                         // 校验触发标记
                         var state = data!.GetInt(); // 触发标记还可能包含状态码信息。
 
-                        // 必须先检测并更新标记状态值（开启回执校验），若值有变动且触发标记值为 1 则推送数据。
-                        if (!TagValueSet.CompareAndSwap(tag.TagId, state, true) && state == 1)
+                        // 必须先检测并更新标记状态值（开启回执校验），若值有变动且达到触发标记条件时则推送数据。
+                        if (!TagValueSet.CompareAndSwap(tag.TagId, state, true) && state == InternalGlobalSetting.TagTriggerConditionValue)
                         {
                             // 发布触发事件
                             await _producer.ProduceAsync(new TriggerEvent

@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+	<TargetFrameworks>net7.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<NoWarn>CS1591</NoWarn>
+	<LangVersion>latest</LangVersion>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>	  
   </PropertyGroup>
 

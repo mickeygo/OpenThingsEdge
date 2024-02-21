@@ -9,7 +9,7 @@ public static class MacAddressUtil
 
     static readonly byte[] NotFound = [byte.MaxValue];
 
-    static readonly ILogger? _logger;
+    static readonly ILogger? _logger = null;
 
     /// Obtains the best MAC address found on local network interfaces.
     /// Generally speaking, an active network interface used on public

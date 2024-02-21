@@ -24,7 +24,7 @@ public sealed class FileDeviceProvider : IDeviceProvider
     public List<Channel> GetChannels()
     {
         // 若有单文件，会从单文件中解析；若不存在，会从文件中解析。
-        if (Path.Exists(_tagsPath))
+        if (File.Exists(_tagsPath))
         {
             return GetChannelsFromSingleFile();
         }
@@ -40,7 +40,7 @@ public sealed class FileDeviceProvider : IDeviceProvider
     private List<Channel> GetChannelsFromSingleFile()
     {
         var text = File.ReadAllText(Path.GetFullPath(_tagsPath));
-        return JsonDeserialize<List<Channel>>(text) ?? new(0);
+        return JsonDeserialize<List<Channel>>(text) ?? [];
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public sealed class FileDeviceProvider : IDeviceProvider
         //          w-- OP030.conf
         //          w-- OP040.conf
 
-        List<Channel> channels = new();
+        List<Channel> channels = [];
 
         var channelsDirPath = Path.Combine(_configDirectory, "channels");
         var channelsDirInfo = new DirectoryInfo(channelsDirPath);

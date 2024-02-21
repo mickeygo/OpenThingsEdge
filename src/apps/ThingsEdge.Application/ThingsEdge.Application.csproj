@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="31.0.0" />
-    <PackageReference Include="Mapster" Version="7.4.1-pre01" />
-    <PackageReference Include="SqlSugarCore" Version="5.1.4.143-preview06" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.142" />
     <PackageReference Include="Yitter.IdGenerator" Version="1.0.14" />
   </ItemGroup>
 

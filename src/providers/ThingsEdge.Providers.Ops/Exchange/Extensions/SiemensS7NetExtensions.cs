@@ -1,4 +1,5 @@
 ﻿using Ops.Communication.Profinet.Siemens;
+using ThingsEdge.Providers.Ops.Configuration;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -12,7 +13,7 @@ public static class SiemensS7NetExtensions
     /// </summary>
     /// <param name="siemensS7Net"></param>
     /// <param name="tags">要批量读取的标记集合</param>
-    /// <param name="maxPDUSize">允许最大的 PDU 长度，为 0 时取全局设定值。</param>
+    /// <param name="maxPDUSize">允许最大的 PDU 长度，为 0 时采用全局设定值。</param>
     public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this SiemensS7Net siemensS7Net, IEnumerable<Tag> tags, int maxPDUSize = 0)
     {
         // 信息系统->对 PLC 进行编程->指令->通信->S7 通信->数据一致性:
@@ -27,15 +28,15 @@ public static class SiemensS7NetExtensions
             ? maxPDUSize 
             : siemensS7Net.CurrentPlc switch
             {
-                SiemensPLCS.S1500 or SiemensPLCS.S400 => DriverGlobalSetting.SiemensS7NetOption.S1500_PDULength,
-                SiemensPLCS.S1200 => DriverGlobalSetting.SiemensS7NetOption.S1200_PDULength,
-                SiemensPLCS.S300 => DriverGlobalSetting.SiemensS7NetOption.S300_PDULength,
-                SiemensPLCS.S200 or SiemensPLCS.S200Smart => throw new NotImplementedException(),
-                _ => throw new NotImplementedException(),
+                SiemensPLCS.S1500 or SiemensPLCS.S400 => InternalGlobalSetting.SiemensS7NetOption.S1500_PDUSize,
+                SiemensPLCS.S1200 => InternalGlobalSetting.SiemensS7NetOption.S1200_PDUSize,
+                SiemensPLCS.S300 => InternalGlobalSetting.SiemensS7NetOption.S300_PDUSize,
+                SiemensPLCS.S200 or SiemensPLCS.S200Smart => 0,
+                _ => 0,
             };
 
         // 取最短的长度。
-        allowMaxByte = Math.Min(allowMaxByte, siemensS7Net.PDULength);
+        allowMaxByte = allowMaxByte > 0 ? Math.Min(allowMaxByte, siemensS7Net.PDULength) : siemensS7Net.PDULength;
 
         List<PayloadData> list = new(tags.Count());
         List<List<Tag>> matrix = [];
