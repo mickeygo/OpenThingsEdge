@@ -13,7 +13,7 @@ namespace ThingsEdge.Providers.Ops.Exchange;
 /// </summary>
 public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
 {
-    private readonly Dictionary<string, IDriverConnector> _connectors = new(); // Key 为设备编号
+    private readonly Dictionary<string, IDriverConnector> _connectors = []; // Key 为设备编号
     private readonly ILogger _logger;
 
     private bool _hasTryConnectServer;
@@ -30,18 +30,18 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
-    /// <param name="name">设备Id</param>
+    /// <param name="deviceId">设备Id</param>
     /// <returns></returns>
-    public IDriverConnector this[string name] => _connectors[name];
+    public IDriverConnector this[string deviceId] => _connectors[deviceId];
 
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
-    /// <param name="name">设备Id</param>
+    /// <param name="deviceId">设备Id</param>
     /// <returns></returns>
-    public IDriverConnector? GetConnector(string name)
+    public IDriverConnector? GetConnector(string deviceId)
     {
-        if (_connectors.TryGetValue(name, out var connector))
+        if (_connectors.TryGetValue(deviceId, out var connector))
         {
             return connector;
         }
@@ -180,7 +180,7 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
         {
             await Task.Delay(3000).ConfigureAwait(false); // 延迟3s后开始监听
 
-            HashSet<string> pingSuccessHosts = new(); // 存放已 Ping 成功的主机信息。
+            HashSet<string> pingSuccessHosts = []; // 存放已 Ping 成功的主机信息。
 
             // PeriodicTimer 定时器，可以让任务不堆积，不会因上一个任务阻塞在下个任务开始时导致多个任务同时进行。
             _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(2));
@@ -291,8 +291,8 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                     }
                 }
 
-                _connectors.Clear();
                 _periodicTimer?.Dispose();
+                _connectors.Clear();
                 _hasTryConnectServer = false;
             }
         }

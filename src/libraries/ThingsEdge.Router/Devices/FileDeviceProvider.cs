@@ -53,15 +53,15 @@ public sealed class FileDeviceProvider : IDeviceProvider
         // 目录结构:
         // 执行目录/config:
         //  w-- tags.conf
-        //  d-- channels
-        //    d-- [Line01]
-        //      w-- channel.conf
-        //        d-- [S7-1200]
-        //          w-- device.conf
-        //          w-- OP010.conf
+        //  d-- channels #通道
+        //    d-- [Line01] #通道1
+        //      w-- channel.conf #通道1配置
+        //        d-- [S7-1200] #设备1
+        //          w-- device.conf #设备1配置
+        //          w-- OP010.conf #设备1下分组成员
         //          w-- OP020.conf
-        //        d-- [S7-1500]
-        //          w-- device.conf
+        //        d-- [S7-1500] #设备2
+        //          w-- device.conf #设备2配置
         //          w-- OP030.conf
         //          w-- OP040.conf
 

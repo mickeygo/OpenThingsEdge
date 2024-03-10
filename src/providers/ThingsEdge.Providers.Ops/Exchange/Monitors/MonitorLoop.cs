@@ -5,7 +5,7 @@
 /// </summary>
 internal sealed class MonitorLoop : ITransientDependency
 {
-    private static readonly HashSet<Type> _monitorTypes = new();
+    private static readonly HashSet<Type> _monitorTypes = [];
 
     private readonly IServiceProvider _serviceProvider;
 

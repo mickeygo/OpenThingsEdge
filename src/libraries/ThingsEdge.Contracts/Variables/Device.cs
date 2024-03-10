@@ -11,7 +11,7 @@ public sealed class Device
     public string DeviceId { get; init; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
-    /// 设备名称。
+    /// 设备唯一名称。
     /// </summary>
     [NotNull]
     public string? Name { get; init; }
@@ -52,19 +52,19 @@ public sealed class Device
     /// 标记组集合。
     /// </summary>
     [NotNull]
-    public List<TagGroup>? TagGroups { get; init; } = new();
+    public List<TagGroup>? TagGroups { get; init; } = [];
 
     /// <summary>
     /// 隶属于设备的标记集合。
     /// </summary>
     [NotNull]
-    public List<Tag>? Tags { get; init; } = new();
+    public List<Tag>? Tags { get; init; } = [];
 
     /// <summary>
     /// 隶属于设备的回写标记集合。
     /// </summary>
     [NotNull]
-    public List<Tag>? CallbackTags { get; init; } = new();
+    public List<Tag>? CallbackTags { get; init; } = [];
 
     /// <summary>
     /// 从所有标记分组中获取指定标识的标记集合。

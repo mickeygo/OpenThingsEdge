@@ -26,11 +26,11 @@ public sealed class TagGroup
     /// 隶属于分组的标记集合。
     /// </summary>
     [NotNull]
-    public List<Tag>? Tags { get; init; } = new();
+    public List<Tag>? Tags { get; init; } = [];
 
     /// <summary>
     /// 隶属于分组的回写标记集合。
     /// </summary>
     [NotNull]
-    public List<Tag>? CallbackTags { get; init; } = new();
+    public List<Tag>? CallbackTags { get; init; } = [];
 }
