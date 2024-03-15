@@ -39,7 +39,7 @@ internal static class TagValueSet
         }
 
         // 新旧值比较相等
-        if (DeepEqual.Syntax.ObjectExtensions.IsDeepEqual(newValue, data.Value))
+        if (ObjectEqualUtil.IsEqual(newValue, data.Value))
         {
             data.Version++;
 
