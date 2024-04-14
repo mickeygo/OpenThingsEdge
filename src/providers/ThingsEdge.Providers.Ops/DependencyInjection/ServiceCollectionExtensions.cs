@@ -35,6 +35,8 @@ public static class ServiceCollectionExtensions
         OpsOptions options = new();
         optionsAction?.Invoke(options);
 
+        InternalGlobalSetting.HeartbeatShouldAckZero = options.HeartbeatShouldAckZero;
+
         if (options.TagTriggerConditionValue > 0)
         {
             InternalGlobalSetting.TagTriggerConditionValue = options.TagTriggerConditionValue;

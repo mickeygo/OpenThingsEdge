@@ -70,8 +70,11 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
                         // 心跳标记数据类型必须为 bool 或 int16
                         if (CheckOn(data!))
                         {
-                            // 数据回写失败不影响，下一次轮询继续处理
-                            await connector.WriteAsync(tag, SetOff2(tag)).ConfigureAwait(false);
+                            if (InternalGlobalSetting.HeartbeatShouldAckZero)
+                            {
+                                // 数据回写失败不影响，下一次轮询继续处理
+                                await connector.WriteAsync(tag, SetOff2(tag)).ConfigureAwait(false);
+                            }
 
                             if (!TagValueSet.CompareAndSwap(tag.TagId, true))
                             {

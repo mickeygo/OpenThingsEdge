@@ -11,6 +11,11 @@ public sealed class OpsOptions
     public short TagTriggerConditionValue { get; set; }
 
     /// <summary>
+    /// Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
+    /// </summary>
+    public bool HeartbeatShouldAckZero { get; set; } = true;
+
+    /// <summary>
     /// 针对于S7协议，1500 系列一起读取运行的最多 PDU 长度（byte数量），为0时会使用默认长度。  
     /// </summary>
     public int Siemens_PDUSizeS1500 { get; set; }

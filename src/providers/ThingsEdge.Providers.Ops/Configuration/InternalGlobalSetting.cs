@@ -11,6 +11,11 @@ internal static class InternalGlobalSetting
     internal static short TagTriggerConditionValue { get; set; } = 1;
 
     /// <summary>
+    /// Heartbeat 心跳收到值后是否要回写给设备，默认为 true。
+    /// </summary>
+    public static bool HeartbeatShouldAckZero {  get; set; } = true;
+
+    /// <summary>
     /// Siemens 选项设置
     /// </summary>
     internal static class SiemensS7NetOption
