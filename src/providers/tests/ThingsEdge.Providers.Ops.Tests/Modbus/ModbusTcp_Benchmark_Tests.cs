@@ -11,7 +11,7 @@ public class ModbusTcp_Benchmark_Tests
     public async Task Benchmark_Driver_Test()
     {
         using var modbus = new ModbusTcpNet("127.0.0.1");
-        var driver = new DriverConnector("1", "127.0.0.1", 0, modbus);
+        var driver = new DriverConnector("1", "127.0.0.1", 0, modbus, 0);
         await modbus.ConnectServerAsync();
 
         driver.Available = true;

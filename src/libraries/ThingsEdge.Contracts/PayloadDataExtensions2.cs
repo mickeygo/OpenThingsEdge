@@ -150,7 +150,7 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data ?? Array.Empty<bool>();
+        return data ?? [];
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data ?? Array.Empty<byte>();
+        return data ?? [];
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data ?? Array.Empty<int>();
+        return data ?? [];
     }
 
     /// <summary>
@@ -225,6 +225,6 @@ public static class PayloadDataExtensions2
             throw new InvalidOperationException(err);
         }
 
-        return data ?? Array.Empty<double>();
+        return data ?? [];
     }
 }

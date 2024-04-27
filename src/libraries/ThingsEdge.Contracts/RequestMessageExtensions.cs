@@ -184,11 +184,11 @@ public static class RequestMessageExtensions
         {
             if (jsonElement.ValueKind == JsonValueKind.True)
             {
-                return new bool[] { true };
+                return [true];
             }
             if (jsonElement.ValueKind == JsonValueKind.False)
             {
-                return new bool[] { false };
+                return [false];
             }
 
             throw new InvalidOperationException("JsonElement 不为 True 或 False 类型。");
@@ -223,7 +223,7 @@ public static class RequestMessageExtensions
         {
             if (jsonElement.ValueKind == JsonValueKind.Number)
             {
-                return new byte[] { jsonElement.Deserialize<byte>() };
+                return [jsonElement.Deserialize<byte>()];
             }
 
             throw new InvalidOperationException("JsonElement 不为 Number 类型。");
@@ -258,7 +258,7 @@ public static class RequestMessageExtensions
         {
             if (jsonElement.ValueKind == JsonValueKind.Number)
             {
-                return new int[] { jsonElement.Deserialize<int>() };
+                return [jsonElement.Deserialize<int>()];
             }
 
             throw new InvalidOperationException("JsonElement 不为 Number 类型。");
@@ -293,7 +293,7 @@ public static class RequestMessageExtensions
         {
             if (jsonElement.ValueKind == JsonValueKind.Number)
             {
-                return new double[] { jsonElement.Deserialize<double>() };
+                return [jsonElement.Deserialize<double>()];
             }
 
             throw new InvalidOperationException("JsonElement 不为 Number 类型。");

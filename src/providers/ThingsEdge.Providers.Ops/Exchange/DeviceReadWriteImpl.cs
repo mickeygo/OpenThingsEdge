@@ -18,10 +18,10 @@ internal sealed class DeviceReadWriteImpl : IDeviceReadWrite, ISingletonDependen
     {
         DeviceReadResult result = new()
         {
-            Data = new(),
+            Data = [],
         };
 
-        List<Tag> tags2 = new();
+        List<Tag> tags2 = [];
 
         // 先从快照中读取
         // TODO: 如何判断快照中数据是不是最新的？
@@ -38,7 +38,7 @@ internal sealed class DeviceReadWriteImpl : IDeviceReadWrite, ISingletonDependen
             }
         }
 
-        if (!tags2.Any())
+        if (tags2.Count == 0)
         {
             return result;
         }

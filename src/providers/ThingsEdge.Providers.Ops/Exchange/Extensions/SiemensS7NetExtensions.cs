@@ -1,4 +1,5 @@
-﻿using Ops.Communication.Profinet.Siemens;
+﻿using Ops.Communication;
+using Ops.Communication.Profinet.Siemens;
 using ThingsEdge.Providers.Ops.Configuration;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
@@ -113,11 +114,10 @@ public static class SiemensS7NetExtensions
                     TagDataType.DInt => siemensS7Net.ByteTransform.TransInt32(result.Content, index),
                     TagDataType.Real => siemensS7Net.ByteTransform.TransSingle(result.Content, index),
                     TagDataType.LReal => siemensS7Net.ByteTransform.TransDouble(result.Content, index),
-                    TagDataType.String or TagDataType.S7String => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length, Encoding.ASCII),
-                    TagDataType.S7WString => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, tag.Length * 2, Encoding.Unicode),
+                    TagDataType.String or TagDataType.S7String => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, result.Content[index + 1], Encoding.ASCII),
+                    TagDataType.S7WString => siemensS7Net.ByteTransform.TransString(result.Content, index + 4, (result.Content[2] * 256 + result.Content[3]) * 2, Encoding.Unicode),
                     _ => throw new NotImplementedException(),
                 };
-
                 tagPayload.Value = data;
             }
             else
@@ -166,7 +166,7 @@ public static class SiemensS7NetExtensions
             TagDataType.DWord or TagDataType.DInt or TagDataType.Real => Len(tag.Length) * 4,
             TagDataType.LReal => Len(tag.Length) * 8,
             TagDataType.String or TagDataType.S7String => tag.Length + 2,
-            TagDataType.S7WString => tag.Length * 2 + 2,
+            TagDataType.S7WString => tag.Length * 2 + 4,
             _ => throw new NotImplementedException(),
         };
     }

@@ -159,6 +159,10 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                             _logger.LogWarning("尝试 Ping 服务失败，主机：{Host}", connector.Host);
                         }
                     }
+                    catch (PingException ex)
+                    {
+                        _logger.LogWarning("尝试 Ping 服务器异常，主机：{Host}，异常：{Message}", connector.Host, ex.Message);
+                    }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "尝试连接服务异常，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
@@ -222,6 +226,10 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                                     }
                                 }
                             }
+                        }
+                        catch (PingException ex)
+                        {
+                            _logger.LogWarning("尝试 Ping 服务器异常，主机：{Host}，异常：{Message}", connector.Host, ex.Message);
                         }
                         catch (Exception ex)
                         {

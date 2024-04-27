@@ -63,7 +63,7 @@ public sealed class RequestMessage
     {
         if (Values.Count <= 1)
         {
-            return Array.Empty<PayloadData>();
+            return [];
         }
 
         if (identity is null)

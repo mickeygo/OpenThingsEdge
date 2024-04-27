@@ -1,5 +1,4 @@
 ﻿using Ops.Communication.Profinet.Siemens;
-using System.Text;
 
 namespace ThingsEdge.Providers.Ops.Tests.Profinets;
 

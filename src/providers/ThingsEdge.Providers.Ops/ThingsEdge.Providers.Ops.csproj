@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ops.Communication" Version="0.7.35" />
+    <PackageReference Include="Ops.Communication" Version="0.7.36" />
   </ItemGroup>
 
   <ItemGroup>
