@@ -5,7 +5,7 @@
 /// </summary>
 internal sealed class MonitorLoop : ITransientDependency
 {
-    private static readonly HashSet<Type> _monitorTypes = [];
+    private static readonly HashSet<Type> MonitorTypes = [];
 
     private readonly IServiceProvider _serviceProvider;
 
@@ -21,7 +21,7 @@ internal sealed class MonitorLoop : ITransientDependency
     public static void Register<TMonitor>()
         where TMonitor : AbstractMonitor
     {
-        _monitorTypes.Add(typeof(TMonitor));
+        MonitorTypes.Add(typeof(TMonitor));
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ internal sealed class MonitorLoop : ITransientDependency
     /// <returns></returns>
     public void Monitor(IDriverConnector connector, string channelName, Device device, CancellationToken cancellationToken)
     {
-        foreach (var monitorType in _monitorTypes)
+        foreach (var monitorType in MonitorTypes)
         {
             var monitor = (AbstractMonitor)_serviceProvider.GetRequiredService(monitorType);
             monitor.Monitor(connector, channelName, device, cancellationToken);

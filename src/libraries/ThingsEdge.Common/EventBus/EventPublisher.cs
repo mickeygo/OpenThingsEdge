@@ -98,7 +98,7 @@ internal sealed class EventPublisher : IEventPublisher
             {
                 tasks.Add(handler.HandlerCallback(notification, cancellationToken));
             }
-            catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
+            catch (Exception ex) when (!(ex is OutOfMemoryException or StackOverflowException))
             {
                 exceptions.Add(ex);
             }
@@ -112,12 +112,12 @@ internal sealed class EventPublisher : IEventPublisher
         {
             exceptions.AddRange(ex.Flatten().InnerExceptions);
         }
-        catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
+        catch (Exception ex) when (!(ex is OutOfMemoryException or StackOverflowException))
         {
             exceptions.Add(ex);
         }
 
-        if (exceptions.Any())
+        if (exceptions.Count != 0)
         {
             throw new AggregateException(exceptions);
         }
@@ -145,13 +145,13 @@ internal sealed class EventPublisher : IEventPublisher
             {
                 exceptions.AddRange(ex.Flatten().InnerExceptions);
             }
-            catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
+            catch (Exception ex) when (!(ex is OutOfMemoryException or StackOverflowException))
             {
                 exceptions.Add(ex);
             }
         }
 
-        if (exceptions.Any())
+        if (exceptions.Count != 0)
         {
             throw new AggregateException(exceptions);
         }

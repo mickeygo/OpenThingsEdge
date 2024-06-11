@@ -73,7 +73,9 @@ public sealed class Device
     /// <returns></returns>
     public List<Tag> GetTagsFromGroups(TagFlag flag)
     {
-        return TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag)).ToList();
+        return TagGroups
+            .SelectMany(s => s.Tags.Where(t => t.Flag == flag))
+            .ToList();
     }
 
     /// <summary>
@@ -83,7 +85,10 @@ public sealed class Device
     /// <returns></returns>
     public List<Tag> GetAllTags(TagFlag flag)
     {
-        return TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag)).Concat(Tags.Where(s => s.Flag == flag)).ToList();
+        return TagGroups
+            .SelectMany(s => s.Tags.Where(t => t.Flag == flag))
+            .Concat(Tags.Where(s => s.Flag == flag))
+            .ToList();
     }
 
     /// <summary>

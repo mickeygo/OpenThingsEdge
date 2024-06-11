@@ -21,59 +21,60 @@ public class Json_Tests
     [Fact]
     public void Should_Json_Deserialize_ToChannel_Test()
     {
-        var str = @"
+        var str = """
 [
   {
-    ""Name"": ""测试Channel"",
-    ""Model"": ""Siemens"",
-    ""Keynote"": """",
-    ""Devices"": [
+    "Name": "测试Channel",
+    "Model": "Siemens",
+    "Keynote": "",
+    "Devices": [
       {
-        ""Name"": ""Name"",
-        ""Model"": ""S7_1500"",
-        ""Host"": """",
-        ""Port"": 102,
-        ""Keynote"": """",
-        ""TagGroups"": [
+        "Name": "Name",
+        "Model": "S7_1500",
+        "Host": "",
+        "Port": 102,
+        "Keynote"": "",
+        "TagGroups": [
           {
-            ""Name"": """",
-            ""Keynote"": """",
-            ""Tags"": []
+            "Name": "",
+            "Keynote": "",
+            "Tags": []
           }
         ],
-        ""Tags"": [
+        "Tags": [
           {
-            ""Name"": ""Name"",
-            ""Address"": """",
-            ""Length"": 0,
-            ""DataType"": ""String"",
-            ""ClientAccess"": ""ReadAndWrite"",
-            ""ScanRate"": 100,
-            ""Flag"": ""Trigger"",
-            ""Keynote"": """",
-            ""Description"": """",
-            ""NormalTags"": []
+            "Name": "Name",
+            "Address": "",
+            "Length": 0,
+            "DataType": "String",
+            "ClientAccess": "ReadAndWrite",
+            "ScanRate": 100,
+            "Flag": "Trigger",
+            "Keynote": "",
+            "Description": "",
+            "NormalTags": []
           }
         ]
       }
     ]
   }
-]";
+]
+""";
 
         var channels = JsonSerializer.Deserialize<List<Channel>>(str);
         Assert.NotNull(channels);
         Assert.NotEmpty(channels);
     }
 
-    static List<Channel> Channels => new()
-        {
+    static List<Channel> Channels =>
+        [
             new Channel
             {
                  //ChannelId = "",
                  Name = "Name",
                  Keynote = "测试Channel",
-                 Devices = new()
-                 {
+                 Devices =
+                 [
                      new Device
                      {
                           //DeviceId = "",
@@ -82,21 +83,18 @@ public class Json_Tests
                           Port = 102,
                           Model = DriverModel.S7_1500,
                           Keynote = "",
-                          TagGroups = new()
-                          {
+                          TagGroups =
+                          [
                               new()
                               {
                                   //TagGroupId = "",
                                   Name = "",
                                   Keynote = "",
-                                  Tags = new()
-                                  {
-
-                                  },
+                                  Tags = [],
                               },
-                          },
-                          Tags = new()
-                          {
+                          ],
+                          Tags =
+                          [
                              new()
                              {
                                  //TagId = "",
@@ -108,14 +106,11 @@ public class Json_Tests
                                  Flag = TagFlag.Trigger,
                                  Keynote = "",
                                  Description = "",
-                                 NormalTags = new()
-                                 {
-
-                                 },
+                                 NormalTags = [],
                              },
-                          },
+                          ],
                      },
-                 },
+                 ],
             },
-        };
+        ];
 }

@@ -5,8 +5,8 @@
 /// </summary>
 internal sealed class CsvCurveWriter : ICurveWriter
 {
-    private readonly List<string> _header = new();
-    private readonly List<IEnumerable<PayloadData>> _body = new();
+    private readonly List<string> _header = [];
+    private readonly List<IEnumerable<PayloadData>> _body = [];
 
     public bool IsClosed { get; private set; }
 

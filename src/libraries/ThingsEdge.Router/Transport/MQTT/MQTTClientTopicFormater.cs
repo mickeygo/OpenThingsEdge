@@ -8,16 +8,13 @@ public sealed partial class MQTTClientTopicFormater
     public static string Default(Schema schema, string? topicFormater, bool topicFormatMatchLower)
     {
         topicFormater ??= "{ChannelName}/{DeviceName}/{TagGroupName}";
-        string match = TopicRegex().Replace(topicFormater, match =>
-        {
-            return match.Value switch
+        string match = TopicRegex().Replace(topicFormater, match => match.Value switch
             {
                 "{ChannelName}" => MatchToLower(schema.ChannelName),
                 "{DeviceName}" => MatchToLower(schema.DeviceName),
                 "{TagGroupName}" => MatchToLower(schema.TagGroupName ?? ""),
                 _ => "",
-            };
-        });
+            });
 
         // 移除首尾斜杠
         var topic = match.Trim('/');

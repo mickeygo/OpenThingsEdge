@@ -13,7 +13,7 @@ public class AbstractResult
     /// <summary>
     /// 错误消息。
     /// </summary>
-    public string? ErrorMessage { get; set; } = "";
+    public string? ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
     /// 返回是否成功。

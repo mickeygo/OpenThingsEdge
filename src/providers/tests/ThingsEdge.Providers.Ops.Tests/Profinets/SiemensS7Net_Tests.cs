@@ -27,8 +27,8 @@ public class SiemensS7Net_Tests
         
         var ret1 = s7.ReadInt16("DB101.316");
 
-        string[] addresses = { "DB101.316", "DB101.318", "DB101.322", "DB101.364", "DB101.116", "DB101.0" };
-        ushort[] lengths = { 2, 4, 42, 42, 200, 128/8 }; // 类型宽度
+        string[] addresses = [ "DB101.316", "DB101.318", "DB101.322", "DB101.364", "DB101.116", "DB101.0" ];
+        ushort[] lengths = [ 2, 4, 42, 42, 200, 128/8 ]; // 类型宽度
 
         var ret2 = await s7.ReadAsync(addresses, lengths);
         var ret01 = s7.ByteTransform.TransInt16(ret2.Content, 0); // 0
@@ -44,7 +44,6 @@ public class SiemensS7Net_Tests
         var ret07_2 = (ret07 & 0x02) == 0x02; // 0000_0010
         var ret07_3 = (ret07 & 0x04) == 0x04; // 0000_0100
 
-
         Assert.True(ret1.IsSuccess);
     }
 
@@ -57,8 +56,8 @@ public class SiemensS7Net_Tests
         //string[] addresses = { "DB101.414", "DB101.456", "DB101.458", "DB101.500", "DB101.504", "DB101.506", "DB101.510", "DB101.630", "DB101.750" };
         //ushort[] lengths = { 42, 2, 42, 4, 2, 4, 120, 120, 120 }; // 类型宽度
 
-        string[] addresses = { "DB101.414", "DB101.456", "DB101.458", "DB101.500", "DB101.504", "DB101.506", "DB101.510", "DB101.630", "DB101.750" };
-        ushort[] lengths = { 42, 2, 42, 4, 2, 4, 120, 120, 120 }; // 类型宽度（）
+        string[] addresses = [ "DB101.414", "DB101.456", "DB101.458", "DB101.500", "DB101.504", "DB101.506", "DB101.510", "DB101.630", "DB101.750" ];
+        ushort[] lengths = [ 42, 2, 42, 4, 2, 4, 120, 120, 120 ]; // 类型宽度（）
 
         var ret2 = await s7.ReadAsync(addresses, lengths);
         var ret01 = s7.ByteTransform.TransString(ret2.Content, 2, 40, Encoding.ASCII).TrimEnd('\0'); // 0+2
@@ -76,7 +75,6 @@ public class SiemensS7Net_Tests
         //var ret07_1 = (ret07 & 0x01) == 0x01; // 0000_0001
         //var ret07_2 = (ret07 & 0x02) == 0x02; // 0000_0010
         //var ret07_3 = (ret07 & 0x04) == 0x04; // 0000_0100
-
 
         Assert.True(ret2.IsSuccess);
     }

@@ -27,7 +27,7 @@ public static class TagFormater
                 TagDataType.Real => tag.Length <= 1 ? JsonElementUtil.GetFloat(jsonElement) : JsonElementUtil.GetFloatArray(jsonElement),
                 TagDataType.LReal => tag.Length <= 1 ? JsonElementUtil.GetDouble(jsonElement) : JsonElementUtil.GetDoubleArray(jsonElement),
                 TagDataType.String or TagDataType.S7String or TagDataType.S7WString => JsonElementUtil.GetString(jsonElement),
-                _ => (false, null, ""),
+                _ => (false, null, string.Empty),
             };
         }
 
@@ -48,7 +48,7 @@ public static class TagFormater
                 _ => throw new NotImplementedException(),
             };
 
-            return (true, obj2, "");
+            return (true, obj2, string.Empty);
         }
         catch (Exception ex)
         {

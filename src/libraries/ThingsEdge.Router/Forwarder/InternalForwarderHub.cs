@@ -2,7 +2,7 @@
 
 internal sealed class InternalForwarderHub : IForwarderHub
 {
-    private readonly HashSet<Type> _forwarderTypes = new();
+    private readonly HashSet<Type> _forwarderTypes = [];
 
     private static readonly Lazy<IForwarderHub> Instance = new(() => new InternalForwarderHub());
 

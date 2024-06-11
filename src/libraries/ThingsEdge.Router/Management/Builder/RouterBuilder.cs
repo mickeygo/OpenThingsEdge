@@ -9,5 +9,5 @@ internal sealed class RouterBuilder : IRouterBuilder
 
     public IHostBuilder Builder { get; }
 
-    public ICollection<Assembly> EventAssemblies { get; } = new List<Assembly>();
+    public ICollection<Assembly> EventAssemblies { get; } = [];
 }

@@ -21,7 +21,7 @@ internal sealed class DestinationHealthCheckHostedService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        while (await _timer.WaitForNextTickAsync().ConfigureAwait(false))
+        while (await _timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
         {
             try
             {

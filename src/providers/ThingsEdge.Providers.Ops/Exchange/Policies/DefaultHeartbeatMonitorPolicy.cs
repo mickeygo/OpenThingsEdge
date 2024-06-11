@@ -18,7 +18,7 @@ internal sealed class DefaultHeartbeatMonitorPolicy : IMonitorPolicy
             TagDataType.Byte => data.GetByte() == 1,
             TagDataType.Word => data.GetWord() == 1,
             TagDataType.Int => data!.GetInt() == 1,
-            _ => throw new InvalidOperationException("Tag 数据类型必须为 bool 或 short。"),
+            _ => throw new InvalidOperationException("Tag 数据类型必须为 bool、byte、ushort 或 short。"),
         };
     }
 
@@ -35,7 +35,7 @@ internal sealed class DefaultHeartbeatMonitorPolicy : IMonitorPolicy
             TagDataType.Byte => (byte)0,
             TagDataType.Word => (ushort)0,
             TagDataType.Int => (short)0,
-            _ => throw new InvalidOperationException("Tag 数据类型必须为 bool 或 short。"),
+            _ => throw new InvalidOperationException("Tag 数据类型必须为 bool、byte、ushort 或 short。"),
         };
     }
 }

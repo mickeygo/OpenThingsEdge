@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
+    <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
+  </ItemGroup>
+
+</Project>

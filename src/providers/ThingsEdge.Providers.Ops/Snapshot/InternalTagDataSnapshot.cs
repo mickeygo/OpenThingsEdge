@@ -29,15 +29,15 @@ internal sealed class InternalTagDataSnapshot : ITagDataSnapshot, ISingletonDepe
     {
         Interlocked.Increment(ref _version);
         _map.AddOrUpdate(tagId,
-           k =>
-           {
-               return new PayloadDataSnapshot { Data = data };
-           },
+           _ => new PayloadDataSnapshot { Data = data },
            (_, snapshot) =>
            {
                snapshot.Data = data; // 替换整个值，而不仅仅是其 Value 属性
                snapshot.UpdatedTime = DateTime.Now;
-               snapshot.Version++;
+               unchecked
+               {
+                   snapshot.Version++;
+               }
                return snapshot;
            });
     }

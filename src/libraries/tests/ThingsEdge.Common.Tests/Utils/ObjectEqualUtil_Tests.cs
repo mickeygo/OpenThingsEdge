@@ -1,5 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using ThingsEdge.Common.Utils;
+﻿using ThingsEdge.Common.Utils;
 
 namespace ThingsEdge.Common.Tests.Utils;
 

@@ -86,8 +86,8 @@ internal sealed class JsonCurveWriter : ICurveWriter
 
     class InternalCurveData
     {
-        public List<string> Header { get; } = new();
+        public List<string> Header { get; } = [];
 
-        public List<IEnumerable<PayloadData>> Body { get; } = new();
+        public List<IEnumerable<PayloadData>> Body { get; } = [];
     }
 }

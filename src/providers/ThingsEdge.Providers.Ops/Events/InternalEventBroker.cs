@@ -7,13 +7,13 @@ namespace ThingsEdge.Providers.Ops.Events;
 /// </summary>
 internal sealed class InternalEventBroker : ISingletonDependency
 {
-    private const int _capacity = 1024;
+    private const int Capacity = 1024;
     private readonly Channel<IMonitorEvent> _queue;
 
     public InternalEventBroker()
     {
         // 多个写入端，单个读取端
-        _queue = System.Threading.Channels.Channel.CreateBounded<IMonitorEvent>(new BoundedChannelOptions(_capacity)
+        _queue = System.Threading.Channels.Channel.CreateBounded<IMonitorEvent>(new BoundedChannelOptions(Capacity)
         {
             FullMode = BoundedChannelFullMode.Wait,
             SingleReader = true,

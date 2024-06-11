@@ -1,5 +1,4 @@
-﻿using Ops.Communication;
-using Ops.Communication.Profinet.Siemens;
+﻿using Ops.Communication.Profinet.Siemens;
 using ThingsEdge.Providers.Ops.Configuration;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
@@ -144,17 +143,6 @@ public static class SiemensS7NetExtensions
 
         return (true, list, default);
     }
-
-    //private static bool TransBool(byte b, int index)
-    //{
-    //    if (index < 1 || index > 8)
-    //    {
-    //        throw new InvalidOperationException();
-    //    }
-
-    //    int index0 = index - 1;
-    //    return (b & 0x01 << index0) == 0x01 << index0;
-    //}
 
     private static int TagToByteLength(Tag tag)
     {

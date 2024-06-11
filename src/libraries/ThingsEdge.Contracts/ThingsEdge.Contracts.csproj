@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+	  <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<NoWarn>CS1591</NoWarn>
-	<LangVersion>latest</LangVersion>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>	  
+	  <NoWarn>CS1591</NoWarn>
+	  <LangVersion>latest</LangVersion>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>	  
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OneOf.Extended" Version="3.0.263" />
+    <PackageReference Include="OneOf.Extended" />
   </ItemGroup>
 
 </Project>

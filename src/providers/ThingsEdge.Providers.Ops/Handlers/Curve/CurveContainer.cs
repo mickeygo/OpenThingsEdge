@@ -54,15 +54,12 @@ internal sealed class CurveContainer : ISingletonDependency
     /// <returns></returns>
     public ICurveWriter GetOrCreate(string tagId, string path, CurveModel model, CurveFileExt curveFileExt)
     {
-        var state = _container.GetOrAdd(tagId, s =>
-        {
-            return curveFileExt switch
+        var state = _container.GetOrAdd(tagId, _ => curveFileExt switch
             {
                 CurveFileExt.CSV => new CurveContainerState(model, new CsvCurveWriter(path)),
                 CurveFileExt.JSON => new CurveContainerState(model, new JsonCurveWriter(path)),
                 _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
-            };
-        });
+            });
         return state.Writer;
     }
 

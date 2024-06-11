@@ -26,5 +26,5 @@ public sealed class Channel
     /// 设备集合。
     /// </summary>
     [NotNull]
-    public List<Device> Devices { get; init; } = new();
+    public List<Device> Devices { get; init; } = [];
 }

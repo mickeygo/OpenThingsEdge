@@ -23,7 +23,7 @@ public static class PayloadDataExtensions2
 
         return jsonElement.ValueKind switch
         {
-            JsonValueKind.String => jsonElement.GetString() ?? "",
+            JsonValueKind.String => jsonElement.GetString() ?? string.Empty,
             JsonValueKind.True => "true",
             JsonValueKind.False => "false",
             JsonValueKind.Number or JsonValueKind.Array => jsonElement.GetRawText(),

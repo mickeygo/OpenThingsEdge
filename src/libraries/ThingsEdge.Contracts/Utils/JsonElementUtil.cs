@@ -222,11 +222,11 @@ public static class JsonElementUtil
             {
                 if (jsonElement.ValueKind == JsonValueKind.True)
                 {
-                    return (true, new bool[] { true }, default);
+                    return (true, [true], default);
                 }
                 if (jsonElement.ValueKind == JsonValueKind.False)
                 {
-                    return (true, new bool[] { false }, default);
+                    return (true, [false], default);
                 }
             }
 
@@ -260,7 +260,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new byte[] { jsonElement.Deserialize<byte>() }, default);
+                        return (true, [jsonElement.Deserialize<byte>()], default);
                     }
                 }
 
@@ -292,7 +292,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new ushort[] { jsonElement.Deserialize<ushort>() }, default);
+                        return (true, [jsonElement.Deserialize<ushort>()], default);
                     }
                 }
 
@@ -324,7 +324,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new short[] { jsonElement.Deserialize<short>() }, default);
+                        return (true, [jsonElement.Deserialize<short>()], default);
                     }
                 }
 
@@ -356,7 +356,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new uint[] { jsonElement.Deserialize<uint>() }, default);
+                        return (true, [jsonElement.Deserialize<uint>()], default);
                     }
                 }
 
@@ -388,7 +388,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new int[] { jsonElement.Deserialize<int>() }, default);
+                        return (true, [jsonElement.Deserialize<int>()], default);
                     }
                 }
 
@@ -420,7 +420,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new float[] { jsonElement.Deserialize<float>() }, default);
+                        return (true, [jsonElement.Deserialize<float>()], default);
                     }
                 }
 
@@ -452,7 +452,7 @@ public static class JsonElementUtil
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, new double[] { jsonElement.Deserialize<double>() }, default);
+                        return (true, [jsonElement.Deserialize<double>()], default);
                     }
                 }
 

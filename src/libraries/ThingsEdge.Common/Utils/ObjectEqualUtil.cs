@@ -5,10 +5,10 @@
 /// </summary>
 public static class ObjectEqualUtil
 {
-    private static readonly Type[] types = [typeof(bool), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), 
+    private static readonly Type[] Types = [typeof(bool), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), 
         typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(double), typeof(decimal)];
 
-    private static readonly Type[] typeArray = [typeof(bool[]), typeof(byte[]), typeof(sbyte[]), typeof(short[]), typeof(ushort[]), 
+    private static readonly Type[] TypeArray = [typeof(bool[]), typeof(byte[]), typeof(sbyte[]), typeof(short[]), typeof(ushort[]), 
         typeof(int[]), typeof(uint[]), typeof(long[]), typeof(ulong[]), typeof(double), typeof(decimal), typeof(string[])];
 
     /// <summary>
@@ -29,7 +29,7 @@ public static class ObjectEqualUtil
         Type expectedType = expected.GetType();
 
         // 单一值
-        if (types.Contains(actualType) && types.Contains(expectedType))
+        if (Types.Contains(actualType) && Types.Contains(expectedType))
         {
             return actual.ToString() == expected.ToString(); // 转为字符串，减少麻烦
         }
@@ -43,7 +43,7 @@ public static class ObjectEqualUtil
         // 数组值
         if (actualType.IsArray && expectedType.IsArray)
         {
-            if (!typeArray.Contains(actualType) || !typeArray.Contains(expectedType))
+            if (!TypeArray.Contains(actualType) || !TypeArray.Contains(expectedType))
             {
                 return false;
             }

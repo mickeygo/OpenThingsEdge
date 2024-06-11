@@ -84,7 +84,7 @@ public static class IRouterBuilderExtensions
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder, 
+    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null, string configName = "HttpDestination")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
@@ -96,6 +96,9 @@ public static class IRouterBuilderExtensions
             }
 
             InternalForwarderHub.Default.Register<HttpForwarder>(); // 注册 Http Forwarder
+
+            services.Add(new ServiceDescriptor(typeof(IForwarder), "HTTP", typeof(MqttClientForwarder), ServiceLifetime.Transient));
+            InternalForwarderKeys.Default.Register("HTTP");
 
             // 配置 HttpClient
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
@@ -146,7 +149,7 @@ public static class IRouterBuilderExtensions
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder, 
+    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null, string configName = "MqttBroker")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
@@ -156,8 +159,11 @@ public static class IRouterBuilderExtensions
             {
                 services.PostConfigure(postDelegate);
             }
-            
+
             InternalForwarderHub.Default.Register<MqttClientForwarder>(); // 注册 MQTT Forwarder
+
+            services.Add(new ServiceDescriptor(typeof(IForwarder), "MQTT", typeof(MqttClientForwarder), ServiceLifetime.Transient));
+            InternalForwarderKeys.Default.Register("MQTT");
 
             // 注册并启动托管的 MQTT 客户端
             services.AddSingleton<IMQTTManagedClient, MQTTManagedClient>(sp =>
@@ -185,6 +191,9 @@ public static class IRouterBuilderExtensions
         {
             services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TForwarder), lifetime));
             InternalForwarderHub.Default.Register<NativeForwarder>(); // 注册 Native Forwarder
+
+            services.Add(new ServiceDescriptor(typeof(IForwarder), "Native", typeof(NativeForwarder), lifetime));
+            InternalForwarderKeys.Default.Register("Native");
         });
 
         return builder;
@@ -209,7 +218,7 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加设备心跳信息处理服务，其中 <see cref="TagFlag.Notice"/>、<see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// 添加设备信息处理服务，其中 <see cref="TagFlag.Notice"/>、<see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Switch"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="IHandler"></typeparam>
     /// <param name="builder"></param>
@@ -258,7 +267,7 @@ public static class IRouterBuilderExtensions
 
             Assembly[] assemblies2 = assemblies?.Length > 0
                 ? [.. builder.EventAssemblies, .. assemblies]
-                : builder.EventAssemblies.ToArray();
+                : [.. builder.EventAssemblies];
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies2));
         });

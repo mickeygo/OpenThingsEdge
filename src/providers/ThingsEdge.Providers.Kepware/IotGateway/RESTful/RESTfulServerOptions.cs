@@ -31,5 +31,4 @@ public sealed class RESTfulServerOptions
     /// 是否禁用凭证检测（https），默认为 true。
     /// </summary>
     public bool DisableCertificateValidationCheck { get; set; } = true;
-
 }

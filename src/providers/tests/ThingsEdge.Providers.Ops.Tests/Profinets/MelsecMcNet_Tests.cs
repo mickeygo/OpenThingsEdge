@@ -7,7 +7,7 @@ namespace ThingsEdge.Providers.Ops.Tests.Profinets;
 public sealed class MelsecMcNet_Tests
 {
     [Fact]
-    public async void Should_Read_Address_Test()
+    public async Task Should_Read_Address_Test()
     {
         using var mc = new MelsecMcNet("192.168.3.39", 4096);
         await mc.ConnectCloseAsync();
@@ -28,7 +28,7 @@ public sealed class MelsecMcNet_Tests
     }
 
     [Fact]
-    public async void Should_Write_Address_Test()
+    public async Task Should_Write_Address_Test()
     {
         using var mc = new MelsecMcNet("192.168.3.39", 4096);
         await mc.ConnectCloseAsync();
@@ -44,7 +44,7 @@ public sealed class MelsecMcNet_Tests
     }
 
     [Fact]
-    public async void Should_Read_Continuation_Address_Test()
+    public async Task Should_Read_Continuation_Address_Test()
     {
         // 与 ModbusTcp 类似
         // int16/uint16 => 2
@@ -68,8 +68,8 @@ public sealed class MelsecMcNet_Tests
         var ret0_d8 = mc.ByteTransform.TransSingle(ret0.Content, 38, 5);
         Assert.True(ret0.IsSuccess, ret0.Message);
 
-        List<Tag> tags = new()
-        {
+        List<Tag> tags =
+        [
             new Tag { Address = "D1000", Length = 0, DataType = TagDataType.Int, },
             new Tag { Address = "D1001", Length = 0, DataType = TagDataType.DInt, },
             new Tag { Address = "D1003", Length = 0, DataType = TagDataType.Real, },
@@ -78,13 +78,13 @@ public sealed class MelsecMcNet_Tests
             new Tag { Address = "D1017", Length = 0, DataType = TagDataType.Byte, },
             new Tag { Address = "D1018", Length = 0, DataType = TagDataType.Bit, },
             new Tag { Address = "D1016", Length = 5, DataType = TagDataType.Real, },
-        };
+        ];
         var (ok, data, err) = await mc.ReadContinuationAsync(tags);
         Assert.True(ok, err);
     }
 
     [Fact]
-    public async void Should_Read_Multiple_Address_Test()
+    public async Task Should_Read_Multiple_Address_Test()
     {
         // 与 ModbusTcp 类似
         // int16/uint16 => 1
@@ -94,8 +94,8 @@ public sealed class MelsecMcNet_Tests
         // double => 4
         // string[len] => len
 
-        string[] addresses = { "D0", "D1", "D2", "D3", "D4", "D5" };
-        ushort[] lengths = { 1, 1, 1, 1, 1, 1 }; // 类型宽度，单个宽度长度为 2个byte）
+        string[] addresses = [ "D0", "D1", "D2", "D3", "D4", "D5" ];
+        ushort[] lengths = [ 1, 1, 1, 1, 1, 1 ]; // 类型宽度，单个宽度长度为 2个byte）
 
         using var mc = new MelsecMcNet("192.168.3.39", 4096);
         await mc.ConnectServerAsync();

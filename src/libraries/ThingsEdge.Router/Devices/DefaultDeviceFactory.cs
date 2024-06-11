@@ -15,10 +15,7 @@ internal sealed class DefaultDeviceFactory : IDeviceFactory
 
     public List<Channel> GetChannels()
     {
-        return _cache.GetOrCreate(CacheName, _ =>
-        {
-            return _deviceSource.GetChannels();
-        }) ?? [];
+        return _cache.GetOrCreate(CacheName, _ => _deviceSource.GetChannels()) ?? [];
     }
 
     public void Refresh()
