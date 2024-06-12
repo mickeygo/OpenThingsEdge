@@ -12,23 +12,29 @@ internal sealed class InternalForwarderFactory : IForwarderFactory, ISingletonDe
     {
         try
         {
-            var forwarders = InternalForwarderHub.Default.ResloveAll(_serviceProvider);
-            if (forwarders.Any())
+            //var forwarders = InternalForwarderHub.Default.ResloveAll(_serviceProvider);
+
+            var keys = InternalForwarderKeys.Default.Keys;
+            var forwarders = keys.Select(key => _serviceProvider.GetKeyedService<IForwarder>(key))
+                .Where(forwarder => forwarder != null)
+                .ToArray();
+            
+            if (forwarders.Length > 0)
             {
-                var tasks = forwarders.Select(s => s.SendAsync(message, cancellationToken));
+                var tasks = forwarders.Select(s => s!.SendAsync(message, cancellationToken));
                 var results = await Task.WhenAll(tasks).ConfigureAwait(false); // 等待所有任务结束
 
-                // 只返回状态的第一个结果，按 HTTP > Native > MQTT 优先级选取
-                var httpResult = results.FirstOrDefault(s => s.Source == ForworderSource.HTTP);
-                if (httpResult is not null)
-                {
-                    return httpResult;
-                }
-
+                // 只返回状态的第一个结果，按 Native > HTTP > MQTT 优先级选取
                 var nativeResult = results.FirstOrDefault(s => s.Source == ForworderSource.Native);
                 if (nativeResult is not null)
                 {
                     return nativeResult;
+                }
+
+                var httpResult = results.FirstOrDefault(s => s.Source == ForworderSource.HTTP);
+                if (httpResult is not null)
+                {
+                    return httpResult;
                 }
 
                 var mqttResult = results.FirstOrDefault(s => s.Source == ForworderSource.MQTT);

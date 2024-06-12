@@ -17,15 +17,8 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 String 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.GetString();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        var v = jsonElement.GetString();
+        return (true, v, default);
     }
 
     /// <summary>
@@ -59,15 +52,9 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<byte>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetByte(out var v) ?
+            (true, v, default) :
+            (false, default, "格式化为 Byte 类型异常");
     }
 
     /// <summary>
@@ -82,15 +69,9 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<ushort>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetUInt16(out var v) ?
+            (true, v, default) :
+            (false, default, "格式化为 UInt16 类型异常");
     }
 
     /// <summary>
@@ -105,15 +86,9 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<short>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetInt16(out var v) ?
+            (true, v, default) :
+            (false, default, "格式化为 Int16 类型异常");
     }
 
     /// <summary>
@@ -128,15 +103,9 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<uint>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetUInt32(out var v) ?
+            (true, v, default) :
+            (false, default, "格式化为 UInt32 类型异常");
     }
 
     /// <summary>
@@ -151,15 +120,9 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<int>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetInt32(out var v) ?
+            (true, v, default) :
+            (false, default, "格式化为 Int32 类型异常");
     }
 
     /// <summary>
@@ -174,15 +137,9 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<float>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetSingle(out var v) ?
+            (true, v, default) :
+            (false, default, "格式化为 float 类型异常");
     }
 
     /// <summary>
@@ -197,28 +154,22 @@ public static class JsonElementUtil
             return (false, default, "JsonElement 不为 Number 类型。");
         }
 
-        try
-        {
-            var v = jsonElement.Deserialize<double>();
-            return (true, v, default);
-        }
-        catch (Exception ex)
-        {
-            return (false, default, ex.Message);
-        }
+        return jsonElement.TryGetDouble(out var v) ? 
+            (true, v, default) : 
+            (false, default, "格式化为 double 类型异常");
     }
 
     /// <summary>
     ///  获取 bool[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, bool[]? value, string? err) GetBooleanArray(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, bool[]? value, string? err) GetBooleanArray(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         if (jsonElement.ValueKind != JsonValueKind.Array)
         {
-            if (canInclude)
+            if (singleAsMultiple)
             {
                 if (jsonElement.ValueKind == JsonValueKind.True)
                 {
@@ -235,7 +186,9 @@ public static class JsonElementUtil
 
         try
         {
-            var v = jsonElement.Deserialize<bool[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetBoolean())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -248,26 +201,28 @@ public static class JsonElementUtil
     ///  获取 byte[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, byte[]? value, string? err) GetByteArray(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, byte[]? value, string? err) GetByteArray(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<byte>()], default);
+                        return (true, [jsonElement.GetByte()], default);
                     }
                 }
 
                 return (false, default, "JsonElement 不为 Array 类型。");
             }
 
-            var v = jsonElement.Deserialize<byte[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetByte())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -280,26 +235,28 @@ public static class JsonElementUtil
     ///  获取 ushort[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, ushort[]? value, string? err) GetUInt16Array(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, ushort[]? value, string? err) GetUInt16Array(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<ushort>()], default);
+                        return (true, [jsonElement.GetUInt16()], default);
                     }
                 }
 
                 return (false, default, "JsonElement 不为 Array 类型。");
             }
 
-            var v = jsonElement.Deserialize<ushort[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetUInt16())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -312,26 +269,28 @@ public static class JsonElementUtil
     ///  获取 short[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, short[]? value, string? err) GetInt16Array(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, short[]? value, string? err) GetInt16Array(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<short>()], default);
+                        return (true, [jsonElement.GetInt16()], default);
                     }
                 }
 
                 return (false, default, "JsonElement 不为 Array 类型。");
             }
 
-            var v = jsonElement.Deserialize<short[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetInt16())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -344,26 +303,28 @@ public static class JsonElementUtil
     ///  获取 uint[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, uint[]? value, string? err) GetUInt32Array(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, uint[]? value, string? err) GetUInt32Array(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<uint>()], default);
+                        return (true, [jsonElement.GetUInt32()], default);
                     }
                 }
 
                 return (false, default, "JsonElement 不为 Array 类型。");
             }
 
-            var v = jsonElement.Deserialize<uint[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetUInt32())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -376,26 +337,28 @@ public static class JsonElementUtil
     ///  获取 int[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, int[]? value, string? err) GetInt32Array(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, int[]? value, string? err) GetInt32Array(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<int>()], default);
+                        return (true, [jsonElement.GetInt32()], default);
                     }
                 }
 
                 return (false, default, "JsonElement 不为 Array 类型。");
             }
 
-            var v = jsonElement.Deserialize<int[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetInt32())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -408,26 +371,28 @@ public static class JsonElementUtil
     ///  获取 float[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, float[]? value, string? err) GetFloatArray(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, float[]? value, string? err) GetFloatArray(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<float>()], default);
+                        return (true, [jsonElement.GetSingle()], default);
                     }
                 }
 
                 return (false, default, "JsonElement 不为 Array 类型。");
             }
 
-            var v = jsonElement.Deserialize<float[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetSingle())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)
@@ -440,19 +405,19 @@ public static class JsonElementUtil
     ///  获取 double[] 类型对象。
     /// </summary>
     /// <param name="jsonElement"></param>
-    /// <param name="canInclude">是否单一值也以数组形式返回。</param>
+    /// <param name="singleAsMultiple">是否单一值也以数组形式返回。</param>
     /// <returns></returns>
-    public static (bool ok, double[]? value, string? err) GetDoubleArray(JsonElement jsonElement, bool canInclude = false)
+    public static (bool ok, double[]? value, string? err) GetDoubleArray(JsonElement jsonElement, bool singleAsMultiple = false)
     {
         try
         {
             if (jsonElement.ValueKind != JsonValueKind.Array)
             {
-                if (canInclude)
+                if (singleAsMultiple)
                 {
                     if (jsonElement.ValueKind == JsonValueKind.Number)
                     {
-                        return (true, [jsonElement.Deserialize<double>()], default);
+                        return (true, [jsonElement.GetDouble()], default);
                     }
                 }
 
@@ -460,7 +425,9 @@ public static class JsonElementUtil
             }
 
             // 使用 JsonSerializer.Deserialize<double[]>(jsonElement.GetRawText()) 兼容性更强。
-            var v = jsonElement.Deserialize<double[]>();
+            var v = jsonElement.EnumerateArray()
+                .Select(e => e.GetDouble())
+                .ToArray();
             return (true, v, default);
         }
         catch (Exception ex)

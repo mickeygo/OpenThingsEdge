@@ -8,8 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
     <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

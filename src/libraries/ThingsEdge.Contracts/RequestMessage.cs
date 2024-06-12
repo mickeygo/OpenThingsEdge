@@ -32,7 +32,7 @@ public sealed class RequestMessage
     /// </summary>
     /// <remarks>注：加载的标记数据集合会包含触发点的信号标记数据。</remarks>
     [NotNull]
-    public List<PayloadData>? Values { get; init; } = new();
+    public List<PayloadData>? Values { get; init; } = [];
 
     /// <summary>
     /// 通过标记获取指定是加载数据，如果没有找到则返回 null。

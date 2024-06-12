@@ -11,6 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Common.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DFD9F66A-11DB-4D14-8304-5E17D59BF514}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
@@ -41,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Providers.Ops.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.Providers.Kepware.Tests", "src\providers\tests\ThingsEdge.Providers.Kepware.Tests\ThingsEdge.Providers.Kepware.Tests.csproj", "{5CEA28B9-05A7-46DC-93C4-C6165E6AAE77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.App", "src\apps\ThingsEdge.App\ThingsEdge.App.csproj", "{F00979D9-DECF-43D9-85E8-AA67AAF777F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.App", "src\apps\ThingsEdge.App\ThingsEdge.App.csproj", "{F00979D9-DECF-43D9-85E8-AA67AAF777F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

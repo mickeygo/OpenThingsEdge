@@ -19,7 +19,7 @@ public sealed class Tag
     /// <summary>
     /// 地址 (字符串格式)。
     /// </summary>
-    [NotNull]
+    [NotNull, JsonRequired]
     public string? Address { get; init; }
 
     /// <summary>
@@ -31,7 +31,7 @@ public sealed class Tag
     /// <summary>
     /// 数据类型。
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonRequired, JsonConverter(typeof(JsonStringEnumConverter))]
     public TagDataType DataType { get; init; }
 
     /// <summary>
@@ -104,6 +104,13 @@ public sealed class Tag
     public TagValueUsage ValueUsage { get; init; } = TagValueUsage.Numerical;
 
     /// <summary>
+    /// 额外属性定义。
+    /// </summary>
+    /// <remarks>JSON 额外属性都会以 K/V 格式绑定到该属性中。</remarks>
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtraProps { get; init; }
+
+    /// <summary>
     /// <see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Notice"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
     /// </summary>
     /// <remarks><see cref="TagFlag.Switch"/> 类型标记，在开关为 On 状态也会筛选数据并一起推送。</remarks>
@@ -119,5 +126,20 @@ public sealed class Tag
     {
         return Length > 0
            && DataType is not (TagDataType.String or TagDataType.S7String or TagDataType.S7WString);
+    }
+
+    /// <summary>
+    /// 从 <see cref="ExtraProps"/> 属性中获取 JSON 元素，没有找到则返回空。
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public JsonElement? GetElementFromProps<T>(string key)
+    {
+        if (ExtraProps != null && ExtraProps.TryGetValue(key, out var jsonElement))
+        {
+            return jsonElement;
+        }
+
+        return default;
     }
 }

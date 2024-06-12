@@ -82,10 +82,13 @@ public static class IRouterBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
+    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="HttpForwarder"/> 注册的生命周期。</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder,
-        Action<RESTfulDestinationOptions>? postDelegate = null, string configName = "HttpDestination")
+        Action<RESTfulDestinationOptions>? postDelegate = null, 
+        ServiceLifetime lifetime = ServiceLifetime.Transient,
+        string configName = "HttpDestination")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
@@ -95,10 +98,8 @@ public static class IRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            InternalForwarderHub.Default.Register<HttpForwarder>(); // 注册 Http Forwarder
-
-            services.Add(new ServiceDescriptor(typeof(IForwarder), "HTTP", typeof(MqttClientForwarder), ServiceLifetime.Transient));
-            InternalForwarderKeys.Default.Register("HTTP");
+            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.HTTP.ToString(), typeof(HttpForwarder), lifetime));
+            InternalForwarderKeys.Default.Register(ForworderSource.HTTP.ToString());
 
             // 配置 HttpClient
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
@@ -147,10 +148,13 @@ public static class IRouterBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
+    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="MqttClientForwarder"/> 注册的生命周期。</param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder,
-        Action<MQTTClientOptions>? postDelegate = null, string configName = "MqttBroker")
+        Action<MQTTClientOptions>? postDelegate = null, 
+        ServiceLifetime lifetime = ServiceLifetime.Transient, 
+        string configName = "MqttBroker")
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
@@ -160,10 +164,8 @@ public static class IRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            InternalForwarderHub.Default.Register<MqttClientForwarder>(); // 注册 MQTT Forwarder
-
-            services.Add(new ServiceDescriptor(typeof(IForwarder), "MQTT", typeof(MqttClientForwarder), ServiceLifetime.Transient));
-            InternalForwarderKeys.Default.Register("MQTT");
+            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.MQTT.ToString(), typeof(MqttClientForwarder), lifetime));
+            InternalForwarderKeys.Default.Register(ForworderSource.MQTT.ToString());
 
             // 注册并启动托管的 MQTT 客户端
             services.AddSingleton<IMQTTManagedClient, MQTTManagedClient>(sp =>
@@ -182,7 +184,7 @@ public static class IRouterBuilderExtensions
     /// 添加本地的转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <param name="builder"></param>
-    /// <param name="lifetime"><typeparamref name="TForwarder"/>注册的生命周期。</param>
+    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="NativeForwarder"/> 以及 <typeparamref name="TForwarder"/> 注册的生命周期。</param>
     /// <returns></returns>
     public static IRouterBuilder AddNativeForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
         where TForwarder : INativeForwarder
@@ -190,10 +192,8 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices(services =>
         {
             services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TForwarder), lifetime));
-            InternalForwarderHub.Default.Register<NativeForwarder>(); // 注册 Native Forwarder
-
-            services.Add(new ServiceDescriptor(typeof(IForwarder), "Native", typeof(NativeForwarder), lifetime));
-            InternalForwarderKeys.Default.Register("Native");
+            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.Native.ToString(), typeof(NativeForwarder), lifetime));
+            InternalForwarderKeys.Default.Register(ForworderSource.Native.ToString());
         });
 
         return builder;

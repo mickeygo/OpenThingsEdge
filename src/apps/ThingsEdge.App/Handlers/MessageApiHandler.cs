@@ -8,8 +8,17 @@ namespace ThingsEdge.App.Handlers;
 /// </summary>
 internal sealed class MessageApiHandler : IDirectMessageRequestApi
 {
+    private readonly ILogger _logger;
+
+    public MessageApiHandler(ILogger<MessageApiHandler> logger)
+    {
+        _logger = logger;
+    }
+
     public Task PostAsync(PayloadData? lastMasterPayloadData, RequestMessage requestMessage, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("MessageApiHandler");
+
         return Task.CompletedTask;
     }
 }
