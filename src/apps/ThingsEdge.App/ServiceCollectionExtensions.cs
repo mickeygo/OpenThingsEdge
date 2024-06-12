@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
             .AddDeviceFileProvider()
             .AddDeviceHeartbeatHandler<HeartbeatApiHandler>()
             .AddNativeForwarder<ScadaNativeForwader>()
-            .AddNoticeRequestHandler<NoticeApiHandler>()
+            .AddNoticePostedHandler<NoticeApiHandler>()
             .AddOpsProvider(option =>
             {
                 option.Siemens_PDUSizeS1500 = 396; // S7 PDU 长度

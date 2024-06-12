@@ -48,7 +48,7 @@ public static class SiemensS7NetExtensions
                 matrix.Add([]);
             }
 
-            int n = TagToByteLength(tag);
+            int n = CalTagByteLength(tag);
             sum += n;
             // 总长度超过 PDU 时，矩阵新增一行，写入数据。
             if (sum > allowMaxByte)
@@ -85,7 +85,7 @@ public static class SiemensS7NetExtensions
         foreach (var tag in tags)
         {
             addresses.Add(tag.Address);
-            lengths.Add((ushort)TagToByteLength(tag)); // 数据长度
+            lengths.Add((ushort)CalTagByteLength(tag)); // 数据长度
         }
 
         var result = await siemensS7Net.ReadAsync([.. addresses], [.. lengths]).ConfigureAwait(false);
@@ -138,13 +138,19 @@ public static class SiemensS7NetExtensions
             }
 
             list.Add(tagPayload);
-            index += TagToByteLength(tag);
+            index += CalTagByteLength(tag);
         }
 
         return (true, list, default);
     }
 
-    private static int TagToByteLength(Tag tag)
+    /// <summary>
+    /// 计算 Tag 所占的字节长度。
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    private static int CalTagByteLength(Tag tag)
     {
         return tag.DataType switch
         {

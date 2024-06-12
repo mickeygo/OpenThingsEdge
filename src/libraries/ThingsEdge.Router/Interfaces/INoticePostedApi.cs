@@ -3,6 +3,7 @@
 /// <summary>
 /// 通知数据发布接口，只针对于 <see cref="TagFlag.Notice"/>。
 /// </summary>
+/// <remarks>服务端采用 <see cref="ServiceLifetime.Scoped"/> 作用域来解析服务。</remarks>
 public interface INoticePostedApi
 {
     /// <summary>

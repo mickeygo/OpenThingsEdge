@@ -1,6 +1,6 @@
-﻿using ThingsEdge.Contracts;
+﻿using ThingsEdge.App.Handlers;
+using ThingsEdge.Contracts;
 using ThingsEdge.Contracts.Variables;
-using ThingsEdge.App.Handlers;
 using ThingsEdge.Router.Forwarder;
 
 namespace ThingsEdge.App.Forwarders;
@@ -11,12 +11,12 @@ namespace ThingsEdge.App.Forwarders;
 /// <remarks>一般用于处理主数据。</remarks>
 internal sealed class ScadaNativeForwader : INativeForwarder
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger _logger;
 
-    public ScadaNativeForwader(IServiceProvider serviceProvider, ILogger<ScadaNativeForwader> logger)
+    public ScadaNativeForwader(IServiceScopeFactory serviceScopeFactory, ILogger<ScadaNativeForwader> logger)
     {
-        _serviceProvider = serviceProvider;
+        _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
     }
 
@@ -42,7 +42,7 @@ internal sealed class ScadaNativeForwader : INativeForwarder
 
         if (map.TryGetValue(self.TagName, out var typ))
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = _serviceScopeFactory.CreateScope();
             var handler = (AbstractHandler)scope.ServiceProvider.GetRequiredService(typ);
             result = await handler.HandleAsync(message, cancellationToken);
         }

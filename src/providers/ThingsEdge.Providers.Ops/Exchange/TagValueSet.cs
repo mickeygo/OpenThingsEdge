@@ -5,7 +5,7 @@
 /// </summary>
 internal static class TagValueSet
 {
-    private static readonly ConcurrentDictionary<string, InternalData> _map = new();
+    private static readonly ConcurrentDictionary<string, InternalData> DataMap = new();
 
     /// <summary>
     /// 比较值，若新值与旧值不同或旧值不存在，则写入新的值。
@@ -25,9 +25,9 @@ internal static class TagValueSet
     public static bool CompareAndSwap(string tagId, object newValue, bool checkAckWhenEqual = false)
     {
         // 初始状态，不包含数据。
-        if (!_map.TryGetValue(tagId, out var data))
+        if (!DataMap.TryGetValue(tagId, out var data))
         {
-            _ = _map.GetOrAdd(tagId, new InternalData { Value = newValue });
+            _ = DataMap.GetOrAdd(tagId, new InternalData { Value = newValue });
             return false;
         }
 
@@ -61,7 +61,7 @@ internal static class TagValueSet
     /// <param name="maxAckVersion">允许的最大回执版本号，当值版本号超过设置的后，不会再设置 Ack 为 true，默认为 null。</param>
     public static void Ack(string tagId, int? maxAckVersion = null)
     {
-        if (_map.TryGetValue(tagId, out var data))
+        if (DataMap.TryGetValue(tagId, out var data))
         {
             ++data.AckVersion;
             if (maxAckVersion is not null)
@@ -81,7 +81,7 @@ internal static class TagValueSet
     /// <summary>
     /// 清空状态的缓存数据。
     /// </summary>
-    public static void Clear() => _map.Clear();
+    public static void Clear() => DataMap.Clear();
 
     class InternalData
     {

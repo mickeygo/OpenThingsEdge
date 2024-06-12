@@ -6,18 +6,11 @@ namespace ThingsEdge.Router.Handlers;
 /// <summary>
 /// 设备心跳事件处理器。
 /// </summary>
-internal sealed class DeviceHeartbeatHandler : INotificationHandler<DeviceHeartbeatEvent>
+internal sealed class DeviceHeartbeatHandler(IServiceScopeFactory serviceScopeFactory) : INotificationHandler<DeviceHeartbeatEvent>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public DeviceHeartbeatHandler(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task Handle(DeviceHeartbeatEvent notification, CancellationToken cancellationToken)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var devHeartbeatApi = scope.ServiceProvider.GetService<IDeviceHeartbeatApi>();
         if (devHeartbeatApi != null)
         {

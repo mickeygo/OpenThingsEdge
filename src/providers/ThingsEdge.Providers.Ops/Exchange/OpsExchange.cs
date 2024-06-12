@@ -42,7 +42,7 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
         IsRunning = true;
 
         _logger.LogInformation("[Engine] 引擎启动");
-        await _producer.ProduceAsync(new ExchangeChangedEvent { State = RunningState.Startup }).ConfigureAwait(false);
+        await _producer.ProduceAsync(new ExchangeChangedEvent(RunningState.Startup)).ConfigureAwait(false);
 
         _cts = new();
 
@@ -80,7 +80,7 @@ internal sealed class OpsExchange : IExchange, ISingletonDependency
         _driverConnectorManager.Close();
 
         _logger.LogInformation("[Engine] 引擎已停止");
-        await _producer.ProduceAsync(new ExchangeChangedEvent { State = RunningState.Stop }).ConfigureAwait(false);
+        await _producer.ProduceAsync(new ExchangeChangedEvent(RunningState.Stop)).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()

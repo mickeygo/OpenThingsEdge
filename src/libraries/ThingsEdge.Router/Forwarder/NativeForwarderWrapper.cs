@@ -1,24 +1,17 @@
 ﻿namespace ThingsEdge.Router.Forwarder;
 
 /// <summary>
-/// Native 转发数据。
+/// Native 转发数据包装类。
 /// </summary>
-internal sealed class NativeForwarder : IForwarder
+internal sealed class NativeForwarderWrapper(INativeForwarder forwarder) : IForwarder
 {
-    private readonly INativeForwarder _forwarder;
-
-    public NativeForwarder(INativeForwarder forwarder)
-    {
-        _forwarder = forwarder;
-    }
-
     public ForworderSource Source => ForworderSource.Native;
 
     public async Task<ResponseResult> SendAsync(RequestMessage message, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await _forwarder.SendAsync(message, cancellationToken);
+            var response = await forwarder.SendAsync(message, cancellationToken);
             return ResponseResult.FromOk(response, Source);
         }
         catch (OperationCanceledException ex)

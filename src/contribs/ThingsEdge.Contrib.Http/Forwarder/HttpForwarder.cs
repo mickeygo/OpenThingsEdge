@@ -13,11 +13,11 @@ internal sealed class HttpForwarder : IForwarder
     private readonly ILogger _logger;
 
     public HttpForwarder(IHttpClientFactory httpClientFactory, 
-        IOptionsMonitor<RESTfulDestinationOptions> restfulOptions, 
+        IOptions<RESTfulDestinationOptions> restfulOptions, 
         ILogger<HttpForwarder> logger)
     {
         _httpClientFactory = httpClientFactory;
-        _restfulOptions = restfulOptions.CurrentValue;
+        _restfulOptions = restfulOptions.Value;
         _logger = logger;
     }
 

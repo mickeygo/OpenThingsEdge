@@ -31,7 +31,7 @@ internal sealed class SwitchMonitor : AbstractMonitor, ITransientDependency
             // 开关绑定的数据
             _ = Task.Run(async () =>
             {
-                int pollingInterval = _opsConfig.SwitchScanRate > 0 ? _opsConfig.SwitchScanRate : 70;
+                int pollingInterval = _opsConfig.SwitchScanRate > 0 ? _opsConfig.SwitchScanRate : 71;
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try

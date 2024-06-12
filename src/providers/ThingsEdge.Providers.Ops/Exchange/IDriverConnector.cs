@@ -91,7 +91,7 @@ public enum DriverStatus
     Normal = 1,
 
     /// <summary>
-    /// 驱动挂起中
+    /// 驱动连接挂起中
     /// </summary>
     Suspended = 2,
 }

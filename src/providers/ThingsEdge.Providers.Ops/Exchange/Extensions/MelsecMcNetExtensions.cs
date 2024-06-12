@@ -20,7 +20,7 @@ public static class MelsecMcNetExtensions
         ushort length = 0;
         foreach (var tag in tags)
         {
-            length += (ushort)TagToWordLength(tag);
+            length += (ushort)CalTagWordLength(tag);
         }
 
         // 读取的长度为 word
@@ -74,13 +74,13 @@ public static class MelsecMcNetExtensions
             }
 
             list.Add(tagPayload);
-            index += TagToByteLength(tag);
+            index += CalTagByteLength(tag);
         }
 
         return (true, list, default);
     }
 
-    private static int TagToByteLength(Tag tag)
+    private static int CalTagByteLength(Tag tag)
     {
         return tag.DataType switch
         {
@@ -92,7 +92,7 @@ public static class MelsecMcNetExtensions
         };
     }
 
-    private static int TagToWordLength(Tag tag)
+    private static int CalTagWordLength(Tag tag)
     {
         return tag.DataType switch
         {

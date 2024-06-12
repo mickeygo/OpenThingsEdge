@@ -4,7 +4,7 @@ using ThingsEdge.Router.Forwarder;
 
 namespace ThingsEdge.Router;
 
-public static class ContribMqttBuilderExtensions
+public static class IMqttRouterBuilderExtensions
 {
     /// <summary>
     /// 添加 MQTT 客户端转发处理服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。

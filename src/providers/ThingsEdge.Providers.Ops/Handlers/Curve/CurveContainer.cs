@@ -7,7 +7,7 @@ namespace ThingsEdge.Providers.Ops.Handlers.Curve;
 /// </summary>
 /// <param name="Model">曲线模型</param>
 /// <param name="Writer">曲线写入器</param>
-internal sealed record class CurveContainerState(CurveModel Model, ICurveWriter Writer);
+internal sealed record CurveContainerState(CurveModel Model, ICurveWriter Writer);
 
 /// <summary>
 /// 曲线数据容器

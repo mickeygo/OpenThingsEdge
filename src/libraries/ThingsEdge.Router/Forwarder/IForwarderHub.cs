@@ -1,8 +1,9 @@
 ﻿namespace ThingsEdge.Router.Forwarder;
 
 /// <summary>
-/// Forwarder Hub。
+/// 内部注册的 Forwarder 对象服务集合。
 /// </summary>
+/// <remarks>采用 <see cref="ActivatorUtilities.GetServiceOrCreateInstance"/> 获取服务对象。</remarks>
 public interface IForwarderHub
 {
     /// <summary>

@@ -72,21 +72,19 @@ internal static class DriverReadWriteUtil
 
     private static async Task<OperateResult<string>> ReadStringAsync(IReadWriteNet driver, string address, ushort length)
     {
-        if (driver is SiemensS7Net driver1)
+        if (driver is SiemensS7Net s7Driver)
         {
-            return await driver1.ReadStringAsync(address).ConfigureAwait(false); // S7 自动计算长度
+            return await s7Driver.ReadStringAsync(address).ConfigureAwait(false); // S7 自动计算长度
         }
-        else
-        {
-            return await driver.ReadStringAsync(address, length).ConfigureAwait(false);
-        }
+
+        return await driver.ReadStringAsync(address, length).ConfigureAwait(false);
     }
 
     private static async Task<OperateResult<string>> ReadWStringAsync(IReadWriteNet driver, string address)
     {
-        if (driver is SiemensS7Net driver2)
+        if (driver is SiemensS7Net s7Driver)
         {
-            return await driver2.ReadWStringAsync(address).ConfigureAwait(false);
+            return await s7Driver.ReadWStringAsync(address).ConfigureAwait(false);
         }
 
         throw new NotImplementedException();
@@ -150,9 +148,9 @@ internal static class DriverReadWriteUtil
 
     private static async Task<OperateResult> WriteWStringAsync(IReadWriteNet driver, string address, string value)
     {
-        if (driver is SiemensS7Net driver2)
+        if (driver is SiemensS7Net s7Driver)
         {
-            return await driver2.WriteWStringAsync(address, value).ConfigureAwait(false);
+            return await s7Driver.WriteWStringAsync(address, value).ConfigureAwait(false);
         }
 
         throw new NotImplementedException();

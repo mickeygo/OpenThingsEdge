@@ -5,7 +5,7 @@ using ThingsEdge.Router.Forwarder;
 
 namespace ThingsEdge.Router;
 
-public static class ContribHttpBuilderExtensions
+public static class IHttpRouterBuilderExtensions
 {
     /// <summary>
     /// 添加下游系统健康检测功能。

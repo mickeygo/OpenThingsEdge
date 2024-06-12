@@ -5,7 +5,7 @@
 /// </summary>
 public enum ForworderSource
 {
-    None = 0,
+    Unknown,
 
     HTTP,
 

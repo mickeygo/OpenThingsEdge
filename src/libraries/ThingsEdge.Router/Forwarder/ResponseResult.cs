@@ -10,22 +10,22 @@ public sealed class ResponseResult : AbstractResult<ResponseMessage>
     /// </summary>
     public ForworderSource Source { get; init; }
 
-    public static ResponseResult FromOk(ResponseMessage data, ForworderSource source = ForworderSource.None)
+    public static ResponseResult FromOk(ResponseMessage data, ForworderSource source = ForworderSource.Unknown)
     {
         return new ResponseResult() { Data = data, Source = source };
     }
 
-    public static ResponseResult FromOk(int code, ResponseMessage data, ForworderSource source = ForworderSource.None)
+    public static ResponseResult FromOk(int code, ResponseMessage data, ForworderSource source = ForworderSource.Unknown)
     {
         return new ResponseResult() { Code = code, Data = data, Source = source };
     }
 
-    public static ResponseResult FromError(int code, string errMessage, ForworderSource source = ForworderSource.None)
+    public static ResponseResult FromError(int code, string errMessage, ForworderSource source = ForworderSource.Unknown)
     {
         return new ResponseResult() { Code = code, ErrorMessage = errMessage, Source = source };
     }
 
-    public static ResponseResult FromError(ErrorCode code, string errMessage, ForworderSource source = ForworderSource.None)
+    public static ResponseResult FromError(ErrorCode code, string errMessage, ForworderSource source = ForworderSource.Unknown)
     {
         return new ResponseResult() { Code = (int)code, ErrorMessage = errMessage, Source = source };
     }

@@ -45,6 +45,7 @@ internal sealed class MqttClientForwarder : IForwarder
         // MQTT 忽略返回结果。
         return ResponseResult.FromOk(new ResponseMessage
         {
+            State = _mqttClientOptions.SuccessCode,
             Request = message,
         }, Source);
     }

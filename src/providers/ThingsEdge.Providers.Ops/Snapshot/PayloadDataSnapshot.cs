@@ -16,5 +16,5 @@ public sealed class PayloadDataSnapshot
     /// <summary>
     /// 数据更新的版本
     /// </summary>
-    public long Version { get; internal set; } = 1;
+    public long Version { get; internal set; } = 1L;
 }

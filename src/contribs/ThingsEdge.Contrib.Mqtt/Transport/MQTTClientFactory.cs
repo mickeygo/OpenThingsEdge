@@ -1,7 +1,6 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
-using ThingsEdge.Router.Transport.MQTT;
 
 namespace ThingsEdge.Contrib.Mqtt.Transport;
 

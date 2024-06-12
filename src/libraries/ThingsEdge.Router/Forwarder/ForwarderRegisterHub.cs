@@ -3,7 +3,6 @@
 /// <summary>
 /// 内部注册的 Forwarder 对象服务集合。
 /// </summary>
-/// <remarks>采用 <see cref="ActivatorUtilities.GetServiceOrCreateInstance"/> 获取服务对象。</remarks>
 public sealed class ForwarderRegisterHub : IForwarderHub
 {
     private readonly HashSet<Type> _forwarderTypes = [];

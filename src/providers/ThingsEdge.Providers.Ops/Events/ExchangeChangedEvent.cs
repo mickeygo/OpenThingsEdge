@@ -3,13 +3,8 @@
 /// <summary>
 /// 引擎状态更改事件
 /// </summary>
-internal sealed class ExchangeChangedEvent : INotification, IMonitorEvent
-{
-    /// <summary>
-    /// 引擎状态
-    /// </summary>
-    public RunningState State { get; init; }
-}
+/// <param name="State">引擎运行状态</param>
+internal sealed record ExchangeChangedEvent(RunningState State) : INotification, IMonitorEvent;
 
 /// <summary>
 /// 运行状态

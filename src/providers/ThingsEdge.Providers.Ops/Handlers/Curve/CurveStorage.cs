@@ -14,10 +14,10 @@ internal sealed class CurveStorage : ISingletonDependency
     private readonly CurveContainer _curveContainer;
     private readonly CurveConfig _curveConfig;
 
-    public CurveStorage(CurveContainer curveContainer, IOptionsMonitor<OpsConfig> opsConfig)
+    public CurveStorage(CurveContainer curveContainer, IOptions<OpsConfig> opsConfig)
     {
         _curveContainer = curveContainer;
-        _curveConfig = opsConfig.CurrentValue.Curve;
+        _curveConfig = opsConfig.Value.Curve;
 
         _rollingFile = new(CreateRollingFile(_curveConfig.LocalRootDirectory, _curveConfig.RetainedDayLimit));
     }

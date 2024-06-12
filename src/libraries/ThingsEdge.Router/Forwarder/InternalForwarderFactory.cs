@@ -15,32 +15,29 @@ internal sealed class InternalForwarderFactory : IForwarderFactory, ISingletonDe
             //var forwarders = InternalForwarderHub.Default.ResloveAll(_serviceProvider);
 
             var keys = ForwarderRegisterKeys.Default.Keys;
-            var forwarders = keys.Select(key => _serviceProvider.GetKeyedService<IForwarder>(key))
-                .Where(forwarder => forwarder != null)
-                .ToArray();
-            
+            var forwarders = keys.Select(key => _serviceProvider.GetRequiredKeyedService<IForwarder>(key)).ToArray();
             if (forwarders.Length > 0)
             {
-                var tasks = forwarders.Select(s => s!.SendAsync(message, cancellationToken));
+                var tasks = forwarders.Select(s => s.SendAsync(message, cancellationToken));
                 var results = await Task.WhenAll(tasks).ConfigureAwait(false); // 等待所有任务结束
 
                 // 只返回状态的第一个结果，按 Native > HTTP > MQTT 优先级选取
-                var nativeResult = results.FirstOrDefault(s => s.Source == ForworderSource.Native);
-                if (nativeResult is not null)
+                var result1 = results.FirstOrDefault(s => s.Source == ForworderSource.Native);
+                if (result1 is not null)
                 {
-                    return nativeResult;
+                    return result1;
                 }
 
-                var httpResult = results.FirstOrDefault(s => s.Source == ForworderSource.HTTP);
-                if (httpResult is not null)
+                var result2 = results.FirstOrDefault(s => s.Source == ForworderSource.HTTP);
+                if (result2 is not null)
                 {
-                    return httpResult;
+                    return result2;
                 }
 
-                var mqttResult = results.FirstOrDefault(s => s.Source == ForworderSource.MQTT);
-                if (mqttResult is not null)
+                var result3 = results.FirstOrDefault(s => s.Source == ForworderSource.MQTT);
+                if (result3 is not null)
                 {
-                    return mqttResult;
+                    return result3;
                 }
             }
         }
