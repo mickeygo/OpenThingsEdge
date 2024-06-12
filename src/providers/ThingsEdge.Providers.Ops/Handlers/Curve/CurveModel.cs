@@ -6,9 +6,9 @@
 internal sealed class CurveModel
 {
     /// <summary>
-    /// 曲线绑定的 SN
+    /// 曲线条码
     /// </summary>
-    public string? SN { get; set; }
+    public string? Barcode { get; set; }
 
     /// <summary>
     /// 曲线所属的编号

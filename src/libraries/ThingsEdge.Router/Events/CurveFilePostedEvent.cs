@@ -3,13 +3,8 @@
 /// <summary>
 /// 曲线文件传送通知事件，其中 <see cref="TagFlag.Switch"/> 会发布此事件
 /// </summary>
-public sealed class CurveFilePostedEvent : INotification
+public sealed record CurveFilePostedEvent : INotification
 {
-    /// <summary>
-    /// 事件创建时间。
-    /// </summary>
-    public DateTime EventTime { get; init; } = DateTime.Now;
-
     [NotNull]
     public string? ChannelName { get; init; }
 
@@ -19,11 +14,14 @@ public sealed class CurveFilePostedEvent : INotification
     [NotNull]
     public string? GroupName { get; init; }
 
+    /// <summary>
+    /// 条码。
+    /// </summary>
     [NotNull]
-    public string? SN { get; init; }
+    public string? Barcode { get; init; }
 
     /// <summary>
-    /// 曲线所属的编号。
+    /// 编号。
     /// </summary>
     public string? No { get; init; }
 

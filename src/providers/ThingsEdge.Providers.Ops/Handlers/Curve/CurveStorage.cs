@@ -130,9 +130,9 @@ internal sealed class CurveStorage : ISingletonDependency
         }
 
         // 按 SN 打包
-        if (_curveConfig.DirIncludeSN && !string.IsNullOrWhiteSpace(model.SN))
+        if (_curveConfig.DirIncludeSN && !string.IsNullOrWhiteSpace(model.Barcode))
         {
-            curveDir = Path.Combine(curveDir, model.SN); // root/[L1]/[拧紧]/[20230101]/SN001/
+            curveDir = Path.Combine(curveDir, model.Barcode); // root/[L1]/[拧紧]/[20230101]/SN001/
         }
 
         // SN 内部再分组
@@ -144,7 +144,7 @@ internal sealed class CurveStorage : ISingletonDependency
         // 创建对应的文件夹。
         FolderUtil.CreateIfNotExists(curveDir);
 
-        StringBuilder sbFilename = new(model.SN); // 文件名称
+        StringBuilder sbFilename = new(model.Barcode); // 文件名称
         if (!string.IsNullOrWhiteSpace(model.No))
         {
             if (sbFilename.Length > 0)

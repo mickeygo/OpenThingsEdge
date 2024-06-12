@@ -5,6 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\contribs\ThingsEdge.Contrib.Http\ThingsEdge.Contrib.Http.csproj" />
+    <ProjectReference Include="..\..\contribs\ThingsEdge.Contrib.Mqtt\ThingsEdge.Contrib.Mqtt.csproj" />
     <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
     <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
   </ItemGroup>

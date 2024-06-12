@@ -13,11 +13,11 @@ internal sealed class NoticeMonitor : AbstractMonitor, ITransientDependency
     private readonly ILogger _logger;
 
     public NoticeMonitor(IProducer producer,
-        IOptionsMonitor<OpsConfig> opsConfig,
+        IOptions<OpsConfig> opsConfig,
         ILogger<NoticeMonitor> logger)
     {
         _producer = producer;
-        _opsConfig = opsConfig.CurrentValue;
+        _opsConfig = opsConfig.Value;
         _logger = logger;
     }
 

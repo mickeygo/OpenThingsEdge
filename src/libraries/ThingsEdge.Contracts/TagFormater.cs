@@ -36,14 +36,14 @@ public static class TagFormater
             // 原始数据。
             object? obj2 = tag.DataType switch
             {
-                TagDataType.Bit => tag.Length <= 1 ? Convert.ToBoolean(obj) : ObjectConvertUtil.ToArray<bool>(obj),
-                TagDataType.Byte => tag.Length <= 1 ? Convert.ToByte(obj) : ObjectConvertUtil.ToArray<byte>(obj),
-                TagDataType.Word => tag.Length <= 1 ? Convert.ToUInt16(obj) : ObjectConvertUtil.ToArray<ushort>(obj),
-                TagDataType.DWord => tag.Length <= 1 ? Convert.ToUInt32(obj) : ObjectConvertUtil.ToArray<uint>(obj),
-                TagDataType.Int => tag.Length <= 1 ? Convert.ToInt16(obj) : ObjectConvertUtil.ToArray<short>(obj),
-                TagDataType.DInt => tag.Length <= 1 ? Convert.ToInt32(obj) : ObjectConvertUtil.ToArray<int>(obj),
-                TagDataType.Real => tag.Length <= 1 ? Convert.ToSingle(obj) : ObjectConvertUtil.ToArray<float>(obj),
-                TagDataType.LReal => tag.Length <= 1 ? Convert.ToDouble(obj) : ObjectConvertUtil.ToArray<double>(obj),
+                TagDataType.Bit => tag.Length <= 1 ? Convert.ToBoolean(obj) : ObjectConvertUtil.ToBooleanArray(obj),
+                TagDataType.Byte => tag.Length <= 1 ? Convert.ToByte(obj) : ObjectConvertUtil.ToByteArray(obj),
+                TagDataType.Word => tag.Length <= 1 ? Convert.ToUInt16(obj) : ObjectConvertUtil.ToUInt16Array(obj),
+                TagDataType.DWord => tag.Length <= 1 ? Convert.ToUInt32(obj) : ObjectConvertUtil.ToUInt32Array(obj),
+                TagDataType.Int => tag.Length <= 1 ? Convert.ToInt16(obj) : ObjectConvertUtil.ToInt16Array(obj),
+                TagDataType.DInt => tag.Length <= 1 ? Convert.ToInt32(obj) : ObjectConvertUtil.ToInt32Array(obj),
+                TagDataType.Real => tag.Length <= 1 ? Convert.ToSingle(obj) : ObjectConvertUtil.ToSingleArray(obj),
+                TagDataType.LReal => tag.Length <= 1 ? Convert.ToDouble(obj) : ObjectConvertUtil.ToDoubleArray(obj),
                 TagDataType.String or TagDataType.S7String or TagDataType.S7WString => Convert.ToString(obj),
                 _ => throw new NotImplementedException(),
             };

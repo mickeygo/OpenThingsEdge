@@ -16,17 +16,17 @@ public sealed class OpsOptions
     public bool HeartbeatShouldAckZero { get; set; } = true;
 
     /// <summary>
-    /// 针对于S7协议，1500 系列一起读取运行的最多 PDU 长度（byte数量），为0时会使用默认长度。  
+    /// 针对于S7协议，1500 系列一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
     /// </summary>
     public int Siemens_PDUSizeS1500 { get; set; }
 
     /// <summary>
-    /// 针对于S7协议，1200 系列一起读取运行的最多 PDU 长度（byte数量），为0时会使用默认长度。  
+    /// 针对于S7协议，1200 系列一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
     /// </summary>
     public int Siemens_PDUSizeS1200 { get; set; }
 
     /// <summary>
-    /// 针对于S7协议，300 系列一起读取运行的最多 PDU 长度（byte数量），为0时会使用默认长度。  
+    /// 针对于S7协议，300 系列一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
     /// </summary>
     public int Siemens_PDUSizeS300 { get; set; }
 }

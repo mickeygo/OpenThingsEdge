@@ -1,10 +1,7 @@
 ﻿using ThingsEdge.Common;
-using ThingsEdge.Router.Configuration;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Forwarder;
-using ThingsEdge.Router.Handlers.Health;
 using ThingsEdge.Router.Interfaces;
-using ThingsEdge.Router.Transport.MQTT;
 
 namespace ThingsEdge.Router;
 
@@ -26,22 +23,6 @@ public static class IRouterBuilderExtensions
             builder.EventAssemblies.Add(assembly);
         }
 
-        return builder;
-    }
-
-    /// <summary>
-    /// 添加下游系统健康检测功能。
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static IRouterBuilder AddDownstreamHealthChecks(this IRouterBuilder builder)
-    {
-        builder.Builder.ConfigureServices(services =>
-        {
-            services.AddSingleton<IDestinationHealthChecker, HttpDestinationHealthChecker>();
-            services.AddSingleton<IHealthCheckHandlePolicy, HealthCheckHandlePolicy>();
-            services.AddHostedService<DestinationHealthCheckHostedService>();
-        });
         return builder;
     }
 
@@ -78,128 +59,6 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 HTTP 转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="HttpForwarder"/> 注册的生命周期。</param>
-    /// <param name="configName">配置名称</param>
-    /// <returns></returns>
-    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder,
-        Action<RESTfulDestinationOptions>? postDelegate = null, 
-        ServiceLifetime lifetime = ServiceLifetime.Transient,
-        string configName = "HttpDestination")
-    {
-        builder.Builder.ConfigureServices((hostBuilder, services) =>
-        {
-            services.Configure<RESTfulDestinationOptions>(hostBuilder.Configuration.GetSection(configName));
-            if (postDelegate is not null)
-            {
-                services.PostConfigure(postDelegate);
-            }
-
-            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.HTTP.ToString(), typeof(HttpForwarder), lifetime));
-            InternalForwarderKeys.Default.Register(ForworderSource.HTTP.ToString());
-
-            // 配置 HttpClient
-            services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
-            {
-                var options = sp.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
-                httpClient.BaseAddress = new Uri(options.BaseAddress);
-
-                if (options.Timeout > 0)
-                {
-                    httpClient.Timeout = TimeSpan.FromMilliseconds(options.Timeout.Value);
-                }
-
-                if (options.EnableBasicAuth)
-                {
-                    httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue(
-                            "Basic",
-                            $"{options.UserName}:{options.Password}");
-                }
-
-                // 不验证 TLS 凭证
-                if (options.DisableCertificateValidationCheck)
-                {
-
-                }
-            })
-            .ConfigurePrimaryHttpMessageHandler((handler, sp) =>
-            {
-                if (handler is HttpClientHandler httpHandler)
-                {
-                    var options = sp.GetRequiredService<IOptions<RESTfulDestinationOptions>>().Value;
-                    // 不验证 TLS 凭证
-                    if (options.DisableCertificateValidationCheck)
-                    {
-                        httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-                    }
-                }
-            });
-        });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 添加 MQTT 客户端转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="MqttClientForwarder"/> 注册的生命周期。</param>
-    /// <param name="configName">MQTT Broker 配置名称</param>
-    /// <returns></returns>
-    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder,
-        Action<MQTTClientOptions>? postDelegate = null, 
-        ServiceLifetime lifetime = ServiceLifetime.Transient, 
-        string configName = "MqttBroker")
-    {
-        builder.Builder.ConfigureServices((hostBuilder, services) =>
-        {
-            services.Configure<MQTTClientOptions>(hostBuilder.Configuration.GetSection(configName));
-            if (postDelegate is not null)
-            {
-                services.PostConfigure(postDelegate);
-            }
-
-            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.MQTT.ToString(), typeof(MqttClientForwarder), lifetime));
-            InternalForwarderKeys.Default.Register(ForworderSource.MQTT.ToString());
-
-            // 注册并启动托管的 MQTT 客户端
-            services.AddSingleton<IMQTTManagedClient, MQTTManagedClient>(sp =>
-            {
-                var mqttClientOptions = sp.GetRequiredService<IOptions<MQTTClientOptions>>().Value;
-                var client = (MQTTManagedClient)MQTTClientFactory.CreateManagedClient(mqttClientOptions);
-                client.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                return client;
-            });
-        });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 添加本地的转发服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="NativeForwarder"/> 以及 <typeparamref name="TForwarder"/> 注册的生命周期。</param>
-    /// <returns></returns>
-    public static IRouterBuilder AddNativeForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
-        where TForwarder : INativeForwarder
-    {
-        builder.Builder.ConfigureServices(services =>
-        {
-            services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TForwarder), lifetime));
-            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.Native.ToString(), typeof(NativeForwarder), lifetime));
-            InternalForwarderKeys.Default.Register(ForworderSource.Native.ToString());
-        });
-
-        return builder;
-    }
-
-    /// <summary>
     /// 添加设备心跳信息处理服务，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="IHandler"></typeparam>
@@ -218,18 +77,37 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加设备信息处理服务，其中 <see cref="TagFlag.Notice"/>、<see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// 添加本地的转发处理服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
-    /// <typeparam name="IHandler"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"><typeparamref name="IHandler"/>注册的生命周期。</param>
+    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="NativeForwarder"/> 以及 <typeparamref name="TForwarder"/> 注册的生命周期。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddDirectMessageRequestHandler<IHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
-        where IHandler : IDirectMessageRequestApi
+    public static IRouterBuilder AddNativeForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+        where TForwarder : INativeForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(new ServiceDescriptor(typeof(IDirectMessageRequestApi), typeof(IHandler), lifetime));
+            services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TForwarder), lifetime));
+            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.Native.ToString(), typeof(NativeForwarder), lifetime));
+            ForwarderRegisterKeys.Default.Register(ForworderSource.Native.ToString());
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加通知消息请求处理服务，其中 <see cref="TagFlag.Notice"/> 会发布此事件。
+    /// </summary>
+    /// <typeparam name="IHandler"></typeparam>
+    /// <param name="builder"></param>
+    /// <param name="lifetime"><typeparamref name="IHandler"/> 注册的生命周期。</param>
+    /// <returns></returns>
+    public static IRouterBuilder AddNoticeRequestHandler<IHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+       where IHandler : INoticePostedApi
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.Add(new ServiceDescriptor(typeof(INoticePostedApi), typeof(IHandler), lifetime));
         });
 
         return builder;

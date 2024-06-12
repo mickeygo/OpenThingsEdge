@@ -3,7 +3,7 @@
 namespace ThingsEdge.App.Handlers;
 
 /// <summary>
-/// Handler 基类
+/// Handler 基类。
 /// </summary>
 public abstract class AbstractHandler
 {

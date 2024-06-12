@@ -3,7 +3,7 @@
 /// <summary>
 /// Forwarder Hub。
 /// </summary>
-internal interface IForwarderHub
+public interface IForwarderHub
 {
     /// <summary>
     /// 注册实例对象类型。

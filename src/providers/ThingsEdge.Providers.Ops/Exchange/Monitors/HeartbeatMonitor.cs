@@ -13,11 +13,11 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
     private readonly ILogger _logger;
 
     public HeartbeatMonitor(IProducer producer,
-        IOptionsMonitor<OpsConfig> opsConfig, 
+        IOptions<OpsConfig> opsConfig, 
         ILogger<HeartbeatMonitor> logger)
     {
         _producer = producer;
-        _opsConfig = opsConfig.CurrentValue;
+        _opsConfig = opsConfig.Value;
         _logger = logger;
     }
 

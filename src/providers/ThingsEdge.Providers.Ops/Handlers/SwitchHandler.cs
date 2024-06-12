@@ -22,13 +22,13 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
     public SwitchHandler(IEventPublisher publisher,
         ITagDataSnapshot tagDataSnapshot,
         CurveStorage curveStorage,
-        IOptionsMonitor<OpsConfig> config,
+        IOptions<OpsConfig> config,
         ILogger<SwitchHandler> logger)
     {
         _publisher = publisher;
         _tagDataSnapshot = tagDataSnapshot;
         _curveStorage = curveStorage;
-        _config = config.CurrentValue;
+        _config = config.Value;
         _logger = logger;
     }
 
@@ -91,7 +91,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                 {
                     CurveModel model = new()
                     {
-                        SN = sn,
+                        Barcode = sn,
                         No = no,
                         CurveName = notification.Tag.DisplayName,
                         ChannelName = notification.ChannelName,
@@ -101,7 +101,9 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                     var writer = _curveStorage.GetOrCreate(notification.Tag.TagId, model);
 
                     // 添加头信息
-                    var header = notification.Tag.NormalTags.Where(s => s.CurveUsage == TagCurveUsage.SwitchCurve).Select(s => s.DisplayName);
+                    var header = notification.Tag.NormalTags
+                        .Where(s => s.CurveUsage == TagCurveUsage.SwitchCurve)
+                        .Select(s => s.DisplayName);
                     writer.WriteHeader(header);
                 }
                 catch (Exception ex)
@@ -121,7 +123,7 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
                         ChannelName = curveModel!.ChannelName,
                         DeviceName = curveModel.DeviceName,
                         GroupName = curveModel.GroupName,
-                        SN = curveModel.SN ?? "",
+                        Barcode = curveModel.Barcode ?? "",
                         No = curveModel.No,
                         CurveName = curveModel.CurveName,
                         FilePath = path,
@@ -135,10 +137,6 @@ internal sealed class SwitchHandler : INotificationHandler<SwitchEvent>
 
             // 设置标记值快照。
             _tagDataSnapshot.Change(message.Values);
-
-            // 发布标记数据请求事件。
-            await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload),
-                PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
 
             return;
         }

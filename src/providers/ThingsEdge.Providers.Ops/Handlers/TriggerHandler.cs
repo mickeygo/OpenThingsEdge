@@ -1,9 +1,7 @@
-﻿using ThingsEdge.Common.EventBus;
-using ThingsEdge.Providers.Ops.Configuration;
+﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Exchange;
 using ThingsEdge.Providers.Ops.Snapshot;
-using ThingsEdge.Router.Events;
 using ThingsEdge.Router.Forwarder;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
@@ -13,22 +11,19 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 /// </summary>
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
-    private readonly IEventPublisher _publisher;
     private readonly ITagDataSnapshot _tagDataSnapshot;
     private readonly IForwarderFactory _forwarderFactory;
     private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
-    public TriggerHandler(IEventPublisher publisher,
-        ITagDataSnapshot tagDataSnapshot,
+    public TriggerHandler(ITagDataSnapshot tagDataSnapshot,
         IForwarderFactory forwarderFactory,
-        IOptionsMonitor<OpsConfig> config,
+        IOptions<OpsConfig> config,
         ILogger<TriggerHandler> logger)
     {
-        _publisher = publisher;
         _tagDataSnapshot = tagDataSnapshot;
         _forwarderFactory = forwarderFactory;
-        _config = config.CurrentValue;
+        _config = config.Value;
         _logger = logger;
     }
 
@@ -78,9 +73,6 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         // 设置标记值快照。
         _tagDataSnapshot.Change(message.Values);
 
-        // 不管读取是否成功，都发布标记数据请求事件（不用等待）。
-        await _publisher.Publish(DirectMessageRequestEvent.Create(message, lastPayload), PublishStrategy.ParallelNoWait, cancellationToken).ConfigureAwait(false);
-
         // 读取数据出错，直接退出
         if (!ok)
         {
@@ -124,7 +116,8 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             {
                 // 通过 tagName 找到对应的 Tag 标记。
                 // 注意：回写标记与触发标记处于同一级别，位于设备下或是分组中。
-                Tag? tag2 = (tagGroup?.CallbackTags ?? notification.Device.CallbackTags).FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                Tag? tag2 = (tagGroup?.CallbackTags ?? notification.Device.CallbackTags)
+                    .FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
                 if (tag2 == null)
                 {
                     _logger.LogError("[Trigger] 地址表中没有找到要回写的标记, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",

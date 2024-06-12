@@ -14,7 +14,7 @@ internal sealed class InternalForwarderFactory : IForwarderFactory, ISingletonDe
         {
             //var forwarders = InternalForwarderHub.Default.ResloveAll(_serviceProvider);
 
-            var keys = InternalForwarderKeys.Default.Keys;
+            var keys = ForwarderRegisterKeys.Default.Keys;
             var forwarders = keys.Select(key => _serviceProvider.GetKeyedService<IForwarder>(key))
                 .Where(forwarder => forwarder != null)
                 .ToArray();

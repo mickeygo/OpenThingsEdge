@@ -28,12 +28,12 @@ public static class ServiceCollectionExtensions
 
         hostBuilder.AddThingsEdgeRouter()
             .AddDeviceFileProvider()
-            .AddNativeForwarder<ScadaNativeForwader>()
             .AddDeviceHeartbeatHandler<HeartbeatApiHandler>()
-            .AddDirectMessageRequestHandler<MessageApiHandler>()
+            .AddNativeForwarder<ScadaNativeForwader>()
+            .AddNoticeRequestHandler<NoticeApiHandler>()
             .AddOpsProvider(option =>
             {
-                option.Siemens_PDUSizeS1500 = 396; // 经测试，此 S1500 PDU 长度设置为 396 不会触发异常
+                option.Siemens_PDUSizeS1500 = 396; // S7 PDU 长度
             })
             .AddEventBus([.. assemblyList]);
 

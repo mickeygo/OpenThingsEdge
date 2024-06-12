@@ -29,7 +29,7 @@ internal sealed class HeartbeatHandler : INotificationHandler<HeartbeatEvent>
             return;
         }
 
-        var @event = DeviceHeartbeatEvent.Create(notification.ChannelName, notification.Device, notification.Tag, notification.IsConnected);
+        var @event = new DeviceHeartbeatEvent(notification.ChannelName, notification.Device, notification.Tag, notification.IsConnected);
         await _publisher.Publish(@event, PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
     }
 }

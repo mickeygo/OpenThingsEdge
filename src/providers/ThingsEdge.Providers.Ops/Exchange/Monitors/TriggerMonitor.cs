@@ -13,11 +13,11 @@ internal sealed class TriggerMonitor : AbstractMonitor, ITransientDependency
     private readonly ILogger _logger;
 
     public TriggerMonitor(IProducer producer,
-        IOptionsMonitor<OpsConfig> config,
+        IOptions<OpsConfig> config,
         ILogger<TriggerMonitor> logger)
     {
         _producer = producer;
-        _config = config.CurrentValue;
+        _config = config.Value;
         _logger = logger;
     }
 

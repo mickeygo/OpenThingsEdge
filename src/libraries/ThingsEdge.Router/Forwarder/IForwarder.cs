@@ -1,7 +1,7 @@
 ﻿namespace ThingsEdge.Router.Forwarder;
 
 /// <summary>
-/// 转发请求数据。
+/// 数据传送请求，接收处理后有响应结果。
 /// </summary>
 public interface IForwarder
 {

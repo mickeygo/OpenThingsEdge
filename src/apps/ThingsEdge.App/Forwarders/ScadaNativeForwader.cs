@@ -6,8 +6,9 @@ using ThingsEdge.Router.Forwarder;
 namespace ThingsEdge.App.Forwarders;
 
 /// <summary>
-/// 本地转发服务接口
+/// 本地转发服务接口。
 /// </summary>
+/// <remarks>一般用于处理主数据。</remarks>
 internal sealed class ScadaNativeForwader : INativeForwarder
 {
     private readonly IServiceProvider _serviceProvider;
@@ -26,6 +27,7 @@ internal sealed class ScadaNativeForwader : INativeForwarder
             Request = message,
         };
 
+        // 只处理 Trigger 触发数据。
         if (message.Flag != TagFlag.Trigger)
         {
             return response;
@@ -46,7 +48,7 @@ internal sealed class ScadaNativeForwader : INativeForwarder
         }
         else
         {
-            _logger.LogWarning("请求的标记名称 [{TagName}] 必须属于 [{Tags}] 其中的一种", self.TagName, string.Join(",", map.Keys));
+            _logger.LogWarning("请求的标记名称 {TagName} 必须属于 {@Tags} 其中的一种。", self.TagName, map.Keys);
             result = new() { State = 0 };
         }
 
