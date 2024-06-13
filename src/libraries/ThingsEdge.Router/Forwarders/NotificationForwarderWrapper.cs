@@ -5,7 +5,7 @@
 /// </summary>
 internal sealed class NotificationForwarderWrapper(IServiceScopeFactory serviceScopeFactory) : INotificationForwarderWrapper, ISingletonDependency
 {
-    public async Task PublishAsync(RequestMessage requestMessage, PayloadData? lastMasterPayloadData, CancellationToken cancellationToken = default)
+    public async Task PublishAsync(RequestMessage message, PayloadData? lastMasterPayloadData, CancellationToken cancellationToken = default)
     {
         var keys = ForwarderRegisterHub.Default.Keys;
         if (keys.Length == 0)
@@ -17,7 +17,7 @@ internal sealed class NotificationForwarderWrapper(IServiceScopeFactory serviceS
         var forwarders = keys.Select(key => scope.ServiceProvider.GetRequiredKeyedService<INotificationForwarder>(key)).ToArray();
         if (forwarders.Length > 0)
         {
-            var tasks = forwarders.Select(s => s.PublishAsync(requestMessage, lastMasterPayloadData, cancellationToken));
+            var tasks = forwarders.Select(s => s.PublishAsync(message, lastMasterPayloadData, cancellationToken));
             await Task.WhenAll(tasks).ConfigureAwait(false); // 考虑是否能替换为 Task.WhenAny()
         }
     }

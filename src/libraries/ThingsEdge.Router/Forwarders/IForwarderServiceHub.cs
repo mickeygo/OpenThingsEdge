@@ -12,7 +12,7 @@ public interface IForwarderServiceHub
     string[] Keys { get; }
 
     /// <summary>
-    /// 注册服务，若服务已存在，则不会再添加。
+    /// 注册服务，若已存在会抛出异常。
     /// </summary>
     /// <param name="serviceKey">服务关键字</param>
     void Register(string serviceKey);

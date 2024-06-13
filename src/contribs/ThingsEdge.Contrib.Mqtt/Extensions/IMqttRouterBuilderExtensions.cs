@@ -58,6 +58,6 @@ public static class IMqttRouterBuilderExtensions
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "MqttBroker")
     {
-        return builder.AddMqttTriggerForwarder<MqttClientForwarder>(postDelegate, lifetime, configName);
+        return builder.AddMqttTriggerForwarder<MqttRequestForwarder>(postDelegate, lifetime, configName);
     }
 }

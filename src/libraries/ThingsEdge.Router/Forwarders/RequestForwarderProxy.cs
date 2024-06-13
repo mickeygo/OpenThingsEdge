@@ -1,9 +1,9 @@
 ﻿namespace ThingsEdge.Router.Forwarders;
 
 /// <summary>
-/// 请求数据发送处理包装类。
+/// 请求数据发送处理代理类。
 /// </summary>
-internal sealed class RequestForwarderWrapper(IServiceScopeFactory serviceScopeFactory) : IRequestForwarder
+internal sealed class RequestForwarderProxy(IServiceScopeFactory serviceScopeFactory) : IRequestForwarder
 {
     public async Task<ResponseResult> SendAsync(RequestMessage message, CancellationToken cancellationToken = default)
     {

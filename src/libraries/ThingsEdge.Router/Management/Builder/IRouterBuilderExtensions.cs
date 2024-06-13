@@ -89,7 +89,7 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices(services =>
         {
             services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarder), lifetime));
-            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarder), typeof(RequestForwarderWrapper), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarder), typeof(RequestForwarderProxy), lifetime));
         });
 
         return builder;

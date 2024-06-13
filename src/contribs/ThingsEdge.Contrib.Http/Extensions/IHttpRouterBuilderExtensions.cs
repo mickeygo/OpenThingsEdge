@@ -98,6 +98,6 @@ public static class IHttpRouterBuilderExtensions
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "HttpDestination")
     {
-        return builder.AddHttpTriggerForwarder<HttpForwarder>(postDelegate, lifetime, configName);
+        return builder.AddHttpTriggerForwarder<HttpRequestForwarder>(postDelegate, lifetime, configName);
     }
 }

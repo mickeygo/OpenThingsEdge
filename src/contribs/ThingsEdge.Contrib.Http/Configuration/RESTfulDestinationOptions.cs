@@ -52,5 +52,11 @@ public sealed class RESTfulDestinationOptions
     /// 自定义目标服务接收数据的地址，未设置会使用 RequestUrl 值代替。
     /// </summary>
     [JsonIgnore]
-    public Func<RESTfulForwardRouterArgs, string>? RequestUrlFunc;
+    public Func<RESTfulForwardRouterArgs, string>? RequestUrlFormaterFunc { get; set; }
+
+    /// <summary>
+    /// 自定义发送给服务器的请求数据，处理后的数据应该能被 JSON 序列化。
+    /// </summary>
+    [JsonIgnore]
+    public Func<RequestMessage, object>? RequestJsonValueFormaterFunc { get; set; }
 }

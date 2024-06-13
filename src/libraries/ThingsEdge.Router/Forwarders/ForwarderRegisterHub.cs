@@ -19,7 +19,10 @@ public sealed class ForwarderRegisterHub : IForwarderServiceHub
 
     public void Register(string serviceKey)
     {
-        _serviceKeys.Add(serviceKey);
+        if (!_serviceKeys.Add(serviceKey))
+        {
+            throw new InvalidOperationException($"服务 {nameof(serviceKey)} 已注册，不能再重复注册。");
+        }
     }
 
     public void Remove(string serviceKey)
