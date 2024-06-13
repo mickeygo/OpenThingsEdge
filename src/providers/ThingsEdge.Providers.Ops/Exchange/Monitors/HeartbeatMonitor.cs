@@ -1,5 +1,6 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
+using ThingsEdge.Providers.Ops.Internal;
 
 namespace ThingsEdge.Providers.Ops.Exchange.Monitors;
 
@@ -70,7 +71,7 @@ internal sealed class HeartbeatMonitor : AbstractMonitor, ITransientDependency
                         // 心跳标记数据类型必须为 bool 或 int16
                         if (CheckOn(data!))
                         {
-                            if (InternalGlobalSetting.HeartbeatShouldAckZero)
+                            if (GlobalSettings.HeartbeatShouldAckZero)
                             {
                                 // 数据回写失败不影响，下一次轮询继续处理
                                 await connector.WriteAsync(tag, SetOff2(tag)).ConfigureAwait(false);

@@ -11,6 +11,6 @@ host.ConfigureServices(services => {
 );
 
 // 注册本地Scada服务
-host.AddScada(Assembly.GetExecutingAssembly());
+host.AddScada();
 
 await host.RunConsoleAsync();

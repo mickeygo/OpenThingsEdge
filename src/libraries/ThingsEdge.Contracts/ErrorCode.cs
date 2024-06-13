@@ -46,16 +46,16 @@ public enum ErrorCode
     HttpResponseJsonError,
 
     /// <summary>
-    /// Native 请求错误
+    /// 数据处理错误
     /// </summary>
-    [Description("Native 请求错误")]
-    NativeError,
+    [Description("数据处理错误")]
+    HandleError,
 
     /// <summary>
-    /// Native 请求超时错误。
+    /// 数据处理超时错误。
     /// </summary>
     [Description("Native 请求超时错误")]
-    NativeRequestTimedOut,
+    HandleRequestTimedOut,
 
     /// <summary>
     /// 批量读取子数据错误。

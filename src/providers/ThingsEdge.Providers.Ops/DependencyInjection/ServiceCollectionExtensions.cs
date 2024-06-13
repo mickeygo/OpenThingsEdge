@@ -1,6 +1,7 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.DependencyInjection;
 using ThingsEdge.Providers.Ops.Exchange.Monitors;
+using ThingsEdge.Providers.Ops.Internal;
 
 namespace ThingsEdge.Router;
 
@@ -35,23 +36,23 @@ public static class ServiceCollectionExtensions
         OpsOptions options = new();
         optionsAction?.Invoke(options);
 
-        InternalGlobalSetting.HeartbeatShouldAckZero = options.HeartbeatShouldAckZero;
+        GlobalSettings.HeartbeatShouldAckZero = options.HeartbeatShouldAckZero;
 
         if (options.TagTriggerConditionValue > 0)
         {
-            InternalGlobalSetting.TagTriggerConditionValue = options.TagTriggerConditionValue;
+            GlobalSettings.TagTriggerConditionValue = options.TagTriggerConditionValue;
         }
         if (options.Siemens_PDUSizeS1500 > 0)
         {
-            InternalGlobalSetting.SiemensS7NetOption.S1500_PDUSize = options.Siemens_PDUSizeS1500;
+            GlobalSettings.SiemensS7NetOptions.S1500_PDUSize = options.Siemens_PDUSizeS1500;
         }
         if (options.Siemens_PDUSizeS1200 > 0)
         {
-            InternalGlobalSetting.SiemensS7NetOption.S1200_PDUSize = options.Siemens_PDUSizeS1200;
+            GlobalSettings.SiemensS7NetOptions.S1200_PDUSize = options.Siemens_PDUSizeS1200;
         }
         if (options.Siemens_PDUSizeS300 > 0)
         {
-            InternalGlobalSetting.SiemensS7NetOption.S300_PDUSize = options.Siemens_PDUSizeS300;
+            GlobalSettings.SiemensS7NetOptions.S300_PDUSize = options.Siemens_PDUSizeS300;
         }
 
         return builder;

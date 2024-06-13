@@ -1,7 +1,7 @@
 ﻿using ThingsEdge.Contrib.Http.Configuration;
-using ThingsEdge.Contrib.Http.Forwarder;
+using ThingsEdge.Contrib.Http.Forwarders;
 using ThingsEdge.Contrib.Http.Health;
-using ThingsEdge.Router.Forwarder;
+using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.Router;
 
@@ -24,17 +24,19 @@ public static class IHttpRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 HTTP 转发处理服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 添加 HTTP 数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
+    /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="HttpForwarder"/> 注册的生命周期。</param>
+    /// <param name="lifetime"></param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpForwarder(this IRouterBuilder builder,
+    public static IRouterBuilder AddHttpTriggerForwarder<TForwarder>(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "HttpDestination")
+        where TForwarder : IRequestForwarder
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
@@ -44,8 +46,8 @@ public static class IHttpRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.HTTP.ToString(), typeof(HttpForwarder), lifetime));
-            ForwarderRegisterKeys.Default.Register(ForworderSource.HTTP.ToString());
+            services.Add(ServiceDescriptor.DescribeKeyed(typeof(IRequestForwarder), "HTTP", typeof(TForwarder), lifetime));
+            ForwarderRegisterHub.Default.Register("HTTP");
 
             // 配置 HttpClient
             services.AddHttpClient(ForwarderConstants.HttpClientName, (sp, httpClient) =>
@@ -81,5 +83,21 @@ public static class IHttpRouterBuilderExtensions
         });
 
         return builder;
+    }
+
+    /// <summary>
+    /// 添加 HTTP 数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="postDelegate">配置后更改委托</param>
+    /// <param name="lifetime"></param>
+    /// <param name="configName">配置名称</param>
+    /// <returns></returns>
+    public static IRouterBuilder AddHttpTriggerForwarder(this IRouterBuilder builder,
+        Action<RESTfulDestinationOptions>? postDelegate = null,
+        ServiceLifetime lifetime = ServiceLifetime.Transient,
+        string configName = "HttpDestination")
+    {
+        return builder.AddHttpTriggerForwarder<HttpForwarder>(postDelegate, lifetime, configName);
     }
 }

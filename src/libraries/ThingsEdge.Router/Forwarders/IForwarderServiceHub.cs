@@ -1,10 +1,10 @@
-﻿namespace ThingsEdge.Router.Forwarder;
+﻿namespace ThingsEdge.Router.Forwarders;
 
 /// <summary>
 /// 注册的 Forwarder 对象服务关键字。
 /// </summary>
 /// <remarks>采用 <see cref="ServiceDescriptor.ServiceKey"/> 获取服务对象。</remarks>
-public interface IForwarderServiceKeys
+public interface IForwarderServiceHub
 {
     /// <summary>
     /// 获取注册的所有服务关键字。

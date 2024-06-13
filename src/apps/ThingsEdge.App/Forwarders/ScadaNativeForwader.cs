@@ -1,7 +1,7 @@
 ﻿using ThingsEdge.App.Handlers;
 using ThingsEdge.Contracts;
 using ThingsEdge.Contracts.Variables;
-using ThingsEdge.Router.Forwarder;
+using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.App.Forwarders;
 
@@ -9,7 +9,7 @@ namespace ThingsEdge.App.Forwarders;
 /// 本地转发服务接口。
 /// </summary>
 /// <remarks>一般用于处理主数据。</remarks>
-internal sealed class ScadaNativeForwader : INativeForwarder
+internal sealed class ScadaNativeForwader : IRequestForwarderHandler
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger _logger;
@@ -20,18 +20,12 @@ internal sealed class ScadaNativeForwader : INativeForwarder
         _logger = logger;
     }
 
-    public async Task<ResponseMessage> SendAsync(RequestMessage message, CancellationToken cancellationToken = default)
+    public async Task<ResponseMessage> HandleAsync(RequestMessage message, CancellationToken cancellationToken = default)
     {
         ResponseMessage response = new()
         {
             Request = message,
         };
-
-        // 只处理 Trigger 触发数据。
-        if (message.Flag != TagFlag.Trigger)
-        {
-            return response;
-        }
 
         Dictionary<string, Type> map = new() { 
             { "PLC_Archive_Sign", typeof(ArchiveHandler) },

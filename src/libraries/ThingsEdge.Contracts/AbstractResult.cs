@@ -6,7 +6,7 @@
 public class AbstractResult
 {
     /// <summary>
-    /// 状态码。
+    /// 错误码。
     /// </summary>
     public int Code { get; set; }
 
@@ -16,7 +16,7 @@ public class AbstractResult
     public string? ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
-    /// 返回是否成功。
+    /// 返回是否成功, 默认 0 表示成功。
     /// </summary>
     /// <returns></returns>
     public virtual bool IsSuccess()

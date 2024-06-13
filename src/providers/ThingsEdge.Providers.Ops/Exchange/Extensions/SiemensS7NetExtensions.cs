@@ -1,5 +1,5 @@
 ﻿using Ops.Communication.Profinet.Siemens;
-using ThingsEdge.Providers.Ops.Configuration;
+using ThingsEdge.Providers.Ops.Internal;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -28,9 +28,9 @@ public static class SiemensS7NetExtensions
             ? maxPDUSize 
             : siemensS7Net.CurrentPlc switch
             {
-                SiemensPLCS.S1500 or SiemensPLCS.S400 => InternalGlobalSetting.SiemensS7NetOption.S1500_PDUSize,
-                SiemensPLCS.S1200 => InternalGlobalSetting.SiemensS7NetOption.S1200_PDUSize,
-                SiemensPLCS.S300 => InternalGlobalSetting.SiemensS7NetOption.S300_PDUSize,
+                SiemensPLCS.S1500 or SiemensPLCS.S400 => GlobalSettings.SiemensS7NetOptions.S1500_PDUSize,
+                SiemensPLCS.S1200 => GlobalSettings.SiemensS7NetOptions.S1200_PDUSize,
+                SiemensPLCS.S300 => GlobalSettings.SiemensS7NetOptions.S300_PDUSize,
                 SiemensPLCS.S200 or SiemensPLCS.S200Smart => 0,
                 _ => 0,
             };

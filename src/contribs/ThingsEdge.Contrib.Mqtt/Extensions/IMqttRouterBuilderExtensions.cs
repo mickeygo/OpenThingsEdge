@@ -1,23 +1,25 @@
-﻿using ThingsEdge.Contrib.Mqtt.Forwarder;
+﻿using ThingsEdge.Contrib.Mqtt.Forwarders;
 using ThingsEdge.Contrib.Mqtt.Transport;
-using ThingsEdge.Router.Forwarder;
+using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.Router;
 
 public static class IMqttRouterBuilderExtensions
 {
     /// <summary>
-    /// 添加 MQTT 客户端转发处理服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 添加 MQTT 客户端数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
+    /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="MqttClientForwarder"/> 注册的生命周期。</param>
+    /// <param name="lifetime"></param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttClientForwarder(this IRouterBuilder builder,
+    public static IRouterBuilder AddMqttTriggerForwarder<TForwarder>(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "MqttBroker")
+        where TForwarder : IRequestForwarder
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
@@ -27,8 +29,8 @@ public static class IMqttRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.MQTT.ToString(), typeof(MqttClientForwarder), lifetime));
-            ForwarderRegisterKeys.Default.Register(ForworderSource.MQTT.ToString());
+            services.Add(ServiceDescriptor.DescribeKeyed(typeof(IRequestForwarder), "MQTT", typeof(TForwarder), lifetime));
+            ForwarderRegisterHub.Default.Register("MQTT");
 
             // 注册并启动托管的 MQTT 客户端
             services.AddSingleton<IMQTTManagedClient, MQTTManagedClient>(sp =>
@@ -41,5 +43,21 @@ public static class IMqttRouterBuilderExtensions
         });
 
         return builder;
+    }
+
+    /// <summary>
+    /// 添加 MQTT 客户端数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="postDelegate">配置后更改委托</param>
+    /// <param name="lifetime"></param>
+    /// <param name="configName">MQTT Broker 配置名称</param>
+    /// <returns></returns>
+    public static IRouterBuilder AddMqttTriggerForwarder(this IRouterBuilder builder,
+        Action<MQTTClientOptions>? postDelegate = null,
+        ServiceLifetime lifetime = ServiceLifetime.Transient,
+        string configName = "MqttBroker")
+    {
+        return builder.AddMqttTriggerForwarder<MqttClientForwarder>(postDelegate, lifetime, configName);
     }
 }

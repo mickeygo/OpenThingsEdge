@@ -1,8 +1,9 @@
 ﻿using ThingsEdge.Providers.Ops.Configuration;
 using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Exchange;
+using ThingsEdge.Providers.Ops.Internal;
 using ThingsEdge.Providers.Ops.Snapshot;
-using ThingsEdge.Router.Forwarder;
+using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.Providers.Ops.Handlers;
 
@@ -12,17 +13,17 @@ namespace ThingsEdge.Providers.Ops.Handlers;
 internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
 {
     private readonly ITagDataSnapshot _tagDataSnapshot;
-    private readonly IForwarderFactory _forwarderFactory;
+    private readonly IRequestForwarderProvider _requestForwarderProvider;
     private readonly OpsConfig _config;
     private readonly ILogger _logger;
 
     public TriggerHandler(ITagDataSnapshot tagDataSnapshot,
-        IForwarderFactory forwarderFactory,
+        IRequestForwarderProvider requestForwarderProvider,
         IOptions<OpsConfig> config,
         ILogger<TriggerHandler> logger)
     {
         _tagDataSnapshot = tagDataSnapshot;
-        _forwarderFactory = forwarderFactory;
+        _requestForwarderProvider = requestForwarderProvider;
         _config = config.Value;
         _logger = logger;
     }
@@ -79,8 +80,15 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             return;
         }
 
+        // 获取注册的发送请求对象，没有注册则后续不处理。
+        var requestForwarder = _requestForwarderProvider.GetForwarder();
+        if (requestForwarder == null) 
+        { 
+            return;
+        }
+
         // 发送消息。
-        var result = await _forwarderFactory.SendAsync(message, cancellationToken).ConfigureAwait(false);
+        var result = await requestForwarder.SendAsync(message, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
             _logger.LogError("[Trigger] 推送消息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
@@ -181,6 +189,6 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ChangeWhenEqTriggerCondValue(int tagCode)
     {
-        return tagCode == InternalGlobalSetting.TagTriggerConditionValue ? 0 : tagCode;
+        return tagCode == GlobalSettings.TagTriggerConditionValue ? 0 : tagCode;
     }
 }

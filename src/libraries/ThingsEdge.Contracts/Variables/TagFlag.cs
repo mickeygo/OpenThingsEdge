@@ -28,8 +28,8 @@ public enum TagFlag
     /// 该标记值改变时，只会触发一次数据发送行为。此行为会接收响应结果，同时响应状态会更新此标记值。
     /// </summary>
     /// <remarks>
-    /// Trigger 会监听信号标识的变化，信号标识的数据类型必须为 <see cref="TagDataType.Bit"/>、<see cref="TagDataType.Byte"/>、<see cref="TagDataType.Word"/> 
-    /// 或 <see cref="TagDataType.Int"/> 其中一种，只有在值为 true 或 1 时才会触发。
+    /// Trigger 会监听信号标识的变化，信号标识的数据类型必须 <see cref="TagDataType.Int"/> 或 <see cref="TagDataType.Byte"/>，
+    /// 只有在值与设定的 TagTriggerConditionValue 值相同时才会触发，默认为 1。
     /// </remarks>
     [Description("触发")]
     Trigger = 2,

@@ -1,4 +1,6 @@
-﻿namespace ThingsEdge.Contrib.Http.Configuration;
+﻿using System.Text.Json.Serialization;
+
+namespace ThingsEdge.Contrib.Http.Configuration;
 
 /// <summary>
 /// 基于 RESTful 格式的目标服务参数选项。
@@ -49,5 +51,6 @@ public sealed class RESTfulDestinationOptions
     /// <summary>
     /// 自定义目标服务接收数据的地址，未设置会使用 RequestUrl 值代替。
     /// </summary>
+    [JsonIgnore]
     public Func<RESTfulForwardRouterArgs, string>? RequestUrlFunc;
 }

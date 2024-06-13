@@ -1,6 +1,6 @@
 ﻿using ThingsEdge.Common;
 using ThingsEdge.Router.Devices;
-using ThingsEdge.Router.Forwarder;
+using ThingsEdge.Router.Forwarders;
 using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Router;
@@ -70,26 +70,26 @@ public static class IRouterBuilderExtensions
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(new ServiceDescriptor(typeof(IDeviceHeartbeatApi), typeof(TDeviceHeartHandler), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(IDeviceHeartbeatApi), typeof(TDeviceHeartHandler), lifetime));
         });
 
         return builder;
     }
 
     /// <summary>
-    /// 添加本地的转发处理服务，其中 <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 添加本地的转发处理服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
+    /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"><see cref="IForwarder"/> 与 <see cref="NativeForwarderWrapper"/> 以及 <typeparamref name="TNativeForwarder"/> 注册的生命周期。</param>
+    /// <param name="lifetime"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeForwarder<TNativeForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
-        where TNativeForwarder : INativeForwarder
+    public static IRouterBuilder AddNativeTriggerForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+        where TForwarder : IRequestForwarderHandler
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(new ServiceDescriptor(typeof(INativeForwarder), typeof(TNativeForwarder), lifetime));
-            services.Add(new ServiceDescriptor(typeof(IForwarder), ForworderSource.Native.ToString(), typeof(NativeForwarderWrapper), lifetime));
-            ForwarderRegisterKeys.Default.Register(ForworderSource.Native.ToString());
+            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarder), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarder), typeof(RequestForwarderWrapper), lifetime));
         });
 
         return builder;
@@ -98,16 +98,17 @@ public static class IRouterBuilderExtensions
     /// <summary>
     /// 添加通知消息处理服务，其中 <see cref="TagFlag.Notice"/> 会发布此事件。
     /// </summary>
-    /// <typeparam name="TNoticeHandler"></typeparam>
+    /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"><typeparamref name="TNoticeHandler"/> 注册的生命周期。</param>
+    /// <param name="lifetime"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNoticePostedHandler<TNoticeHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
-       where TNoticeHandler : INoticePostedApi
+    public static IRouterBuilder AddNativeNoticeForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+        where TForwarder : INotificationForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(new ServiceDescriptor(typeof(INoticePostedApi), typeof(TNoticeHandler), lifetime));
+            ForwarderRegisterHub.Default.Register("Native");
+            services.Add(ServiceDescriptor.DescribeKeyed(typeof(INotificationForwarder), "Native", typeof(TForwarder), lifetime));
         });
 
         return builder;
@@ -125,7 +126,7 @@ public static class IRouterBuilderExtensions
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(new ServiceDescriptor(typeof(ICurveFilePostedApi), typeof(TCurveFileHandler), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(ICurveFilePostedApi), typeof(TCurveFileHandler), lifetime));
         });
 
         return builder;
@@ -135,19 +136,13 @@ public static class IRouterBuilderExtensions
     /// 注册基于 MediatR 的事件总线。
     /// </summary>
     /// <param name="builder"></param>
-    /// <param name="assemblies">注册事件属于的程序集集合。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddEventBus(this IRouterBuilder builder, params Assembly[] assemblies)
+    public static IRouterBuilder AddEventBus(this IRouterBuilder builder)
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
             services.AddEventBusPublisher(); // 注入 EventBus 事件发布器。
-
-            Assembly[] assemblies2 = assemblies?.Length > 0
-                ? [.. builder.EventAssemblies, .. assemblies]
-                : [.. builder.EventAssemblies];
-
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies2));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies([.. builder.EventAssemblies]));
         });
 
         return builder;

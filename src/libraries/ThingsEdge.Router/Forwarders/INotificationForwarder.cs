@@ -1,10 +1,10 @@
-﻿namespace ThingsEdge.Router.Interfaces;
+﻿namespace ThingsEdge.Router.Forwarders;
 
 /// <summary>
-/// 通知数据发布接口，只针对于 <see cref="TagFlag.Notice"/>。
+/// 通知数据传送接口，其中仅有 <see cref="TagFlag.Notice"/> 会发布此事件。
 /// </summary>
 /// <remarks>服务端采用 <see cref="ServiceLifetime.Scoped"/> 作用域来解析服务。</remarks>
-public interface INoticePostedApi
+public interface INotificationForwarder
 {
     /// <summary>
     /// 发送通知。
@@ -13,5 +13,5 @@ public interface INoticePostedApi
     /// <param name="lastMasterPayloadData">最近一次记录的标记主数据，没有则为 null</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task NotifyAsync(RequestMessage requestMessage, PayloadData? lastMasterPayloadData, CancellationToken cancellationToken);
+    Task PublishAsync(RequestMessage requestMessage, PayloadData? lastMasterPayloadData, CancellationToken cancellationToken = default);
 }

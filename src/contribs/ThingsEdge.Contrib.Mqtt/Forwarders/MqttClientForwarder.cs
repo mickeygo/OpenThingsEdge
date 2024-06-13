@@ -1,16 +1,14 @@
 ﻿using ThingsEdge.Contrib.Mqtt.Transport;
-using ThingsEdge.Router.Forwarder;
+using ThingsEdge.Router.Forwarders;
 using ThingsEdge.Router.Transport.MQTT;
 
-namespace ThingsEdge.Contrib.Mqtt.Forwarder;
+namespace ThingsEdge.Contrib.Mqtt.Forwarders;
 
-internal sealed class MqttClientForwarder : IForwarder
+internal sealed class MqttClientForwarder : IRequestForwarder
 {
     private readonly IMQTTManagedClient _managedMqttClient;
     private readonly MQTTClientOptions _mqttClientOptions;
     private readonly ILogger _logger;
-
-    public ForworderSource Source => ForworderSource.MQTT;
 
     public MqttClientForwarder(IMQTTManagedClient managedMqttClient,
         IOptions<MQTTClientOptions> mqttClientOptions,
@@ -47,6 +45,6 @@ internal sealed class MqttClientForwarder : IForwarder
         {
             State = _mqttClientOptions.SuccessCode,
             Request = message,
-        }, Source);
+        });
     }
 }
