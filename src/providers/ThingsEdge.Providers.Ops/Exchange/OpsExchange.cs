@@ -1,7 +1,7 @@
 ﻿using ThingsEdge.Providers.Ops.Events;
 using ThingsEdge.Providers.Ops.Exchange.Monitors;
-using ThingsEdge.Router;
 using ThingsEdge.Router.Devices;
+using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// 通知数据转发包装类。
 /// </summary>
-internal sealed class NotificationForwarderWrapper(IServiceScopeFactory serviceScopeFactory) : INotificationForwarderWrapper, ISingletonDependency
+internal sealed class NotificationForwarderWrapper(IServiceProvider serviceProvider) : INotificationForwarderWrapper, ISingletonDependency
 {
     public async Task PublishAsync(RequestMessage message, PayloadData? lastMasterPayloadData, CancellationToken cancellationToken = default)
     {
@@ -13,8 +13,7 @@ internal sealed class NotificationForwarderWrapper(IServiceScopeFactory serviceS
             return;
         }
 
-        using var scope = serviceScopeFactory.CreateScope();
-        var forwarders = keys.Select(key => scope.ServiceProvider.GetRequiredKeyedService<INotificationForwarder>(key)).ToArray();
+        var forwarders = keys.Select(key => serviceProvider.GetRequiredKeyedService<INotificationForwarder>(key)).ToArray();
         if (forwarders.Length > 0)
         {
             var tasks = forwarders.Select(s => s.PublishAsync(message, lastMasterPayloadData, cancellationToken));

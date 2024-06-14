@@ -1,6 +1,6 @@
 ﻿namespace ThingsEdge.Providers.Ops.Snapshot;
 
-internal sealed class InternalTagDataSnapshot : ITagDataSnapshot, ISingletonDependency
+internal sealed class TagDataSnapshotImpl : ITagDataSnapshot, ISingletonDependency
 {
     private readonly ConcurrentDictionary<string, PayloadDataSnapshot> _map = new();
     private long _version;

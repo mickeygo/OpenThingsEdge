@@ -15,6 +15,7 @@ internal sealed class HeartbeatHandler(IEventPublisher publisher, ITagDataSnapsh
         // 设置标记值快照。
         tagDataSnapshot.Change(notification.Self);
 
+        // 若是信号值，则中断处理。
         if (notification.IsOnlySign)
         {
             return;

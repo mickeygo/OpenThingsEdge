@@ -1,13 +1,13 @@
 ﻿using ThingsEdge.Contracts;
 using ThingsEdge.Router.Forwarders;
 
-namespace ThingsEdge.App.Handlers;
+namespace ThingsEdge.App.Forwarders;
 
 /// <summary>
 /// 通知消息处理。
 /// </summary>
 /// <remarks>一般用于处理通知消息数据，如警报、设备状态信息。</remarks>
-internal sealed class NoticeApiHandler(ILogger<NoticeApiHandler> logger) : INotificationForwarder
+internal sealed class ScadaNotificationForwarder(ILogger<ScadaNotificationForwarder> logger) : INotificationForwarder
 {
     public Task PublishAsync(RequestMessage message, PayloadData? lastMasterPayloadData, CancellationToken cancellationToken = default)
     {

@@ -1,7 +1,6 @@
 ﻿using ThingsEdge.Common;
 using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Forwarders;
-using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.Router;
 
@@ -61,16 +60,15 @@ public static class IRouterBuilderExtensions
     /// <summary>
     /// 添加设备心跳信息处理服务，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件。
     /// </summary>
-    /// <typeparam name="TDeviceHeartHandler"></typeparam>
+    /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"><typeparamref name="TDeviceHeartHandler"/>注册的生命周期。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddDeviceHeartbeatHandler<TDeviceHeartHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
-        where TDeviceHeartHandler : IDeviceHeartbeatApi
+    public static IRouterBuilder AddDeviceHeartbeatForwarder<TForwarder>(this IRouterBuilder builder)
+        where TForwarder : INativeHeartbeatForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(ServiceDescriptor.Describe(typeof(IDeviceHeartbeatApi), typeof(TDeviceHeartHandler), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(INativeHeartbeatForwarder), typeof(TForwarder), ServiceLifetime.Transient));
         });
 
         return builder;
@@ -81,15 +79,14 @@ public static class IRouterBuilderExtensions
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeTriggerForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+    public static IRouterBuilder AddNativeTriggerForwarder<TForwarder>(this IRouterBuilder builder)
         where TForwarder : IRequestForwarderHandler
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarder), lifetime));
-            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarder), typeof(RequestForwarderProxy), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarder), ServiceLifetime.Transient));
+            services.AddSingleton<IRequestForwarder, RequestForwarderProxy>();
         });
 
         return builder;
@@ -100,15 +97,14 @@ public static class IRouterBuilderExtensions
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeNoticeForwarder<TForwarder>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
+    public static IRouterBuilder AddNativeNoticeForwarder<TForwarder>(this IRouterBuilder builder)
         where TForwarder : INotificationForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
             ForwarderRegisterHub.Default.Register("Native");
-            services.Add(ServiceDescriptor.DescribeKeyed(typeof(INotificationForwarder), "Native", typeof(TForwarder), lifetime));
+            services.Add(ServiceDescriptor.DescribeKeyed(typeof(INotificationForwarder), "Native", typeof(TForwarder), ServiceLifetime.Transient));
         });
 
         return builder;
@@ -117,16 +113,15 @@ public static class IRouterBuilderExtensions
     /// <summary>
     /// 添加曲线文件信息处理服务，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
     /// </summary>
-    /// <typeparam name="TCurveFileHandler"></typeparam>
+    /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
-    /// <param name="lifetime"><typeparamref name="TCurveFileHandler"/>注册的生命周期。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddCurveFilePostedHandler<TCurveFileHandler>(this IRouterBuilder builder, ServiceLifetime lifetime = ServiceLifetime.Transient)
-       where TCurveFileHandler : ICurveFilePostedApi
+    public static IRouterBuilder AddCurveFileForwarder<TForwarder>(this IRouterBuilder builder)
+       where TForwarder : INativeCurveFileForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(ServiceDescriptor.Describe(typeof(ICurveFilePostedApi), typeof(TCurveFileHandler), lifetime));
+            services.Add(ServiceDescriptor.Describe(typeof(INativeCurveFileForwarder), typeof(TForwarder), ServiceLifetime.Transient));
         });
 
         return builder;

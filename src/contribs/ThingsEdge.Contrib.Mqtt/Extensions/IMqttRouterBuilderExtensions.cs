@@ -12,12 +12,10 @@ public static class IMqttRouterBuilderExtensions
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"></param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddMqttTriggerForwarder<TForwarder>(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
-        ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "MqttBroker")
         where TForwarder : IRequestForwarder
     {
@@ -29,7 +27,7 @@ public static class IMqttRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            services.Add(ServiceDescriptor.DescribeKeyed(typeof(IRequestForwarder), "MQTT", typeof(TForwarder), lifetime));
+            services.Add(ServiceDescriptor.DescribeKeyed(typeof(IRequestForwarder), "MQTT", typeof(TForwarder), ServiceLifetime.Transient));
             ForwarderRegisterHub.Default.Register("MQTT");
 
             // 注册并启动托管的 MQTT 客户端
@@ -50,14 +48,12 @@ public static class IMqttRouterBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"></param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddMqttTriggerForwarder(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
-        ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "MqttBroker")
     {
-        return builder.AddMqttTriggerForwarder<MqttRequestForwarder>(postDelegate, lifetime, configName);
+        return builder.AddMqttTriggerForwarder<MqttRequestForwarder>(postDelegate, configName);
     }
 }

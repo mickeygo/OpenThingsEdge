@@ -1,20 +1,19 @@
 ﻿using ThingsEdge.Router.Events;
-using ThingsEdge.Router.Interfaces;
+using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.Router.Handlers;
 
 /// <summary>
 /// 曲线文件信息处理器。
 /// </summary>
-internal sealed class CurveFilePostedHandler(IServiceScopeFactory serviceScopeFactory) : INotificationHandler<CurveFilePostedEvent>
+internal sealed class CurveFilePostedHandler(IServiceProvider serviceProvider) : INotificationHandler<CurveFilePostedEvent>
 {
     public async Task Handle(CurveFilePostedEvent notification, CancellationToken cancellationToken)
     {
-        using var scope = serviceScopeFactory.CreateScope();
-        var curveFilePostedApi = scope.ServiceProvider.GetService<ICurveFilePostedApi>();
-        if (curveFilePostedApi != null)
+        var forwarder = serviceProvider.GetService<INativeCurveFileForwarder>();
+        if (forwarder != null)
         {
-            await curveFilePostedApi.PostAsync(notification, cancellationToken).ConfigureAwait(false);
+            await forwarder.PostAsync(notification, cancellationToken).ConfigureAwait(false);
         }
     }
 }

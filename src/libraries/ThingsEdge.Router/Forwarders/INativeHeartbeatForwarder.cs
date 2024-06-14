@@ -1,10 +1,9 @@
-﻿namespace ThingsEdge.Router.Interfaces;
+﻿namespace ThingsEdge.Router.Forwarders;
 
 /// <summary>
 /// 设备心跳接口，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件 。
 /// </summary>
-/// <remarks>服务端采用 <see cref="ServiceLifetime.Scoped"/> 作用域来解析服务。</remarks>
-public interface IDeviceHeartbeatApi
+public interface INativeHeartbeatForwarder
 {
     /// <summary>
     /// 更改设备心跳状态。

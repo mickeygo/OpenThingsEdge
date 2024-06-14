@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.Router;
+﻿namespace ThingsEdge.Router.Interfaces;
 
 /// <summary>
 /// 交换机引擎。

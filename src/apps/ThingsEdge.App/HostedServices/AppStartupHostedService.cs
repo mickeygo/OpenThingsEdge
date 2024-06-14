@@ -1,5 +1,5 @@
 ﻿using ThingsEdge.App.Configuration;
-using ThingsEdge.Router;
+using ThingsEdge.Router.Interfaces;
 
 namespace ThingsEdge.App.HostedServices;
 

@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.App.Handlers;
 using ThingsEdge.Contracts;
-using ThingsEdge.Contracts.Variables;
 using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.App.Forwarders;
@@ -9,12 +8,12 @@ namespace ThingsEdge.App.Forwarders;
 /// 本地转发服务接口。
 /// </summary>
 /// <remarks>一般用于处理主数据。</remarks>
-internal sealed class ScadaNativeForwader : IRequestForwarderHandler
+internal sealed class ScadaRequestForwader : IRequestForwarderHandler
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger _logger;
 
-    public ScadaNativeForwader(IServiceScopeFactory serviceScopeFactory, ILogger<ScadaNativeForwader> logger)
+    public ScadaRequestForwader(IServiceScopeFactory serviceScopeFactory, ILogger<ScadaRequestForwader> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;

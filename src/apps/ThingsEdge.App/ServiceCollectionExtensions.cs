@@ -1,6 +1,5 @@
 ﻿using ThingsEdge.App.Configuration;
 using ThingsEdge.App.Forwarders;
-using ThingsEdge.App.Handlers;
 using ThingsEdge.App.HostedServices;
 using ThingsEdge.Common.DependencyInjection;
 using ThingsEdge.Router;
@@ -18,9 +17,9 @@ public static class ServiceCollectionExtensions
     {
         hostBuilder.AddThingsEdgeRouter()
             .AddDeviceFileProvider()
-            .AddDeviceHeartbeatHandler<HeartbeatApiHandler>()
-            .AddNativeTriggerForwarder<ScadaNativeForwader>()
-            .AddNativeNoticeForwarder<NoticeApiHandler>()
+            .AddDeviceHeartbeatForwarder<HeartbeatForwarder>()
+            .AddNativeTriggerForwarder<ScadaRequestForwader>()
+            .AddNativeNoticeForwarder<ScadaNotificationForwarder>()
             .AddOpsProvider(option =>
             {
                 option.Siemens_PDUSizeS1500 = 396; // S7 PDU 长度

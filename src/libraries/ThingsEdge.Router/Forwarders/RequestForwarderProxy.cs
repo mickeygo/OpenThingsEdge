@@ -3,14 +3,13 @@
 /// <summary>
 /// 请求数据发送处理代理类。
 /// </summary>
-internal sealed class RequestForwarderProxy(IServiceScopeFactory serviceScopeFactory) : IRequestForwarder
+internal sealed class RequestForwarderProxy(IServiceProvider serviceProvider) : IRequestForwarder
 {
     public async Task<ResponseResult> SendAsync(RequestMessage message, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            var forwarder = scope.ServiceProvider.GetRequiredService<IRequestForwarderHandler>();
+            var forwarder = serviceProvider.GetRequiredService<IRequestForwarderHandler>();
             var resp = await forwarder.HandleAsync(message, cancellationToken);
             return ResponseResult.FromOk(resp);
         }

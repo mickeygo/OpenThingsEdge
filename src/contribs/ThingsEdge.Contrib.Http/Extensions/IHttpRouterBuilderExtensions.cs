@@ -20,6 +20,7 @@ public static class IHttpRouterBuilderExtensions
             services.AddSingleton<IHealthCheckHandlePolicy, HealthCheckHandlePolicy>();
             services.AddHostedService<DestinationHealthCheckHostedService>();
         });
+        builder.AddEventBusRegisterAssembly(typeof(IHttpRouterBuilderExtensions).Assembly);
         return builder;
     }
 
@@ -29,12 +30,10 @@ public static class IHttpRouterBuilderExtensions
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"></param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddHttpTriggerForwarder<TForwarder>(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
-        ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "HttpDestination")
         where TForwarder : IRequestForwarder
     {
@@ -46,7 +45,7 @@ public static class IHttpRouterBuilderExtensions
                 services.PostConfigure(postDelegate);
             }
 
-            services.Add(ServiceDescriptor.DescribeKeyed(typeof(IRequestForwarder), "HTTP", typeof(TForwarder), lifetime));
+            services.Add(ServiceDescriptor.DescribeKeyed(typeof(IRequestForwarder), "HTTP", typeof(TForwarder), ServiceLifetime.Transient));
             ForwarderRegisterHub.Default.Register("HTTP");
 
             // 配置 HttpClient
@@ -90,14 +89,12 @@ public static class IHttpRouterBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
-    /// <param name="lifetime"></param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
     public static IRouterBuilder AddHttpTriggerForwarder(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
-        ServiceLifetime lifetime = ServiceLifetime.Transient,
         string configName = "HttpDestination")
     {
-        return builder.AddHttpTriggerForwarder<HttpRequestForwarder>(postDelegate, lifetime, configName);
+        return builder.AddHttpTriggerForwarder<HttpRequestForwarder>(postDelegate, configName);
     }
 }

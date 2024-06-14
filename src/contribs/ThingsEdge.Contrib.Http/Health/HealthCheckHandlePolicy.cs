@@ -4,19 +4,12 @@ using ThingsEdge.Contrib.Http.Model;
 
 namespace ThingsEdge.Contrib.Http.Health;
 
-internal sealed class HealthCheckHandlePolicy : IHealthCheckHandlePolicy
+internal sealed class HealthCheckHandlePolicy(IEventPublisher publisher) : IHealthCheckHandlePolicy
 {
-    private readonly IEventPublisher _publisher;
-
-    public HealthCheckHandlePolicy(IEventPublisher publisher)
-    {
-        _publisher = publisher;
-    }
-
     public async Task HandleAsync(DestinationHealthState healthState, CancellationToken cancellationToken)
     {
         // 通知目标服务健康状况。
-        await _publisher.Publish(new DestinationHealthCheckedEvent { HealthState = healthState }, 
+        await publisher.Publish(new DestinationHealthCheckedEvent(healthState), 
             PublishStrategy.AsyncContinueOnException, cancellationToken).ConfigureAwait(false);
     }
 }
