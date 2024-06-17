@@ -80,13 +80,12 @@ public static class IRouterBuilderExtensions
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeTriggerForwarder<TForwarder>(this IRouterBuilder builder)
-        where TForwarder : IRequestForwarderHandler
+    public static IRouterBuilder AddNativeRequestForwarder<TForwarder>(this IRouterBuilder builder)
+        where TForwarder : IRequestForwarder
     {
         builder.Builder.ConfigureServices(services =>
         {
-            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarder), ServiceLifetime.Transient));
-            services.AddSingleton<IRequestForwarder, RequestForwarderProxy>();
+            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarder), typeof(TForwarder), ServiceLifetime.Transient));
         });
 
         return builder;
@@ -122,6 +121,24 @@ public static class IRouterBuilderExtensions
         builder.Builder.ConfigureServices(services =>
         {
             services.Add(ServiceDescriptor.Describe(typeof(INativeCurveFileForwarder), typeof(TForwarder), ServiceLifetime.Transient));
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加本地的转发处理器，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// </summary>
+    /// <typeparam name="TForwarderHandler"></typeparam>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static IRouterBuilder AddNativeRequestForwarderHandler<TForwarderHandler>(this IRouterBuilder builder)
+        where TForwarderHandler : IRequestForwarderHandler
+    {
+        builder.Builder.ConfigureServices(services =>
+        {
+            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarderHandler), ServiceLifetime.Transient));
+            services.AddSingleton<IRequestForwarder, RequestForwarderProxy>();
         });
 
         return builder;

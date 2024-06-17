@@ -32,7 +32,7 @@ public static class IHttpRouterBuilderExtensions
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpTriggerForwarder<TForwarder>(this IRouterBuilder builder,
+    public static IRouterBuilder AddHttpRequestForwarder<TForwarder>(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
         string configName = "HttpDestination")
         where TForwarder : IRequestForwarder
@@ -91,10 +91,10 @@ public static class IHttpRouterBuilderExtensions
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpTriggerForwarder(this IRouterBuilder builder,
+    public static IRouterBuilder AddHttpRequestForwarder(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
         string configName = "HttpDestination")
     {
-        return builder.AddHttpTriggerForwarder<HttpRequestForwarder>(postDelegate, configName);
+        return builder.AddHttpRequestForwarder<HttpRequestForwarder>(postDelegate, configName);
     }
 }

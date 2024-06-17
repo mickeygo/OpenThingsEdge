@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         hostBuilder.AddThingsEdgeRouter()
             .AddDeviceFileProvider()
             .AddDeviceHeartbeatForwarder<HeartbeatForwarder>()
-            .AddNativeTriggerForwarder<ScadaRequestForwader>()
+            .AddNativeRequestForwarderHandler<ScadaRequestForwaderHandler>()
             .AddNativeNoticeForwarder<ScadaNotificationForwarder>()
             .AddOpsProvider(option =>
             {

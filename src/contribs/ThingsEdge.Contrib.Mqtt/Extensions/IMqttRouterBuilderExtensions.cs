@@ -14,7 +14,7 @@ public static class IMqttRouterBuilderExtensions
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttTriggerForwarder<TForwarder>(this IRouterBuilder builder,
+    public static IRouterBuilder AddMqttRequestForwarder<TForwarder>(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
         string configName = "MqttBroker")
         where TForwarder : IRequestForwarder
@@ -50,10 +50,10 @@ public static class IMqttRouterBuilderExtensions
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttTriggerForwarder(this IRouterBuilder builder,
+    public static IRouterBuilder AddMqttRequestForwarder(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
         string configName = "MqttBroker")
     {
-        return builder.AddMqttTriggerForwarder<MqttRequestForwarder>(postDelegate, configName);
+        return builder.AddMqttRequestForwarder<MqttRequestForwarder>(postDelegate, configName);
     }
 }
