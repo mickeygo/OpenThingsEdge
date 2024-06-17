@@ -7,14 +7,14 @@ namespace ThingsEdge.Router;
 public static class IMqttRouterBuilderExtensions
 {
     /// <summary>
-    /// 添加 MQTT 客户端数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 使用 MQTT 客户端数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttRequestForwarder<TForwarder>(this IRouterBuilder builder,
+    public static IRouterBuilder UseMqttRequestForwarder<TForwarder>(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
         string configName = "MqttBroker")
         where TForwarder : IRequestForwarder
@@ -44,16 +44,16 @@ public static class IMqttRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 MQTT 客户端数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 使用 MQTT 客户端数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">MQTT Broker 配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddMqttRequestForwarder(this IRouterBuilder builder,
+    public static IRouterBuilder UseMqttRequestForwarder(this IRouterBuilder builder,
         Action<MQTTClientOptions>? postDelegate = null,
         string configName = "MqttBroker")
     {
-        return builder.AddMqttRequestForwarder<MqttRequestForwarder>(postDelegate, configName);
+        return builder.UseMqttRequestForwarder<MqttRequestForwarder>(postDelegate, configName);
     }
 }

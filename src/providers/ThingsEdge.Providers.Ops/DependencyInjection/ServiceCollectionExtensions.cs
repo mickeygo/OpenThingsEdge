@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
     /// <param name="optionsAction">参数选项设置</param>
     /// <param name="configName">配置节点名称，默认为 "Ops"。</param>
     /// <returns></returns>
-    public static IRouterBuilder AddOpsProvider(this IRouterBuilder builder, Action<OpsOptions>? optionsAction = null, string configName = "Ops")
+    public static IRouterBuilder UseOpsProvider(this IRouterBuilder builder, Action<OpsOptions>? optionsAction = null, string configName = "Ops")
     {
         // 注册 EventBus 程序集
         builder.AddEventBusRegisterAssembly(typeof(ServiceCollectionExtensions).Assembly);

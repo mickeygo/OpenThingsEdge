@@ -1,5 +1,4 @@
-﻿using ThingsEdge.Common;
-using ThingsEdge.Router.Devices;
+﻿using ThingsEdge.Router.Devices;
 using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.Router;
@@ -26,11 +25,11 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加设备基于本地文件的提供者。
+    /// 使用设备基于本地文件的提供者。
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddDeviceFileProvider(this IRouterBuilder builder)
+    public static IRouterBuilder UseDeviceFileProvider(this IRouterBuilder builder)
     {
         builder.Builder.ConfigureServices(services =>
         {
@@ -41,12 +40,12 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加自定义设备提供者。
+    /// 使用自定义设备提供者。
     /// </summary>
     /// <typeparam name="TDeviceProvider"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddDeviceCustomProvider<TDeviceProvider>(this IRouterBuilder builder)
+    public static IRouterBuilder UseDeviceCustomProvider<TDeviceProvider>(this IRouterBuilder builder)
         where TDeviceProvider : class, IDeviceProvider
     {
         builder.Builder.ConfigureServices(services =>
@@ -58,12 +57,12 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加设备心跳信息处理服务，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件。
+    /// 使用设备心跳信息处理服务，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddDeviceHeartbeatForwarder<TForwarder>(this IRouterBuilder builder)
+    public static IRouterBuilder UseDeviceHeartbeatForwarder<TForwarder>(this IRouterBuilder builder)
         where TForwarder : INativeHeartbeatForwarder
     {
         builder.Builder.ConfigureServices(services =>
@@ -75,12 +74,12 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加本地的转发处理服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 使用本地的转发处理服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeRequestForwarder<TForwarder>(this IRouterBuilder builder)
+    public static IRouterBuilder UseNativeRequestForwarder<TForwarder>(this IRouterBuilder builder)
         where TForwarder : IRequestForwarder
     {
         builder.Builder.ConfigureServices(services =>
@@ -92,12 +91,12 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加通知消息处理服务，其中 <see cref="TagFlag.Notice"/> 会发布此事件。
+    /// 使用通知消息处理服务，其中 <see cref="TagFlag.Notice"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeNoticeForwarder<TForwarder>(this IRouterBuilder builder)
+    public static IRouterBuilder UseNativeNoticeForwarder<TForwarder>(this IRouterBuilder builder)
         where TForwarder : INotificationForwarder
     {
         builder.Builder.ConfigureServices(services =>
@@ -110,12 +109,12 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加曲线文件信息处理服务，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// 使用曲线文件信息处理服务，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddCurveFileForwarder<TForwarder>(this IRouterBuilder builder)
+    public static IRouterBuilder UseCurveFileForwarder<TForwarder>(this IRouterBuilder builder)
        where TForwarder : INativeCurveFileForwarder
     {
         builder.Builder.ConfigureServices(services =>
@@ -127,34 +126,18 @@ public static class IRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加本地的转发处理器，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 使用本地的转发处理器，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarderHandler"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IRouterBuilder AddNativeRequestForwarderHandler<TForwarderHandler>(this IRouterBuilder builder)
+    public static IRouterBuilder UseNativeRequestForwarderHandler<TForwarderHandler>(this IRouterBuilder builder)
         where TForwarderHandler : IRequestForwarderHandler
     {
         builder.Builder.ConfigureServices(services =>
         {
             services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarderHandler), ServiceLifetime.Transient));
             services.AddSingleton<IRequestForwarder, RequestForwarderProxy>();
-        });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 注册基于 MediatR 的事件总线。
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static IRouterBuilder AddEventBus(this IRouterBuilder builder)
-    {
-        builder.Builder.ConfigureServices((hostBuilder, services) =>
-        {
-            services.AddEventBusPublisher(); // 注入 EventBus 事件发布器。
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies([.. builder.EventAssemblies]));
         });
 
         return builder;

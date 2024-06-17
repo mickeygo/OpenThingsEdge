@@ -25,14 +25,14 @@ public static class IHttpRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 HTTP 数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 使用 HTTP 数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpRequestForwarder<TForwarder>(this IRouterBuilder builder,
+    public static IRouterBuilder UseHttpRequestForwarder<TForwarder>(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
         string configName = "HttpDestination")
         where TForwarder : IRequestForwarder
@@ -85,16 +85,16 @@ public static class IHttpRouterBuilderExtensions
     }
 
     /// <summary>
-    /// 添加 HTTP 数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+    /// 使用 HTTP 数据发送服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="postDelegate">配置后更改委托</param>
     /// <param name="configName">配置名称</param>
     /// <returns></returns>
-    public static IRouterBuilder AddHttpRequestForwarder(this IRouterBuilder builder,
+    public static IRouterBuilder UseHttpRequestForwarder(this IRouterBuilder builder,
         Action<RESTfulDestinationOptions>? postDelegate = null,
         string configName = "HttpDestination")
     {
-        return builder.AddHttpRequestForwarder<HttpRequestForwarder>(postDelegate, configName);
+        return builder.UseHttpRequestForwarder<HttpRequestForwarder>(postDelegate, configName);
     }
 }

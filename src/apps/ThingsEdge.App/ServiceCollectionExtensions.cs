@@ -15,16 +15,17 @@ public static class ServiceCollectionExtensions
     /// <param name="assemblies">注册 EventBus 的程序集</param>
     public static void AddScada(this IHostBuilder hostBuilder)
     {
-        hostBuilder.AddThingsEdgeRouter()
-            .AddDeviceFileProvider()
-            .AddDeviceHeartbeatForwarder<HeartbeatForwarder>()
-            .AddNativeRequestForwarderHandler<ScadaRequestForwaderHandler>()
-            .AddNativeNoticeForwarder<ScadaNotificationForwarder>()
-            .AddOpsProvider(option =>
-            {
-                option.Siemens_PDUSizeS1500 = 396; // S7 PDU 长度
-            })
-            .AddEventBus();
+        hostBuilder.AddThingsEdgeRouter(builder =>
+        {
+            builder.UseDeviceFileProvider()
+                .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
+                .UseNativeRequestForwarderHandler<ScadaRequestForwaderHandler>()
+                .UseNativeNoticeForwarder<ScadaNotificationForwarder>()
+                .UseOpsProvider(option =>
+                {
+                    option.Siemens_PDUSizeS1500 = 396; // S7 PDU 长度
+                });
+        });
 
         hostBuilder.ConfigureServices((context, services) =>
         {

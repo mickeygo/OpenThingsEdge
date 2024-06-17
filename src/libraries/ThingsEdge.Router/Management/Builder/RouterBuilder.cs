@@ -1,13 +1,8 @@
 ﻿namespace ThingsEdge.Router.Management;
 
-internal sealed class RouterBuilder : IRouterBuilder
+internal sealed class RouterBuilder(IHostBuilder builder) : IRouterBuilder
 {
-    public RouterBuilder(IHostBuilder builder)
-    {
-        Builder = builder ?? throw new ArgumentNullException(nameof(builder));
-    }
-
-    public IHostBuilder Builder { get; }
+    public IHostBuilder Builder { get; } = builder ?? throw new ArgumentNullException(nameof(builder));
 
     public ICollection<Assembly> EventAssemblies { get; } = [];
 }
