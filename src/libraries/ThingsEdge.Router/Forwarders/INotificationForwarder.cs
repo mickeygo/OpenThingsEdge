@@ -3,7 +3,6 @@
 /// <summary>
 /// 通知数据传送接口，其中仅有 <see cref="TagFlag.Notice"/> 会发布此事件。
 /// </summary>
-/// <remarks>服务端采用 <see cref="ServiceLifetime.Scoped"/> 作用域来解析服务。</remarks>
 public interface INotificationForwarder
 {
     /// <summary>
