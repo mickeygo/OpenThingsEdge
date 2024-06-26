@@ -103,6 +103,7 @@ public static class SiemensS7NetExtensions
             // 非数组
             if (!tag.IsArray())
             {
+                // .NET 中 byte 是无符号类型，sbyte 是有符号类型。
                 object data = tag.DataType switch
                 {
                     TagDataType.Bit => siemensS7Net.ByteTransform.TransBool(result.Content, index),
@@ -113,8 +114,12 @@ public static class SiemensS7NetExtensions
                     TagDataType.DInt => siemensS7Net.ByteTransform.TransInt32(result.Content, index),
                     TagDataType.Real => siemensS7Net.ByteTransform.TransSingle(result.Content, index),
                     TagDataType.LReal => siemensS7Net.ByteTransform.TransDouble(result.Content, index),
-                    TagDataType.String or TagDataType.S7String => siemensS7Net.ByteTransform.TransString(result.Content, index + 2, result.Content[index + 1], Encoding.ASCII),
-                    TagDataType.S7WString => siemensS7Net.ByteTransform.TransString(result.Content, index + 4, (result.Content[2] * 256 + result.Content[3]) * 2, Encoding.Unicode),
+                    TagDataType.String or TagDataType.S7String => result.Content[index + 1] > 0 
+                        ? siemensS7Net.ByteTransform.TransString(result.Content, index + 2, result.Content[index + 1], Encoding.ASCII)
+                        : string.Empty,
+                    TagDataType.S7WString => (result.Content[2] + result.Content[3]) > 0
+                        ? siemensS7Net.ByteTransform.TransString(result.Content, index + 4, (result.Content[2] * 256 + result.Content[3]) * 2, Encoding.Unicode)
+                        : string.Empty,
                     _ => throw new NotImplementedException(),
                 };
                 tagPayload.Value = data;
