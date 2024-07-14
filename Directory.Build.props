@@ -17,7 +17,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     
-    <PackageVersion>0.3.3</PackageVersion>
+    <PackageVersion>0.3.4</PackageVersion>
     <Version>$(PackageVersion)</Version>
 	  <Authors>Gang.Yang</Authors>
 	  <Company>OpsLab</Company>

@@ -1,5 +1,4 @@
-﻿using ThingsEdge.Contracts.Variables;
-using ThingsEdge.Router.Forwarders;
+﻿using ThingsEdge.Router.Forwarders;
 
 namespace ThingsEdge.App.Forwarders;
 
@@ -8,9 +7,9 @@ namespace ThingsEdge.App.Forwarders;
 /// </summary>
 internal sealed class HeartbeatForwarder(ILogger<HeartbeatForwarder> logger) : INativeHeartbeatForwarder
 {
-    public Task ChangeAsync(string channelName, Device device, Tag tag, bool isOnline, CancellationToken cancellationToken)
+    public Task ChangeAsync(HeartbeatForwarderContext context, CancellationToken cancellationToken)
     {
-        logger.LogInformation("心跳监控，设备名称：{DeviceName}，状态：{State}", device.Name, isOnline ? "on" : "off");
+        logger.LogInformation("心跳监控，设备名称：{DeviceName}，状态：{State}", context.Device.Name, context.IsOnline ? "on" : "off");
 
         return Task.CompletedTask;
     }

@@ -13,7 +13,14 @@ internal sealed class DeviceHeartbeatHandler(IServiceProvider serviceProvider) :
         var forwarder = serviceProvider.GetService<INativeHeartbeatForwarder>();
         if (forwarder != null)
         {
-            await forwarder.ChangeAsync(notification.ChannelName, notification.Device, notification.Tag, notification.IsOnline, cancellationToken).ConfigureAwait(false);
+            HeartbeatForwarderContext context = new()
+            {
+                ChannelName = notification.ChannelName,
+                Device = notification.Device,
+                Tag = notification.Tag,
+                IsOnline = notification.IsOnline,
+            };
+            await forwarder.ChangeAsync(context, cancellationToken).ConfigureAwait(false);
         }
     }
 }
