@@ -68,9 +68,6 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             message.Values.AddRange(normalPaydatas!);
         }
 
-        // 先提取上一次触发点的值
-        var lastPayload = _tagDataSnapshot.Get(notification.Tag.TagId)?.Data;
-
         // 设置标记值快照。
         _tagDataSnapshot.Change(message.Values);
 

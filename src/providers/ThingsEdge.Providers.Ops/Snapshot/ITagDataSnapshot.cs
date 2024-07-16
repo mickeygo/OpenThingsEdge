@@ -6,11 +6,6 @@
 public interface ITagDataSnapshot
 {
     /// <summary>
-    /// 数据更改版本。清空数据后版本会重置。
-    /// </summary>
-    long Version { get; }
-
-    /// <summary>
     /// 获取标记值，若标记不存在，则返回 null。
     /// </summary>
     /// <param name="tagId">标记 Id</param>
