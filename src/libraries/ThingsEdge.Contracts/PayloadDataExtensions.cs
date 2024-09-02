@@ -11,7 +11,7 @@ namespace ThingsEdge.Contracts;
 /// <summary>
 /// <see cref="PayloadData"/> 直接提取数据的扩展对象。
 /// </summary>
-public static class PayloadDataExtensions
+public static partial class PayloadDataExtensions
 {
     /// <summary>
     /// 提取对象文本值，若值不为 <see cref="string"/> 类型时，会字符串转换。

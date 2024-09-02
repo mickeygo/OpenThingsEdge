@@ -20,7 +20,7 @@ public sealed class ResponseResult : AbstractResult<ResponseMessage>
         return new ResponseResult() { Code = code, ErrorMessage = errMessage };
     }
 
-    public static ResponseResult FromError(ErrorCode code, string errMessage)
+    public static ResponseResult FromError(ErrCode code, string errMessage)
     {
         return new ResponseResult() { Code = (int)code, ErrorMessage = errMessage };
     }

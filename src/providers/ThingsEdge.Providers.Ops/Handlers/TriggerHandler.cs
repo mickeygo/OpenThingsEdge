@@ -53,7 +53,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
             // 写入错误代码到设备
             if (notification.Connector.CanConnect)
             {
-                var (ok5, _, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrorCode.MultiReadItemError).ConfigureAwait(false);
+                var (ok5, _, err5) = await notification.Connector.WriteAsync(notification.Tag, (int)ErrCode.MultiReadItemError).ConfigureAwait(false);
                 if (!ok5)
                 {
                     _logger.LogError("[Trigger] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
@@ -148,7 +148,7 @@ internal sealed class TriggerHandler : INotificationHandler<TriggerEvent>
         }
 
         // 回写标记状态。
-        int tagCode = hasError ? (int)ErrorCode.CallbackItemError : result.Data!.State;
+        int tagCode = hasError ? (int)ErrCode.CallbackItemError : result.Data!.State;
         var (ok3, formatedData3, err3) = await notification.Connector.WriteAsync(notification.Tag, ChangeWhenEqTriggerCondValue(tagCode)).ConfigureAwait(false);
         if (!ok3)
         {

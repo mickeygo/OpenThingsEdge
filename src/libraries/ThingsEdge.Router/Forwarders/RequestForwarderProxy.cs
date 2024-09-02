@@ -15,11 +15,11 @@ internal sealed class RequestForwarderProxy(IServiceProvider serviceProvider) : 
         }
         catch (OperationCanceledException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HandleRequestTimedOut, $"数据请求处理超时，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrCode.HandleRequestTimedOut, $"数据请求处理超时，错误：{ex.Message}");
         }
         catch (Exception ex)
         {
-            return ResponseResult.FromError(ErrorCode.HandleError, $"数据处理服务异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrCode.HandleError, $"数据处理服务异常，错误：{ex.Message}");
         }
     }
 }

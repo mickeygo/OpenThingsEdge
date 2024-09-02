@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-    <PackageVersion Include="MediatR" Version="12.3.0" />
+    <PackageVersion Include="MediatR" Version="12.4.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
@@ -19,7 +19,7 @@
     <PackageVersion Include="Moq" Version="4.20.70" />
     <PackageVersion Include="Nito.AsyncEx.Context" Version="5.1.2" />
     <PackageVersion Include="OneOf.Extended" Version="3.0.271" />
-    <PackageVersion Include="Ops.Communication" Version="0.7.36" />
+    <PackageVersion Include="Ops.Communication" Version="0.7.37" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.2" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />

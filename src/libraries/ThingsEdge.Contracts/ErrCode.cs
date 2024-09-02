@@ -7,7 +7,7 @@
 /// <para>0 成功</para>
 /// <para>401~499 内部详细错误</para>
 /// </remarks>
-public enum ErrorCode
+public enum ErrCode
 {
     /// <summary>
     /// 成功。

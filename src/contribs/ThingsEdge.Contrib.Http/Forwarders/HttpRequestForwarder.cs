@@ -45,7 +45,7 @@ internal sealed class HttpRequestForwarder : IRequestForwarder
             var resp = await httpClient.PostAsync(requestUri, jsonContent, cancellationToken).ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode)
             {
-                return ResponseResult.FromError(ErrorCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}");
+                return ResponseResult.FromError(ErrCode.HttpResponseError, $"调用 HTTP 服务出错，返回状态码：{resp.StatusCode}");
             }
 
             var ret = await resp.Content.ReadFromJsonAsync<HttpResponseResult>(cancellationToken).ConfigureAwait(false);
@@ -64,19 +64,19 @@ internal sealed class HttpRequestForwarder : IRequestForwarder
         }
         catch (OperationCanceledException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpRequestTimedOut, $"[HttpNotificationForwarder] 请求 HTTP 服务超时，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrCode.HttpRequestTimedOut, $"[HttpNotificationForwarder] 请求 HTTP 服务超时，错误：{ex.Message}");
         }
         catch (HttpRequestException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpRequestError, $"[HttpNotificationForwarder] 调用 HTTP 服务请求异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrCode.HttpRequestError, $"[HttpNotificationForwarder] 调用 HTTP 服务请求异常，错误：{ex.Message}");
         }
         catch (JsonException ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpResponseJsonError, $"[HttpNotificationForwarder] 调用 HTTP 服务解析返回数据异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrCode.HttpResponseJsonError, $"[HttpNotificationForwarder] 调用 HTTP 服务解析返回数据异常，错误：{ex.Message}");
         }
         catch (Exception ex)
         {
-            return ResponseResult.FromError(ErrorCode.HttpError, $"[HttpNotificationForwarder] 调用 HTTP 服务异常，错误：{ex.Message}");
+            return ResponseResult.FromError(ErrCode.HttpError, $"[HttpNotificationForwarder] 调用 HTTP 服务异常，错误：{ex.Message}");
         }
     }
 }

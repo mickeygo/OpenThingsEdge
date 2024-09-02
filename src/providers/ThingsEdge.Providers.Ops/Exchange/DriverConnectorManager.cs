@@ -1,10 +1,10 @@
-﻿using Ops.Communication.Core.Net;
+﻿using Ops.Communication;
+using Ops.Communication.Core.Net;
 using Ops.Communication.Modbus;
 using Ops.Communication.Profinet.AllenBradley;
 using Ops.Communication.Profinet.Melsec;
 using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Profinet.Siemens;
-using ErrCode = Ops.Communication.ErrorCode;
 
 namespace ThingsEdge.Providers.Ops.Exchange;
 
@@ -128,11 +128,11 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
 
-                            if (code is (int)ErrCode.SocketConnectionAborted
-                                    or (int)ErrCode.RemoteClosedConnection
-                                    or (int)ErrCode.ReceiveDataTimeout
-                                    or (int)ErrCode.SocketSendException
-                                    or (int)ErrCode.SocketReceiveException)
+                            if (code is (int)OpsErrorCode.SocketConnectionAborted
+                                    or (int)OpsErrorCode.RemoteClosedConnection
+                                    or (int)OpsErrorCode.ReceiveDataTimeout
+                                    or (int)OpsErrorCode.SocketSendException
+                                    or (int)OpsErrorCode.SocketReceiveException)
                             {
                                 _logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
                             }

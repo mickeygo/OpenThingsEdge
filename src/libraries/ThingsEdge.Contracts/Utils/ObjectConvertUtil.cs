@@ -12,11 +12,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static bool[] ToBooleanArray(object obj)
-    {
-        var (ok, arr) = ToReal<bool>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToBoolean);
-    }
+    public static bool[] ToBooleanArray(object obj) => ToArray(obj, Convert.ToBoolean);
 
     /// <summary>
     /// 转换为 <see cref="byte"/> 类型数组。
@@ -25,11 +21,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static byte[] ToByteArray(object obj)
-    {
-        var (ok, arr) = ToReal<byte>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToByte);
-    }
+    public static byte[] ToByteArray(object obj) => ToArray(obj, Convert.ToByte);
 
     /// <summary>
     /// 转换为 <see cref="ushort"/> 类型数组。
@@ -38,11 +30,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static ushort[] ToUInt16Array(object obj)
-    {
-        var (ok, arr) = ToReal<ushort>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToUInt16);
-    }
+    public static ushort[] ToUInt16Array(object obj) => ToArray(obj, Convert.ToUInt16);
 
     /// <summary>
     /// 转换为 <see cref="short"/> 类型数组。
@@ -51,11 +39,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static short[] ToInt16Array(object obj)
-    {
-        var (ok, arr) = ToReal<short>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToInt16);
-    }
+    public static short[] ToInt16Array(object obj) => ToArray(obj, Convert.ToInt16);
 
     /// <summary>
     /// 转换为 <see cref="uint"/> 类型数组。
@@ -64,11 +48,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static uint[] ToUInt32Array(object obj)
-    {
-        var (ok, arr) = ToReal<uint>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToUInt32);
-    }
+    public static uint[] ToUInt32Array(object obj) => ToArray(obj, Convert.ToUInt32);
 
     /// <summary>
     /// 转换为 <see cref="int"/> 类型数组。
@@ -77,11 +57,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static int[] ToInt32Array(object obj)
-    {
-        var (ok, arr) = ToReal<int>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToInt32);
-    }
+    public static int[] ToInt32Array(object obj) => ToArray(obj, Convert.ToInt32);
 
     /// <summary>
     /// 转换为 <see cref="float"/> 类型数组。
@@ -90,11 +66,7 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static float[] ToSingleArray(object obj)
-    {
-        var (ok, arr) = ToReal<float>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToSingle);
-    }
+    public static float[] ToSingleArray(object obj) => ToArray(obj, Convert.ToSingle);
 
     /// <summary>
     /// 转换为 <see cref="double"/> 类型数组。
@@ -103,10 +75,22 @@ public static class ObjectConvertUtil
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static double[] ToDoubleArray(object obj)
+    public static double[] ToDoubleArray(object obj) => ToArray(obj, Convert.ToDouble);
+
+    /// <summary>
+    /// 将对象转换为指定类型的数据。
+    /// </summary>
+    /// <typeparam name="TTarget"></typeparam>
+    /// <param name="obj"></param>
+    /// <param name="convert">使用 System.Convert 进行转换</param>
+    /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static TTarget[] ToArray<TTarget>(object obj, Func<object?, TTarget> convert)
+        where TTarget : struct
     {
-        var (ok, arr) = ToReal<double>(obj);
-        return ok ? arr! : ToConvert(obj, Convert.ToDouble);
+        var (ok, arr) = ToReal<TTarget>(obj);
+        return ok ? arr! : ToConvert(obj, convert);
     }
 
     private static (bool, T[]?) ToReal<T>(object obj)
@@ -124,7 +108,7 @@ public static class ObjectConvertUtil
         return (false, default);
     }
 
-    private static T[] ToConvert<T>(object obj, Func<object?, T> func)
+    private static T[] ToConvert<T>(object obj, Func<object?, T> convert)
     {
         if (obj is not IEnumerable enumerable)
         {
@@ -134,7 +118,14 @@ public static class ObjectConvertUtil
         List<T> result = [];
         foreach (var item in enumerable)
         {
-            result.Add(func(item));
+            if (item is T item2)
+            {
+                result.Add(item2);
+            }
+            else
+            {
+                result.Add(convert(item));
+            }
         }
 
         return [.. result];
