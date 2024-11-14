@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
+    <ProjectReference Include="..\..\src\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
   </ItemGroup>
 
 </Project>

@@ -23,26 +23,25 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static string GetString(this PayloadData payload, bool isTrimString = true)
     {
-        var v = payload.GetValue();
-        return v.Match(
-            t0 => isTrimString ? t0.Trim('\0', ' ') : t0,
-            t1 => t1.ToString(),
-            t2 => t2.ToString(),
-            t3 => t3.ToString(),
-            t4 => t4.ToString(),
-            t5 => t5.ToString(),
-            t6 => t6.ToString(),
-            t7 => t7.ToString(),
-            t8 => t8.ToString(),
-            t9 => Arr2Str(t9),
-            t10 => Arr2Str(t10),
-            t11 => Arr2Str(t11),
-            t12 => Arr2Str(t12),
-            t13 => Arr2Str(t13),
-            t14 => Arr2Str(t14),
-            t15 => Arr2Str(t15),
-            t16 => Arr2Str(t16)
-            );
+        if (payload.DataType is TagDataType.String or TagDataType.S7String or TagDataType.S7WString)
+        {
+            string s = (string)payload.Value;
+            return isTrimString ? s.Trim('\0', ' ') : s;
+        }
+
+        bool array = payload.IsArray();
+        return payload.DataType switch
+        {
+            TagDataType.Bit => !array ? payload.GetBit().ToString() : Arr2Str(payload.GetBitArray()),
+            TagDataType.Byte => !array ? payload.GetByte().ToString() : Arr2Str(payload.GetByteArray()),
+            TagDataType.Word => !array ? payload.GetWord().ToString() : Arr2Str(payload.GetWordArray()),
+            TagDataType.DWord => !array ? payload.GetDWord().ToString() : Arr2Str(payload.GetDWordArray()),
+            TagDataType.Int => !array ? payload.GetInt().ToString() : Arr2Str(payload.GetIntArray()),
+            TagDataType.DInt => !array ? payload.GetDInt().ToString() : Arr2Str(payload.GetDIntArray()),
+            TagDataType.Real => !array ? payload.GetReal().ToString() : Arr2Str(payload.GetRealArray()),
+            TagDataType.LReal => !array ? payload.GetLReal().ToString() : Arr2Str(payload.GetLRealArray()),
+            _ => throw new FormatException(),
+        };
     }
 
     /// <summary>
@@ -55,26 +54,41 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static string[] GetStringArray(this PayloadData payload, bool isTrimString = true)
     {
-        var v = payload.GetValue();
-        return v.Match(
-            t0 => [isTrimString ? t0.Trim('\0', ' ') : t0],
-            t1 => [t1.ToString()],
-            t2 => [t2.ToString()],
-            t3 => [t3.ToString()],
-            t4 => [t4.ToString()],
-            t5 => [t5.ToString()],
-            t6 => [t6.ToString()],
-            t7 => [t7.ToString()],
-            t8 => [t8.ToString()],
-            t9 => t9.Select(s => s.ToString()).ToArray(),
-            t10 => t10.Select(s => s.ToString()).ToArray(),
-            t11 => t11.Select(s => s.ToString()).ToArray(),
-            t12 => t12.Select(s => s.ToString()).ToArray(),
-            t13 => t13.Select(s => s.ToString()).ToArray(),
-            t14 => t14.Select(s => s.ToString()).ToArray(),
-            t15 => t15.Select(s => s.ToString()).ToArray(),
-            t16 => t16.Select(s => s.ToString()).ToArray()
-            );
+        if (payload.DataType is TagDataType.String or TagDataType.S7String or TagDataType.S7WString)
+        {
+            string s = (string)payload.Value;
+            return [isTrimString ? s.Trim('\0', ' ') : s];
+        }
+
+        bool array = payload.IsArray();
+        return payload.DataType switch
+        {
+            TagDataType.Bit => !array ? [payload.GetBit().ToString()] : payload.GetBitArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.Byte => !array ? [payload.GetByte().ToString()] : payload.GetByteArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.Word => !array ? [payload.GetWord().ToString()] : payload.GetWordArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.DWord => !array ? [payload.GetDWord().ToString()] : payload.GetDWordArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.Int => !array ? [payload.GetInt().ToString()] : payload.GetIntArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.DInt => !array ? [payload.GetDInt().ToString()] : payload.GetDIntArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.Real => !array ? [payload.GetReal().ToString()] : payload.GetRealArray().Select(s => s.ToString()).ToArray(),
+            TagDataType.LReal => !array ? [payload.GetLReal().ToString()] : payload.GetLRealArray().Select(s => s.ToString()).ToArray(),
+            _ => throw new FormatException(),
+        };
+    }
+
+    /// <summary>
+    /// 获取原始的字符串数据。
+    /// 数据类型必须为 <see cref="TagDataType.String"/>、 <see cref="TagDataType.S7String"/> 或  <see cref="TagDataType.S7WString"/> 类型的值。
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
+    public static string GetRawString(this PayloadData payload)
+    {
+        if (payload.DataType is not (TagDataType.String or TagDataType.S7String or TagDataType.S7WString))
+        {
+            throw new FormatException();
+        }
+
+        return (string)payload.Value;
     }
 
     /// <summary>
@@ -85,8 +99,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Bit GetBit(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT1;
+        if (payload.DataType != TagDataType.Bit)
+        {
+            throw new FormatException();
+        }
+
+        return (Bit)payload.Value;
     }
 
     /// <summary>
@@ -97,8 +115,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static byte GetByte(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT2;
+        if (payload.DataType != TagDataType.Byte)
+        {
+            throw new FormatException();
+        }
+
+        return ((byte[])payload.Value)[0];
     }
 
     /// <summary>
@@ -109,8 +131,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Word GetWord(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT3;
+        if (payload.DataType != TagDataType.Word)
+        {
+            throw new FormatException();
+        }
+
+        return (Word)payload.Value;
     }
 
     /// <summary>
@@ -121,8 +147,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static DWord GetDWord(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT4;
+        if (payload.DataType != TagDataType.DWord)
+        {
+            throw new FormatException();
+        }
+
+        return (DWord)payload.Value;
     }
 
     /// <summary>
@@ -133,8 +163,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Int GetInt(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT5;
+        if (payload.DataType != TagDataType.Int)
+        {
+            throw new FormatException();
+        }
+
+        return (Int)payload.Value;
     }
 
     /// <summary>
@@ -145,8 +179,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static DInt GetDInt(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT6;
+        if (payload.DataType != TagDataType.DInt)
+        {
+            throw new FormatException();
+        }
+
+        return (DInt)payload.Value;
     }
 
     /// <summary>
@@ -157,8 +195,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Real GetReal(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT7;
+        if (payload.DataType != TagDataType.Real)
+        {
+            throw new FormatException();
+        }
+
+        return (Real)payload.Value;
     }
 
     /// <summary>
@@ -169,8 +211,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static LReal GetLReal(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT8;
+        if (payload.DataType != TagDataType.LReal)
+        {
+            throw new FormatException();
+        }
+
+        return (LReal)payload.Value;
     }
 
     /// <summary>
@@ -181,8 +227,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Bit[] GetBitArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT9;
+        if (payload.DataType != TagDataType.Bit)
+        {
+            throw new FormatException();
+        }
+
+        return (Bit[])payload.Value;
     }
 
     /// <summary>
@@ -193,8 +243,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static byte[] GetByteArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT10;
+        if (payload.DataType != TagDataType.Byte)
+        {
+            throw new FormatException();
+        }
+
+        return (byte[])payload.Value;
     }
 
     /// <summary>
@@ -205,8 +259,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Word[] GetWordArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT11;
+        if (payload.DataType != TagDataType.Word)
+        {
+            throw new FormatException();
+        }
+
+        return (Word[])payload.Value;
     }
 
     /// <summary>
@@ -217,8 +275,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static DWord[] GetDWordArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT12;
+        if (payload.DataType != TagDataType.DWord)
+        {
+            throw new FormatException();
+        }
+
+        return (DWord[])payload.Value;
     }
 
     /// <summary>
@@ -229,8 +291,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Int[] GetIntArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT13;
+        if (payload.DataType != TagDataType.Int)
+        {
+            throw new FormatException();
+        }
+
+        return (Int[])payload.Value;
     }
 
     /// <summary>
@@ -241,8 +307,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static DInt[] GetDIntArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT14;
+        if (payload.DataType != TagDataType.DInt)
+        {
+            throw new FormatException();
+        }
+
+        return (DInt[])payload.Value;
     }
 
     /// <summary>
@@ -253,8 +323,12 @@ public static partial class PayloadDataExtensions
     /// <exception cref="FormatException"></exception>
     public static Real[] GetRealArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT15;
+        if (payload.DataType != TagDataType.Real)
+        {
+            throw new FormatException();
+        }
+
+        return (Real[])payload.Value;
     }
 
     /// <summary>
@@ -263,46 +337,14 @@ public static partial class PayloadDataExtensions
     /// </summary>
     /// <returns></returns>
     /// <exception cref="FormatException"></exception>
-    public static LReal[] GetDRealArray(this PayloadData payload)
+    public static LReal[] GetLRealArray(this PayloadData payload)
     {
-        var v = payload.GetValue();
-        return v.AsT16;
-    }
-
-    private static OneOf<string, Bit, byte, Word, DWord, Int, DInt, Real, LReal, Bit[], byte[], Word[], DWord[], Int[], DInt[], Real[], LReal[]> GetValue(this PayloadData payload)
-    {
-        // 单值
-        if (!payload.IsArray()) // payload.Value.GetType().IsArray
+        if (payload.DataType != TagDataType.LReal)
         {
-            return payload.DataType switch
-            {
-                TagDataType.Bit => (Bit)payload.Value,
-                TagDataType.Byte => ((byte[])payload.Value)[0],// byte 都为数组
-                TagDataType.Word => (Word)payload.Value,
-                TagDataType.DWord => (DWord)payload.Value,
-                TagDataType.Int => (Int)payload.Value,
-                TagDataType.DInt => (DInt)payload.Value,
-                TagDataType.Real => (Real)payload.Value,
-                TagDataType.LReal => (LReal)payload.Value,
-                TagDataType.String or TagDataType.S7String or TagDataType.S7WString => (string)payload.Value,
-                _ => throw new FormatException(),
-            };
+            throw new FormatException();
         }
 
-        // 数组
-        return payload.DataType switch
-        {
-            TagDataType.Bit => (Bit[])payload.Value,
-            TagDataType.Byte => (byte[])payload.Value,
-            TagDataType.Word => (Word[])payload.Value,
-            TagDataType.DWord => (DWord[])payload.Value,
-            TagDataType.Int => (Int[])payload.Value,
-            TagDataType.DInt => (DInt[])payload.Value,
-            TagDataType.Real => (Real[])payload.Value,
-            TagDataType.LReal => (LReal[])payload.Value,
-            TagDataType.String or TagDataType.S7String or TagDataType.S7WString => (string)payload.Value,
-            _ => throw new FormatException(),
-        };
+        return (LReal[])payload.Value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

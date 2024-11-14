@@ -15,10 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\contribs\ThingsEdge.Contrib.Http\ThingsEdge.Contrib.Http.csproj" />
-    <ProjectReference Include="..\..\contribs\ThingsEdge.Contrib.Mqtt\ThingsEdge.Contrib.Mqtt.csproj" />
-    <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
-    <ProjectReference Include="..\..\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
+    <ProjectReference Include="..\..\src\contribs\ThingsEdge.Contrib.Http\ThingsEdge.Contrib.Http.csproj" />
+    <ProjectReference Include="..\..\src\contribs\ThingsEdge.Contrib.Mqtt\ThingsEdge.Contrib.Mqtt.csproj" />
+    <ProjectReference Include="..\..\src\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
+    <ProjectReference Include="..\..\src\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
   </ItemGroup>
 
   <ItemGroup>

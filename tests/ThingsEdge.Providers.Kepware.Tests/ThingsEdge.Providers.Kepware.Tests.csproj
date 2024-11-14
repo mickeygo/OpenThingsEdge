@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ThingsEdge.Common\ThingsEdge.Common.csproj" />
+    <ProjectReference Include="..\..\src\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
   </ItemGroup>
 
 </Project>

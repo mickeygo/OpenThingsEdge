@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\libraries\ThingsEdge.Contracts\ThingsEdge.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

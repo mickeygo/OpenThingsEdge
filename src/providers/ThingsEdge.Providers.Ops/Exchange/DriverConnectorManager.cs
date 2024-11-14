@@ -128,11 +128,11 @@ public sealed class DriverConnectorManager : IDisposable, ISingletonDependency
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
 
-                            if (code is (int)OpsErrorCode.SocketConnectionAborted
-                                    or (int)OpsErrorCode.RemoteClosedConnection
-                                    or (int)OpsErrorCode.ReceiveDataTimeout
-                                    or (int)OpsErrorCode.SocketSendException
-                                    or (int)OpsErrorCode.SocketReceiveException)
+                            if (code is (int)ConnErrorCode.SocketConnectionAborted
+                                    or (int)ConnErrorCode.RemoteClosedConnection
+                                    or (int)ConnErrorCode.ReceiveDataTimeout
+                                    or (int)ConnErrorCode.SocketSendException
+                                    or (int)ConnErrorCode.SocketReceiveException)
                             {
                                 _logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
                             }
