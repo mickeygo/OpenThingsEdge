@@ -15,13 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\contribs\ThingsEdge.Contrib.Http\ThingsEdge.Contrib.Http.csproj" />
-    <ProjectReference Include="..\..\src\contribs\ThingsEdge.Contrib.Mqtt\ThingsEdge.Contrib.Mqtt.csproj" />
-    <ProjectReference Include="..\..\src\providers\ThingsEdge.Providers.Kepware\ThingsEdge.Providers.Kepware.csproj" />
-    <ProjectReference Include="..\..\src\providers\ThingsEdge.Providers.Ops\ThingsEdge.Providers.Ops.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

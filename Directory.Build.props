@@ -1,6 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <PropertyGroup>
+    <!-- Style Settings -->
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!--<UsePublicApiAnalyzers>true</UsePublicApiAnalyzers>-->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
+    <!--<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>-->
+    
     <!-- Build Settings -->
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -16,11 +24,11 @@
     <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">True</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    
-    <PackageVersion>0.3.6</PackageVersion>
+
+    <!-- Version Settings -->
+    <PackageVersion>1.0.0</PackageVersion>
     <Version>$(PackageVersion)</Version>
 	  <Authors>Gang.Yang</Authors>
-	  <Company>OpsLab</Company>
+	  <Company>ThingsEdge</Company>
   </PropertyGroup>
-  
 </Project>
