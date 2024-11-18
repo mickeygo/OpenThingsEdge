@@ -7,17 +7,17 @@ namespace ThingsEdge.Communication.Profinet.Fuji;
 /// <summary>
 /// 富士SPB的辅助类
 /// </summary>
-public class FujiSPBHelper
+public static class FujiSPBHelper
 {
     /// <summary>
-    /// 将int数据转换成SPB可识别的标准的数据内容，例如 2转换为0200 , 200转换为0002
+    /// 将int数据转换成SPB可识别的标准的数据内容，例如 2转换为0200 , 200转换为0002。
     /// </summary>
     /// <param name="address">等待转换的数据内容</param>
     /// <returns>转换之后的数据内容</returns>
     public static string AnalysisIntegerAddress(int address)
     {
         var text = address.ToString("D4");
-        return text.Substring(2) + text.Substring(0, 2);
+        return string.Concat(text.AsSpan(2), text.AsSpan(0, 2));
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class FujiSPBHelper
         {
             num += bytes[i];
         }
-        return num.ToString("X4").Substring(2);
+        return num.ToString("X4")[2..];
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ public class FujiSPBHelper
     /// <returns>是否成功的结果对象</returns>
     public static OperateResult<byte[]> BuildReadCommand(byte station, string address, ushort length)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -94,6 +94,7 @@ public class FujiSPBHelper
         {
             return new OperateResult<byte[]>(StringResources.Language.TwoParametersLengthIsNotSame);
         }
+
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(':');
         stringBuilder.Append(station.ToString("X2"));
@@ -105,7 +106,7 @@ public class FujiSPBHelper
         stringBuilder.Append(address.Length.ToString("X2"));
         for (var i = 0; i < address.Length; i++)
         {
-            station = (byte)CommHelper.ExtractParameter(ref address[i], "s", station);
+            station = (byte)CommunicationHelper.ExtractParameter(ref address[i], "s", station);
             var operateResult = FujiSPBAddress.ParseFrom(address[i]);
             if (!operateResult.IsSuccess)
             {
@@ -130,7 +131,7 @@ public class FujiSPBHelper
     /// <returns>是否创建成功</returns>
     public static OperateResult<byte[]> BuildWriteByteCommand(byte station, string address, byte[] value)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -161,13 +162,18 @@ public class FujiSPBHelper
     /// <returns>是否创建成功</returns>
     public static OperateResult<byte[]> BuildWriteBoolCommand(byte station, string address, bool value)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
-        if ((address.StartsWith("X") || address.StartsWith("Y") || address.StartsWith("M") || address.StartsWith("L") || address.StartsWith("TC") || address.StartsWith("CC")) && address.IndexOf('.') < 0)
+        if ((address.StartsWith('X')
+            || address.StartsWith('Y')
+            || address.StartsWith('M')
+            || address.StartsWith('L')
+            || address.StartsWith("TC")
+            || address.StartsWith("CC")) && address.IndexOf('.') < 0)
         {
             operateResult.Content.BitIndex = operateResult.Content.AddressStart % 16;
             operateResult.Content.AddressStart = (ushort)(operateResult.Content.AddressStart / 16);
@@ -205,7 +211,7 @@ public class FujiSPBHelper
             {
                 return new OperateResult<byte[]>(Convert.ToInt32(@string, 16), GetErrorDescriptionFromCode(@string));
             }
-            if (content[content.Length - 2] == 13 && content[content.Length - 1] == 10)
+            if (content[^2] == 13 && content[^1] == 10)
             {
                 content = content.RemoveLast(2);
             }
@@ -240,9 +246,7 @@ public class FujiSPBHelper
     }
 
     /// <summary>
-    /// 批量读取PLC的数据，以字为单位，支持读取X,Y,L,M,D,TN,CN,TC,CC,R,W具体的地址范围需要根据PLC型号来确认，地址可以携带站号信息，例如：s=2;D100<br />
-    /// Read PLC data in batches, in units of words. Supports reading X, Y, L, M, D, TN, CN, TC, CC, R, W. 
-    /// The specific address range needs to be confirmed according to the PLC model, The address can carry station number information, for example: s=2;D100
+    /// 批量读取PLC的数据，以字为单位，支持读取X,Y,L,M,D,TN,CN,TC,CC,R,W具体的地址范围需要根据PLC型号来确认，地址可以携带站号信息，例如：s=2;D100。
     /// </summary>
     /// <param name="device">PLC设备通信对象</param>
     /// <param name="station">当前的站号信息</param>
@@ -252,123 +256,6 @@ public class FujiSPBHelper
     /// <remarks>
     /// 单次读取的最大的字数为105，如果读取的字数超过这个值，请分批次读取。
     /// </remarks>
-    public static OperateResult<byte[]> Read(IReadWriteDevice device, byte station, string address, ushort length)
-    {
-        var operateResult = BuildReadCommand(station, address, length);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult);
-        }
-        OperateResult<byte[]> operateResult2 = device.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-        }
-        var operateResult3 = CheckResponseData(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-        }
-        return OperateResult.CreateSuccessResult(Encoding.ASCII.GetString(operateResult3.Content.RemoveBegin(4)).ToHexBytes());
-    }
-
-    /// <summary>
-    /// 批量写入PLC的数据，以字为单位，也就是说最少2个字节信息，支持读取X,Y,L,M,D,TN,CN,TC,CC,R具体的地址范围需要根据PLC型号来确认，地址可以携带站号信息，例如：s=2;D100<br />
-    /// The data written to the PLC in batches, in units of words, that is, a minimum of 2 bytes of information. It supports reading X, Y, L, M, D, TN, CN, TC, CC, and R. 
-    /// The specific address range needs to be based on PLC model to confirm, The address can carry station number information, for example: s=2;D100
-    /// </summary>
-    /// <param name="device">PLC设备通信对象</param>
-    /// <param name="station">当前的站号信息</param>
-    /// <param name="address">地址信息，举例，D100，R200，TN100，CN200</param>
-    /// <param name="value">数据值</param>
-    /// <returns>是否写入成功</returns>
-    /// <remarks>
-    /// 单次写入的最大的字数为103个字，如果写入的数据超过这个长度，请分批次写入
-    /// </remarks>
-    public static OperateResult Write(IReadWriteDevice device, byte station, string address, byte[] value)
-    {
-        var operateResult = BuildWriteByteCommand(station, address, value);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        OperateResult<byte[]> operateResult2 = device.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        return CheckResponseData(operateResult2.Content);
-    }
-
-    /// <summary>
-    /// 批量读取PLC的Bool数据，以位为单位，支持读取X,Y,L,M,D,TN,CN,TC,CC,R,W，例如 M100, 如果是寄存器地址，可以使用D10.12来访问第10个字的12位，地址可以携带站号信息，例如：s=2;M100<br />
-    /// Read PLC's Bool data in batches, in units of bits, support reading X, Y, L, M, D, TN, CN, TC, CC, R, W, such as M100, if it is a register address, 
-    /// you can use D10. 12 to access the 12 bits of the 10th word, the address can carry station number information, for example: s=2;M100
-    /// </summary>
-    /// <param name="device">PLC设备通信对象</param>
-    /// <param name="station">当前的站号信息</param>
-    /// <param name="address">地址信息，举例：M100, D10.12</param>
-    /// <param name="length">读取的bool长度信息</param>
-    /// <returns>Bool[]的结果对象</returns>
-    public static OperateResult<bool[]> ReadBool(IReadWriteDevice device, byte station, string address, ushort length)
-    {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
-        var operateResult = FujiSPBAddress.ParseFrom(address);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult);
-        }
-        if ((address.StartsWith("X") || address.StartsWith("Y") || address.StartsWith("M") || address.StartsWith("L") || address.StartsWith("TC") || address.StartsWith("CC")) && address.IndexOf('.') < 0)
-        {
-            operateResult.Content.BitIndex = operateResult.Content.AddressStart % 16;
-            operateResult.Content.AddressStart = (ushort)(operateResult.Content.AddressStart / 16);
-        }
-        var length2 = (ushort)((operateResult.Content.GetBitIndex() + length - 1) / 16 - operateResult.Content.GetBitIndex() / 16 + 1);
-        var operateResult2 = BuildReadCommand(station2, operateResult.Content, length2);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult2);
-        }
-        OperateResult<byte[]> operateResult3 = device.ReadFromCoreServer(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult3);
-        }
-        var operateResult4 = CheckResponseData(operateResult3.Content);
-        if (!operateResult4.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult4);
-        }
-        return OperateResult.CreateSuccessResult(Encoding.ASCII.GetString(operateResult4.Content.RemoveBegin(4)).ToHexBytes().ToBoolArray()
-            .SelectMiddle(operateResult.Content.BitIndex, length));
-    }
-
-    /// <summary>
-    /// 写入一个Bool值到一个地址里，地址可以是线圈地址，也可以是寄存器地址，例如：M100, D10.12，地址可以携带站号信息，例如：s=2;D10.12<br />
-    /// Write a Bool value to an address. The address can be a coil address or a register address, for example: M100, D10.12. 
-    /// The address can carry station number information, for example: s=2;D10.12
-    /// </summary>
-    /// <param name="device">PLC设备通信对象</param>
-    /// <param name="station">当前的站号信息</param>
-    /// <param name="address">地址信息，举例：M100, D10.12</param>
-    /// <param name="value">写入的bool值</param>
-    /// <returns>是否写入成功的结果对象</returns>
-    public static OperateResult Write(IReadWriteDevice device, byte station, string address, bool value)
-    {
-        var operateResult = BuildWriteBoolCommand(station, address, value);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        OperateResult<byte[]> operateResult2 = device.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        return CheckResponseData(operateResult2.Content);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPBHelper.Read(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice device, byte station, string address, ushort length)
     {
         var command = BuildReadCommand(station, address, length);
@@ -376,7 +263,8 @@ public class FujiSPBHelper
         {
             return OperateResult.CreateFailedResult<byte[]>(command);
         }
-        var read = await device.ReadFromCoreServerAsync(command.Content);
+
+        var read = await device.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(read);
@@ -389,32 +277,28 @@ public class FujiSPBHelper
         return OperateResult.CreateSuccessResult(Encoding.ASCII.GetString(check.Content.RemoveBegin(4)).ToHexBytes());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPBHelper.Write(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.Byte[])" />
-    public static async Task<OperateResult> WriteAsync(IReadWriteDevice device, byte station, string address, byte[] value)
-    {
-        var command = BuildWriteByteCommand(station, address, value);
-        if (!command.IsSuccess)
-        {
-            return command;
-        }
-        var read = await device.ReadFromCoreServerAsync(command.Content);
-        if (!read.IsSuccess)
-        {
-            return read;
-        }
-        return CheckResponseData(read.Content);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPBHelper.ReadBool(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.UInt16)" />
+    /// <summary>
+    /// 批量读取PLC的Bool数据，以位为单位，支持读取X,Y,L,M,D,TN,CN,TC,CC,R,W，例如 M100, 如果是寄存器地址，可以使用D10.12来访问第10个字的12位，地址可以携带站号信息，例如：s=2;M100。
+    /// </summary>
+    /// <param name="device">PLC设备通信对象</param>
+    /// <param name="station">当前的站号信息</param>
+    /// <param name="address">地址信息，举例：M100, D10.12</param>
+    /// <param name="length">读取的bool长度信息</param>
+    /// <returns>Bool[]的结果对象</returns>
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice device, byte station, string address, ushort length)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var addressAnalysis = FujiSPBAddress.ParseFrom(address);
         if (!addressAnalysis.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool[]>(addressAnalysis);
         }
-        if ((address.StartsWith("X") || address.StartsWith("Y") || address.StartsWith("M") || address.StartsWith("L") || address.StartsWith("TC") || address.StartsWith("CC")) && address.IndexOf('.') < 0)
+        if ((address.StartsWith('X')
+            || address.StartsWith('Y')
+            || address.StartsWith('M')
+            || address.StartsWith('L')
+            || address.StartsWith("TC")
+            || address.StartsWith("CC")) && address.IndexOf('.') < 0)
         {
             addressAnalysis.Content.BitIndex = addressAnalysis.Content.AddressStart % 16;
             addressAnalysis.Content.AddressStart = (ushort)(addressAnalysis.Content.AddressStart / 16);
@@ -424,7 +308,7 @@ public class FujiSPBHelper
         {
             return OperateResult.CreateFailedResult<bool[]>(command);
         }
-        var read = await device.ReadFromCoreServerAsync(command.Content);
+        var read = await device.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool[]>(read);
@@ -438,7 +322,40 @@ public class FujiSPBHelper
             .SelectMiddle(addressAnalysis.Content.BitIndex, length));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPBHelper.Write(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.Boolean)" />
+    /// <summary>
+    /// 批量写入PLC的数据，以字为单位，也就是说最少2个字节信息，支持读取X,Y,L,M,D,TN,CN,TC,CC,R具体的地址范围需要根据PLC型号来确认，地址可以携带站号信息，例如：s=2;D100。
+    /// </summary>
+    /// <param name="device">PLC设备通信对象</param>
+    /// <param name="station">当前的站号信息</param>
+    /// <param name="address">地址信息，举例，D100，R200，TN100，CN200</param>
+    /// <param name="value">数据值</param>
+    /// <returns>是否写入成功</returns>
+    /// <remarks>
+    /// 单次写入的最大的字数为103个字，如果写入的数据超过这个长度，请分批次写入
+    /// </remarks>
+    public static async Task<OperateResult> WriteAsync(IReadWriteDevice device, byte station, string address, byte[] value)
+    {
+        var command = BuildWriteByteCommand(station, address, value);
+        if (!command.IsSuccess)
+        {
+            return command;
+        }
+        var read = await device.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
+        if (!read.IsSuccess)
+        {
+            return read;
+        }
+        return CheckResponseData(read.Content);
+    }
+
+    /// <summary>
+    /// 写入一个Bool值到一个地址里，地址可以是线圈地址，也可以是寄存器地址，例如：M100, D10.12，地址可以携带站号信息，例如：s=2;D10.12。
+    /// </summary>
+    /// <param name="device">PLC设备通信对象</param>
+    /// <param name="station">当前的站号信息</param>
+    /// <param name="address">地址信息，举例：M100, D10.12</param>
+    /// <param name="value">写入的bool值</param>
+    /// <returns>是否写入成功的结果对象</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice device, byte station, string address, bool value)
     {
         var command = BuildWriteBoolCommand(station, address, value);
@@ -446,7 +363,7 @@ public class FujiSPBHelper
         {
             return command;
         }
-        var read = await device.ReadFromCoreServerAsync(command.Content);
+        var read = await device.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

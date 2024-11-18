@@ -79,7 +79,7 @@ public class FujiSPBAddress : DeviceAddressDataBase
         };
         try
         {
-            fujiSPBAddress.BitIndex = CommHelper.GetBitIndexInformation(ref address);
+            fujiSPBAddress.BitIndex = CommunicationHelper.GetBitIndexInformation(ref address);
             switch (address[0])
             {
                 case 'X' or 'x':

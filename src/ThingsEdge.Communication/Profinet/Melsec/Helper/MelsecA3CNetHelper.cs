@@ -210,7 +210,7 @@ public class MelsecA3CNetHelper
     /// <returns>读取结果信息</returns>
     public static OperateResult<byte[]> Read(IReadWriteA3C plc, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var operateResult = McAddressData.ParseMelsecFrom(address, length, isBit: false);
         if (!operateResult.IsSuccess)
         {
@@ -250,7 +250,7 @@ public class MelsecA3CNetHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.Read(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteA3C plc, string address, ushort length)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, length, isBit: false);
         if (!addressResult.IsSuccess)
         {
@@ -296,7 +296,7 @@ public class MelsecA3CNetHelper
     /// <returns>是否写入成功</returns>
     public static OperateResult Write(IReadWriteA3C plc, string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var operateResult = McAddressData.ParseMelsecFrom(address, 0, isBit: false);
         if (!operateResult.IsSuccess)
         {
@@ -314,7 +314,7 @@ public class MelsecA3CNetHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.Write(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C,System.String,System.Byte[])" />
     public static async Task<OperateResult> WriteAsync(IReadWriteA3C plc, string address, byte[] value)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, 0, isBit: false);
         if (!addressResult.IsSuccess)
         {
@@ -340,9 +340,9 @@ public class MelsecA3CNetHelper
     {
         if (address.IndexOf('.') > 0)
         {
-            return CommHelper.ReadBool(plc, address, length);
+            return CommunicationHelper.ReadBool(plc, address, length);
         }
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var operateResult = McAddressData.ParseMelsecFrom(address, length, isBit: true);
         if (!operateResult.IsSuccess)
         {
@@ -377,9 +377,9 @@ public class MelsecA3CNetHelper
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommHelper.ReadBoolAsync(plc, address, length);
+            return await CommunicationHelper.ReadBoolAsync(plc, address, length);
         }
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, length, isBit: true);
         if (!addressResult.IsSuccess)
         {
@@ -416,7 +416,7 @@ public class MelsecA3CNetHelper
         {
             return ReadWriteNetHelper.WriteBoolWithWord(plc, address, value);
         }
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var operateResult = McAddressData.ParseMelsecFrom(address, 0, isBit: true);
         if (!operateResult.IsSuccess)
         {
@@ -438,7 +438,7 @@ public class MelsecA3CNetHelper
         {
             return await ReadWriteNetHelper.WriteBoolWithWordAsync(plc, address, value).ConfigureAwait(continueOnCapturedContext: false);
         }
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, 0, isBit: true);
         if (!addressResult.IsSuccess)
         {

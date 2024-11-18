@@ -111,6 +111,18 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
+    public virtual async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
+    {
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
+    }
+
+    /// <inheritdoc />
+    public async Task<OperateResult<float>> ReadFloatAsync(string address)
+    {
+        return ByteTransformHelper.GetResultFromArray(await ReadFloatAsync(address, 1).ConfigureAwait(false));
+    }
+
+    /// <inheritdoc />
     public async Task<OperateResult<long>> ReadInt64Async(string address)
     {
         return ByteTransformHelper.GetResultFromArray(await ReadInt64Async(address, 1).ConfigureAwait(false));
@@ -127,23 +139,11 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     {
         return ByteTransformHelper.GetResultFromArray(await ReadUInt64Async(address, 1).ConfigureAwait(false));
     }
-
+   
     /// <inheritdoc />
     public virtual async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
     {
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => ByteTransform.TransUInt64(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    public async Task<OperateResult<float>> ReadFloatAsync(string address)
-    {
-        return ByteTransformHelper.GetResultFromArray(await ReadFloatAsync(address, 1).ConfigureAwait(false));
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
     }
     
     /// <inheritdoc />
@@ -169,7 +169,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     {
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransString(m, 0, m.Length, encoding));
     }
-  
+
     /// <inheritdoc />
     public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new()
     {

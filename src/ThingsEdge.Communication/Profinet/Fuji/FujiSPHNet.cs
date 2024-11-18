@@ -6,8 +6,7 @@ using ThingsEdge.Communication.Core.IMessage;
 namespace ThingsEdge.Communication.Profinet.Fuji;
 
 /// <summary>
-/// 富士PLC的SPH通信协议，可以和富士PLC进行通信，<see cref="P:HslCommunication.Profinet.Fuji.FujiSPHNet.ConnectionID" />默认CPU0，需要根据实际进行调整。<br />
-/// The SPH communication protocol of Fujifilm PLC can communicate with Fujifilm PLC, <see cref="P:HslCommunication.Profinet.Fuji.FujiSPHNet.ConnectionID" /> default CPU0, which needs to be adjusted according to the actual situation.
+/// 富士PLC的SPH通信协议，可以和富士PLC进行通信，<see cref="P:HslCommunication.Profinet.Fuji.FujiSPHNet.ConnectionID" />默认CPU0，需要根据实际进行调整。
 /// </summary>
 /// <remarks>
 /// 地址支持 M1.0, M3.0, M10.0 以及I0, Q0
@@ -15,8 +14,7 @@ namespace ThingsEdge.Communication.Profinet.Fuji;
 public class FujiSPHNet : DeviceTcpNet
 {
     /// <summary>
-    /// 对于 CPU0-CPU7来说是CPU的站号，分为对应 0xFE-0xF7，对于P/PE link, FL-net是模块站号，分别对应0xF6-0xEF<br />
-    /// CPU0 to CPU7: SX bus station No. of destination CPU (FEh to F7h); P/PE link, FL-net: SX bus station No. of destination module (F6H to EFH)
+    /// 对于 CPU0-CPU7来说是CPU的站号，分为对应 0xFE-0xF7，对于P/PE link, FL-net是模块站号，分别对应0xF6-0xEF。
     /// </summary>
     public byte ConnectionID { get; set; } = 254;
 
@@ -32,8 +30,7 @@ public class FujiSPHNet : DeviceTcpNet
     }
 
     /// <summary>
-    /// 指定IP地址和端口号来实例化一个对象<br />
-    /// Specify the IP address and port number to instantiate an object
+    /// 指定IP地址和端口号来实例化一个对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>

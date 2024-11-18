@@ -657,6 +657,6 @@ public static class SoftBasic
     /// <returns>随机字符串数据</returns>
     public static string GetUniqueStringByGuidAndRandom()
     {
-        return Guid.NewGuid().ToString("N") + CommHelper.HslRandom.Next(1000, 10000);
+        return Guid.NewGuid().ToString("N") + CommunicationHelper.HslRandom.Next(1000, 10000);
     }
 }

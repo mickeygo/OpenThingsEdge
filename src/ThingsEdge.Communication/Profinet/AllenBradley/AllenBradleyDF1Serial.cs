@@ -11,7 +11,7 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public class AllenBradleyDF1Serial : DeviceSerialPort
 {
-    private SoftIncrementCount incrementCount;
+    private SoftIncrementCount _incrementCount;
 
     /// <summary>
     /// 站号信息
@@ -40,7 +40,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     {
         WordLength = 2;
         ByteTransform = new RegularByteTransform();
-        incrementCount = new SoftIncrementCount(65535L, 0L);
+        _incrementCount = new SoftIncrementCount(65535L, 0L);
         CheckType = CheckType.CRC16;
     }
 
@@ -53,10 +53,10 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     [HslMqttApi("ReadByteArray", "")]
     public override OperateResult<byte[]> Read(string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", Station);
-        var dstNode = (byte)CommHelper.ExtractParameter(ref address, "dst", DstNode);
-        var srcNode = (byte)CommHelper.ExtractParameter(ref address, "src", SrcNode);
-        var operateResult = BuildProtectedTypedLogicalReadWithThreeAddressFields(dstNode, srcNode, (int)incrementCount.GetCurrentValue(), address, length);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
+        var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
+        var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
+        var operateResult = BuildProtectedTypedLogicalReadWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, length);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -78,10 +78,10 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     [HslMqttApi("WriteByteArray", "")]
     public override OperateResult Write(string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", Station);
-        var dstNode = (byte)CommHelper.ExtractParameter(ref address, "dst", DstNode);
-        var srcNode = (byte)CommHelper.ExtractParameter(ref address, "src", SrcNode);
-        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)incrementCount.GetCurrentValue(), address, value);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
+        var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
+        var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
+        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, value);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -105,9 +105,9 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
             }
             num = (byte)~num;
             num++;
-            return new byte[1] { (byte)num };
+            return [(byte)num];
         }
-        var value = SoftBasic.SpliceArray(new byte[1] { station }, new byte[1] { 2 }, command, new byte[1] { 3 });
+        var value = SoftBasic.SpliceArray([station], new byte[1] { 2 }, command, new byte[1] { 3 });
         return SoftCRC16.CRC16(value, 160, 1, 0, 0).SelectLast(2);
     }
 
@@ -156,7 +156,6 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         ms.WriteByte(BitConverter.GetBytes(value)[1]);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyDF1Serial.BuildProtectedTypedLogicalReadWithThreeAddressFields(System.Byte,System.Byte,System.Int32,System.String,System.Int32)" />
     public static OperateResult<byte[]> BuildProtectedTypedLogicalReadWithThreeAddressFields(int tns, string address, int length)
     {
         var operateResult = AllenBradleySLCAddress.ParseFrom(address);
@@ -179,8 +178,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     }
 
     /// <summary>
-    /// 构建0F-A2命令码的报文读取指令，用来读取文件数据。适用 Micro-Logix1000,SLC500,SLC 5/03,SLC 5/04, PLC-5，地址示例：N7:1<br />
-    /// Construct a message read instruction of 0F-A2 command code to read file data. Applicable to Micro-Logix1000, SLC500, SLC 5/03, SLC 5/04, PLC-5, address example: N7:1
+    /// 构建0F-A2命令码的报文读取指令，用来读取文件数据。适用 Micro-Logix1000,SLC500,SLC 5/03,SLC 5/04, PLC-5，地址示例：N7:1。
     /// </summary>
     /// <param name="dstNode">目标节点号</param>
     /// <param name="srcNode">原节点号</param>
@@ -189,7 +187,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <param name="length">读取的数据长度</param>
     /// <returns>初步的报文信息</returns>
     /// <remarks>
-    /// 对于SLC 5/01或SLC 5/02而言，一次最多读取82个字节。对于 03 或是 04 为225，236字节取决于是否应用DF1驱动
+    /// 对于SLC 5/01或SLC 5/02而言，一次最多读取82个字节。对于 03 或是 04 为225，236字节取决于是否应用DF1驱动。
     /// </remarks>
     public static OperateResult<byte[]> BuildProtectedTypedLogicalReadWithThreeAddressFields(byte dstNode, byte srcNode, int tns, string address, int length)
     {
@@ -198,10 +196,9 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
-        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(new byte[2] { dstNode, srcNode }, operateResult.Content));
+        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray([dstNode, srcNode], operateResult.Content));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyDF1Serial.BuildProtectedTypedLogicalWriteWithThreeAddressFields(System.Byte,System.Byte,System.Int32,System.String,System.Byte[])" />
     public static OperateResult<byte[]> BuildProtectedTypedLogicalWriteWithThreeAddressFields(int tns, string address, byte[] data)
     {
         var operateResult = AllenBradleySLCAddress.ParseFrom(address);
@@ -225,8 +222,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     }
 
     /// <summary>
-    /// 构建0F-AA命令码的写入读取指令，用来写入文件数据。适用 Micro-Logix1000,SLC500,SLC 5/03,SLC 5/04, PLC-5，地址示例：N7:1<br />
-    /// Construct a write and read command of 0F-AA command code to write file data. Applicable to Micro-Logix1000, SLC500, SLC 5/03, SLC 5/04, PLC-5, address example: N7:1
+    /// 构建0F-AA命令码的写入读取指令，用来写入文件数据。适用 Micro-Logix1000,SLC500,SLC 5/03,SLC 5/04, PLC-5，地址示例：N7:1。
     /// </summary>
     /// <param name="dstNode">目标节点号</param>
     /// <param name="srcNode">原节点号</param>
@@ -235,7 +231,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <param name="data">写入的数据内容</param>
     /// <returns>初步的报文信息</returns>
     /// <remarks>
-    /// 对于SLC 5/01或SLC 5/02而言，一次最多读取82个字节。对于 03 或是 04 为225，236字节取决于是否应用DF1驱动
+    /// 对于SLC 5/01或SLC 5/02而言，一次最多读取82个字节。对于 03 或是 04 为225，236字节取决于是否应用DF1驱动。
     /// </remarks>
     public static OperateResult<byte[]> BuildProtectedTypedLogicalWriteWithThreeAddressFields(byte dstNode, byte srcNode, int tns, string address, byte[] data)
     {
@@ -244,7 +240,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
-        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(new byte[2] { dstNode, srcNode }, operateResult.Content));
+        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray([dstNode, srcNode], operateResult.Content));
     }
 
     /// <summary>
@@ -290,8 +286,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     }
 
     /// <summary>
-    /// 提取返回报文的数据内容，将其转换成实际的数据内容，如果PLC返回了错误信息，则结果对象为失败。<br />
-    /// Extract the data content of the returned message and convert it into the actual data content. If the PLC returns an error message, the result object is a failure.
+    /// 提取返回报文的数据内容，将其转换成实际的数据内容，如果PLC返回了错误信息，则结果对象为失败。
     /// </summary>
     /// <param name="content">PLC返回的报文信息</param>
     /// <returns>结果对象内容</returns>
@@ -312,6 +307,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
             {
                 return new OperateResult<byte[]>("Message must start with '10 02', source: " + content.ToHexString(' '));
             }
+
             var memoryStream = new MemoryStream();
             for (var j = num; j < content.Length - 1; j++)
             {
@@ -340,7 +336,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
             {
                 return OperateResult.CreateSuccessResult(content.RemoveBegin(6));
             }
-            return OperateResult.CreateSuccessResult(new byte[0]);
+            return OperateResult.CreateSuccessResult(Array.Empty<byte>());
         }
         catch (Exception ex)
         {

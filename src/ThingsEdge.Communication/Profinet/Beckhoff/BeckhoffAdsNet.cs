@@ -861,7 +861,7 @@ public class BeckhoffAdsNet : DeviceTcpNet
     {
         if (Regex.IsMatch(address, "^[MIQ][0-9]+\\.[0-7]$", RegexOptions.IgnoreCase) && length > 1)
         {
-            return CommHelper.ReadBool(this, address, length, 8);
+            return CommunicationHelper.ReadBool(this, address, length, 8);
         }
         var operateResult = TransValueHandle(address);
         if (!operateResult.IsSuccess)
@@ -1008,7 +1008,7 @@ public class BeckhoffAdsNet : DeviceTcpNet
     {
         if (Regex.IsMatch(address, "^[MIQ][0-9]+\\.[0-7]$", RegexOptions.IgnoreCase) && length > 1)
         {
-            return await CommHelper.ReadBoolAsync(this, address, length, 8).ConfigureAwait(continueOnCapturedContext: false);
+            return await CommunicationHelper.ReadBoolAsync(this, address, length, 8).ConfigureAwait(continueOnCapturedContext: false);
         }
         var addressCheck = await TransValueHandleAsync(address).ConfigureAwait(continueOnCapturedContext: false);
         if (!addressCheck.IsSuccess)

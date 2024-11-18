@@ -243,7 +243,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Read(System.String,System.UInt16)" />
     public static OperateResult<byte[]> Read(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var operateResult = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: false, hostLink.ReadSplits);
         if (!operateResult.IsSuccess)
         {
@@ -271,7 +271,7 @@ public class OmronHostLinkHelper
         var station = hostLink.UnitNumber;
         if (address != null && address.Length != 0)
         {
-            station = (byte)CommHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
+            station = (byte)CommunicationHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
         }
         var operateResult = OmronFinsNetHelper.BuildReadCommand(address, hostLink.PlcType);
         if (!operateResult.IsSuccess)
@@ -294,7 +294,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Write(System.String,System.Byte[])" />
     public static OperateResult Write(IHostLink hostLink, string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var operateResult = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, value, isBit: false);
         if (!operateResult.IsSuccess)
         {
@@ -311,7 +311,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Read(System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadAsync(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: false, hostLink.ReadSplits);
         if (!command.IsSuccess)
         {
@@ -333,7 +333,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Write(System.String,System.Byte[])" />
     public static async Task<OperateResult> WriteAsync(IHostLink hostLink, string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, value, isBit: false);
         if (!command.IsSuccess)
         {
@@ -353,7 +353,7 @@ public class OmronHostLinkHelper
         var station = hostLink.UnitNumber;
         if (address != null && address.Length != 0)
         {
-            station = (byte)CommHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
+            station = (byte)CommunicationHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
         }
         var command = OmronFinsNetHelper.BuildReadCommand(address, hostLink.PlcType);
         if (!command.IsSuccess)
@@ -376,7 +376,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.ReadBool(System.String,System.UInt16)" />
     public static OperateResult<bool[]> ReadBool(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var operateResult = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: true);
         if (!operateResult.IsSuccess)
         {
@@ -402,7 +402,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Write(System.String,System.Boolean[])" />
     public static OperateResult Write(IHostLink hostLink, string address, bool[] values)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var operateResult = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, values.Select((m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
         if (!operateResult.IsSuccess)
         {
@@ -419,7 +419,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.ReadBool(System.String,System.UInt16)" />
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: true);
         if (!command.IsSuccess)
         {
@@ -441,7 +441,7 @@ public class OmronHostLinkHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Write(System.String,System.Boolean[])" />
     public static async Task<OperateResult> WriteAsync(IHostLink hostLink, string address, bool[] values)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, values.Select((m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
         if (!command.IsSuccess)
         {

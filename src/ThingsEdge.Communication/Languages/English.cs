@@ -81,7 +81,7 @@ public class English : DefaultLanguage
 
     public override string UserCancelOperate => "The user canceled the current operation";
 
-    public override string TooManyLock => $"Too many read and write operations have occurred, resulting in a large accumulation of locks ({CommHelper.LockLimit}), so this read and write fails, please try again later.";
+    public override string TooManyLock => $"Too many read and write operations have occurred, resulting in a large accumulation of locks ({CommunicationHelper.LockLimit}), so this read and write fails, please try again later.";
 
     public override string AddressOffsetEven => "The address offset must be even";
 

@@ -17,46 +17,6 @@ public static class DeltaHelper
         };
     }
 
-    internal static OperateResult<bool[]> ReadBool(IDelta delta, Func<string, ushort, OperateResult<bool[]>> readBoolFunc, string address, ushort length)
-    {
-        return delta.Series switch
-        {
-            DeltaSeries.Dvp => DeltaDvpHelper.ReadBool(readBoolFunc, address, length),
-            DeltaSeries.AS => readBoolFunc(address, length),
-            _ => new OperateResult<bool[]>(StringResources.Language.NotSupportedDataType),
-        };
-    }
-
-    internal static OperateResult Write(IDelta delta, Func<string, bool[], OperateResult> writeBoolFunc, string address, bool[] values)
-    {
-        return delta.Series switch
-        {
-            DeltaSeries.Dvp => DeltaDvpHelper.Write(writeBoolFunc, address, values),
-            DeltaSeries.AS => writeBoolFunc(address, values),
-            _ => new OperateResult(StringResources.Language.NotSupportedDataType),
-        };
-    }
-
-    internal static OperateResult<byte[]> Read(IDelta delta, Func<string, ushort, OperateResult<byte[]>> readFunc, string address, ushort length)
-    {
-        return delta.Series switch
-        {
-            DeltaSeries.Dvp => DeltaDvpHelper.Read(readFunc, address, length),
-            DeltaSeries.AS => readFunc(address, length),
-            _ => new OperateResult<byte[]>(StringResources.Language.NotSupportedDataType),
-        };
-    }
-
-    internal static OperateResult Write(IDelta delta, Func<string, byte[], OperateResult> writeFunc, string address, byte[] value)
-    {
-        return delta.Series switch
-        {
-            DeltaSeries.Dvp => DeltaDvpHelper.Write(writeFunc, address, value),
-            DeltaSeries.AS => writeFunc(address, value),
-            _ => new OperateResult(StringResources.Language.NotSupportedDataType),
-        };
-    }
-
     internal static async Task<OperateResult<bool[]>> ReadBoolAsync(IDelta delta, Func<string, ushort, Task<OperateResult<bool[]>>> readBoolFunc, string address, ushort length)
     {
         return delta.Series switch

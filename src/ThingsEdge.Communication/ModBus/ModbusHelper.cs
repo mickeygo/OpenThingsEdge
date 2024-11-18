@@ -101,21 +101,6 @@ internal static class ModbusHelper
         return ModbusInfo.ExtractActualData(operateResult.Content);
     }
 
-    public static async Task<OperateResult<byte[]>> ReadAsync(IModbus modbus, string address, ushort length)
-    {
-        var modbusAddress = modbus.TranslateToModbusAddress(address, 3);
-        if (!modbusAddress.IsSuccess)
-        {
-            return modbusAddress.ConvertFailed<byte[]>();
-        }
-        var command = ModbusInfo.BuildReadModbusCommand(modbusAddress.Content, length, modbus.Station, modbus.AddressStartWithZero, 3);
-        if (!command.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(command);
-        }
-        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
-    }
-
     /// <summary>
     /// 使用0x17功能码来实现同时写入并读取数据的操作，使用一条报文来实现，需要指定读取的地址，长度，写入的地址，写入的数据信息，返回读取的结果数据。
     /// </summary>
@@ -141,67 +126,6 @@ internal static class ModbusHelper
         if (!command.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(command);
-        }
-        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
-    }
-
-    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, byte[] value)
-    {
-        var modbusAddress = modbus.TranslateToModbusAddress(address, 16);
-        if (!modbusAddress.IsSuccess)
-        {
-            return modbusAddress;
-        }
-        var command = ModbusInfo.BuildWriteWordModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 16);
-        if (!command.IsSuccess)
-        {
-            return command;
-        }
-        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
-    }
-
-    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, short value)
-    {
-        var modbusAddress = modbus.TranslateToModbusAddress(address, 6);
-        if (!modbusAddress.IsSuccess)
-        {
-            return modbusAddress;
-        }
-        var command = ModbusInfo.BuildWriteWordModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 6, modbus.ByteTransform);
-        if (!command.IsSuccess)
-        {
-            return command;
-        }
-        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
-    }
-
-    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, ushort value)
-    {
-        var modbusAddress = modbus.TranslateToModbusAddress(address, 6);
-        if (!modbusAddress.IsSuccess)
-        {
-            return modbusAddress;
-        }
-        var command = ModbusInfo.BuildWriteWordModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 6, modbus.ByteTransform);
-        if (!command.IsSuccess)
-        {
-            return command;
-        }
-        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
-    }
-
-    public static async Task<OperateResult> WriteMaskAsync(IModbus modbus, string address, ushort andMask, ushort orMask)
-    {
-        var modbusAddress = modbus.TranslateToModbusAddress(address, 22);
-        if (!modbusAddress.IsSuccess)
-        {
-            return modbusAddress;
-        }
-
-        var command = ModbusInfo.BuildWriteMaskModbusCommand(modbusAddress.Content, andMask, orMask, modbus.Station, modbus.AddressStartWithZero, 22);
-        if (!command.IsSuccess)
-        {
-            return command;
         }
         return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
     }
@@ -254,23 +178,34 @@ internal static class ModbusHelper
         return OperateResult.CreateSuccessResult(resultArray.ToArray());
     }
 
-    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, bool[] values)
+    public static async Task<OperateResult<byte[]>> ReadAsync(IModbus modbus, string address, ushort length)
     {
-        var modbusAddress = modbus.TranslateToModbusAddress(address, 15);
+        var modbusAddress = modbus.TranslateToModbusAddress(address, 3);
+        if (!modbusAddress.IsSuccess)
+        {
+            return modbusAddress.ConvertFailed<byte[]>();
+        }
+        var command = ModbusInfo.BuildReadModbusCommand(modbusAddress.Content, length, modbus.Station, modbus.AddressStartWithZero, 3);
+        if (!command.IsSuccess)
+        {
+            return OperateResult.CreateFailedResult<byte[]>(command);
+        }
+        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
+    }
+
+    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, byte[] value)
+    {
+        var modbusAddress = modbus.TranslateToModbusAddress(address, 16);
         if (!modbusAddress.IsSuccess)
         {
             return modbusAddress;
         }
-        if (modbusAddress.Content.IndexOf('.') > 0)
-        {
-            return await ReadWriteNetHelper.WriteBoolWithWordAsync(modbus, address, values, 16, reverseWord: true, modbusAddress.Content.SplitDot()[1]).ConfigureAwait(false);
-        }
-        var command = ModbusInfo.BuildWriteBoolModbusCommand(modbusAddress.Content, values, modbus.Station, modbus.AddressStartWithZero, 15);
+        var command = ModbusInfo.BuildWriteWordModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 16);
         if (!command.IsSuccess)
         {
             return command;
         }
-        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(continueOnCapturedContext: false);
+        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
     }
 
     public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, bool value)
@@ -302,6 +237,71 @@ internal static class ModbusHelper
             return await WriteAsync(modbus, address, [value]).ConfigureAwait(continueOnCapturedContext: false);
         }
         return write;
+    }
+
+    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, bool[] values)
+    {
+        var modbusAddress = modbus.TranslateToModbusAddress(address, 15);
+        if (!modbusAddress.IsSuccess)
+        {
+            return modbusAddress;
+        }
+        if (modbusAddress.Content.IndexOf('.') > 0)
+        {
+            return await ReadWriteNetHelper.WriteBoolWithWordAsync(modbus, address, values, 16, reverseWord: true, modbusAddress.Content.SplitDot()[1]).ConfigureAwait(false);
+        }
+        var command = ModbusInfo.BuildWriteBoolModbusCommand(modbusAddress.Content, values, modbus.Station, modbus.AddressStartWithZero, 15);
+        if (!command.IsSuccess)
+        {
+            return command;
+        }
+        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(continueOnCapturedContext: false);
+    }
+
+    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, short value)
+    {
+        var modbusAddress = modbus.TranslateToModbusAddress(address, 6);
+        if (!modbusAddress.IsSuccess)
+        {
+            return modbusAddress;
+        }
+        var command = ModbusInfo.BuildWriteWordModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 6, modbus.ByteTransform);
+        if (!command.IsSuccess)
+        {
+            return command;
+        }
+        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
+    }
+
+    public static async Task<OperateResult> WriteAsync(IModbus modbus, string address, ushort value)
+    {
+        var modbusAddress = modbus.TranslateToModbusAddress(address, 6);
+        if (!modbusAddress.IsSuccess)
+        {
+            return modbusAddress;
+        }
+        var command = ModbusInfo.BuildWriteWordModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 6, modbus.ByteTransform);
+        if (!command.IsSuccess)
+        {
+            return command;
+        }
+        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
+    }
+
+    public static async Task<OperateResult> WriteMaskAsync(IModbus modbus, string address, ushort andMask, ushort orMask)
+    {
+        var modbusAddress = modbus.TranslateToModbusAddress(address, 22);
+        if (!modbusAddress.IsSuccess)
+        {
+            return modbusAddress;
+        }
+
+        var command = ModbusInfo.BuildWriteMaskModbusCommand(modbusAddress.Content, andMask, orMask, modbus.Station, modbus.AddressStartWithZero, 22);
+        if (!command.IsSuccess)
+        {
+            return command;
+        }
+        return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
     }
 
     public static bool TransAddressToModbus(string station, string address, string[] code, int[] offset, Func<string, int> prase, out string newAddress)

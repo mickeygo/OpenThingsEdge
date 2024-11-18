@@ -399,7 +399,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
         }
         if (SleepTime > 0)
         {
-            CommHelper.ThreadSleep(SleepTime);
+            CommunicationHelper.ThreadSleep(SleepTime);
         }
         OperateResult<byte[]> resultReceive;
         if (_useServerActivePush)
@@ -478,7 +478,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     /// <returns>接收的完整的报文信息</returns>
     public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
     {
-        if (pipeSocket.LockingTick > CommHelper.LockLimit)
+        if (pipeSocket.LockingTick > CommunicationHelper.LockLimit)
         {
             return new OperateResult<byte[]>(StringResources.Language.TooManyLock);
         }

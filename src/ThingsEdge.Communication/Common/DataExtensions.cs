@@ -365,7 +365,7 @@ public static class DataExtensions
     /// <returns>串口对的格式化字符串信息</returns>
     public static string ToFormatString(this SerialPort serialPort)
     {
-        return CommHelper.ToFormatString(serialPort.PortName, serialPort.BaudRate, serialPort.DataBits, serialPort.Parity, serialPort.StopBits);
+        return CommunicationHelper.ToFormatString(serialPort.PortName, serialPort.BaudRate, serialPort.DataBits, serialPort.Parity, serialPort.StopBits);
     }
 
     /// <summary>

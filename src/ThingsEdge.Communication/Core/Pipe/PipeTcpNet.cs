@@ -25,7 +25,7 @@ public class PipeTcpNet : CommunicationPipe
         set
         {
             Host = value;
-            _ipAddress = CommHelper.GetIpAddressFromInput(value);
+            _ipAddress = CommunicationHelper.GetIpAddressFromInput(value);
         }
     }
 

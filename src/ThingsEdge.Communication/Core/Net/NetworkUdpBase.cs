@@ -113,7 +113,7 @@ public class NetworkUdpBase : NetworkBase
     {
         var array = usePackAndUnpack ? PackCommandWithHeader(send) : send;
         Logger?.WriteDebug(ToString(), StringResources.Language.Send + " : " + (LogMsgFormatBinary ? SoftBasic.ByteToHexString(array) : Encoding.ASCII.GetString(array)));
-        if (pipeSocket.LockingTick > CommHelper.LockLimit)
+        if (pipeSocket.LockingTick > CommunicationHelper.LockLimit)
         {
             return new OperateResult<byte[]>(StringResources.Language.TooManyLock);
         }

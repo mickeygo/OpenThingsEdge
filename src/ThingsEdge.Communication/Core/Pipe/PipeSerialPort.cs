@@ -262,7 +262,7 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
             num2++;
             if (num2 > 1 && SleepTime >= 0)
             {
-                CommHelper.ThreadSleep(SleepTime);
+                CommunicationHelper.ThreadSleep(SleepTime);
             }
             try
             {

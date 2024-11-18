@@ -150,7 +150,7 @@ public class InovanceHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
@@ -255,7 +255,7 @@ public class InovanceHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
@@ -314,7 +314,7 @@ public class InovanceHelper
         try
         {
             var station = string.Empty;
-            var operateResult = CommHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 station = $"s={operateResult.Content};";

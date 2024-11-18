@@ -34,7 +34,7 @@ public class PipeSocket : PipeBase, IDisposable
         }
         set
         {
-            ipAddress = CommHelper.GetIpAddressFromInput(value);
+            ipAddress = CommunicationHelper.GetIpAddressFromInput(value);
         }
     }
 

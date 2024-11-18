@@ -31,13 +31,13 @@ public class XinJEHelper
     public static OperateResult<string> PraseXinJEAddress(XinJESeries series, string address, byte modbusCode)
     {
         var text = string.Empty;
-        var operateResult = CommHelper.ExtractParameter(ref address, "s");
+        var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
         if (operateResult.IsSuccess)
         {
             text = $"s={operateResult.Content};";
         }
         var text2 = string.Empty;
-        var operateResult2 = CommHelper.ExtractParameter(ref address, "x");
+        var operateResult2 = CommunicationHelper.ExtractParameter(ref address, "x");
         if (operateResult2.IsSuccess)
         {
             text2 = $"x={operateResult2.Content};";

@@ -156,7 +156,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     {
         if (address.IndexOf('.') > 0)
         {
-            return CommHelper.ReadBool(this, address, length);
+            return CommunicationHelper.ReadBool(this, address, length);
         }
         var operateResult = BuildReadCommand(address, length, isBit: true, PLCNumber);
         if (!operateResult.IsSuccess)
@@ -207,7 +207,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommHelper.ReadBoolAsync(this, address, length);
+            return await CommunicationHelper.ReadBoolAsync(this, address, length);
         }
         var command = BuildReadCommand(address, length, isBit: true, PLCNumber);
         if (!command.IsSuccess)

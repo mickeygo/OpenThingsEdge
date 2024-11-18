@@ -14,7 +14,7 @@ public class OmronHostLinkCModeHelper
     /// </remarks>
     public static OperateResult<byte[]> Read(IReadWriteDevice omron, byte unitNumber, string address, ushort length)
     {
-        var unitNumber2 = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
+        var unitNumber2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
         var operateResult = BuildReadCommand(address, length, isBit: false);
         if (!operateResult.IsSuccess)
         {
@@ -41,7 +41,7 @@ public class OmronHostLinkCModeHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.Read(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice omron, byte unitNumber, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
         var command = BuildReadCommand(address, length, isBit: false);
         if (!command.IsSuccess)
         {
@@ -71,7 +71,7 @@ public class OmronHostLinkCModeHelper
     /// </remarks>
     public static OperateResult Write(IReadWriteDevice omron, byte unitNumber, string address, byte[] value)
     {
-        var unitNumber2 = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
+        var unitNumber2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
         var operateResult = BuildWriteWordCommand(address, value);
         if (!operateResult.IsSuccess)
         {
@@ -96,7 +96,7 @@ public class OmronHostLinkCModeHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.Write(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.Byte[])" />
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice omron, byte unitNumber, string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
         var command = BuildWriteWordCommand(address, value);
         if (!command.IsSuccess)
         {

@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
@@ -6,8 +7,7 @@ using ThingsEdge.Communication.Core.IMessage;
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
 /// <summary>
-/// AllenBradley品牌的PLC，针对SLC系列的通信的实现，测试PLC为1747。<br />
-/// AllenBradley brand PLC, for the realization of SLC series communication, the test PLC is 1747.
+/// AllenBradley品牌的PLC，针对SLC系列的通信的实现，测试PLC为1747。
 /// </summary>
 /// <remarks>
 /// 地址支持的举例：A9:0, N9:0, B9:0, F9:0, S:0, ST1:0, C9:0, I:0/10, O:0/1, R9:0, T9:0, L9:0
@@ -131,21 +131,6 @@ public class AllenBradleySLCNet : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    protected override OperateResult InitializationOnConnect()
-    {
-        var operateResult = ReadFromCoreServer(CommunicationPipe, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes(), hasResponseData: true, usePackAndUnpack: true);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        if (operateResult.Content.Length >= 8)
-        {
-            SessionHandle = ByteTransform.TransUInt32(operateResult.Content, 4);
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
         var read = await ReadFromCoreServerAsync(CommunicationPipe, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes(), hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
@@ -160,91 +145,6 @@ public class AllenBradleySLCNet : DeviceTcpNet
         return OperateResult.CreateSuccessResult();
     }
 
-    /// <summary>
-    /// Read data information, data length for read array length information
-    /// </summary>
-    /// <param name="address">Address format of the node</param>
-    /// <param name="length">In the case of arrays, the length of the array </param>
-    /// <returns>Result data with result object </returns>
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
-    {
-        var operateResult = BuildReadCommand(address, length);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(PackCommand(operateResult.Content));
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = ExtraActualContent(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult(operateResult3.Content);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
-    {
-        var operateResult = BuildWriteCommand(address, value);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(PackCommand(operateResult.Content));
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = ExtraActualContent(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult(operateResult3.Content);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadBool", "")]
-    public override OperateResult<bool> ReadBool(string address)
-    {
-        address = AnalysisBitIndex(address, out var bitIndex);
-        var operateResult = Read(address, 1);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool>(operateResult);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content.ToBoolArray()[bitIndex]);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteBool", "")]
-    public override OperateResult Write(string address, bool value)
-    {
-        var operateResult = BuildWriteCommand(address, value);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(PackCommand(operateResult.Content));
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = ExtraActualContent(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult(operateResult3.Content);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleySLCNet.Read(System.String,System.UInt16)" />
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
         var command = BuildReadCommand(address, length);
@@ -252,7 +152,8 @@ public class AllenBradleySLCNet : DeviceTcpNet
         {
             return command;
         }
-        var read = await ReadFromCoreServerAsync(PackCommand(command.Content));
+
+        var read = await ReadFromCoreServerAsync(PackCommand(command.Content)).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -273,7 +174,7 @@ public class AllenBradleySLCNet : DeviceTcpNet
         {
             return command;
         }
-        var read = await ReadFromCoreServerAsync(PackCommand(command.Content));
+        var read = await ReadFromCoreServerAsync(PackCommand(command.Content)).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -290,7 +191,7 @@ public class AllenBradleySLCNet : DeviceTcpNet
     public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
     {
         address = AnalysisBitIndex(address, out var bitIndex);
-        var read = await ReadAsync(address, 1);
+        var read = await ReadAsync(address, 1).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool>(read);
@@ -306,7 +207,8 @@ public class AllenBradleySLCNet : DeviceTcpNet
         {
             return command;
         }
-        var read = await ReadFromCoreServerAsync(PackCommand(command.Content));
+
+        var read = await ReadFromCoreServerAsync(PackCommand(command.Content)).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

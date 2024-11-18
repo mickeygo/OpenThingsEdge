@@ -16,7 +16,7 @@ namespace ThingsEdge.Communication.Profinet.Siemens;
 /// <remarks>
 /// 暂时不支持bool[]的批量写入操作，请使用 Write(string, byte[]) 替换。
 /// 对于200smartPLC的V区，就是DB1.X，例如，V100=DB1.100，当然了你也可以输入V100。
-/// 在西门子PLC，字符串分为普通的string，和WString类型，前者为单字节的类型，后者为双字节的字符串类型。
+/// 在西门子PLC，字符串分为普通的 String 和 WString 类型，前者为单字节的类型，后者为双字节的字符串类型。
 /// 一个字符串除了本身的数据信息，还有字符串的长度信息，比如字符串 "12345"，比如在PLC的地址 DB1.0 存储的字节是 FE 05 31 32 33 34 35, 第一个字节是最大长度，第二个字节是当前长度，后面的才是字符串的数据信息。
 /// </remarks>
 public sealed class SiemensS7Net : DeviceTcpNet
@@ -620,7 +620,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
-        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommunicationHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
@@ -651,7 +651,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
 
-        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
+        CommunicationHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);

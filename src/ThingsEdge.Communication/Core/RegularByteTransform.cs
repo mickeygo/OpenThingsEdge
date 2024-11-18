@@ -81,7 +81,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public short[,] TransInt16(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransInt16(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransInt16(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -104,7 +104,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public ushort[,] TransUInt16(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransUInt16(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransUInt16(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -127,7 +127,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public int[,] TransInt32(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransInt32(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransInt32(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -150,7 +150,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public uint[,] TransUInt32(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransUInt32(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransUInt32(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -173,7 +173,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public long[,] TransInt64(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransInt64(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransInt64(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -196,7 +196,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public ulong[,] TransUInt64(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransUInt64(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransUInt64(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -219,7 +219,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public float[,] TransSingle(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Core.IByteTransform.TransDouble(System.Byte[],System.Int32)" />
@@ -242,7 +242,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public double[,] TransDouble(byte[] buffer, int index, int row, int col)
     {
-        return CommHelper.CreateTwoArrayFromOneArray(TransDouble(buffer, index, row * col), row, col);
+        return CommunicationHelper.CreateTwoArrayFromOneArray(TransDouble(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />

@@ -135,7 +135,7 @@ public class McHelper
     {
         if (supportWordAdd && address.IndexOf('.') > 0)
         {
-            return CommHelper.ReadBool(mc, address, length);
+            return CommunicationHelper.ReadBool(mc, address, length);
         }
         var operateResult = mc.McAnalysisAddress(address, length, isBit: true);
         if (!operateResult.IsSuccess)
@@ -263,7 +263,7 @@ public class McHelper
     {
         if (supportWordAdd && address.IndexOf('.') > 0)
         {
-            return await CommHelper.ReadBoolAsync(mc, address, length);
+            return await CommunicationHelper.ReadBoolAsync(mc, address, length);
         }
         var addressResult = mc.McAnalysisAddress(address, length, isBit: true);
         if (!addressResult.IsSuccess)

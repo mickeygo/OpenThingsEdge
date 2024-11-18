@@ -124,17 +124,10 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     /// </remarks>
     public byte Station { get; set; } = 1;
 
-    /// <inheritdoc cref="IByteTransform.DataFormat" />
     public DataFormat DataFormat
     {
-        get
-        {
-            return ByteTransform.DataFormat;
-        }
-        set
-        {
-            ByteTransform.DataFormat = value;
-        }
+        get => ByteTransform.DataFormat;
+        set => ByteTransform.DataFormat = value;
     }
 
     /// <summary>
@@ -145,27 +138,21 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     /// </remarks>
     public bool IsStringReverse
     {
-        get
-        {
-            return ByteTransform.IsStringReverseByteWord;
-        }
-        set
-        {
-            ByteTransform.IsStringReverseByteWord = value;
-        }
+        get => ByteTransform.IsStringReverseByteWord;
+        set => ByteTransform.IsStringReverseByteWord = value;
     }
 
     /// <inheritdoc cref="IModbus.EnableWriteMaskCode" />
     public bool EnableWriteMaskCode { get; set; } = true;
 
-    /// <inheritdoc cref="IMessage.ModbusTcpMessage.IsCheckMessageId" />
+    /// <inheritdoc cref="ModbusTcpMessage.IsCheckMessageId" />
     public bool IsCheckMessageId { get; set; } = true;
 
     /// <inheritdoc cref="IModbus.BroadcastStation" />
     public int BroadcastStation { get; set; } = -1;
 
     /// <summary>
-    /// 获取modbus协议自增的消息号，你可以自定义modbus的消息号的规则，详细参见<see cref="ModbusTcpNet" />说明，也可以查找<see cref="Common.SoftIncrementCount" />说明。
+    /// 获取modbus协议自增的消息号，你可以自定义modbus的消息号的规则，详细参见<see cref="ModbusTcpNet" />说明，也可以查找<see cref="SoftIncrementCount" />说明。
     /// </summary>
     public SoftIncrementCount MessageId { get; }
 
@@ -209,7 +196,8 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     /// <param name="send">发送的完整的报文信息</param>
     /// <returns>接收到的Modbus报文信息</returns>
     /// <remarks>
-    /// 需要注意的是，本方法的发送和接收都只需要输入Modbus核心报文，例如读取寄存器0的字数据 01 03 00 00 00 01，最前面的6个字节是自动添加的，收到的数据也是只有modbus核心报文，例如：01 03 02 00 00 , 所以在解析的时候需要注意。
+    /// 需要注意的是，本方法的发送和接收都只需要输入Modbus核心报文，例如读取寄存器0的字数据 01 03 00 00 00 01，最前面的6个字节是自动添加的，收到的数据也是只有modbus核心报文，
+    /// 例如：01 03 02 00 00 , 所以在解析的时候需要注意。
     /// </remarks>
     public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send)
     {
@@ -220,85 +208,72 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return await base.ReadFromCoreServerAsync(send).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
     {
-        var transform = CommHelper.ExtractTransformParameter(ref address, ByteTransform);
+        var transform = CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform);
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => transform.TransInt32(m, 0, length));
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
     {
-        var transform = CommHelper.ExtractTransformParameter(ref address, ByteTransform);
+        var transform = CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform);
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => transform.TransUInt32(m, 0, length));
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
     {
-        var transform = CommHelper.ExtractTransformParameter(ref address, ByteTransform);
+        var transform = CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform);
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => transform.TransSingle(m, 0, length));
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
     {
-        var transform = CommHelper.ExtractTransformParameter(ref address, ByteTransform);
+        var transform = CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform);
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => transform.TransInt64(m, 0, length));
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
     {
-        var transform = CommHelper.ExtractTransformParameter(ref address, ByteTransform);
+        var transform = CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform);
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => transform.TransUInt64(m, 0, length));
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
     {
-        var transform = CommHelper.ExtractTransformParameter(ref address, ByteTransform);
+        var transform = CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform);
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => transform.TransDouble(m, 0, length));
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, int[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, uint[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, float[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, long[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, double[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public virtual OperateResult<string> TranslateToModbusAddress(string address, byte modbusCode)
     {
         if (_addressMapping != null)
@@ -308,19 +283,16 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return OperateResult.CreateSuccessResult(address);
     }
 
-    /// <inheritdoc cref="IModbus.RegisteredAddressMapping(Func{System.String,System.Byte,OperateResult{string}})" />
     public void RegisteredAddressMapping(Func<string, byte, OperateResult<string>> mapping)
     {
         _addressMapping = mapping;
     }
 
-    /// <inheritdoc />
     public override byte[] PackCommandWithHeader(byte[] command)
     {
         return ModbusInfo.PackCommandToTcp(command, (ushort)MessageId.GetCurrentValue());
     }
 
-    /// <inheritdoc />
     public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         if (BroadcastStation >= 0 && send[6] == BroadcastStation)
@@ -335,15 +307,8 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return ModbusInfo.ExtractActualData(ModbusInfo.ExplodeTcpCommandToCore(response));
     }
 
-    /// <inheritdoc cref="ModbusHelper.ReadWrite(HslCommunication.ModBus.IModbus,System.String,System.UInt16,System.String,System.Byte[])" />
-    public OperateResult<byte[]> ReadWrite(string readAddress, ushort length, string writeAddress, byte[] value)
-    {
-        return ModbusHelper.ReadWrite(this, readAddress, length, writeAddress, value);
-    }
-
     /// <summary>
-    /// 批量的读取线圈，需要指定起始地址，读取长度，如果富文本地址不指定，默认使用的功能码是 0x01<br />
-    /// For batch reading coils, you need to specify the start address and read length. If the rich text address is not specified, the default function code is 0x01.
+    /// 批量的读取线圈，需要指定起始地址，读取长度，如果富文本地址不指定，默认使用的功能码是 0x01。
     /// </summary>
     /// <param name="address">起始地址，格式为"1234"</param>
     /// <returns>带有成功标志的bool数组对象</returns>
@@ -353,8 +318,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     }
 
     /// <summary>
-    /// 批量的读取线圈，需要指定起始地址，读取长度，如果富文本地址不指定，默认使用的功能码是 0x01<br />
-    /// For batch reading coils, you need to specify the start address and read length. If the rich text address is not specified, the default function code is 0x01.
+    /// 批量的读取线圈，需要指定起始地址，读取长度，如果富文本地址不指定，默认使用的功能码是 0x01。
     /// </summary>
     /// <param name="address">起始地址，格式为"1234"</param>
     /// <param name="length">读取长度</param>
@@ -365,8 +329,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     }
 
     /// <summary>
-    /// 读取输入线圈，需要指定起始地址，如果富文本地址不指定，默认使用的功能码是 0x02<br />
-    /// To read the input coil, you need to specify the start address. If the rich text address is not specified, the default function code is 0x02.
+    /// 读取输入线圈，需要指定起始地址，如果富文本地址不指定，默认使用的功能码是 0x02。
     /// </summary>
     /// <param name="address">起始地址，格式为"1234"</param>
     /// <returns>带有成功标志的bool对象</returns>
@@ -376,8 +339,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     }
 
     /// <summary>
-    /// 读取输入线圈，需要指定起始地址，如果富文本地址不指定，默认使用的功能码是 0x02<br />
-    /// To read the input coil, you need to specify the start address. If the rich text address is not specified, the default function code is 0x02.
+    /// 读取输入线圈，需要指定起始地址，如果富文本地址不指定，默认使用的功能码是 0x02。
     /// </summary>
     /// <param name="address">起始地址，格式为"1234"</param>
     /// <param name="length">读取长度</param>
@@ -393,7 +355,6 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return await ModbusHelper.ReadAsync(this, address, length).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref=".ModbusHelper.ReadWrite(HslCommunication.ModBus.IModbus,System.String,System.UInt16,System.String,System.Byte[])" />
     public async Task<OperateResult<byte[]>> ReadWriteAsync(string readAddress, ushort length, string writeAddress, byte[] value)
     {
         return await ModbusHelper.ReadWriteAsync(this, readAddress, length, writeAddress, value).ConfigureAwait(false);
@@ -418,9 +379,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     }
 
     /// <summary>
-    /// 向设备写入掩码数据，使用0x16功能码，需要确认对方是否支持相关的操作，掩码数据的操作主要针对寄存器。<br />
-    /// To write mask data to the server, using the 0x16 function code, you need to confirm whether the other party supports related operations. 
-    /// The operation of mask data is mainly directed to the register.
+    /// 向设备写入掩码数据，使用0x16功能码，需要确认对方是否支持相关的操作，掩码数据的操作主要针对寄存器。
     /// </summary>
     /// <param name="address">起始地址，起始地址，比如"100"，"x=4;100"，"s=1;100","s=1;x=4;100"</param>
     /// <param name="andMask">等待与操作的掩码数据</param>
@@ -431,13 +390,11 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return await ModbusHelper.WriteMaskAsync(this, address, andMask, orMask).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.ModBus.ModbusTcpNet.Write(System.String,System.Int16)" />
     public virtual async Task<OperateResult> WriteOneRegisterAsync(string address, short value)
     {
         return await WriteAsync(address, value).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.ModBus.ModbusTcpNet.Write(System.String,System.UInt16)" />
     public virtual async Task<OperateResult> WriteOneRegisterAsync(string address, ushort value)
     {
         return await WriteAsync(address, value).ConfigureAwait(false);

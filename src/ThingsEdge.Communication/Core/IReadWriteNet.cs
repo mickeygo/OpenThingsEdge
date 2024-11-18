@@ -110,6 +110,21 @@ public interface IReadWriteNet
     Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length);
 
     /// <summary>
+    /// 异步读取单浮点数据。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <returns>带有成功标识的float数据</returns>
+    Task<OperateResult<float>> ReadFloatAsync(string address);
+
+    /// <summary>
+    /// 异步读取单浮点精度的数组。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="length">数组长度</param>
+    /// <returns>带有成功标识的float数组</returns>
+    Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length);
+
+    /// <summary>
     /// 异步读取64位的有符号整型。
     /// </summary>
     /// <param name="address">起始地址</param>
@@ -138,21 +153,6 @@ public interface IReadWriteNet
     /// <param name="length">数组长度</param>
     /// <returns>带有成功标识的ulong数组</returns>
     Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length);
-
-    /// <summary>
-    /// 异步读取单浮点数据。
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <returns>带有成功标识的float数据</returns>
-    Task<OperateResult<float>> ReadFloatAsync(string address);
-
-    /// <summary>
-    /// 异步读取单浮点精度的数组。
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="length">数组长度</param>
-    /// <returns>带有成功标识的float数组</returns>
-    Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length);
 
     /// <summary>
     /// 异步读取双浮点的数据。
@@ -318,6 +318,22 @@ public interface IReadWriteNet
     Task<OperateResult> WriteAsync(string address, uint[] values);
 
     /// <summary>
+    /// 异步写入float数据，返回是否成功。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="value">写入值</param>
+    /// <returns>带有成功标识的结果类对象</returns>
+    Task<OperateResult> WriteAsync(string address, float value);
+
+    /// <summary>
+    /// 异步写入float数组，返回是否成功。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="values">写入值</param>
+    /// <returns>带有成功标识的结果类对象</returns>
+    Task<OperateResult> WriteAsync(string address, float[] values);
+
+    /// <summary>
     /// 异步写入long数据，返回是否成功。
     /// </summary>
     /// <param name="address">起始地址</param>
@@ -348,22 +364,6 @@ public interface IReadWriteNet
     /// <param name="values">写入值</param>
     /// <returns>带有成功标识的结果类对象</returns>
     Task<OperateResult> WriteAsync(string address, ulong[] values);
-
-    /// <summary>
-    /// 异步写入float数据，返回是否成功。
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="value">写入值</param>
-    /// <returns>带有成功标识的结果类对象</returns>
-    Task<OperateResult> WriteAsync(string address, float value);
-
-    /// <summary>
-    /// 异步写入float数组，返回是否成功。
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="values">写入值</param>
-    /// <returns>带有成功标识的结果类对象</returns>
-    Task<OperateResult> WriteAsync(string address, float[] values);
 
     /// <summary>
     /// 异步写入double数据，返回是否成功。

@@ -52,7 +52,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
         var num = ushort.Parse(array[0]) * 16;
         if (array.Length > 1)
         {
-            num += CommHelper.CalculateBitStartIndex(array[1]);
+            num += CommunicationHelper.CalculateBitStartIndex(array[1]);
         }
         return num;
     }

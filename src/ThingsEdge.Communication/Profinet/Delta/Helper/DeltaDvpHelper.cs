@@ -30,7 +30,7 @@ public static class DeltaDvpHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
@@ -109,7 +109,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(Func<string, ushort, Task<OperateResult<bool[]>>> readBoolFunc, string address, ushort length)
     {
         var station = string.Empty;
-        var stationPara = CommHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";
@@ -143,7 +143,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult> WriteAsync(Func<string, bool[], Task<OperateResult>> writeBoolFunc, string address, bool[] value)
     {
         var station = string.Empty;
-        var stationPara = CommHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";
@@ -176,7 +176,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult<byte[]>> ReadAsync(Func<string, ushort, Task<OperateResult<byte[]>>> readFunc, string address, ushort length)
     {
         var station = string.Empty;
-        var stationPara = CommHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";
@@ -210,7 +210,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult> WriteAsync(Func<string, byte[], Task<OperateResult>> writeFunc, string address, byte[] value)
     {
         var station = string.Empty;
-        var stationPara = CommHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";

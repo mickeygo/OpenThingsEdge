@@ -465,7 +465,7 @@ public class SiemensPPIHelper
     /// <returns>带返回结果的结果对象</returns>
     public static OperateResult<byte[]> Read(IReadWriteDevice plc, string address, ushort length, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
@@ -485,7 +485,7 @@ public class SiemensPPIHelper
     /// <returns>带返回结果的结果对象</returns>
     public static OperateResult<bool> ReadBool(IReadWriteDevice plc, string address, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildReadCommand(station2, address, 1, isBit: true);
         if (!operateResult.IsSuccess)
         {
@@ -524,13 +524,13 @@ public class SiemensPPIHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.Helper.SiemensPPIHelper.ReadBool(HslCommunication.Core.IReadWriteDevice,System.String,System.Byte,System.Object)" />
     public static OperateResult<bool[]> ReadBool(IReadWriteDevice plc, string address, ushort length, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool[]>(operateResult);
         }
-        CommHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommunicationHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         operateResult.Content.AddressStart = newStart;
         operateResult.Content.Length = byteLength;
         var operateResult2 = Read(plc, operateResult.Content, operateResult.Content.Length, station2, communicationLock);
@@ -553,7 +553,7 @@ public class SiemensPPIHelper
     /// <returns>带返回结果的结果对象</returns>
     public static OperateResult Write(IReadWriteDevice plc, string address, byte[] value, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildWriteCommand(station2, address, value);
         if (!operateResult.IsSuccess)
         {
@@ -596,7 +596,7 @@ public class SiemensPPIHelper
     /// <returns>带返回结果的结果对象</returns>
     public static OperateResult Write(IReadWriteDevice plc, string address, bool[] value, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildWriteCommand(station2, address, value);
         if (!operateResult.IsSuccess)
         {
@@ -638,7 +638,7 @@ public class SiemensPPIHelper
     /// <returns>是否启动成功</returns>
     public static OperateResult Start(IReadWriteDevice plc, string parameter, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
         var obj = new byte[39]
         {
             104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
@@ -679,7 +679,7 @@ public class SiemensPPIHelper
     /// <returns>是否停止成功</returns>
     public static OperateResult Stop(IReadWriteDevice plc, string parameter, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
         var obj = new byte[35]
         {
             104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
@@ -720,7 +720,7 @@ public class SiemensPPIHelper
     /// <returns>包含是否成功的结果对象</returns>
     public static OperateResult<string> ReadPlcType(IReadWriteDevice plc, string parameter, byte station, object communicationLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
         var operateResult = BuildReadCommand(station2, "SYS0", 20, isBit: false);
         if (!operateResult.IsSuccess)
         {

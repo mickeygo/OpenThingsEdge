@@ -9,7 +9,7 @@ namespace ThingsEdge.Communication.Core;
 /// <summary>
 /// Communication的一些静态辅助方法。
 /// </summary>
-public static class CommHelper
+public static class CommunicationHelper
 {
     /// <summary>
     /// 本通讯项目的随机数信息<br />

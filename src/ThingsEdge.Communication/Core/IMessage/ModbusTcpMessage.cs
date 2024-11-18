@@ -3,21 +3,17 @@ using ThingsEdge.Communication.Common;
 namespace ThingsEdge.Communication.Core.IMessage;
 
 /// <summary>
-/// Modbus-Tcp协议支持的消息解析类
+/// Modbus-Tcp协议支持的消息解析类。
 /// </summary>
 public class ModbusTcpMessage : NetMessageBase, INetMessage
 {
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => 8;
 
     /// <summary>
-    /// 获取或设置是否进行检查返回的消息ID和发送的消息ID是否一致，默认为true，也就是检查<br />
-    /// Get or set whether to check whether the returned message ID is consistent with the sent message ID, the default is true, that is, check
+    /// 获取或设置是否进行检查返回的消息ID和发送的消息ID是否一致，默认为true，也就是检查。
     /// </summary>
     public bool IsCheckMessageId { get; set; } = true;
 
-
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
         if (HeadBytes?.Length >= ProtocolHeadBytesLength)
@@ -33,7 +29,6 @@ public class ModbusTcpMessage : NetMessageBase, INetMessage
         return 0;
     }
 
-    /// <inheritdoc />
     public override int CheckMessageMatch(byte[] send, byte[] receive)
     {
         if (!IsCheckMessageId)
@@ -59,7 +54,6 @@ public class ModbusTcpMessage : NetMessageBase, INetMessage
         return -1;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetHeadBytesIdentity" />
     public override int GetHeadBytesIdentity()
     {
         return HeadBytes[0] * 256 + HeadBytes[1];

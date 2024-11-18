@@ -171,7 +171,7 @@ public class ModbusInfo
         var list = new List<byte[]>();
         if (mAddress.Function == 1 || mAddress.Function == 2 || mAddress.Function == 3 || mAddress.Function == 4)
         {
-            var operateResult = CommHelper.SplitReadLength(mAddress.AddressStart, length, mAddress.Function == 1 || mAddress.Function == 2 ? 2000 : 120);
+            var operateResult = CommunicationHelper.SplitReadLength(mAddress.AddressStart, length, mAddress.Function == 1 || mAddress.Function == 2 ? 2000 : 120);
             for (var i = 0; i < operateResult.Content1.Length; i++)
             {
                 list.Add(

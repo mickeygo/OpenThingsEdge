@@ -9,7 +9,7 @@ public interface IReadWriteCip : IReadWriteNet
 {
     IByteTransform ByteTransform { get; set; }
 
-    OperateResult<string> ReadPlcType();
+    Task<OperateResult<string>> ReadPlcTypeAsync();
 
     Task<OperateResult<ushort, byte[]>> ReadTagAsync(string address, ushort length = 1);
 

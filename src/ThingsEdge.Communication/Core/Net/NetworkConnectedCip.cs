@@ -65,7 +65,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         for (var i = 0; i < 10; i++)
         {
             var value = Interlocked.Increment(ref _openForwardId);
-            var connectionID = i < 7 ? (ushort)i : (ushort)CommHelper.HslRandom.Next(7, 200);
+            var connectionID = i < 7 ? (ushort)i : (ushort)CommunicationHelper.HslRandom.Next(7, 200);
             var operateResult3 = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, num, GetLargeForwardOpen(connectionID), ByteTransform.TransByte(value)), hasResponseData: true, usePackAndUnpack: false);
             if (!operateResult3.IsSuccess)
             {
@@ -141,7 +141,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         for (var i = 0; i < 10; i++)
         {
             var id = Interlocked.Increment(ref _openForwardId);
-            var read2 = await ReadFromCoreServerAsync(send: AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommHelper.HslRandom.Next(7, 200)), ByteTransform.TransByte(id)), pipe: CommunicationPipe, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
+            var read2 = await ReadFromCoreServerAsync(send: AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommunicationHelper.HslRandom.Next(7, 200)), ByteTransform.TransByte(id)), pipe: CommunicationPipe, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
             if (!read2.IsSuccess)
             {
                 return read2;

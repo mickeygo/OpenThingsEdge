@@ -279,7 +279,7 @@ internal class AdsHelper
             return Convert.ToInt32(address);
         }
         var array = address.Split('.');
-        return Convert.ToInt32(array[0]) * 8 + CommHelper.CalculateBitStartIndex(array[1]);
+        return Convert.ToInt32(array[0]) * 8 + CommunicationHelper.CalculateBitStartIndex(array[1]);
     }
 
     /// <summary>
@@ -306,7 +306,7 @@ internal class AdsHelper
             else if (address.StartsWith("ig=") || address.StartsWith("IG="))
             {
                 address = address.ToUpper();
-                operateResult.Content1 = (uint)CommHelper.ExtractParameter(ref address, "IG", 0);
+                operateResult.Content1 = (uint)CommunicationHelper.ExtractParameter(ref address, "IG", 0);
                 operateResult.Content2 = uint.Parse(address);
             }
             else

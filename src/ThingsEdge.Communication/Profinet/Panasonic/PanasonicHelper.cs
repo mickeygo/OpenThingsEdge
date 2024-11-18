@@ -37,7 +37,7 @@ public class PanasonicHelper
         }
         var num = Convert.ToInt32(address.Substring(0, address.IndexOf("."))) * fromBase;
         var bit = address.Substring(address.IndexOf(".") + 1);
-        return num + CommHelper.CalculateBitStartIndex(bit);
+        return num + CommunicationHelper.CalculateBitStartIndex(bit);
     }
 
     /// <summary>

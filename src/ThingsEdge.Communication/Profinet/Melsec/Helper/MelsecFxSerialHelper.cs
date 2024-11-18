@@ -539,7 +539,7 @@ public class MelsecFxSerialHelper
         {
             return OperateResult.CreateFailedResult<List<byte[]>, int>(operateResult);
         }
-        var integer = (ushort)CommHelper.CalculateOccupyLength(operateResult.Content2, length);
+        var integer = (ushort)CommunicationHelper.CalculateOccupyLength(operateResult.Content2, length);
         var num = operateResult.Content1;
         var array = SoftBasic.SplitIntegerToArray(integer, 254);
         var list = new List<byte[]>();

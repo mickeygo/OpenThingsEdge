@@ -172,7 +172,7 @@ public static class AllenBradleyHelper
     private static byte[] BuildRequestPathCommand(string address, bool isConnectedAddress = false)
     {
         using var memoryStream = new MemoryStream();
-        var num = CommHelper.ExtractParameter(ref address, "class", -1);
+        var num = CommunicationHelper.ExtractParameter(ref address, "class", -1);
         if (num != -1)
         {
             var num2 = address.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? Convert.ToInt32(address.Substring(2), 16) : Convert.ToInt32(address);
@@ -255,7 +255,7 @@ public static class AllenBradleyHelper
     }
 
     /// <summary>
-    /// 从生成的报文里面反解出实际的数据地址，不支持结构体嵌套，仅支持数据，一维数组，不支持多维数据
+    /// 从生成的报文里面反解出实际的数据地址，不支持结构体嵌套，仅支持数据，一维数组，不支持多维数据。
     /// </summary>
     /// <param name="pathCommand">地址路径报文</param>
     /// <returns>实际的地址</returns>
@@ -268,6 +268,7 @@ public static class AllenBradleyHelper
             {
                 continue;
             }
+
             var text = Encoding.UTF8.GetString(pathCommand, i + 2, pathCommand[i + 1]).TrimEnd(default(char));
             stringBuilder.Append(text);
             var num = 2 + text.Length;
@@ -296,15 +297,14 @@ public static class AllenBradleyHelper
     }
 
     /// <summary>
-    /// 从生成的报文里面，反解出实际的 Symbol Class ID，以及  Instance ID 信息
+    /// 从生成的报文里面，反解出实际的 Symbol Class ID，以及  Instance ID 信息。
     /// </summary>
     /// <param name="pathCommand"></param>
     /// <returns></returns>
     public static OperateResult<int, int> ParseRequestPathSymbolInstanceAddressing(byte[] pathCommand)
     {
-        var num = 0;
-        var num2 = 0;
         var num3 = 0;
+        int num;
         if (pathCommand[num3] == 32)
         {
             num3++;
@@ -320,6 +320,7 @@ public static class AllenBradleyHelper
             num = BitConverter.ToUInt16(pathCommand, num3);
             num3 += 2;
         }
+        int num2;
         if (pathCommand[num3] == 36)
         {
             num3++;
@@ -333,7 +334,6 @@ public static class AllenBradleyHelper
             }
             num3 += 2;
             num2 = BitConverter.ToUInt16(pathCommand, num3);
-            num3 += 2;
         }
         return OperateResult.CreateSuccessResult(num, num2);
     }
@@ -345,8 +345,8 @@ public static class AllenBradleyHelper
     /// <returns>结果数据</returns>
     public static byte[] BuildEnumeratorCommand(uint startInstance)
     {
-        return new byte[16]
-        {
+        return
+        [
             85,
             3,
             32,
@@ -363,7 +363,7 @@ public static class AllenBradleyHelper
             0,
             8,
             0
-        };
+        ];
     }
 
     /// <summary>
@@ -456,13 +456,9 @@ public static class AllenBradleyHelper
         return array;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.PackRequestHeader(System.UInt16,System.UInt32,System.UInt32,System.Byte[])" />
-    public static byte[] PackRequestHeader(ushort command, uint session, byte[] commandSpecificData, byte[] senderContext = null)
+    public static byte[] PackRequestHeader(ushort command, uint session, byte[] commandSpecificData, byte[]? senderContext = null)
     {
-        if (commandSpecificData == null)
-        {
-            commandSpecificData = [];
-        }
+        commandSpecificData ??= [];
         var array = new byte[commandSpecificData.Length + 24];
         Array.Copy(commandSpecificData, 0, array, 24, commandSpecificData.Length);
         BitConverter.GetBytes(command).CopyTo(array, 0);
@@ -581,9 +577,9 @@ public static class AllenBradleyHelper
     /// <summary>
     /// 打包生成一个请求读取数据片段的节点信息，CIP指令信息
     /// </summary>
-    /// <param name="address">节点的名称 -&gt; Tag Name</param>
-    /// <param name="startIndex">起始的索引位置，以字节为单位 -&gt; The initial index position, in bytes</param>
-    /// <param name="length">读取的数据长度，一次通讯总计490个字节 -&gt; Length of read data, a total of 490 bytes of communication</param>
+    /// <param name="address">节点的名称</param>
+    /// <param name="startIndex">起始的索引位置，以字节为单位</param>
+    /// <param name="length">读取的数据长度，一次通讯总计490个字节</param>
     /// <returns>CIP的指令信息</returns>
     public static byte[] PackRequestReadSegment(string address, int startIndex, int length)
     {
@@ -629,17 +625,13 @@ public static class AllenBradleyHelper
         array[num++] = BitConverter.GetBytes(typeCode)[1];
         array[num++] = BitConverter.GetBytes(length)[0];
         array[num++] = BitConverter.GetBytes(length)[1];
-        if (value == null)
-        {
-            value = new byte[0];
-        }
+        value ??= [];
         var array3 = new byte[value.Length + num];
         Array.Copy(array, 0, array3, 0, num);
         value.CopyTo(array3, num);
         return array3;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.PackRequestWrite(System.String,System.UInt16,System.Byte[],System.Int32,System.Boolean)" />
     public static byte[] PackRequestWriteSegment(string address, ushort typeCode, byte[] value, int startIndex, int length = 1, bool isConnectedAddress = false)
     {
         var array = new byte[1024];
@@ -658,10 +650,7 @@ public static class AllenBradleyHelper
         array[num++] = BitConverter.GetBytes(startIndex)[1];
         array[num++] = BitConverter.GetBytes(startIndex)[2];
         array[num++] = BitConverter.GetBytes(startIndex)[3];
-        if (value == null)
-        {
-            value = new byte[0];
-        }
+        value ??= [];
         var array3 = new byte[value.Length + num];
         Array.Copy(array, 0, array3, 0, num);
         value.CopyTo(array3, num);
@@ -695,7 +684,6 @@ public static class AllenBradleyHelper
         return array.SelectBegin(num);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.PackRequestReadModifyWrite(System.String,System.UInt32,System.UInt32,System.Boolean)" />
     public static byte[] PackRequestReadModifyWrite(string address, int index, bool value, bool isConnectedAddress = false)
     {
         address += $"[{index / 32}]";
@@ -721,7 +709,7 @@ public static class AllenBradleyHelper
     public static string AnalysisArrayIndex(string address, out int arrayIndex)
     {
         arrayIndex = 0;
-        if (!address.EndsWith("]"))
+        if (!address.EndsWith(']'))
         {
             return address;
         }
@@ -730,11 +718,12 @@ public static class AllenBradleyHelper
         {
             return address;
         }
+
         address = address.Remove(address.Length - 1);
         try
         {
-            arrayIndex = int.Parse(address.Substring(num + 1));
-            address = address.Substring(0, num);
+            arrayIndex = int.Parse(address[(num + 1)..]);
+            address = address[..num];
             return address;
         }
         catch
@@ -835,7 +824,7 @@ public static class AllenBradleyHelper
     /// <returns>包含服务的信息</returns>
     public static byte[] PackCleanCommandService(byte[] portSlot, params byte[][] cips)
     {
-        var memoryStream = new MemoryStream();
+        using var memoryStream = new MemoryStream();
         memoryStream.WriteByte(178);
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
@@ -884,7 +873,7 @@ public static class AllenBradleyHelper
     /// <returns>最终发送的报文数据</returns>
     public static byte[] PackCommandGetAttributesAll(byte[] portSlot, uint sessionHandle)
     {
-        var commandSpecificData = PackCommandSpecificData(new byte[4], PackCommandService(portSlot, new byte[6] { 1, 2, 32, 1, 36, 1 }));
+        var commandSpecificData = PackCommandSpecificData(new byte[4], PackCommandService(portSlot, [1, 2, 32, 1, 36, 1]));
         return PackRequestHeader(111, sessionHandle, commandSpecificData);
     }
 
@@ -898,7 +887,7 @@ public static class AllenBradleyHelper
     {
         if (data == null)
         {
-            return new byte[6] { 0, 0, 4, 0, 0, 0 };
+            return [0, 0, 4, 0, 0, 0];
         }
         return SoftBasic.SpliceArray(new byte[6]
         {
@@ -918,7 +907,7 @@ public static class AllenBradleyHelper
     /// <returns>最终的指令值</returns>
     public static byte[] PackCommandSpecificData(params byte[][] service)
     {
-        var memoryStream = new MemoryStream();
+        using var memoryStream = new MemoryStream();
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
@@ -944,10 +933,7 @@ public static class AllenBradleyHelper
     /// <returns>包含服务的信息</returns>
     public static byte[] PackCommandSingleService(byte[] command, ushort code = 178, bool isConnected = false, ushort sequence = 0)
     {
-        if (command == null)
-        {
-            command = new byte[0];
-        }
+        command ??= [];
         var array = isConnected ? new byte[6 + command.Length] : new byte[4 + command.Length];
         array[0] = BitConverter.GetBytes(code)[0];
         array[1] = BitConverter.GetBytes(code)[1];
@@ -962,31 +948,28 @@ public static class AllenBradleyHelper
     }
 
     /// <summary>
-    /// 向PLC注册会话ID的报文<br />
-    /// Register a message with the PLC for the session ID
+    /// 向PLC注册会话ID的报文。
     /// </summary>
     /// <param name="senderContext">发送的上下文信息</param>
-    /// <returns>报文信息 -&gt; Message information </returns>
-    public static byte[] RegisterSessionHandle(byte[] senderContext = null)
+    /// <returns>报文信息 </returns>
+    public static byte[] RegisterSessionHandle(byte[]? senderContext = null)
     {
         var commandSpecificData = new byte[4] { 1, 0, 0, 0 };
         return PackRequestHeader(101, 0u, commandSpecificData, senderContext);
     }
 
     /// <summary>
-    /// 获取卸载一个已注册的会话的报文<br />
-    /// Get a message to uninstall a registered session
+    /// 获取卸载一个已注册的会话的报文。
     /// </summary>
     /// <param name="sessionHandle">当前会话的ID信息</param>
-    /// <returns>字节报文信息 -&gt; BYTE message information </returns>
+    /// <returns>字节报文信息</returns>
     public static byte[] UnRegisterSessionHandle(uint sessionHandle)
     {
-        return PackRequestHeader(102, sessionHandle, new byte[0]);
+        return PackRequestHeader(102, sessionHandle, []);
     }
 
     /// <summary>
-    /// 初步检查返回的CIP协议的报文是否正确<br />
-    /// Initially check whether the returned CIP protocol message is correct
+    /// 初步检查返回的CIP协议的报文是否正确。
     /// </summary>
     /// <param name="response">CIP的报文信息</param>
     /// <returns>是否正确的结果信息</returns>
@@ -999,6 +982,7 @@ public static class AllenBradleyHelper
             {
                 return OperateResult.CreateSuccessResult();
             }
+
             var empty = string.Empty;
             return new OperateResult(num, num switch
             {
@@ -1260,31 +1244,14 @@ public static class AllenBradleyHelper
     }
 
     /// <summary>
-    /// 从PLC里读取当前PLC的型号信息<br />
-    /// Read the current PLC model information from the PLC
+    /// 从PLC里读取当前PLC的型号信息。
     /// </summary>
     /// <param name="plc">PLC对象</param>
     /// <returns>型号数据信息</returns>
-    public static OperateResult<string> ReadPlcType(IReadWriteDevice plc)
-    {
-        var send = "00 00 00 00 00 00 02 00 00 00 00 00 b2 00 06 00 01 02 20 01 24 01".ToHexBytes();
-        OperateResult<byte[]> operateResult = plc.ReadFromCoreServer(send);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<string>(operateResult);
-        }
-        if (operateResult.Content.Length > 59 && operateResult.Content.Length >= 59 + operateResult.Content[58])
-        {
-            return OperateResult.CreateSuccessResult(Encoding.UTF8.GetString(operateResult.Content, 59, operateResult.Content[58]));
-        }
-        return new OperateResult<string>("Data is too short: " + operateResult.Content.ToHexString(' '));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice)" />
     public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteDevice plc)
     {
         var buffer = "00 00 00 00 00 00 02 00 00 00 00 00 b2 00 06 00 01 02 20 01 24 01".ToHexBytes();
-        var read = await plc.ReadFromCoreServerAsync(buffer);
+        var read = await plc.ReadFromCoreServerAsync(buffer).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<string>(read);
@@ -1297,93 +1264,14 @@ public static class AllenBradleyHelper
     }
 
     /// <summary>
-    /// 读取指定地址的日期数据，最小日期为 1970年1月1日，当PLC的变量类型为 "Date" 和 "TimeAndDate" 时，都可以用本方法读取。<br />
-    /// Read the date data of the specified address. The minimum date is January 1, 1970. When the PLC variable type is "Date" and "TimeAndDate", this method can be used to read.
+    /// 读取指定地址的日期数据，最小日期为 1970年1月1日，当PLC的变量类型为 "Date" 和 "TimeAndDate" 时，都可以用本方法读取。
     /// </summary>
     /// <param name="plc">当前的通信对象信息</param>
     /// <param name="address">PLC里变量的地址</param>
     /// <returns>日期结果对象</returns>
-    public static OperateResult<DateTime> ReadDate(IReadWriteCip plc, string address)
-    {
-        OperateResult<long> operateResult = plc.ReadInt64(address);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<DateTime>(operateResult);
-        }
-        var value = operateResult.Content / 100;
-        return OperateResult.CreateSuccessResult(new DateTime(1970, 1, 1).AddTicks(value));
-    }
-
-    /// <summary>
-    /// 使用日期格式（Date）将指定的数据写入到指定的地址里，PLC的地址类型变量必须为 "Date"，否则写入失败。<br />
-    /// Use the date format (Date) to write the specified data to the specified address. The PLC address type variable must be "Date", otherwise the writing will fail.
-    /// </summary>
-    /// <param name="plc">当前的通信对象信息</param>
-    /// <param name="address">PLC里变量的地址</param>
-    /// <param name="date">时间信息</param>
-    /// <returns>是否写入成功</returns>
-    public static OperateResult WriteDate(IReadWriteCip plc, string address, DateTime date)
-    {
-        var value = (date.Date - new DateTime(1970, 1, 1)).Ticks * 100;
-        return plc.WriteTag(address, 8, plc.ByteTransform.TransByte(value));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.DateTime)" />
-    public static OperateResult WriteTimeAndDate(IReadWriteCip plc, string address, DateTime date)
-    {
-        var value = (date - new DateTime(1970, 1, 1)).Ticks * 100;
-        return plc.WriteTag(address, 10, plc.ByteTransform.TransByte(value));
-    }
-
-    /// <summary>
-    /// 读取指定地址的时间数据，最小时间为 0，如果获取秒，可以访问 <see cref="P:System.TimeSpan.TotalSeconds" />，当PLC的变量类型为 "Time" 和 "TimeOfDate" 时，都可以用本方法读取。<br />
-    /// Read the time data of the specified address. The minimum time is 0. If you get seconds, you can access <see cref="P:System.TimeSpan.TotalSeconds" />. 
-    /// When the PLC variable type is "Time" and "TimeOfDate", you can use this Method to read.
-    /// </summary>
-    /// <param name="plc">当前的通信对象信息</param>
-    /// <param name="address">PLC里变量的地址</param>
-    /// <returns>时间的结果对象</returns>
-    public static OperateResult<TimeSpan> ReadTime(IReadWriteCip plc, string address)
-    {
-        OperateResult<long> operateResult = plc.ReadInt64(address);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<TimeSpan>(operateResult);
-        }
-        var value = operateResult.Content / 100;
-        return OperateResult.CreateSuccessResult(TimeSpan.FromTicks(value));
-    }
-
-    /// <summary>
-    /// 使用时间格式（TIME）将时间数据写入到PLC中指定的地址里去，PLC的地址类型变量必须为 "TIME"，否则写入失败。<br />
-    /// Use the time format (TIME) to write the time data to the address specified in the PLC. The PLC address type variable must be "TIME", otherwise the writing will fail.
-    /// </summary>
-    /// <param name="plc">当前的通信对象信息</param>
-    /// <param name="address">PLC里变量的地址</param>
-    /// <param name="time">时间参数变量</param>
-    /// <returns>是否写入成功</returns>
-    public static OperateResult WriteTime(IReadWriteCip plc, string address, TimeSpan time)
-    {
-        return plc.WriteTag(address, 9, plc.ByteTransform.TransByte(time.Ticks * 100));
-    }
-
-    /// <summary>
-    /// 使用时间格式（TimeOfDate）将时间数据写入到PLC中指定的地址里去，PLC的地址类型变量必须为 "TimeOfDate"，否则写入失败。<br />
-    /// Use the time format (TimeOfDate) to write the time data to the address specified in the PLC. The PLC address type variable must be "TimeOfDate", otherwise the writing will fail.
-    /// </summary>
-    /// <param name="plc">当前的通信对象信息</param>
-    /// <param name="address">PLC里变量的地址</param>
-    /// <param name="timeOfDate">时间参数变量</param>
-    /// <returns>是否写入成功</returns>
-    public static OperateResult WriteTimeOfDate(IReadWriteCip plc, string address, TimeSpan timeOfDate)
-    {
-        return plc.WriteTag(address, 11, plc.ByteTransform.TransByte(timeOfDate.Ticks * 100));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String)" />
     public static async Task<OperateResult<DateTime>> ReadDateAsync(IReadWriteCip plc, string address)
     {
-        var read = await plc.ReadInt64Async(address);
+        var read = await plc.ReadInt64Async(address).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<DateTime>(read);
@@ -1392,24 +1280,41 @@ public static class AllenBradleyHelper
         return OperateResult.CreateSuccessResult(new DateTime(1970, 1, 1).AddTicks(tick));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.DateTime)" />
+    /// <summary>
+    /// 使用日期格式（Date）将指定的数据写入到指定的地址里，PLC的地址类型变量必须为 "Date"，否则写入失败。
+    /// </summary>
+    /// <param name="plc">当前的通信对象信息</param>
+    /// <param name="address">PLC里变量的地址</param>
+    /// <param name="date">时间信息</param>
+    /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteDateAsync(IReadWriteCip plc, string address, DateTime date)
     {
         var tick = (date.Date - new DateTime(1970, 1, 1)).Ticks * 100;
-        return await plc.WriteTagAsync(address, 8, plc.ByteTransform.TransByte(tick));
+        return await plc.WriteTagAsync(address, 8, plc.ByteTransform.TransByte(tick)).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteTimeAndDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.DateTime)" />
+    /// <summary>
+    /// 使用日期格式（Date）将指定的数据写入到指定的地址里，PLC的地址类型变量必须为 "Date"，否则写入失败。
+    /// </summary>
+    /// <param name="plc">当前的通信对象信息</param>
+    /// <param name="address">PLC里变量的地址</param>
+    /// <param name="date">时间信息</param>
+    /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteTimeAndDateAsync(IReadWriteCip plc, string address, DateTime date)
     {
         var tick = (date - new DateTime(1970, 1, 1)).Ticks * 100;
-        return await plc.WriteTagAsync(address, 10, plc.ByteTransform.TransByte(tick));
+        return await plc.WriteTagAsync(address, 10, plc.ByteTransform.TransByte(tick)).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadTime(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String)" />
+    /// <summary>
+    /// 读取指定地址的时间数据，最小时间为 0，如果获取秒，可以访问 <see cref="P:System.TimeSpan.TotalSeconds" />，当PLC的变量类型为 "Time" 和 "TimeOfDate" 时，都可以用本方法读取。
+    /// </summary>
+    /// <param name="plc">当前的通信对象信息</param>
+    /// <param name="address">PLC里变量的地址</param>
+    /// <returns>时间的结果对象</returns>
     public static async Task<OperateResult<TimeSpan>> ReadTimeAsync(IReadWriteCip plc, string address)
     {
-        var read = await plc.ReadInt64Async(address);
+        var read = await plc.ReadInt64Async(address).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<TimeSpan>(read);
@@ -1418,15 +1323,27 @@ public static class AllenBradleyHelper
         return OperateResult.CreateSuccessResult(TimeSpan.FromTicks(tick));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteTime(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.TimeSpan)" />
+    /// <summary>
+    /// 使用时间格式（TIME）将时间数据写入到PLC中指定的地址里去，PLC的地址类型变量必须为 "TIME"，否则写入失败。
+    /// </summary>
+    /// <param name="plc">当前的通信对象信息</param>
+    /// <param name="address">PLC里变量的地址</param>
+    /// <param name="time">时间参数变量</param>
+    /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteTimeAsync(IReadWriteCip plc, string address, TimeSpan time)
     {
-        return await plc.WriteTagAsync(address, 9, plc.ByteTransform.TransByte(time.Ticks * 100));
+        return await plc.WriteTagAsync(address, 9, plc.ByteTransform.TransByte(time.Ticks * 100)).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteTimeOfDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.TimeSpan)" />
+    /// <summary>
+    /// 使用时间格式（TimeOfDate）将时间数据写入到PLC中指定的地址里去，PLC的地址类型变量必须为 "TimeOfDate"，否则写入失败。
+    /// </summary>
+    /// <param name="plc">当前的通信对象信息</param>
+    /// <param name="address">PLC里变量的地址</param>
+    /// <param name="timeOfDate">时间参数变量</param>
+    /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteTimeOfDateAsync(IReadWriteCip plc, string address, TimeSpan timeOfDate)
     {
-        return await plc.WriteTagAsync(address, 11, plc.ByteTransform.TransByte(timeOfDate.Ticks * 100));
+        return await plc.WriteTagAsync(address, 11, plc.ByteTransform.TransByte(timeOfDate.Ticks * 100)).ConfigureAwait(false);
     }
 }

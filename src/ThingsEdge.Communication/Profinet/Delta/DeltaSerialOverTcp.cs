@@ -31,56 +31,24 @@ public class DeltaSerialOverTcp : ModbusRtuOverTcp, IDelta, IReadWriteDevice, IR
         return DeltaHelper.TranslateToModbusAddress(this, address, modbusCode);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaTcpNet.ReadBool(System.String,System.UInt16)" />
-    [HslMqttApi("ReadBoolArray", "")]
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
-    {
-        return DeltaHelper.ReadBool(this, base.ReadBool, address, length);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaTcpNet.Write(System.String,System.Boolean[])" />
-    [HslMqttApi("WriteBoolArray", "")]
-    public override OperateResult Write(string address, bool[] values)
-    {
-        return DeltaHelper.Write(this, base.Write, address, values);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaTcpNet.Read(System.String,System.UInt16)" />
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
-    {
-        return DeltaHelper.Read(this, base.Read, address, length);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaTcpNet.Write(System.String,System.Byte[])" />
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
-    {
-        return DeltaHelper.Write(this, base.Write, address, value);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaSerialOverTcp.ReadBool(System.String,System.UInt16)" />
     public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
-        return await DeltaHelper.ReadBoolAsync(this, base.ReadBoolAsync, address, length);
+        return await DeltaHelper.ReadBoolAsync(this, base.ReadBoolAsync, address, length).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaSerialOverTcp.Write(System.String,System.Boolean[])" />
     public override async Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return await DeltaHelper.WriteAsync(this, [DebuggerHidden] (address, values) => base.WriteAsync(address, values), address, values);
+        return await DeltaHelper.WriteAsync(this, base.WriteAsync, address, values).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaSerialOverTcp.Read(System.String,System.UInt16)" />
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        return await DeltaHelper.ReadAsync(this, [DebuggerHidden] (address, length) => base.ReadAsync(address, length), address, length);
+        return await DeltaHelper.ReadAsync(this, base.ReadAsync, address, length).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Delta.DeltaSerialOverTcp.Write(System.String,System.Byte[])" />
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
     {
-        return await DeltaHelper.WriteAsync(this, [DebuggerHidden] (address, value) => base.WriteAsync(address, value), address, value);
+        return await DeltaHelper.WriteAsync(this, base.WriteAsync, address, values).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

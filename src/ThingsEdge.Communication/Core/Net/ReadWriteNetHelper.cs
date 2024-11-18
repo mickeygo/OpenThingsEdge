@@ -115,7 +115,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
@@ -140,7 +140,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
@@ -165,7 +165,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
@@ -190,7 +190,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
@@ -215,7 +215,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
@@ -240,7 +240,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
@@ -265,7 +265,7 @@ public class ReadWriteNetHelper
             {
                 break;
             }
-            CommHelper.ThreadSleep(readInterval);
+            CommunicationHelper.ThreadSleep(readInterval);
         }
         return new OperateResult<TimeSpan>(StringResources.Language.CheckDataTimeout + waitTimeout);
     }
