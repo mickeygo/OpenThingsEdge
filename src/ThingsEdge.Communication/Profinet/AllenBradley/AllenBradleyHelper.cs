@@ -1,7 +1,6 @@
 using System.Globalization;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
@@ -462,7 +461,7 @@ public static class AllenBradleyHelper
     {
         if (commandSpecificData == null)
         {
-            commandSpecificData = new byte[0];
+            commandSpecificData = [];
         }
         var array = new byte[commandSpecificData.Length + 24];
         Array.Copy(commandSpecificData, 0, array, 24, commandSpecificData.Length);

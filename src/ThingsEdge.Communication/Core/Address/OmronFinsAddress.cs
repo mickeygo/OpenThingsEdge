@@ -1,10 +1,11 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Exceptions;
 using ThingsEdge.Communication.Profinet.Omron;
 
 namespace ThingsEdge.Communication.Core.Address;
 
 /// <summary>
-/// 欧姆龙的Fins协议的地址类对象
+/// 欧姆龙的Fins协议的地址类对象。
 /// </summary>
 public class OmronFinsAddress : DeviceAddressDataBase
 {
@@ -19,7 +20,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
     public byte WordCode { get; set; }
 
     /// <summary>
-    /// 从指定的地址信息解析成真正的设备地址信息
+    /// 从指定的地址信息解析成真正的设备地址信息。
     /// </summary>
     /// <param name="address">地址信息</param>
     /// <param name="length">数据长度</param>
@@ -36,8 +37,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
     }
 
     /// <summary>
-    /// 从实际的欧姆龙的地址里面解析出地址对象<br />
-    /// Resolve the address object from the actual Omron address
+    /// 从实际的欧姆龙的地址里面解析出地址对象。
     /// </summary>
     /// <param name="address">欧姆龙的地址数据信息</param>
     /// <returns>是否成功的结果对象</returns>
@@ -58,8 +58,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
     }
 
     /// <summary>
-    /// 从实际的欧姆龙的地址里面解析出地址对象<br />
-    /// Resolve the address object from the actual Omron address
+    /// 从实际的欧姆龙的地址里面解析出地址对象。
     /// </summary>
     /// <param name="address">欧姆龙的地址数据信息</param>
     /// <param name="length">读取的数据长度</param>
@@ -76,24 +75,24 @@ public class OmronFinsAddress : DeviceAddressDataBase
                 if (plcType == OmronPlcType.CV)
                 {
                     omronFinsAddress.WordCode = 156;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2)) + 48;
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]) + 48;
                 }
                 else
                 {
                     omronFinsAddress.WordCode = 188;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2)) + 8192;
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]) + 8192;
                 }
             }
             else if (address.StartsWith("IR") || address.StartsWith("ir"))
             {
                 omronFinsAddress.WordCode = 220;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2)) + 4096;
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]) + 4096;
             }
             else if (address.StartsWith("DM") || address.StartsWith("dm"))
             {
                 omronFinsAddress.BitCode = OmronFinsDataType.DM.BitCode;
                 omronFinsAddress.WordCode = OmronFinsDataType.DM.WordCode;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]);
             }
             else if (address.StartsWith("TIM") || address.StartsWith("tim"))
             {
@@ -107,7 +106,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
                     omronFinsAddress.BitCode = OmronFinsDataType.TIM.BitCode;
                     omronFinsAddress.WordCode = OmronFinsDataType.TIM.WordCode;
                 }
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(3));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[3..]);
             }
             else if (address.StartsWith("CNT") || address.StartsWith("cnt"))
             {
@@ -115,13 +114,13 @@ public class OmronFinsAddress : DeviceAddressDataBase
                 {
                     omronFinsAddress.BitCode = 1;
                     omronFinsAddress.WordCode = 129;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(3)) + 32768;
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[3..]) + 32768;
                 }
                 else
                 {
                     omronFinsAddress.BitCode = OmronFinsDataType.TIM.BitCode;
                     omronFinsAddress.WordCode = OmronFinsDataType.TIM.WordCode;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(3)) + 524288;
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[3..]) + 524288;
                 }
             }
             else if (address.StartsWith("CIO") || address.StartsWith("cio"))
@@ -136,19 +135,19 @@ public class OmronFinsAddress : DeviceAddressDataBase
                     omronFinsAddress.BitCode = OmronFinsDataType.CIO.BitCode;
                     omronFinsAddress.WordCode = OmronFinsDataType.CIO.WordCode;
                 }
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(3));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[3..]);
             }
             else if (address.StartsWith("WR") || address.StartsWith("wr"))
             {
                 omronFinsAddress.BitCode = OmronFinsDataType.WR.BitCode;
                 omronFinsAddress.WordCode = OmronFinsDataType.WR.WordCode;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]);
             }
             else if (address.StartsWith("HR") || address.StartsWith("hr"))
             {
                 omronFinsAddress.BitCode = OmronFinsDataType.HR.BitCode;
                 omronFinsAddress.WordCode = OmronFinsDataType.HR.WordCode;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]);
             }
             else if (address.StartsWith("AR") || address.StartsWith("ar"))
             {
@@ -156,26 +155,26 @@ public class OmronFinsAddress : DeviceAddressDataBase
                 {
                     omronFinsAddress.BitCode = 0;
                     omronFinsAddress.WordCode = 128;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2)) + 45056;
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]) + 45056;
                 }
                 else
                 {
                     omronFinsAddress.BitCode = OmronFinsDataType.AR.BitCode;
                     omronFinsAddress.WordCode = OmronFinsDataType.AR.WordCode;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2));
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]);
                 }
             }
             else if (address.StartsWith("CF") || address.StartsWith("cf"))
             {
                 omronFinsAddress.BitCode = 7;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(2));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[2..]);
             }
-            else if (address.StartsWith("EM") || address.StartsWith("em") || address.StartsWith("E") || address.StartsWith("e"))
+            else if (address.StartsWith("EM") || address.StartsWith("em") || address.StartsWith('E') || address.StartsWith('e'))
             {
                 if (address.IndexOf('.') > 0)
                 {
                     var array = address.SplitDot();
-                    var num = Convert.ToInt32(array[0].Substring(address[1] != 'M' && address[1] != 'm' ? 1 : 2), 16);
+                    var num = Convert.ToInt32(array[0][(address[1] is not 'M' and not 'm' ? 1 : 2)..], 16);
                     if (num < 16)
                     {
                         omronFinsAddress.BitCode = (byte)(32 + num);
@@ -193,22 +192,22 @@ public class OmronFinsAddress : DeviceAddressDataBase
                         omronFinsAddress.BitCode = (byte)(224 + num - 16);
                         omronFinsAddress.WordCode = (byte)(96 + num - 16);
                     }
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(address.IndexOf('.') + 1));
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[(address.IndexOf('.') + 1)..]);
                 }
                 else
                 {
                     omronFinsAddress.BitCode = 10;
                     omronFinsAddress.WordCode = 152;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(address[1] != 'M' && address[1] != 'm' ? 1 : 2));
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[(address[1] != 'M' && address[1] != 'm' ? 1 : 2)..]);
                 }
             }
-            else if (address.StartsWith("D") || address.StartsWith("d"))
+            else if (address.StartsWith('D') || address.StartsWith('d'))
             {
                 omronFinsAddress.BitCode = OmronFinsDataType.DM.BitCode;
                 omronFinsAddress.WordCode = OmronFinsDataType.DM.WordCode;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(1));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[1..]);
             }
-            else if (address.StartsWith("C") || address.StartsWith("c"))
+            else if (address.StartsWith('C') || address.StartsWith('c'))
             {
                 if (plcType == OmronPlcType.CV)
                 {
@@ -220,37 +219,38 @@ public class OmronFinsAddress : DeviceAddressDataBase
                     omronFinsAddress.BitCode = OmronFinsDataType.CIO.BitCode;
                     omronFinsAddress.WordCode = OmronFinsDataType.CIO.WordCode;
                 }
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(1));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[1..]);
             }
-            else if (address.StartsWith("W") || address.StartsWith("w"))
+            else if (address.StartsWith('W') || address.StartsWith('w'))
             {
                 omronFinsAddress.BitCode = OmronFinsDataType.WR.BitCode;
                 omronFinsAddress.WordCode = OmronFinsDataType.WR.WordCode;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(1));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[1..]);
             }
-            else if (address.StartsWith("H") || address.StartsWith("h"))
+            else if (address.StartsWith('H') || address.StartsWith('h'))
             {
                 omronFinsAddress.BitCode = OmronFinsDataType.HR.BitCode;
                 omronFinsAddress.WordCode = OmronFinsDataType.HR.WordCode;
-                omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(1));
+                omronFinsAddress.AddressStart = CalculateBitIndex(address[1..]);
             }
             else
             {
-                if (!address.StartsWith("A") && !address.StartsWith("a"))
+                if (!address.StartsWith('A') && !address.StartsWith('a'))
                 {
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
                 }
+
                 if (plcType == OmronPlcType.CV)
                 {
                     omronFinsAddress.BitCode = 0;
                     omronFinsAddress.WordCode = 128;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(1)) + 45056;
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[1..]) + 45056;
                 }
                 else
                 {
                     omronFinsAddress.BitCode = OmronFinsDataType.AR.BitCode;
                     omronFinsAddress.WordCode = OmronFinsDataType.AR.WordCode;
-                    omronFinsAddress.AddressStart = CalculateBitIndex(address.Substring(1));
+                    omronFinsAddress.AddressStart = CalculateBitIndex(address[1..]);
                 }
             }
         }

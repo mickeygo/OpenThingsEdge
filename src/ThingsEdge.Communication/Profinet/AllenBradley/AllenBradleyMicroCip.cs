@@ -5,12 +5,10 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public sealed class AllenBradleyMicroCip : AllenBradleyNet
 {
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.#ctor" />
     public AllenBradleyMicroCip()
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.#ctor(System.String,System.Int32)" />
     public AllenBradleyMicroCip(string ipAddress, int port = 44818)
         : base(ipAddress, port)
     {

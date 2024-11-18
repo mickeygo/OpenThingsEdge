@@ -1,8 +1,8 @@
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Fuji;
 

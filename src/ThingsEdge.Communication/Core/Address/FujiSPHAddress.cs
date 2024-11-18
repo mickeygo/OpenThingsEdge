@@ -1,4 +1,5 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Core.Address;
 
@@ -42,11 +43,10 @@ public class FujiSPHAddress : DeviceAddressDataBase
         {
             switch (address[0])
             {
-                case 'M':
-                case 'm':
+                case 'M' or 'm':
                     {
                         var array2 = address.SplitDot();
-                        switch (int.Parse(array2[0].Substring(1)))
+                        switch (int.Parse(array2[0][1..]))
                         {
                             case 1:
                                 fujiSPHAddress.TypeCode = 2;
@@ -58,7 +58,7 @@ public class FujiSPHAddress : DeviceAddressDataBase
                                 fujiSPHAddress.TypeCode = 8;
                                 break;
                             default:
-                                throw new Exception(StringResources.Language.NotSupportedDataType);
+                                throw new CommunicationException(StringResources.Language.NotSupportedDataType);
                         }
                         fujiSPHAddress.AddressStart = Convert.ToInt32(array2[1]);
                         if (array2.Length > 2)
@@ -67,14 +67,11 @@ public class FujiSPHAddress : DeviceAddressDataBase
                         }
                         break;
                     }
-                case 'I':
-                case 'Q':
-                case 'i':
-                case 'q':
+                case 'I' or 'Q' or 'i' or 'q':
                     {
                         var array = address.SplitDot();
                         fujiSPHAddress.TypeCode = 1;
-                        fujiSPHAddress.AddressStart = Convert.ToInt32(array[0].Substring(1));
+                        fujiSPHAddress.AddressStart = Convert.ToInt32(array[0][1..]);
                         if (array.Length > 1)
                         {
                             fujiSPHAddress.BitIndex = CommHelper.CalculateBitStartIndex(array[1]);
@@ -82,7 +79,7 @@ public class FujiSPHAddress : DeviceAddressDataBase
                         break;
                     }
                 default:
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
             }
         }
         catch (Exception ex)

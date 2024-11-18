@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 
 namespace ThingsEdge.Communication.Robot.YASKAWA.Helper;
 

@@ -1,5 +1,5 @@
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Robot.YASKAWA;
 

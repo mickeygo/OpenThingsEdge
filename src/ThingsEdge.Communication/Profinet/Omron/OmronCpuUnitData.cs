@@ -1,9 +1,9 @@
 namespace ThingsEdge.Communication.Profinet.Omron;
 
 /// <summary>
-/// 欧姆的Cpu的单元信息数据类
+/// 欧姆的Cpu的单元信息数据类。
 /// </summary>
-public class OmronCpuUnitData
+public sealed class OmronCpuUnitData
 {
     /// <summary>
     /// Cpu unit Model
@@ -47,13 +47,6 @@ public class OmronCpuUnitData
     /// Maximum number of timers/counters available (always 8)
     /// </summary>
     public int TCSize { get; set; }
-
-    /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public OmronCpuUnitData()
-    {
-    }
 
     /// <summary>
     /// 根据原始的数据来实例化相关的CPU单元信息

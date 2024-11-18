@@ -1,44 +1,22 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Core.Pipe;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Profinet.Beckhoff.Helper;
 using ThingsEdge.Communication.Reflection;
 
 namespace ThingsEdge.Communication.Profinet.Beckhoff;
 
 /// <summary>
-/// 倍福的ADS协议，支持读取倍福的地址数据，关于端口号的选择，TwinCAT2，端口号801；TwinCAT3，端口号为851，NETID可以选择手动输入，自动输入方式，具体参考API文档的示例代码<br />
-/// Beckhoff's ADS protocol supports reading Beckhoff address data. Regarding the choice of port number, TwinCAT2, port number is 801; TwinCAT3, port number is 851, NETID can be input manually or automatically. 
-/// For details, please refer to the example of API documentation code
+/// 倍福的ADS协议，支持读取倍福的地址数据，关于端口号的选择，TwinCAT2，端口号801；TwinCAT3，端口号为851，NETID可以选择手动输入，自动输入方式，具体参考API文档的示例代码。
 /// </summary>
 /// <remarks>
-/// 支持的地址格式分四种，第一种是绝对的地址表示，比如M100，I100，Q100；第二种是字符串地址，采用s=aaaa;的表示方式；第三种是绝对内存地址采用i=1000000;的表示方式，第四种是自定义的index group, IG=0xF020;0 的地址<br />
-/// There are four supported address formats, the first is absolute address representation, such as M100, I100, Q100; the second is string address, using s=aaaa; representation; 
-/// the third is absolute memory address using i =1000000; representation, the fourth is the custom index group, the address of IG=0xF020;0
-/// <br />
-/// <note type="important">
-/// 在实际的测试中，由于打开了VS软件对倍福PLC进行编程操作，会导致HslCommunicationDemo读取PLC发生间歇性读写失败的问题，此时需要关闭Visual Studio软件对倍福的连接，之后HslCommunicationDemo就会读写成功，感谢QQ：1813782515 提供的解决思路。
-/// </note>
+/// 支持的地址格式分四种，第一种是绝对的地址表示，比如M100，I100，Q100；第二种是字符串地址，采用s=aaaa;的表示方式；第三种是绝对内存地址采用i=1000000;的表示方式，第四种是自定义的index group, IG=0xF020;0 的地址。
 /// </remarks>
-/// <example>
-/// 地址既支持 M100, I100，Q100 ，读取bool时，支持输入 M100.0,  也支持符号的地址，s=MAIN.a  ,也支持绝对地址的形式， i=1235467;<br />
-/// 下面是实例化的例子，可选两种方式
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Profinet\BeckhoffAdsNetSample.cs" region="Sample1" title="实例化" />
-/// 实例化之后，就可以连接操作了
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Profinet\BeckhoffAdsNetSample.cs" region="Sample2" title="连接" />
-/// 连接成功之后，就可以进行读写操作了
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Profinet\BeckhoffAdsNetSample.cs" region="Sample3" title="读写示例" />
-/// 也可以高级的批量读取，需要自己手动解析下数据
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Profinet\BeckhoffAdsNetSample.cs" region="Sample4" title="批量读取" />
-/// 当然，还可以进一步，既实现了批量的高性能读取，又自动解析。
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Profinet\BeckhoffAdsNetSample.cs" region="Sample5" title="类型读取" />
-/// </example>
 public class BeckhoffAdsNet : DeviceTcpNet
 {
     private byte[] targetAMSNetId = new byte[8];

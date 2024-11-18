@@ -1,8 +1,7 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.ModBus;
 
@@ -166,7 +165,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     public int BroadcastStation { get; set; } = -1;
 
     /// <summary>
-    /// 获取modbus协议自增的消息号，你可以自定义modbus的消息号的规则，详细参见<see cref="ModbusTcpNet" />说明，也可以查找<see cref="BasicFramework.SoftIncrementCount" />说明。
+    /// 获取modbus协议自增的消息号，你可以自定义modbus的消息号的规则，详细参见<see cref="ModbusTcpNet" />说明，也可以查找<see cref="Common.SoftIncrementCount" />说明。
     /// </summary>
     public SoftIncrementCount MessageId { get; }
 
@@ -309,7 +308,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return OperateResult.CreateSuccessResult(address);
     }
 
-    /// <inheritdoc cref="IModbus.RegisteredAddressMapping(Func{System.String,System.Byte,HslCommunication.OperateResult{System.String}})" />
+    /// <inheritdoc cref="IModbus.RegisteredAddressMapping(Func{System.String,System.Byte,OperateResult{string}})" />
     public void RegisteredAddressMapping(Func<string, byte, OperateResult<string>> mapping)
     {
         _addressMapping = mapping;
@@ -446,7 +445,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
 
     private async Task<OperateResult<bool[]>> ReadBoolHelperAsync(string address, ushort length, byte function)
     {
-        return await ModbusHelper.ReadBoolHelperAsync(this, address, length, function).ConfigureAwait(false);
+        return await ModbusHelper.ReadBoolAsync(this, address, length, function).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

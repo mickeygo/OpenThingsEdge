@@ -1,4 +1,4 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Reflection;
 
 namespace ThingsEdge.Communication.Core.Net;

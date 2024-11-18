@@ -1,12 +1,11 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Core.Pipe;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Core.Net;
 
 /// <summary>
-/// 二进制通信类，默认。
+/// 基于二进制的通信类。
 /// </summary>
 public class BinaryCommunication
 {
@@ -14,9 +13,11 @@ public class BinaryCommunication
     public string ConnectionId { get; init; }
 
     /// <summary>
-    /// 获取或设置当前的管道信息，管道类型为<see cref="CommunicationPipe" />的继承类，内置了<see cref="PipeTcpNet" />管道，<see cref="PipeUdpNet" />管道，<see cref="PipeSerialPort" />管道等
+    /// 获取当前的管道信息，管道类型为<see cref="CommunicationPipe" />的继承类，
+    /// 内置了<see cref="PipeTcpNet" />管道，<see cref="PipeUdpNet" />管道，<see cref="PipeSerialPort" />管道等。
     /// </summary>
-    public CommunicationPipe CommunicationPipe { get; set; }
+    [NotNull]
+    public CommunicationPipe? CommunicationPipe { get; init; }
 
     /// <summary>
     /// 组件的日志工具。
@@ -38,7 +39,9 @@ public class BinaryCommunication
         }
     }
 
-    /// <inheritdoc cref="CommunicationPipe.SleepTime" />
+    /// <summary>
+    /// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
+    /// </summary>
     public int SleepTime
     {
         get
@@ -160,7 +163,6 @@ public class BinaryCommunication
         return OperateResult.CreateSuccessResult(response);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.Net.BinaryCommunication.ReadFromCoreServer(System.Byte[],System.Boolean,System.Boolean)" />
     public virtual OperateResult<byte[]> ReadFromCoreServer(byte[] send)
     {
         return ReadFromCoreServer(send, hasResponseData: true, usePackAndUnpack: true);
@@ -217,7 +219,7 @@ public class BinaryCommunication
     }
 
     /// <summary>
-    /// 使用指定的管道来进行数据通信，发送原始数据到管道，然后从管道接收相关的数据返回，本方法无锁
+    /// 使用指定的管道来进行数据通信，发送原始数据到管道，然后从管道接收相关的数据返回，本方法无锁。
     /// </summary>
     /// <param name="pipe">管道信息</param>
     /// <param name="send">等待发送的数据</param>
@@ -264,11 +266,11 @@ public class BinaryCommunication
     /// <remarks>
     /// 在实际解包的操作过程中，通常对状态码，错误码等消息进行判断，如果校验不通过，将携带错误消息返回。
     /// </remarks>
-    /// <param name="send">发送的原始报文数据</param>
+    /// <param name="sends">发送的原始报文数据</param>
     /// <returns>返回拆包之后的报文信息，默认不进行任何的拆包操作</returns>
-    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send)
+    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> sends)
     {
-        return await NetSupport.ReadFromCoreServerAsync(send, ReadFromCoreServerAsync).ConfigureAwait(false);
+        return await NetSupport.ReadFromCoreServerAsync(sends, ReadFromCoreServerAsync).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -289,7 +291,7 @@ public class BinaryCommunication
         var read = new OperateResult<byte[]>();
         try
         {
-            var pipe = await CommunicationPipe.OpenCommunicationAsync().ConfigureAwait(continueOnCapturedContext: false);
+            var pipe = await CommunicationPipe.OpenCommunicationAsync().ConfigureAwait(false);
             if (!pipe.IsSuccess)
             {
                 read.CopyErrorFromOther(pipe);
@@ -297,7 +299,7 @@ public class BinaryCommunication
             }
             if (pipe.Content)
             {
-                var ini = await InitializationOnConnectAsync().ConfigureAwait(continueOnCapturedContext: false);
+                var ini = await InitializationOnConnectAsync().ConfigureAwait(false);
                 if (!ini.IsSuccess)
                 {
                     return OperateResult.CreateFailedResult<byte[]>(ini);
@@ -325,12 +327,12 @@ public class BinaryCommunication
     }
 
     /// <summary>
-    /// 使用指定的管道来进行数据通信，发送原始数据到管道，然后从管道接收相关的数据返回，本方法无锁
+    /// 使用指定的管道来进行数据通信，发送原始数据到管道，然后从管道接收相关的数据返回，本方法无锁。
     /// </summary>
     /// <param name="pipe">管道信息</param>
-    /// <param name="send">等待发送的数据</param>
-    /// <param name="hasResponseData">是否需要返回的数据</param>
-    /// <param name="usePackAndUnpack">是否进行封包，拆包操作</param>
+    /// <param name="send">发送的完整的报文信息</param>
+    /// <param name="hasResponseData">是否有等待的数据返回</param>
+    /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写 <see cref="PackCommandWithHeader" /> 方法后才会有影响</param>
     /// <returns>是否成功的结果对象</returns>
     public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
@@ -348,7 +350,7 @@ public class BinaryCommunication
         {
             return read;
         }
-        var unpack = UnpackResponseContent(send, read.Content!);
+        var unpack = UnpackResponseContent(send, read.Content);
         if (!unpack.IsSuccess && unpack.ErrorCode == int.MinValue)
         {
             unpack.ErrorCode = 10000;

@@ -1,6 +1,5 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 
@@ -128,10 +127,6 @@ public class OmronHostLinkCModeHelper
     /// <returns>型号</returns>
     public static OperateResult<string> ReadPlcType(IReadWriteDevice omron, byte unitNumber)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<string>(StringResources.Language.InsufficientPrivileges);
-        }
         OperateResult<byte[]> operateResult = omron.ReadFromCoreServer(PackCommand(Encoding.ASCII.GetBytes("MM"), unitNumber));
         if (!operateResult.IsSuccess)
         {
@@ -155,10 +150,6 @@ public class OmronHostLinkCModeHelper
     /// <returns>0: 编程模式  1: 运行模式  2: 监视模式</returns>
     public static OperateResult<int> ReadPlcMode(IReadWriteDevice omron, byte unitNumber)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<int>(StringResources.Language.InsufficientPrivileges);
-        }
         OperateResult<byte[]> operateResult = omron.ReadFromCoreServer(PackCommand(Encoding.ASCII.GetBytes("MS"), unitNumber));
         if (!operateResult.IsSuccess)
         {
@@ -183,10 +174,6 @@ public class OmronHostLinkCModeHelper
     /// <returns>是否变更成功</returns>
     public static OperateResult ChangePlcMode(IReadWriteDevice omron, byte unitNumber, byte mode)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<int>(StringResources.Language.InsufficientPrivileges);
-        }
         OperateResult<byte[]> operateResult = omron.ReadFromCoreServer(PackCommand(Encoding.ASCII.GetBytes("SC" + mode.ToString("X2")), unitNumber));
         if (!operateResult.IsSuccess)
         {

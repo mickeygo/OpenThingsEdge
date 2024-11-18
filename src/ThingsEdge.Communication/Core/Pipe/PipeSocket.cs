@@ -4,14 +4,13 @@ using System.Net.Sockets;
 namespace ThingsEdge.Communication.Core.Pipe;
 
 /// <summary>
-/// 基于网络通信的管道信息，可以设置额外的一些参数信息，例如连接超时时间，读取超时时间等等。<br />
-/// Based on the pipe information of network communication, some additional parameter information can be set, such as connection timeout time, read timeout time and so on.
+/// 基于网络通信的管道信息，可以设置额外的一些参数信息，例如连接超时时间，读取超时时间等等。
 /// </summary>
 public class PipeSocket : PipeBase, IDisposable
 {
     private string ipAddress = "127.0.0.1";
 
-    private int[] _port = new int[1] { 2000 };
+    private int[] _port = [2000];
 
     private int indexPort = -1;
 

@@ -1,8 +1,7 @@
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.XINJE;

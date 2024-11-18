@@ -1,4 +1,5 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Core.Address;
 
@@ -8,8 +9,7 @@ namespace ThingsEdge.Communication.Core.Address;
 public class GeSRTPAddress : DeviceAddressDataBase
 {
     /// <summary>
-    /// 获取或设置等待读取的数据的代码<br />
-    /// Get or set the code of the data waiting to be read
+    /// 获取或设置等待读取的数据的代码。
     /// </summary>
     public byte DataCode { get; set; }
 
@@ -25,14 +25,13 @@ public class GeSRTPAddress : DeviceAddressDataBase
         }
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.Address.GeSRTPAddress.ParseFrom(System.String,System.UInt16,System.Boolean)" />
     public static OperateResult<GeSRTPAddress> ParseFrom(string address, bool isBit)
     {
         return ParseFrom(address, 0, isBit);
     }
 
     /// <summary>
-    /// 从GE的地址里，解析出实际的带数据码的 <see cref="T:HslCommunication.Core.Address.GeSRTPAddress" /> 地址信息，起始地址会自动减一，和实际的地址相匹配
+    /// 从GE的地址里，解析出实际的带数据码的 <see cref="GeSRTPAddress" /> 地址信息，起始地址会自动减一，和实际的地址相匹配
     /// </summary>
     /// <param name="address">实际的地址数据</param>
     /// <param name="length">读取的长度信息</param>
@@ -51,7 +50,7 @@ public class GeSRTPAddress : DeviceAddressDataBase
                     return new OperateResult<GeSRTPAddress>(StringResources.Language.GeSRTPNotSupportBitReadWrite);
                 }
                 geSRTPAddress.DataCode = 10;
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(2));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
             else if (address.StartsWith("AQ") || address.StartsWith("aq"))
             {
@@ -60,63 +59,63 @@ public class GeSRTPAddress : DeviceAddressDataBase
                     return new OperateResult<GeSRTPAddress>(StringResources.Language.GeSRTPNotSupportBitReadWrite);
                 }
                 geSRTPAddress.DataCode = 12;
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(2));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
-            else if (address.StartsWith("R") || address.StartsWith("r"))
+            else if (address.StartsWith('R') || address.StartsWith('r'))
             {
                 if (isBit)
                 {
                     return new OperateResult<GeSRTPAddress>(StringResources.Language.GeSRTPNotSupportBitReadWrite);
                 }
                 geSRTPAddress.DataCode = 8;
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(1));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[1..]);
             }
             else if (address.StartsWith("SA") || address.StartsWith("sa"))
             {
                 geSRTPAddress.DataCode = (byte)(isBit ? 78 : 24);
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(2));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
             else if (address.StartsWith("SB") || address.StartsWith("sb"))
             {
                 geSRTPAddress.DataCode = (byte)(isBit ? 80 : 26);
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(2));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
             else if (address.StartsWith("SC") || address.StartsWith("sc"))
             {
                 geSRTPAddress.DataCode = (byte)(isBit ? 82 : 28);
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(2));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
             else
             {
-                if (address[0] == 'I' || address[0] == 'i')
+                if (address[0] is 'I' or 'i')
                 {
                     geSRTPAddress.DataCode = (byte)(isBit ? 70 : 16);
                 }
-                else if (address[0] == 'Q' || address[0] == 'q')
+                else if (address[0] is 'Q' or 'q')
                 {
                     geSRTPAddress.DataCode = (byte)(isBit ? 72 : 18);
                 }
-                else if (address[0] == 'M' || address[0] == 'm')
+                else if (address[0] is 'M' or 'm')
                 {
                     geSRTPAddress.DataCode = (byte)(isBit ? 76 : 22);
                 }
-                else if (address[0] == 'T' || address[0] == 't')
+                else if (address[0] is 'T' or 't')
                 {
                     geSRTPAddress.DataCode = (byte)(isBit ? 74 : 20);
                 }
-                else if (address[0] == 'S' || address[0] == 's')
+                else if (address[0] is 'S' or 's')
                 {
                     geSRTPAddress.DataCode = (byte)(isBit ? 84 : 30);
                 }
                 else
                 {
-                    if (address[0] != 'G' && address[0] != 'g')
+                    if (address[0] is not 'G' and not 'g')
                     {
-                        throw new Exception(StringResources.Language.NotSupportedDataType);
+                        throw new CommunicationException(StringResources.Language.NotSupportedDataType);
                     }
                     geSRTPAddress.DataCode = (byte)(isBit ? 86 : 56);
                 }
-                geSRTPAddress.AddressStart = Convert.ToInt32(address.Substring(1));
+                geSRTPAddress.AddressStart = Convert.ToInt32(address[1..]);
             }
         }
         catch (Exception ex)

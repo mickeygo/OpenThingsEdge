@@ -1,7 +1,6 @@
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
-namespace ThingsEdge.Communication.BasicFramework;
+namespace ThingsEdge.Communication.Common;
 
 /// <summary>
 /// 一个软件基础类，提供常用的一些静态方法，比如字符串转换，字节转换的方法。

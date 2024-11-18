@@ -1,12 +1,11 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Net;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Reflection;
 
 namespace ThingsEdge.Communication.Core.Device;
 
 /// <summary>
-/// 所有设备的基类信息。
+/// 设备通信的基类信息。
 /// </summary>
 public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevice, IReadWriteNet, IDisposable
 {
@@ -49,14 +48,10 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         return (ushort)(WordLength * length * dataTypeLength);
     }
 
+    #region read
+
     /// <inheritdoc />
     public abstract Task<OperateResult<byte[]>> ReadAsync(string address, ushort length);
-
-    /// <inheritdoc />
-    public abstract Task<OperateResult> WriteAsync(string address, byte[] value);
-
-    /// <inheritdoc />
-    public abstract Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length);
 
     /// <inheritdoc />
     public virtual async Task<OperateResult<bool>> ReadBoolAsync(string address)
@@ -65,49 +60,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public abstract Task<OperateResult> WriteAsync(string address, bool[] value);
-
-    /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, bool value)
-    {
-        return await WriteAsync(address, [value]).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new()
-    {
-        return await ReadWriteNetHelper.ReadCustomerAsync<T>(this, address).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address, T obj) where T : IDataTransfer, new()
-    {
-        return await ReadWriteNetHelper.ReadCustomerAsync(this, address, obj).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public async Task<OperateResult> WriteCustomerAsync<T>(string address, T data) where T : IDataTransfer, new()
-    {
-        return await ReadWriteNetHelper.WriteCustomerAsync(this, address, data).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<OperateResult<T>> ReadAsync<T>() where T : class, new()
-    {
-        return await CommReflectionHelper.ReadAsync<T>(this).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync<T>(T data) where T : class, new()
-    {
-        return await CommReflectionHelper.WriteAsync(data, this).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<OperateResult<T>> ReadStructAsync<T>(string address, ushort length) where T : class, new()
-    {
-        return await ReadWriteNetHelper.ReadStructAsync<T>(this, address, length, ByteTransform).ConfigureAwait(false);
-    }
+    public abstract Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length);
 
     /// <inheritdoc />
     public async Task<OperateResult<short>> ReadInt16Async(string address)
@@ -158,18 +111,6 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public async Task<OperateResult<float>> ReadFloatAsync(string address)
-    {
-        return ByteTransformHelper.GetResultFromArray(await ReadFloatAsync(address, 1).ConfigureAwait(false));
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
-    }
-
-    /// <inheritdoc />
     public async Task<OperateResult<long>> ReadInt64Async(string address)
     {
         return ByteTransformHelper.GetResultFromArray(await ReadInt64Async(address, 1).ConfigureAwait(false));
@@ -194,6 +135,18 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
+    public async Task<OperateResult<float>> ReadFloatAsync(string address)
+    {
+        return ByteTransformHelper.GetResultFromArray(await ReadFloatAsync(address, 1).ConfigureAwait(false));
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
+    {
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
+    }
+    
+    /// <inheritdoc />
     public async Task<OperateResult<double>> ReadDoubleAsync(string address)
     {
         return ByteTransformHelper.GetResultFromArray(await ReadDoubleAsync(address, 1).ConfigureAwait(false));
@@ -216,12 +169,46 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     {
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransString(m, 0, m.Length, encoding));
     }
+  
+    /// <inheritdoc />
+    public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new()
+    {
+        return await ReadWriteNetHelper.ReadCustomerAsync<T>(this, address).ConfigureAwait(false);
+    }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, short[] values)
+    public virtual async Task<OperateResult<T>> ReadStructAsync<T>(string address, ushort length) where T : class, new()
     {
-        return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
+        return await ReadWriteNetHelper.ReadStructAsync<T>(this, address, length, ByteTransform).ConfigureAwait(false);
     }
+
+    /// <inheritdoc />
+    public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address, T obj) where T : IDataTransfer, new()
+    {
+        return await ReadWriteNetHelper.ReadCustomerAsync(this, address, obj).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<OperateResult<T>> ReadAsync<T>() where T : class, new()
+    {
+        return await CommReflectionHelper.ReadAsync<T>(this).ConfigureAwait(false);
+    }
+
+    #endregion
+
+    #region write
+
+    /// <inheritdoc />
+    public abstract Task<OperateResult> WriteAsync(string address, byte[] values);
+
+    /// <inheritdoc />
+    public virtual async Task<OperateResult> WriteAsync(string address, bool value)
+    {
+        return await WriteAsync(address, [value]).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public abstract Task<OperateResult> WriteAsync(string address, bool[] values);
 
     /// <inheritdoc />
     public virtual async Task<OperateResult> WriteAsync(string address, short value)
@@ -230,7 +217,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, ushort[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, short[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -242,7 +229,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, int[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, ushort[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -254,7 +241,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, uint[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, int[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -266,7 +253,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, float[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, uint[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -278,7 +265,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, long[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, float[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -290,7 +277,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, ulong[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, long[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -302,7 +289,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     }
 
     /// <inheritdoc />
-    public virtual async Task<OperateResult> WriteAsync(string address, double[] values)
+    public virtual async Task<OperateResult> WriteAsync(string address, ulong[] values)
     {
         return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
@@ -311,6 +298,12 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     public virtual async Task<OperateResult> WriteAsync(string address, double value)
     {
         return await WriteAsync(address, [value]).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<OperateResult> WriteAsync(string address, double[] values)
+    {
+        return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -347,6 +340,20 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         temp = SoftBasic.ArrayExpandToLength(temp, length);
         return await WriteAsync(address, temp).ConfigureAwait(false);
     }
+
+    /// <inheritdoc />
+    public async Task<OperateResult> WriteCustomerAsync<T>(string address, T data) where T : IDataTransfer, new()
+    {
+        return await ReadWriteNetHelper.WriteCustomerAsync(this, address, data).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<OperateResult> WriteAsync<T>(T data) where T : class, new()
+    {
+        return await CommReflectionHelper.WriteAsync(data, this).ConfigureAwait(false);
+    }
+
+    #endregion
 
     /// <inheritdoc />
     protected virtual void Dispose(bool disposing)

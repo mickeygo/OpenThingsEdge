@@ -1,9 +1,8 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Pipe;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Core.Net;
 

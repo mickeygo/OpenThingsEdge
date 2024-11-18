@@ -3,14 +3,12 @@ using System.Text.Json.Serialization;
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
 /// <summary>
-/// AB PLC的数据标签实体类<br />
-/// Data tag entity class of AB PLC
+/// AB PLC的数据标签实体类。
 /// </summary>
 public class AbTagItem
 {
     /// <summary>
-    /// 实例ID<br />
-    /// instance ID
+    /// 实例ID。
     /// </summary>
     public uint InstanceID { get; set; }
 
@@ -21,21 +19,17 @@ public class AbTagItem
     public string Name { get; set; }
 
     /// <summary>
-    /// 当前标签的类型代号，例如 0x0C1 表示bool类型，如果当前的标签的<see cref="P:HslCommunication.Profinet.AllenBradley.AbTagItem.IsStruct" />为 <c>True</c>，那么本属性表示结构体的实例ID<br />
-    /// The type code of the current tag, for example 0x0C1 means bool type, if the current tag's <see cref="P:HslCommunication.Profinet.AllenBradley.AbTagItem.IsStruct" /> is <c>True</c>, 
-    /// then this attribute indicates the instance ID of the structure
+    /// 当前标签的类型代号，例如 0x0C1 表示bool类型，如果当前的标签的<see cref="IsStruct" />为 <c>True</c>，那么本属性表示结构体的实例ID。
     /// </summary>
     public ushort SymbolType { get; set; }
 
     /// <summary>
-    /// 数据的维度信息，默认是0，标量数据，1表示一维数组，2表示二维数组<br />
-    /// The dimension information of the data, the default is 0, scalar data, 1 means a one-dimensional array, 2 means a two-dimensional array
+    /// 数据的维度信息，默认是0，标量数据，1表示一维数组，2表示二维数组。
     /// </summary>
     public int ArrayDimension { get; set; }
 
     /// <summary>
-    /// 当前的标签是否结构体数据<br />
-    /// Whether the current label is structured data
+    /// 当前的标签是否结构体数据。
     /// </summary>
     public bool IsStruct { get; set; }
 
@@ -57,18 +51,16 @@ public class AbTagItem
     public object Tag { get; set; }
 
     /// <summary>
-    /// 获取或设置本属性实际数据在结构体中的偏移位置信息<br />
-    /// Get or set the offset position information of the actual data of this property in the structure
+    /// 获取或设置本属性实际数据在结构体中的偏移位置信息。
     /// </summary>
     public int ByteOffset { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的对象<br />
-    /// instantiate a default object
+    /// 实例化一个默认的对象。
     /// </summary>
     public AbTagItem()
     {
-        ArrayLength = new int[3] { -1, -1, -1 };
+        ArrayLength = [-1, -1, -1];
     }
 
     /// <summary>
@@ -209,16 +201,14 @@ public class AbTagItem
     /// <returns>新的实例的标签</returns>
     public static AbTagItem CloneBy(AbTagItem abTagItem)
     {
-        if (abTagItem == null)
+        var abTagItem2 = new AbTagItem
         {
-            return null;
-        }
-        var abTagItem2 = new AbTagItem();
-        abTagItem2.InstanceID = abTagItem.InstanceID;
-        abTagItem2.Name = abTagItem.Name;
-        abTagItem2.ByteOffset = abTagItem.ByteOffset;
-        abTagItem2.SymbolType = abTagItem.SymbolType;
-        abTagItem2.ArrayDimension = abTagItem.ArrayDimension;
+            InstanceID = abTagItem.InstanceID,
+            Name = abTagItem.Name,
+            ByteOffset = abTagItem.ByteOffset,
+            SymbolType = abTagItem.SymbolType,
+            ArrayDimension = abTagItem.ArrayDimension
+        };
         abTagItem2.ArrayLength[0] = abTagItem.ArrayLength[0];
         abTagItem2.ArrayLength[1] = abTagItem.ArrayLength[1];
         abTagItem2.ArrayLength[2] = abTagItem.ArrayLength[2];
@@ -249,8 +239,10 @@ public class AbTagItem
     /// <returns>标签信息</returns>
     public static AbTagItem PraseAbTagItem(byte[] source, ref int index)
     {
-        var abTagItem = new AbTagItem();
-        abTagItem.InstanceID = BitConverter.ToUInt32(source, index);
+        var abTagItem = new AbTagItem
+        {
+            InstanceID = BitConverter.ToUInt32(source, index)
+        };
         index += 4;
         var num = BitConverter.ToUInt16(source, index);
         index += 2;
@@ -283,7 +275,7 @@ public class AbTagItem
         {
             var abTagItem = PraseAbTagItem(source, ref index);
             instance = abTagItem.InstanceID;
-            if ((abTagItem.SymbolType & 0x1000) != 4096 && !abTagItem.Name.StartsWith("__") && !abTagItem.Name.Contains(":"))
+            if ((abTagItem.SymbolType & 0x1000) != 4096 && !abTagItem.Name.StartsWith("__") && !abTagItem.Name.Contains(':'))
             {
                 if (!isGlobalVariable)
                 {
@@ -342,7 +334,7 @@ public class AbTagItem
     {
         var list = new List<AbTagItem>();
         var index2 = structHandle.MemberCount * 8 + index;
-        var text = CalculatesString(source, ref index2, 0);
+        _ = CalculatesString(source, ref index2, 0);
         for (var i = 0; i < structHandle.MemberCount; i++)
         {
             var abTagItem = new AbTagItem();

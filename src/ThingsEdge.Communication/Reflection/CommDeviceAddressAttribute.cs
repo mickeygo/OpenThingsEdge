@@ -9,12 +9,13 @@ public class CommDeviceAddressAttribute : Attribute
     /// <summary>
     /// 设备的类型，如果指定了特殊的PLC，那么该地址就可以支持多种不同PLC。
     /// </summary>
-    public Type DeviceType { get; set; }
+    public Type? DeviceType { get; set; }
 
     /// <summary>
     /// 数据的地址信息，真实的设备的地址信息。
     /// </summary>
-    public string Address { get; }
+    [NotNull]
+    public string? Address { get; }
 
     /// <summary>
     /// 读取的数据长度。
@@ -25,7 +26,6 @@ public class CommDeviceAddressAttribute : Attribute
     /// 如果关联了字符串类型的数据，则表示指定的字符编码，默认 ASCII 编码。
     /// </summary>
     public string Encoding { get; set; } = "ASCII";
-
 
     /// <summary>
     /// 实例化一个地址特性，指定地址信息，用于单变量的数据。

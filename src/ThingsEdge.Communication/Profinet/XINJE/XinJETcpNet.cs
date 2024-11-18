@@ -1,13 +1,10 @@
 using System.Diagnostics;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.XINJE;
 
 /// <summary>
-/// 信捷PLC的XC,XD,XL系列的网口通讯类，底层使用ModbusTcp协议实现，每个系列支持的地址类型及范围不一样，详细参考Demo程序<br />
-/// XC, XD, XL series of Xinje PLC's network port communication class, the bottom layer is realized by ModbusTcp protocol, 
-/// each series supports different address types and ranges, please refer to the Demo for details
+/// 信捷PLC的XC,XD,XL系列的网口通讯类，底层使用ModbusTcp协议实现，每个系列支持的地址类型及范围不一样。
 /// </summary>
 /// <remarks>
 /// 对于XC系列适用于XC1/XC2/XC3/XC5/XCM/XCC系列，线圈支持X,Y,S,M,T,C，寄存器支持D,F,E,T,C<br />
@@ -59,55 +56,6 @@ public class XinJETcpNet : ModbusTcpNet
     public override OperateResult<string> TranslateToModbusAddress(string address, byte modbusCode)
     {
         return XinJEHelper.PraseXinJEAddress(Series, address, modbusCode);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
-    {
-        return XinJEHelper.Read(this, address, length, base.Read);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
-    {
-        return XinJEHelper.Write(this, address, value, base.Write);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteInt16", "")]
-    public override OperateResult Write(string address, short value)
-    {
-        return XinJEHelper.Write(this, address, value, base.Write);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteUInt16", "")]
-    public override OperateResult Write(string address, ushort value)
-    {
-        return XinJEHelper.Write(this, address, value, base.Write);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadBoolArray", "")]
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
-    {
-        return XinJEHelper.ReadBool(this, address, length, base.ReadBool);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteBoolArray", "")]
-    public override OperateResult Write(string address, bool[] values)
-    {
-        return XinJEHelper.Write(this, address, values, base.Write);
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteBool", "")]
-    public override OperateResult Write(string address, bool value)
-    {
-        return XinJEHelper.Write(this, address, value, base.Write);
     }
 
     /// <inheritdoc />

@@ -2,7 +2,6 @@ using System.IO.Ports;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Profinet.Omron.Helper;
 
 namespace ThingsEdge.Communication.Profinet.Omron;

@@ -1,12 +1,12 @@
-namespace ThingsEdge.Communication.Serial;
+namespace ThingsEdge.Communication.Common.Serial;
 
 /// <summary>
 /// 用于CRC16验证的类，提供了标准的验证方法，可以方便快速的对数据进行CRC校验。
 /// </summary>
 /// <remarks>
-/// 本类提供了几个静态的方法，用来进行CRC16码的计算和验证的，多项式码可以自己指定配置，但是预置的寄存器为0xFF 0xFF
+/// 本类提供了几个静态的方法，用来进行CRC16码的计算和验证的，多项式码可以自己指定配置，但是预置的寄存器为0xFF 0xFF。
 /// </remarks>
-public class SoftCRC16
+public static class SoftCRC16
 {
     /// <summary>
     /// 来校验对应的接收数据的CRC校验码，默认多项式码为0xA001。

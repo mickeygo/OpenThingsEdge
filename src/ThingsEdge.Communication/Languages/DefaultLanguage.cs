@@ -1,14 +1,12 @@
 using ThingsEdge.Communication.Core;
 
-namespace ThingsEdge.Communication.Language;
+namespace ThingsEdge.Communication.Languages;
 
 /// <summary>
 /// 系统的语言基类，默认也即是中文版本
 /// </summary>
 public class DefaultLanguage
 {
-    internal static string Contact = "QQ: 200962190，Wechat：13516702732，Email:hsl200909@163.com";
-
     public virtual string TimeDescriptionSecond => " 秒";
 
     public virtual string TimeDescriptionMinute => " 分钟";
@@ -16,10 +14,6 @@ public class DefaultLanguage
     public virtual string TimeDescriptionHour => " 小时";
 
     public virtual string TimeDescriptionDay => " 天";
-
-    public virtual string InsufficientPrivileges => "当前的方法接口或类，只对商业授权用户开放，权限不足，感谢支持。如果需要商业授权，" + Contact;
-
-    public virtual string DeveloperPrivileges => "当前会话的权限不足，无法调用本服务接口，请将当前会话的权限设置为开发者权限。";
 
     public virtual string ConnectedFailed => "连接失败：";
 

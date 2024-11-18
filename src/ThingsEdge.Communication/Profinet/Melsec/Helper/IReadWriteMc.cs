@@ -1,6 +1,5 @@
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 

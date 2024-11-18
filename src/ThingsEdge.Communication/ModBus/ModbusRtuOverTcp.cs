@@ -1,29 +1,15 @@
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.ModBus;
 
 /// <inheritdoc cref="T:HslCommunication.ModBus.ModbusRtu" />
 public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteNet
 {
-    private bool isAddressStartWithZero = true;
+    private Func<string, byte, OperateResult<string>> _addressMapping = (address, modbusCode) => OperateResult.CreateSuccessResult(address);
 
-    private Func<string, byte, OperateResult<string>> addressMapping = (address, modbusCode) => OperateResult.CreateSuccessResult(address);
-
-    /// <inheritdoc cref="P:HslCommunication.ModBus.ModbusTcpNet.AddressStartWithZero" />
-    public bool AddressStartWithZero
-    {
-        get
-        {
-            return isAddressStartWithZero;
-        }
-        set
-        {
-            isAddressStartWithZero = value;
-        }
-    }
+    public bool AddressStartWithZero { get; set; } = true;
 
     /// <inheritdoc cref="ModbusTcpNet.Station" />
     public byte Station { get; set; } = 1;
@@ -89,9 +75,9 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     /// <inheritdoc cref="IModbus.TranslateToModbusAddress(string,byte)" />
     public virtual OperateResult<string> TranslateToModbusAddress(string address, byte modbusCode)
     {
-        if (addressMapping != null)
+        if (_addressMapping != null)
         {
-            return addressMapping(address, modbusCode);
+            return _addressMapping(address, modbusCode);
         }
         return OperateResult.CreateSuccessResult(address);
     }
@@ -99,7 +85,7 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     /// <inheritdoc cref="IModbus.RegisteredAddressMapping(Func{string,byte,OperateResult{string}})" />
     public void RegisteredAddressMapping(Func<string, byte, OperateResult<string>> mapping)
     {
-        addressMapping = mapping;
+        _addressMapping = mapping;
     }
 
     /// <inheritdoc />
@@ -265,7 +251,7 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
 
     private async Task<OperateResult<bool[]>> ReadBoolHelperAsync(string address, ushort length, byte function)
     {
-        return await ModbusHelper.ReadBoolHelperAsync(this, address, length, function);
+        return await ModbusHelper.ReadBoolAsync(this, address, length, function);
     }
 
     /// <inheritdoc cref="M:HslCommunication.ModBus.ModbusTcpNet.ReadBoolAsync(System.String,System.UInt16)" />
@@ -457,7 +443,7 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     /// <inheritdoc cref="M:HslCommunication.Core.IReadWriteNet.WriteAsync(System.String,System.Double[])" />
     public override async Task<OperateResult> WriteAsync(string address, double[] values)
     {
-        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address);
+        return await WriteAsync(value: CommHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

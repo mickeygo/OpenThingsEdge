@@ -10,12 +10,13 @@ public class CommAddressProperty
     /// <summary>
     /// 该属性绑定的地址特性
     /// </summary>
-    public CommDeviceAddressAttribute DeviceAddressAttribute { get; set; }
+    public CommDeviceAddressAttribute? DeviceAddressAttribute { get; set; }
 
     /// <summary>
     /// 地址绑定的属性信息
     /// </summary>
-    public PropertyInfo PropertyInfo { get; set; }
+    [NotNull]
+    public PropertyInfo? PropertyInfo { get; set; }
 
     /// <summary>
     /// 起始的字节偏移信息
@@ -30,5 +31,5 @@ public class CommAddressProperty
     /// <summary>
     /// 缓存的数据对象
     /// </summary>
-    public byte[] Buffer { get; set; }
+    public byte[]? Buffer { get; set; }
 }

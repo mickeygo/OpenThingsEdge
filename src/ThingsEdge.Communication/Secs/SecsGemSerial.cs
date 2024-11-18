@@ -1,6 +1,5 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Device;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Secs;
 

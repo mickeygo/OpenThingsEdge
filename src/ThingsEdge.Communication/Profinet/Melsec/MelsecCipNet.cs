@@ -1,4 +1,3 @@
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Profinet.AllenBradley;
 
 namespace ThingsEdge.Communication.Profinet.Melsec;

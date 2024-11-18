@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Net;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 
@@ -531,10 +531,6 @@ public class McHelper
     /// <returns>读取的内容</returns>
     public static OperateResult<byte[]> ReadMemory(IReadWriteMc mc, string address, ushort length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var operateResult = mc.McType == McType.McBinary ? McBinaryHelper.BuildReadMemoryCommand(address, length) : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadMemoryCommand(address, length) : null;
         if (!operateResult.IsSuccess)
         {
@@ -551,10 +547,6 @@ public class McHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.McHelper.ReadMemory(HslCommunication.Profinet.Melsec.Helper.IReadWriteMc,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadMemoryAsync(IReadWriteMc mc, string address, ushort length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var coreResult = mc.McType == McType.McBinary ? McBinaryHelper.BuildReadMemoryCommand(address, length) : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadMemoryCommand(address, length) : null;
         if (!coreResult.IsSuccess)
         {
@@ -579,10 +571,6 @@ public class McHelper
     /// <returns>返回结果</returns>
     public static OperateResult<byte[]> ReadSmartModule(IReadWriteMc mc, ushort module, string address, ushort length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var operateResult = mc.McType == McType.McBinary ? McBinaryHelper.BuildReadSmartModule(module, address, length) : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadSmartModule(module, address, length) : null;
         if (!operateResult.IsSuccess)
         {
@@ -599,10 +587,6 @@ public class McHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.McHelper.ReadSmartModule(HslCommunication.Profinet.Melsec.Helper.IReadWriteMc,System.UInt16,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadSmartModuleAsync(IReadWriteMc mc, ushort module, string address, ushort length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var coreResult = mc.McType == McType.McBinary ? McBinaryHelper.BuildReadSmartModule(module, address, length) : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadSmartModule(module, address, length) : null;
         if (!coreResult.IsSuccess)
         {
@@ -627,10 +611,6 @@ public class McHelper
     /// <returns>返回结果</returns>
     public static OperateResult<byte[]> ReadExtend(IReadWriteMc mc, ushort extend, string address, ushort length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var operateResult = mc.McAnalysisAddress(address, length, isBit: false);
         if (!operateResult.IsSuccess)
         {
@@ -648,10 +628,6 @@ public class McHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.McHelper.ReadExtend(HslCommunication.Profinet.Melsec.Helper.IReadWriteMc,System.UInt16,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadExtendAsync(IReadWriteMc mc, ushort extend, string address, ushort length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var addressResult = mc.McAnalysisAddress(address, length, isBit: false);
         if (!addressResult.IsSuccess)
         {

@@ -1,4 +1,5 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Exceptions;
 using ThingsEdge.Communication.Profinet.Fuji;
 
 namespace ThingsEdge.Communication.Core.Address;
@@ -11,7 +12,7 @@ public class FujiSPBAddress : DeviceAddressDataBase
     /// <summary>
     /// 数据的类型代码
     /// </summary>
-    public string TypeCode { get; set; }
+    public string? TypeCode { get; set; }
 
     /// <summary>
     /// 当是位地址的时候，用于标记的信息
@@ -72,80 +73,73 @@ public class FujiSPBAddress : DeviceAddressDataBase
     /// <returns>是否成功的结果对象</returns>
     public static OperateResult<FujiSPBAddress> ParseFrom(string address, ushort length)
     {
-        var fujiSPBAddress = new FujiSPBAddress();
-        fujiSPBAddress.Length = length;
+        var fujiSPBAddress = new FujiSPBAddress
+        {
+            Length = length
+        };
         try
         {
             fujiSPBAddress.BitIndex = CommHelper.GetBitIndexInformation(ref address);
             switch (address[0])
             {
-                case 'X':
-                case 'x':
+                case 'X' or 'x':
                     fujiSPBAddress.TypeCode = "01";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
-                case 'Y':
-                case 'y':
+                case 'Y' or 'y':
                     fujiSPBAddress.TypeCode = "00";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
-                case 'M':
-                case 'm':
+                case 'M' or 'm':
                     fujiSPBAddress.TypeCode = "02";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
-                case 'L':
-                case 'l':
+                case 'L' or 'l':
                     fujiSPBAddress.TypeCode = "03";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
-                case 'T':
-                case 't':
-                    if (address[1] == 'N' || address[1] == 'n')
+                case 'T' or 't':
+                    if (address[1] is 'N' or 'n')
                     {
                         fujiSPBAddress.TypeCode = "0A";
-                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(2), 10);
+                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address[2..], 10);
                         break;
                     }
-                    if (address[1] == 'C' || address[1] == 'c')
+                    if (address[1] is 'C' or 'c')
                     {
                         fujiSPBAddress.TypeCode = "04";
-                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(2), 10);
+                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address[2..], 10);
                         break;
                     }
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
-                case 'C':
-                case 'c':
-                    if (address[1] == 'N' || address[1] == 'n')
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
+                case 'C' or 'c':
+                    if (address[1] is 'N' or 'n')
                     {
                         fujiSPBAddress.TypeCode = "0B";
-                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(2), 10);
+                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address[2..], 10);
                         break;
                     }
-                    if (address[1] == 'C' || address[1] == 'c')
+                    if (address[1] is 'C' or 'c')
                     {
                         fujiSPBAddress.TypeCode = "05";
-                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(2), 10);
+                        fujiSPBAddress.AddressStart = Convert.ToUInt16(address[2..], 10);
                         break;
                     }
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
-                case 'D':
-                case 'd':
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
+                case 'D' or 'd':
                     fujiSPBAddress.TypeCode = "0C";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
-                case 'R':
-                case 'r':
+                case 'R' or 'r':
                     fujiSPBAddress.TypeCode = "0D";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
-                case 'W':
-                case 'w':
+                case 'W' or 'w':
                     fujiSPBAddress.TypeCode = "0E";
-                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address.Substring(1), 10);
+                    fujiSPBAddress.AddressStart = Convert.ToUInt16(address[1..], 10);
                     break;
                 default:
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
             }
         }
         catch (Exception ex)

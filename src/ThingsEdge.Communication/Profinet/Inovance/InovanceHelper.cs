@@ -1,9 +1,8 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.Inovance;

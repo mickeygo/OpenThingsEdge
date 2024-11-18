@@ -1,8 +1,7 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Fuji;
 
@@ -314,10 +313,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuBatchStart()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 0, null)).Check(ExtractActualData);
     }
 
@@ -330,10 +325,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuBatchInitializeAndStart()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 1, null)).Check(ExtractActualData);
     }
 
@@ -346,10 +337,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuBatchStop()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 2, null)).Check(ExtractActualData);
     }
 
@@ -362,10 +349,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuBatchReset()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 3, null)).Check(ExtractActualData);
     }
 
@@ -378,10 +361,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuIndividualStart()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 4, null)).Check(ExtractActualData);
     }
 
@@ -394,10 +373,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuIndividualInitializeAndStart()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 5, null)).Check(ExtractActualData);
     }
 
@@ -409,10 +384,6 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuIndividualStop()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 6, null)).Check(ExtractActualData);
     }
 
@@ -424,90 +395,54 @@ public class FujiSPHNet : DeviceTcpNet
     [HslMqttApi]
     public OperateResult CpuIndividualReset()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return ReadFromCoreServer(PackCommand(ConnectionID, 4, 7, null)).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuBatchStart" />
     public async Task<OperateResult> CpuBatchStartAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 0, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuBatchInitializeAndStart" />
     public async Task<OperateResult> CpuBatchInitializeAndStartAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 1, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuBatchStop" />
     public async Task<OperateResult> CpuBatchStopAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 2, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuBatchReset" />
     public async Task<OperateResult> CpuBatchResetAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 3, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuIndividualStart" />
     public async Task<OperateResult> CpuIndividualStartAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 4, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuIndividualInitializeAndStartAsync" />
     public async Task<OperateResult> CpuIndividualInitializeAndStartAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 5, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuIndividualStop" />
     public async Task<OperateResult> CpuIndividualStopAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 6, null))).Check(ExtractActualData);
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.Fuji.FujiSPHNet.CpuIndividualReset" />
     public async Task<OperateResult> CpuIndividualResetAsync()
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         return (await ReadFromCoreServerAsync(PackCommand(ConnectionID, 4, 7, null))).Check(ExtractActualData);
     }
 

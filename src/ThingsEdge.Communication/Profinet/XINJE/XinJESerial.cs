@@ -1,4 +1,3 @@
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.XINJE;

@@ -1,5 +1,4 @@
-using ThingsEdge.Communication.BasicFramework;
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 
 namespace ThingsEdge.Communication.Core;
 

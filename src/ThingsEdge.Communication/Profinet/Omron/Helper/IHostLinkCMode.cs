@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 

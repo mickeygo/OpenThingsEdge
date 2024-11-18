@@ -1,17 +1,13 @@
-using System;
-using System.Text;
-using ThingsEdge.Communication.BasicFramework;
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
 /// <summary>
-/// 自定义的消息路由类，可以实现CIP协议自定义的路由消息<br />
-/// A custom message routing class that can implement custom routing messages of the CIP protocol
+/// 自定义的消息路由类，可以实现CIP协议自定义的路由消息。
 /// </summary>
 public class MessageRouter
 {
-    private byte[] _router = new byte[6];
+    private readonly byte[] _router = new byte[6];
 
     /// <summary>
     /// 背板信息
@@ -55,17 +51,15 @@ public class MessageRouter
     }
 
     /// <summary>
-    /// 指定路由来实例化一个对象，使用字符串的表示方式<br />
-    /// Specify the route to instantiate an object, using the string representation
+    /// 指定路由来实例化一个对象，使用字符串的表示方式。
     /// </summary>
     /// <remarks>
-    /// 路有消息支持两种格式，格式1：1.15.2.18.1.12   格式2： 1.1.2.130.133.139.61.1.0<br />
-    /// There are two formats for the channel message, format 1: 1.15.2.18.1.12 format 2: 1.1.2.130.133.139.61.1.0
+    /// 路有消息支持两种格式，格式1：1.15.2.18.1.12   格式2： 1.1.2.130.133.139.61.1.0。
     /// </remarks>
     /// <param name="router">路由信息</param>
     public MessageRouter(string router)
     {
-        var array = router.Split(new char[1] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+        var array = router.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
         if (array.Length <= 6)
         {
             if (array.Length != 0)
@@ -102,14 +96,13 @@ public class MessageRouter
             _router[2] = (byte)(16 + byte.Parse(array[2]));
             _router[3] = (byte)text.Length;
             Encoding.ASCII.GetBytes(text).CopyTo(_router, 4);
-            _router[_router.Length - 2] = byte.Parse(array[7]);
-            _router[_router.Length - 1] = byte.Parse(array[8]);
+            _router[^2] = byte.Parse(array[7]);
+            _router[^1] = byte.Parse(array[8]);
         }
     }
 
     /// <summary>
-    /// 使用完全自定义的消息路由来初始化数据<br />
-    /// Use fully custom message routing to initialize data
+    /// 使用完全自定义的消息路由来初始化数据。
     /// </summary>
     /// <param name="router">完全自定义的路由消息</param>
     public MessageRouter(byte[] router)
@@ -127,8 +120,7 @@ public class MessageRouter
     }
 
     /// <summary>
-    /// 获取用于发送的CIP路由报文信息<br />
-    /// Get information about CIP routing packets for sending
+    /// 获取用于发送的CIP路由报文信息。
     /// </summary>
     /// <returns>路由信息</returns>
     public byte[] GetRouterCIP()

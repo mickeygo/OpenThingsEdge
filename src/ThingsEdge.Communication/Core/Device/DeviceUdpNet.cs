@@ -9,10 +9,10 @@ namespace ThingsEdge.Communication.Core.Device;
 /// </summary>
 public class DeviceUdpNet : DeviceCommunication
 {
-    private PipeUdpNet pipe;
+    private PipeUdpNet _pipe;
 
     /// <inheritdoc />
-    public override CommunicationPipe CommunicationPipe
+    public CommunicationPipe? CommunicationPipe
     {
         get
         {
@@ -23,60 +23,47 @@ public class DeviceUdpNet : DeviceCommunication
             base.CommunicationPipe = value;
             if (value is PipeUdpNet pipeUdpNet)
             {
-                pipe = pipeUdpNet;
+                _pipe = pipeUdpNet;
             }
         }
     }
 
-    /// <inheritdoc cref="P:HslCommunication.Core.Device.DeviceTcpNet.IpAddress" />
+    /// <inheritdoc cref="P:DeviceTcpNet.IpAddress" />
     public virtual string IpAddress
     {
         get
         {
-            return pipe.IpAddress;
+            return _pipe.IpAddress;
         }
         set
         {
-            pipe.IpAddress = value;
+            _pipe.IpAddress = value;
         }
     }
 
-    /// <inheritdoc cref="P:HslCommunication.Core.Device.DeviceTcpNet.Port" />
+    /// <inheritdoc cref="P:DeviceTcpNet.Port" />
     public virtual int Port
     {
         get
         {
-            return pipe.Port;
+            return _pipe.Port;
         }
         set
         {
-            pipe.Port = value;
+            _pipe.Port = value;
         }
     }
 
-    /// <inheritdoc cref="P:HslCommunication.Core.Pipe.PipeUdpNet.ReceiveCacheLength" />
+    /// <inheritdoc />
     public int ReceiveCacheLength
     {
         get
         {
-            return pipe.ReceiveCacheLength;
+            return _pipe.ReceiveCacheLength;
         }
         set
         {
-            pipe.ReceiveCacheLength = value;
-        }
-    }
-
-    /// <inheritdoc cref="P:HslCommunication.Core.Device.DeviceTcpNet.LocalBinding" />
-    public IPEndPoint LocalBinding
-    {
-        get
-        {
-            return pipe.LocalBinding;
-        }
-        set
-        {
-            pipe.LocalBinding = value;
+            _pipe.ReceiveCacheLength = value;
         }
     }
 

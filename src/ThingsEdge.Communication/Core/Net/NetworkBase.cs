@@ -1,10 +1,9 @@
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Exceptions;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Core.Net;
 
@@ -182,7 +181,7 @@ public abstract class NetworkBase
                         hslTimeOut.StartTime = DateTime.Now;
                         continue;
                     }
-                    throw new RemoteCloseException();
+                    throw new RemoteClosedException();
                 }
                 while (alreadyCount < length);
                 hslTimeOut.IsSuccessful = true;
@@ -191,12 +190,12 @@ public abstract class NetworkBase
             count = await Task.Factory.FromAsync(socket.BeginReceive(buffer, offset, buffer.Length - offset, SocketFlags.None, null, socket), socket.EndReceive).ConfigureAwait(continueOnCapturedContext: false);
             if (count == 0)
             {
-                throw new RemoteCloseException();
+                throw new RemoteClosedException();
             }
             hslTimeOut.IsSuccessful = true;
             return OperateResult.CreateSuccessResult(count);
         }
-        catch (RemoteCloseException)
+        catch (RemoteClosedException)
         {
             socket?.Close();
             if (_connectErrorCount < 1000000000)

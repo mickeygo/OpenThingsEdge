@@ -2,8 +2,7 @@ using System.IO.Ports;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.BasicFramework;
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 
 namespace ThingsEdge.Communication.Core;
 

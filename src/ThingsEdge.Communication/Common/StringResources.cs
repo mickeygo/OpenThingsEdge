@@ -1,7 +1,8 @@
 using System.Globalization;
 using ThingsEdge.Communication.Language;
+using ThingsEdge.Communication.Languages;
 
-namespace ThingsEdge.Communication.HslCommunication;
+namespace ThingsEdge.Communication.Common;
 
 /// <summary>
 /// 系统的字符串资源及多语言管理中心。

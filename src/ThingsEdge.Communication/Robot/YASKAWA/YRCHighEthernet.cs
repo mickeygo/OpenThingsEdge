@@ -1,7 +1,6 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Net;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Robot.YASKAWA.Helper;
 
 namespace ThingsEdge.Communication.Robot.YASKAWA;

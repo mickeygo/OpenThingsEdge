@@ -1,13 +1,9 @@
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.XINJE;
 
 /// <summary>
-/// 信捷PLC的XC,XD,XL系列的串口转网口通讯类，虽然硬件层走的是TCP协议，但是底层使用ModbusRtu协议实现，每个系列支持的地址类型及范围不一样，详细参考Demo程序<br />
-/// Xinje PLC's XC, XD, XL series serial port to network port communication type, although the hardware layer uses TCP protocol, 
-/// but the bottom layer is implemented by ModbusRtu protocol. The address types and ranges supported by each series are different. 
-/// Please refer to the DEMO for details.
+/// 信捷PLC的XC,XD,XL系列的串口转网口通讯类，虽然硬件层走的是TCP协议，但是底层使用ModbusRtu协议实现，每个系列支持的地址类型及范围不一样。
 /// </summary>
 /// <remarks>
 /// 对于XC系列适用于XC1/XC2/XC3/XC5/XCM/XCC系列，线圈支持X,Y,S,M,T,C，寄存器支持D,F,E,T,C<br />
@@ -42,8 +38,7 @@ public class XinJESerialOverTcp : ModbusRtuOverTcp
     }
 
     /// <summary>
-    /// 通过指定站号，IP地址，端口以及PLC的系列来实例化一个新的对象<br />
-    /// Instantiate a new object by specifying the station number and PLC series
+    /// 通过指定站号，IP地址，端口以及PLC的系列来实例化一个新的对象。
     /// </summary>
     /// <param name="series">PLC的系列</param>
     /// <param name="ipAddress">Ip地址</param>

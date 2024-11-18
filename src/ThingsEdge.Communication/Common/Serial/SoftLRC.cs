@@ -1,11 +1,9 @@
-using ThingsEdge.Communication.BasicFramework;
-
-namespace ThingsEdge.Communication.Serial;
+namespace ThingsEdge.Communication.Common.Serial;
 
 /// <summary>
 /// 用于LRC验证的类，提供了标准的验证方法。
 /// </summary>
-public class SoftLRC
+public static class SoftLRC
 {
     /// <summary>
     /// 获取对应的数据的LRC校验码。

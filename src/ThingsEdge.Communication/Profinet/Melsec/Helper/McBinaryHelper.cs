@@ -1,6 +1,5 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Address;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 
@@ -383,10 +382,6 @@ public class McBinaryHelper
     /// </remarks>
     public static OperateResult<byte[]> ReadTags(IReadWriteMc mc, string[] tags, ushort[] length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var send = BuildReadTag(tags, length);
         OperateResult<byte[]> operateResult = mc.ReadFromCoreServer(send);
         if (!operateResult.IsSuccess)
@@ -399,10 +394,6 @@ public class McBinaryHelper
     /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.McBinaryHelper.ReadTags(HslCommunication.Profinet.Melsec.Helper.IReadWriteMc,System.String[],System.UInt16[])" />
     public static async Task<OperateResult<byte[]>> ReadTagsAsync(IReadWriteMc mc, string[] tags, ushort[] length)
     {
-        if (!Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var coreResult = BuildReadTag(tags, length);
         var read = await mc.ReadFromCoreServerAsync(coreResult);
         if (!read.IsSuccess)

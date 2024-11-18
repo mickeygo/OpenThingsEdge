@@ -1,11 +1,11 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 
 namespace ThingsEdge.Communication.Profinet.Omron;
 
 /// <summary>
-/// 欧姆龙Cpu的状态信息
+/// 欧姆龙Cpu的状态信息。
 /// </summary>
-public class OmronCpuUnitStatus
+public sealed class OmronCpuUnitStatus
 {
     /// <summary>
     /// Run 或是 Stop
@@ -36,14 +36,7 @@ public class OmronCpuUnitStatus
     /// Indicates messages from execution of FAL(006) or FALS(007). If there is no error message, 
     /// or if FAL(006) or FALS(007) are not being executed, 16 spaces( ASCII 20) will be returned.
     /// </summary>
-    public string ErrorMessage { get; set; }
-
-    /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public OmronCpuUnitStatus()
-    {
-    }
+    public string? ErrorMessage { get; set; }
 
     /// <summary>
     /// 从原始的字节数组来实例化一个

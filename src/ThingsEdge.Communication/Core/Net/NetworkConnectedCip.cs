@@ -1,21 +1,20 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Profinet.AllenBradley;
 
 namespace ThingsEdge.Communication.Core.Net;
 
 /// <summary>
-/// 基于连接的CIP协议的基类
+/// 基于连接的CIP协议的基类。
 /// </summary>
-public class NetworkConnectedCip : DeviceTcpNet
+public abstract class NetworkConnectedCip : DeviceTcpNet
 {
-    private SoftIncrementCount incrementCount = new SoftIncrementCount(65535L, 3L, 2);
+    private SoftIncrementCount _incrementCount = new(65535L, 3L, 2);
 
-    private long openForwardId = 256L;
+    private long _openForwardId = 256L;
 
-    private long context = 0L;
+    private long _context = 0L;
 
     /// <inheritdoc cref="P:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.SessionHandle" />
     public uint SessionHandle { get; protected set; }
@@ -23,14 +22,12 @@ public class NetworkConnectedCip : DeviceTcpNet
     /// <summary>
     /// O -&gt; T Network Connection ID
     /// </summary>
-    public uint OTConnectionId { get; set; } = 0u;
-
+    public uint OTConnectionId { get; set; }
 
     /// <summary>
     /// T -&gt; O Network Connection ID
     /// </summary>
-    public uint TOConnectionId { get; set; } = 0u;
-
+    public uint TOConnectionId { get; set; }
 
     /// <summary>
     /// 实例化一个默认的对象
@@ -54,7 +51,7 @@ public class NetworkConnectedCip : DeviceTcpNet
     /// <inheritdoc />
     protected override OperateResult InitializationOnConnect()
     {
-        var operateResult = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref context))), hasResponseData: true, usePackAndUnpack: false);
+        var operateResult = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), hasResponseData: true, usePackAndUnpack: false);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -67,7 +64,7 @@ public class NetworkConnectedCip : DeviceTcpNet
         var num = ByteTransform.TransUInt32(operateResult.Content, 4);
         for (var i = 0; i < 10; i++)
         {
-            var value = Interlocked.Increment(ref openForwardId);
+            var value = Interlocked.Increment(ref _openForwardId);
             var connectionID = i < 7 ? (ushort)i : (ushort)CommHelper.HslRandom.Next(7, 200);
             var operateResult3 = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, num, GetLargeForwardOpen(connectionID), ByteTransform.TransByte(value)), hasResponseData: true, usePackAndUnpack: false);
             if (!operateResult3.IsSuccess)
@@ -98,7 +95,7 @@ public class NetworkConnectedCip : DeviceTcpNet
             }
             break;
         }
-        incrementCount.ResetCurrentValue();
+        _incrementCount.ResetCurrentValue();
         SessionHandle = num;
         return OperateResult.CreateSuccessResult();
     }
@@ -130,7 +127,7 @@ public class NetworkConnectedCip : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read1 = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref context))), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
+        var read1 = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
         if (!read1.IsSuccess)
         {
             return read1;
@@ -143,7 +140,7 @@ public class NetworkConnectedCip : DeviceTcpNet
         var sessionHandle = ByteTransform.TransUInt32(read1.Content, 4);
         for (var i = 0; i < 10; i++)
         {
-            var id = Interlocked.Increment(ref openForwardId);
+            var id = Interlocked.Increment(ref _openForwardId);
             var read2 = await ReadFromCoreServerAsync(send: AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommHelper.HslRandom.Next(7, 200)), ByteTransform.TransByte(id)), pipe: CommunicationPipe, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
             if (!read2.IsSuccess)
             {
@@ -174,7 +171,7 @@ public class NetworkConnectedCip : DeviceTcpNet
             }
             break;
         }
-        incrementCount.ResetCurrentValue();
+        _incrementCount.ResetCurrentValue();
         SessionHandle = sessionHandle;
         return OperateResult.CreateSuccessResult();
     }
@@ -215,7 +212,7 @@ public class NetworkConnectedCip : DeviceTcpNet
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
-        var currentValue = incrementCount.GetCurrentValue();
+        var currentValue = _incrementCount.GetCurrentValue();
         memoryStream.WriteByte(BitConverter.GetBytes(currentValue)[0]);
         memoryStream.WriteByte(BitConverter.GetBytes(currentValue)[1]);
         if (cip.Length == 1)

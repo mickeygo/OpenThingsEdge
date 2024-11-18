@@ -1,6 +1,5 @@
 using System.IO.Ports;
 using ThingsEdge.Communication.Core.Pipe;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Core.Device;
 
@@ -135,6 +134,23 @@ public abstract class DeviceSerialPort : DeviceCommunication
         if (operateResult.Content)
         {
             return InitializationOnConnect();
+        }
+        return OperateResult.CreateSuccessResult();
+    }
+
+    /// <summary>
+    /// 打开一个新的串行端口连接。
+    /// </summary>
+    public virtual async Task<OperateResult> OpenAsync()
+    {
+        var operateResult = await CommunicationPipe.OpenCommunicationAsync().ConfigureAwait(false);
+        if (!operateResult.IsSuccess)
+        {
+            return operateResult;
+        }
+        if (operateResult.Content)
+        {
+            return await InitializationOnConnectAsync().ConfigureAwait(false);
         }
         return OperateResult.CreateSuccessResult();
     }

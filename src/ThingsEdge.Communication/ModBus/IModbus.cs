@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.ModBus;
 
@@ -45,6 +44,13 @@ public interface IModbus : IReadWriteDevice, IReadWriteNet
     /// <param name="mapping">地址映射关系信息</param>
     void RegisteredAddressMapping(Func<string, byte, OperateResult<string>> mapping);
 
-    /// <inheritdoc cref="ModbusHelper.ReadWrite" />
-    OperateResult<byte[]> ReadWrite(string readAddress, ushort length, string writeAddress, byte[] value);
+    /// <summary>
+    /// 使用0x17功能码来实现同时写入并读取数据的操作，使用一条报文来实现，需要指定读取的地址，长度，写入的地址，写入的数据信息，返回读取的结果数据。
+    /// </summary>
+    /// <param name="readAddress">读取的地址信息</param>
+    /// <param name="length">读取的长度信息</param>
+    /// <param name="writeAddress">写入的地址信息</param>
+    /// <param name="value">写入的字节数据信息</param>
+    /// <returns>读取的结果对象</returns>
+    Task<OperateResult<byte[]>> ReadWriteAsync(string readAddress, ushort length, string writeAddress, byte[] value);
 }

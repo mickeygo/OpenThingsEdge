@@ -1,7 +1,7 @@
 namespace ThingsEdge.Communication.Core.Pipe;
 
 /// <summary>
-/// 管道的基础类对象
+/// 管道的基础类对象。
 /// </summary>
 public class PipeBase : IDisposable
 {

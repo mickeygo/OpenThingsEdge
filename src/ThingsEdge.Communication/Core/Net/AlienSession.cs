@@ -1,4 +1,4 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Pipe;
 
 namespace ThingsEdge.Communication.Core.Net;

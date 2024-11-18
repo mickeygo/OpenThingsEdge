@@ -1,12 +1,10 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Panasonic;
 
 /// <summary>
-/// 松下PLC的辅助类，提供了基本的辅助方法，用于解析地址，计算校验和，创建报文<br />
-/// The auxiliary class of Panasonic PLC provides basic auxiliary methods for parsing addresses, calculating checksums, and creating messages
+/// 松下PLC的辅助类，提供了基本的辅助方法，用于解析地址，计算校验和，创建报文。
 /// </summary>
 public class PanasonicHelper
 {
@@ -18,19 +16,17 @@ public class PanasonicHelper
         {
             b ^= (byte)sb[i];
         }
-        return SoftBasic.ByteToHexString(new byte[1] { b });
+        return SoftBasic.ByteToHexString([b]);
     }
 
     /// <summary>
-    /// 位地址转换方法，101等同于10.1等同于10*16+1=161<br />
-    /// Bit address conversion method, 101 is equivalent to 10.1 is equivalent to 10 * 16 + 1 = 161
+    /// 位地址转换方法，101等同于10.1等同于10*16+1=161。
     /// </summary>
     /// <param name="address">地址信息</param>
     /// <param name="fromBase">倍率信息</param>
     /// <returns>实际的位地址信息</returns>
     public static int CalculateComplexAddress(string address, int fromBase = 16)
     {
-        var num = 0;
         if (address.IndexOf(".") < 0)
         {
             if (address.Length == 1)
@@ -39,14 +35,13 @@ public class PanasonicHelper
             }
             return Convert.ToInt32(address.Substring(0, address.Length - 1)) * fromBase + Convert.ToInt32(address.Substring(address.Length - 1), fromBase);
         }
-        num = Convert.ToInt32(address.Substring(0, address.IndexOf("."))) * fromBase;
+        var num = Convert.ToInt32(address.Substring(0, address.IndexOf("."))) * fromBase;
         var bit = address.Substring(address.IndexOf(".") + 1);
         return num + CommHelper.CalculateBitStartIndex(bit);
     }
 
     /// <summary>
-    /// 解析数据地址，解析出地址类型，起始地址<br />
-    /// Parse the data address, resolve the address type, start address
+    /// 解析数据地址，解析出地址类型，起始地址。
     /// </summary>
     /// <param name="address">数据地址</param>
     /// <returns>解析出地址类型，起始地址</returns>

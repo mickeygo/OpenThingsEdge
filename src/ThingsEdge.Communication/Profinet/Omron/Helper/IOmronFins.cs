@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 
@@ -47,18 +46,13 @@ public interface IOmronFins : IReadWriteDevice, IReadWriteNet
     /// </summary>
     OmronPlcType PlcType { get; set; }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNetHelper.Run(HslCommunication.Core.IReadWriteDevice)" />
-    OperateResult Run();
+    Task<OperateResult> RunAsync();
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNetHelper.Stop(HslCommunication.Core.IReadWriteDevice)" />
-    OperateResult Stop();
+    Task<OperateResult> StopAsync();
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNetHelper.ReadCpuUnitData(HslCommunication.Core.IReadWriteDevice)" />
-    OperateResult<OmronCpuUnitData> ReadCpuUnitData();
+    Task<OperateResult<OmronCpuUnitData>> ReadCpuUnitDataAsync();
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNetHelper.ReadCpuUnitStatus(HslCommunication.Core.IReadWriteDevice)" />
-    OperateResult<OmronCpuUnitStatus> ReadCpuUnitStatus();
+    Task<OperateResult<OmronCpuUnitStatus>> ReadCpuUnitStatusAsync();
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNetHelper.ReadCpuTime(HslCommunication.Core.IReadWriteDevice)" />
-    OperateResult<DateTime> ReadCpuTime();
+    Task<OperateResult<DateTime>> ReadCpuTimeAsync();
 }

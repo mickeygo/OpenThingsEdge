@@ -1,9 +1,8 @@
 using System.Net.Sockets;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Core.Net;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Secs.Helper;
 using ThingsEdge.Communication.Secs.Message;
 using ThingsEdge.Communication.Secs.Types;

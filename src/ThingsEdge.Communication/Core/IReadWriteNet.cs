@@ -1,4 +1,4 @@
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Reflection;
 
 namespace ThingsEdge.Communication.Core;
@@ -7,7 +7,7 @@ namespace ThingsEdge.Communication.Core;
 /// 所有的和设备或是交互类统一读写标准，公开了如何读写对方的一些api接口，并支持基于特性的读写操作。
 /// </summary>
 /// <remarks>
-/// Modbus类，PLC类均实现了本接口，可以基于本接口实现统一所有的不同种类的设备的数据交互。
+/// Modbus 类和 PLC 类均实现了本接口，可以基于本接口实现统一所有的不同种类的设备的数据交互。
 /// </remarks>
 public interface IReadWriteNet
 {
@@ -24,6 +24,8 @@ public interface IReadWriteNet
     /// </remarks>
     string ConnectionId { get; }
 
+    #region read
+
     /// <summary>
     /// 异步批量读取字节数组信息，需要指定地址和长度，返回原始的字节数组。
     /// </summary>
@@ -33,12 +35,11 @@ public interface IReadWriteNet
     Task<OperateResult<byte[]>> ReadAsync(string address, ushort length);
 
     /// <summary>
-    /// 异步写入原始的byte数组数据到指定的地址，返回是否写入成功。
+    /// 异步读取单个的<see cref="bool" />数据信息。
     /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="value">写入值</param>
-    /// <returns>带有成功标识的结果类对象</returns>
-    Task<OperateResult> WriteAsync(string address, byte[] value);
+    /// <param name="address">数据地址</param>
+    /// <returns>带有成功标识的byte[]数组</returns>
+    Task<OperateResult<bool>> ReadBoolAsync(string address);
 
     /// <summary>
     /// 异步批量读取<see cref="bool" />数组信息，需要指定地址和长度，返回<see cref="bool" /> 数组。
@@ -47,29 +48,6 @@ public interface IReadWriteNet
     /// <param name="length">数据长度</param>
     /// <returns>带有成功标识的byte[]数组</returns>
     Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length);
-
-    /// <summary>
-    /// 异步读取单个的<see cref="bool" />数据信息。
-    /// </summary>
-    /// <param name="address">数据地址</param>
-    /// <returns>带有成功标识的byte[]数组</returns>
-    Task<OperateResult<bool>> ReadBoolAsync(string address);
-
-    /// <summary>
-    /// 异步批量写入<see cref="bool" />数组数据，返回是否成功。
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="value">写入值</param>
-    /// <returns>带有成功标识的结果类对象</returns>
-    Task<OperateResult> WriteAsync(string address, bool[] value);
-
-    /// <summary>
-    /// 异步批量写入<see cref="bool" />数组数据，返回是否成功。
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="value">写入值</param>
-    /// <returns>带有成功标识的结果类对象</returns>
-    Task<OperateResult> WriteAsync(string address, bool value);
 
     /// <summary>
     /// 异步读取16位的有符号的整型数据。
@@ -207,6 +185,73 @@ public interface IReadWriteNet
     /// <param name="encoding">指定的自定义的编码</param>
     /// <returns>带有成功标识的string数据</returns>
     Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding);
+
+    /// <summary>
+    /// 读取结构体类型的数据，根据结构体自身的定义，读取原始字节数组，然后解析出实际的结构体数据，结构体需要实现<see cref="CommStructAttribute" />特性
+    /// </summary>
+    /// <typeparam name="T">类型对象信息</typeparam>
+    /// <param name="address">PLC的地址信息</param>
+    /// <param name="length">读取的地址长度信息</param>
+    /// <returns>如果成功，返回成功的结构体对象</returns>
+    Task<OperateResult<T>> ReadStructAsync<T>(string address, ushort length) where T : class, new();
+
+    /// <summary>
+    /// 读取自定义的数据类型，需要继承自IDataTransfer接口，返回一个新的类型的实例对象。
+    /// </summary>
+    /// <typeparam name="T">自定义的类型</typeparam>
+    /// <param name="address">起始地址</param>
+    /// <returns>带有成功标识的自定义类型数据</returns>
+    /// <remarks>
+    /// 需要是定义一个类，选择好相对于的ByteTransform实例，才能调用该方法。
+    /// </remarks>
+    Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new();
+
+    /// <summary>
+    /// 读取自定义的数据类型，需要继承自IDataTransfer接口，传入一个实例，对这个实例进行赋值，并返回该实例的对象。
+    /// </summary>
+    /// <typeparam name="T">自定义的类型</typeparam>
+    /// <param name="address">起始地址</param>
+    /// <param name="obj">实例</param>
+    /// <returns>带有成功标识的自定义类型数据</returns>
+    /// <remarks>
+    /// 需要是定义一个类，选择好相对于的ByteTransform实例，才能调用该方法。
+    /// </remarks>
+    Task<OperateResult<T>> ReadCustomerAsync<T>(string address, T obj) where T : IDataTransfer, new();
+
+    /// <summary>
+    /// 异步读取支持Hsl特性的数据内容，该特性为<see cref="CommDeviceAddressAttribute" />，详细参考api文档说明。
+    /// </summary>
+    /// <typeparam name="T">自定义的数据类型对象</typeparam>
+    /// <returns>包含是否成功的结果对象</returns>
+    Task<OperateResult<T>> ReadAsync<T>() where T : class, new();
+
+    #endregion
+
+    #region wirte
+
+    /// <summary>
+    /// 异步写入原始的byte数组数据到指定的地址，返回是否写入成功。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="values">写入值</param>
+    /// <returns>带有成功标识的结果类对象</returns>
+    Task<OperateResult> WriteAsync(string address, byte[] values);
+
+    /// <summary>
+    /// 异步批量写入<see cref="bool" />数组数据，返回是否成功。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="value">写入值</param>
+    /// <returns>带有成功标识的结果类对象</returns>
+    Task<OperateResult> WriteAsync(string address, bool value);
+
+    /// <summary>
+    /// 异步批量写入<see cref="bool" />数组数据，返回是否成功。
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="values">写入值</param>
+    /// <returns>带有成功标识的结果类对象</returns>
+    Task<OperateResult> WriteAsync(string address, bool[] values);
 
     /// <summary>
     /// 异步写入short数据，返回是否成功。
@@ -373,46 +418,16 @@ public interface IReadWriteNet
     Task<OperateResult> WriteAsync(string address, string value, int length, Encoding encoding);
 
     /// <summary>
-    /// 读取自定义的数据类型，需要继承自IDataTransfer接口，返回一个新的类型的实例对象。
-    /// </summary>
-    /// <typeparam name="T">自定义的类型</typeparam>
-    /// <param name="address">起始地址</param>
-    /// <returns>带有成功标识的自定义类型数据</returns>
-    /// <remarks>
-    /// 需要是定义一个类，选择好相对于的ByteTransform实例，才能调用该方法。
-    /// </remarks>
-    Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new();
-
-    /// <summary>
-    /// 读取自定义的数据类型，需要继承自IDataTransfer接口，传入一个实例，对这个实例进行赋值，并返回该实例的对象。
-    /// </summary>
-    /// <typeparam name="T">自定义的类型</typeparam>
-    /// <param name="address">起始地址</param>
-    /// <param name="obj">实例</param>
-    /// <returns>带有成功标识的自定义类型数据</returns>
-    /// <remarks>
-    /// 需要是定义一个类，选择好相对于的ByteTransform实例，才能调用该方法。
-    /// </remarks>
-    Task<OperateResult<T>> ReadCustomerAsync<T>(string address, T obj) where T : IDataTransfer, new();
-
-    /// <summary>
-	/// 写入自定义类型的数据，该类型必须继承自IDataTransfer接口。
+	/// 写入自定义类型的数据，该类型必须继承自 <see cref="IDataTransfer"/> 接口。
 	/// </summary>
 	/// <typeparam name="T">类型对象</typeparam>
 	/// <param name="address">起始地址</param>
 	/// <param name="value">写入值</param>
 	/// <returns>带有成功标识的结果类对象</returns>
 	/// <remarks>
-	/// 需要是定义一个类，选择好相对于的<see cref="IDataTransfer" />实例，才能调用该方法。
+	/// 需要是定义一个类，选择好相对于的 <see cref="IDataTransfer" /> 实例，才能调用该方法。
 	/// </remarks>
     Task<OperateResult> WriteCustomerAsync<T>(string address, T value) where T : IDataTransfer, new();
-
-    /// <summary>
-    /// 异步读取支持Hsl特性的数据内容，该特性为<see cref="CommDeviceAddressAttribute" />，详细参考api文档说明。
-    /// </summary>
-    /// <typeparam name="T">自定义的数据类型对象</typeparam>
-    /// <returns>包含是否成功的结果对象</returns>
-    Task<OperateResult<T>> ReadAsync<T>() where T : class, new();
 
     /// <summary>
     /// 异步写入支持Hsl特性的数据，返回是否写入成功，该特性为<see cref="CommDeviceAddressAttribute" />，详细参考api文档说明。
@@ -421,12 +436,5 @@ public interface IReadWriteNet
     /// <returns>包含是否成功的结果对象</returns>
     Task<OperateResult> WriteAsync<T>(T data) where T : class, new();
 
-    /// <summary>
-    /// 读取结构体类型的数据，根据结构体自身的定义，读取原始字节数组，然后解析出实际的结构体数据，结构体需要实现<see cref="Reflection.CommStructAttribute" />特性
-    /// </summary>
-    /// <typeparam name="T">类型对象信息</typeparam>
-    /// <param name="address">PLC的地址信息</param>
-    /// <param name="length">读取的地址长度信息</param>
-    /// <returns>如果成功，返回成功的结构体对象</returns>
-    Task<OperateResult<T>> ReadStructAsync<T>(string address, ushort length) where T : class, new();
+    #endregion
 }

@@ -1,6 +1,5 @@
 using HslCommunication.Reflection;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 using ThingsEdge.Communication.Profinet.Delta.Helper;
 

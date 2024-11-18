@@ -1,12 +1,11 @@
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
-using ThingsEdge.Communication.HslCommunication;
-using ThingsEdge.Communication.BasicFramework;
 using ThingsEdge.Communication.Core.Pipe;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Profinet.Siemens.Helper;
 using ThingsEdge.Communication.Exceptions;
+using ThingsEdge.Communication.Common;
 
 namespace ThingsEdge.Communication.Profinet.Siemens;
 
@@ -310,24 +309,6 @@ public sealed class SiemensS7Net : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
-    {
-        OperateResult<byte[]> read;
-        byte[] content;
-        do
-        {
-            read = await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
-            if (!read.IsSuccess)
-            {
-                return read;
-            }
-            content = read.Content!;
-        }
-        while (content == null || content.Length < 4 || read.Content![2] * 256 + read.Content[3] == 7);
-        return read;
-    }
-
-    /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
         var read_first = await ReadFromCoreServerAsync(CommunicationPipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
@@ -349,6 +330,25 @@ public sealed class SiemensS7Net : DeviceTcpNet
         return OperateResult.CreateSuccessResult();
     }
 
+
+    /// <inheritdoc />
+    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    {
+        OperateResult<byte[]> read;
+        byte[] content;
+        do
+        {
+            read = await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
+            if (!read.IsSuccess)
+            {
+                return read;
+            }
+            content = read.Content;
+        }
+        while (content == null || content.Length < 4 || read.Content![2] * 256 + read.Content[3] == 7);
+        return read;
+    }
+   
     /// <summary>
     /// 从PLC读取订货号信息。
     /// </summary>
@@ -367,7 +367,10 @@ public sealed class SiemensS7Net : DeviceTcpNet
         return OperateResult.CreateSuccessResult(Encoding.ASCII.GetString(operateResult.Content, 71, 20));
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 从PLC读取订货号信息。
+    /// </summary>
+    /// <returns>CPU的订货号信息</returns>
     public async Task<OperateResult<string>> ReadOrderNumberAsync()
     {
         var read = await ReadFromCoreServerAsync(_plcOrderNumber).ConfigureAwait(false);
@@ -451,7 +454,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<byte[]>(addressResult);
         }
-        return await ReadAsync([addressResult.Content!]).ConfigureAwait(false);
+        return await ReadAsync([addressResult.Content]).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -462,12 +465,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<byte[]>(command);
         }
-        var read = await ReadFromCoreServerAsync(command.Content!).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
         }
-        return SiemensS7Helper.AnalysisReadBit(read.Content!);
+        return SiemensS7Helper.AnalysisReadBit(read.Content);
     }
 
     /// <inheritdoc />
@@ -481,7 +484,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             {
                 return OperateResult.CreateFailedResult<byte[]>(tmp);
             }
-            addressResult[i] = tmp.Content!;
+            addressResult[i] = tmp.Content;
         }
         return await ReadAsync(addressResult).ConfigureAwait(false);
     }
@@ -504,7 +507,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
                     {
                         return read;
                     }
-                    bytes.AddRange(read.Content!);
+                    bytes.AddRange(read.Content);
                 }
             }
             else
@@ -514,13 +517,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
                 {
                     return read;
                 }
-                bytes.AddRange(read.Content!);
+                bytes.AddRange(read.Content);
             }
         }
         return OperateResult.CreateSuccessResult(bytes.ToArray());
     }
 
-    /// <inheritdoc />
     private async Task<OperateResult<byte[]>> ReadS7AddressDataAsync(S7AddressData[] s7Addresses)
     {
         var command = BuildReadCommand(s7Addresses, GetMessageId());
@@ -529,15 +531,14 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return command;
         }
 
-        var read = await ReadFromCoreServerAsync(command.Content!).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
         }
-        return AnalysisReadByte(s7Addresses, read.Content!);
+        return AnalysisReadByte(s7Addresses, read.Content);
     }
 
-    /// <inheritdoc />
     private async Task<OperateResult> WriteBaseAsync(byte[] entireValue)
     {
         return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(entireValue).ConfigureAwait(false), AnalysisWrite);
@@ -551,7 +552,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<byte[]>(analysis);
         }
-        return await WriteAsync(analysis.Content!, value).ConfigureAwait(false);
+        return await WriteAsync(analysis.Content, value).ConfigureAwait(false);
     }
 
     private async Task<OperateResult> WriteAsync(S7AddressData address, byte[] value)
@@ -567,7 +568,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             {
                 return command;
             }
-            var write = await WriteBaseAsync(command.Content!).ConfigureAwait(false);
+            var write = await WriteBaseAsync(command.Content).ConfigureAwait(false);
             if (!write.IsSuccess)
             {
                 return write;
@@ -589,7 +590,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             {
                 return OperateResult.CreateFailedResult<byte[]>(tmp);
             }
-            addressResult[i] = tmp.Content!;
+            addressResult[i] = tmp.Content;
         }
         var command = BuildWriteByteCommand(addressResult, data, GetMessageId());
         if (!command.IsSuccess)
@@ -597,12 +598,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return command;
         }
 
-        var read = await ReadFromCoreServerAsync(command.Content!).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
         }
-        return AnalysisWrite(read.Content!);
+        return AnalysisWrite(read.Content);
     }
 
     /// <inheritdoc />
@@ -619,7 +620,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
-        CommHelper.CalculateStartBitIndexAndLength(analysis.Content!.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
@@ -627,7 +628,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<bool[]>(read);
         }
-        return OperateResult.CreateSuccessResult(read.Content!.ToBoolArray().SelectMiddle(offset, length));
+        return OperateResult.CreateSuccessResult(read.Content.ToBoolArray().SelectMiddle(offset, length));
     }
 
     /// <inheritdoc />
@@ -638,7 +639,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return command;
         }
-        return await WriteBaseAsync(command.Content!).ConfigureAwait(false);
+        return await WriteBaseAsync(command.Content).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -650,7 +651,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
 
-        CommHelper.CalculateStartBitIndexAndLength(analysis.Content!.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
+        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
@@ -968,7 +969,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// <param name="data">原始的字节数据</param>
     /// <param name="msgId">message id informaion</param>
     /// <returns>包含结果对象的报文</returns>
-    public static OperateResult<byte[]> BuildWriteByteCommand(S7AddressData s7Address, byte[] data, int msgId)
+    private static OperateResult<byte[]> BuildWriteByteCommand(S7AddressData s7Address, byte[] data, int msgId)
     {
         return BuildWriteByteCommand([s7Address], [data], msgId);
     }
@@ -998,8 +999,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         ms.WriteByte(BitConverter.GetBytes(add.AddressStart)[0]);
     }
 
-    /// <inheritdoc />
-    public static OperateResult<byte[]> BuildWriteByteCommand(S7AddressData[] s7Address, List<byte[]> data, int msgId)
+    private static OperateResult<byte[]> BuildWriteByteCommand(S7AddressData[] s7Address, List<byte[]> data, int msgId)
     {
         var memoryStream = new MemoryStream();
         memoryStream.Write([3, 0, 0, 0, 2, 240, 128]);
@@ -1049,7 +1049,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     }
 
     /// <summary>
-    /// 生成一个写入位数据的指令
+    /// 生成一个写入位数据的指令。
     /// </summary>
     /// <param name="address">起始地址，示例M100,I100,Q100,DB1.100</param>
     /// <param name="data">是否通断</param>

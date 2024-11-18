@@ -1,6 +1,5 @@
 using System.Net.NetworkInformation;
 using ThingsEdge.Communication.Core.Pipe;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Core.Device;
 
@@ -140,7 +139,13 @@ public abstract class DeviceTcpNet : DeviceCommunication
         return CommunicationPipe.CloseCommunication();
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 手动断开与远程服务器的连接，如果当前是长连接模式，那么就会切换到短连接模式。
+    /// </summary>
+    /// <returns>关闭连接，不需要查看IsSuccess属性查看</returns>
+    /// <example>
+    /// 直接关闭连接即可，基本上是不需要进行成功的判定。
+    /// </example>
     public async Task<OperateResult> CloseConnectAsync()
     {
         var result = await ExtraOnDisconnectAsync().ConfigureAwait(continueOnCapturedContext: false);

@@ -1,6 +1,6 @@
 using ThingsEdge.Communication.Core;
 
-namespace ThingsEdge.Communication.Language;
+namespace ThingsEdge.Communication.Languages;
 
 /// <summary>
 /// English Version Text
@@ -14,10 +14,6 @@ public class English : DefaultLanguage
     public override string TimeDescriptionHour => " Hour";
 
     public override string TimeDescriptionDay => " Day";
-
-    public override string InsufficientPrivileges => "The current method interface or class is only open to commercial authorized users with insufficient permissions. Thank you for your support. If you need commercial authorization, please contact " + Contact;
-
-    public override string DeveloperPrivileges => "The permission of the current session is insufficient to call this service interface. Please set the permission of the current session to the developer permission.";
 
     public override string ConnectedFailed => "Connected Failed: ";
 

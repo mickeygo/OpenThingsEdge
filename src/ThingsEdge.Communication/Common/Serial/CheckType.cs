@@ -1,4 +1,4 @@
-namespace ThingsEdge.Communication.Serial;
+namespace ThingsEdge.Communication.Common.Serial;
 
 /// <summary>
 /// 校验方式

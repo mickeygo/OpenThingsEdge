@@ -1,6 +1,6 @@
 using System.Reflection;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Reflection;
 
@@ -684,7 +684,7 @@ public class CommReflectionHelper
             }
             else if (propertyType == typeof(bool[]))
             {
-                var writeResult = await readWrite.WriteAsync(value: (bool[])property.GetValue(data, null), address: hslAttribute.Address);
+                var writeResult = await readWrite.WriteAsync(values: (bool[])property.GetValue(data, null), address: hslAttribute.Address);
                 if (!writeResult.IsSuccess)
                 {
                     return writeResult;
@@ -695,7 +695,7 @@ public class CommReflectionHelper
     }
 
     /// <summary>
-    /// 根据提供的类型对象，解析出符合 <see cref="T:HslCommunication.Reflection.HslDeviceAddressAttribute" /> 特性的地址列表
+    /// 根据提供的类型对象，解析出符合 <see cref="CommDeviceAddressAttribute" /> 特性的地址列表。
     /// </summary>
     /// <param name="valueType">数据类型</param>
     /// <param name="deviceType">设备类型</param>
@@ -715,17 +715,19 @@ public class CommReflectionHelper
             {
                 continue;
             }
-            var hslAddressProperty = new CommAddressProperty();
-            hslAddressProperty.PropertyInfo = propertyInfo;
-            hslAddressProperty.DeviceAddressAttribute = hslDeviceAddressAttribute;
-            hslAddressProperty.ByteOffset = num;
+            var hslAddressProperty = new CommAddressProperty
+            {
+                PropertyInfo = propertyInfo,
+                DeviceAddressAttribute = hslDeviceAddressAttribute,
+                ByteOffset = num
+            };
             var propertyType = propertyInfo.PropertyType;
             if (propertyType == typeof(byte))
             {
                 num++;
                 if (obj != null)
                 {
-                    hslAddressProperty.Buffer = new byte[1] { (byte)propertyInfo.GetValue(obj, null) };
+                    hslAddressProperty.Buffer = [(byte)propertyInfo.GetValue(obj, null)];
                 }
             }
             else if (propertyType == typeof(short))
@@ -906,7 +908,7 @@ public class CommReflectionHelper
         foreach (var property in properties)
         {
             var propertyType = property.PropertyInfo.PropertyType;
-            object obj2 = null;
+            object? obj2 = null;
             if (propertyType == typeof(byte))
             {
                 obj2 = buffer[property.ByteOffset];

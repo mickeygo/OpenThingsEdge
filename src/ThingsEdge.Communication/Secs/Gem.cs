@@ -1,4 +1,3 @@
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Secs.Types;
 
 namespace ThingsEdge.Communication.Secs;

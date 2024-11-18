@@ -1,11 +1,10 @@
 using System.IO.Ports;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.BasicFramework;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Exceptions;
 
-namespace ThingsEdge.Communication.HslCommunication;
+namespace ThingsEdge.Communication.Common;
 
 /// <summary>
 /// 扩展的辅助类方法

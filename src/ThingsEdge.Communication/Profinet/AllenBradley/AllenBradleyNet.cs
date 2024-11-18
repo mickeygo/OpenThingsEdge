@@ -1,9 +1,8 @@
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
@@ -35,8 +34,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <summary>
     /// Gets or sets the slot number information for the current plc, which should be set before connections
     /// </summary>
-    public byte Slot { get; set; } = 0;
-
+    public byte Slot { get; set; }
 
     /// <summary>
     /// port and slot information
@@ -48,7 +46,6 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// Gets or sets the control code of the entire interactive instruction. The default is 0x6F, and usually does not need to be modified.
     /// </summary>
     public ushort CipCommand { get; set; } = 111;
-
 
     /// <summary>
     /// 获取或设置当前的通信的消息路由信息，可以实现一些复杂情况的通信，数据包含背板号，路由参数，slot，例如：1.15.2.18.1.1<br />
@@ -167,7 +164,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     {
         if (CommunicationPipe != null)
         {
-            var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), hasResponseData: true, usePackAndUnpack: false);
+            var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return read;
@@ -177,8 +174,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     }
 
     /// <summary>
-    /// 创建一个读取标签的报文指定，标签地址可以手动动态指定slot编号，例如 slot=2;AAA<br />
-    /// Build a read command bytes, The label address can manually specify the slot number dynamically, for example slot=2;AAA
+    /// 创建一个读取标签的报文指定，标签地址可以手动动态指定slot编号，例如 slot=2;AAA。
     /// </summary>
     /// <param name="address">the address of the tag name</param>
     /// <param name="length">Array information, if not arrays, is 1 </param>
@@ -193,6 +189,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return new OperateResult<byte[]>("address and length is not same array");
         }
+
         try
         {
             var b = Slot;
@@ -202,7 +199,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
                 b = (byte)CommHelper.ExtractParameter(ref address[i], "slot", Slot);
                 list.Add(AllenBradleyHelper.PackRequsetRead(address[i], length[i]));
             }
-            var value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, b }, list.ToArray()));
+            var value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, b], list.ToArray()));
             return OperateResult.CreateSuccessResult(value);
         }
         catch (Exception ex)
@@ -212,8 +209,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     }
 
     /// <summary>
-    /// 创建一个读取多标签的报文<br />
-    /// Build a read command bytes
+    /// 创建一个读取多标签的报文。
     /// </summary>
     /// <param name="address">The address of the tag name </param>
     /// <returns>Message information that contains the result object </returns>
@@ -300,292 +296,14 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     }
 
     /// <summary>
-    /// 读取指定地址的二进制数据内容，长度为地址长度，一般都是1，除非读取数组时，如果需要强制使用 片段读取功能码，则地址里携带 x=0x52; 或是 x=82; 则强制使用片段读取。<br />
-    /// Read the binary data content of the specified address, the length is the address length, generally 1, unless the array is read, if you need to force the fragment reading function code, 
-    /// the address carries x=0x52; or x=82; then the fragment read is forced.
+    /// 读取指定地址的二进制数据内容，长度为地址长度，一般都是1，除非读取数组时，如果需要强制使用 片段读取功能码，则地址里携带 x=0x52; 或是 x=82; 则强制使用片段读取。
     /// </summary>
     /// <remarks>
-    /// 使用片段读取的时候，可以读取一些数量量非常大的地址，例如一个结构体标签有100_000个字节长度的时候。<br />
-    /// When using fragment reading, you can read a very large number of addresses, such as when a struct tag is 100_000 bytes long.
+    /// 使用片段读取的时候，可以读取一些数量量非常大的地址，例如一个结构体标签有100_000个字节长度的时候。
     /// </remarks>
     /// <param name="address">Address format of the node</param>
     /// <param name="length">In the case of arrays, the length of the array </param>
     /// <returns>Result data with result object </returns>
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
-    {
-        CommHelper.ExtractParameter(ref address, "type", 0);
-        var num = CommHelper.ExtractParameter(ref address, "x", -1);
-        if (num == 82 || num == 83)
-        {
-            return ReadSegment(address, 0, length);
-        }
-        if (length > 1)
-        {
-            return ReadSegment(address, 0, length);
-        }
-        return Read(new string[1] { address }, new ushort[1] { length });
-    }
-
-    /// <summary>
-    /// <b>[商业授权]</b> 批量读取多地址的数据信息，例如我可以读取两个标签的数据 "A","B[0]"，每个地址的数据长度为1，表示一个数据，最终读取返回的是一整个的字节数组，需要自行解析<br />
-    /// <b>[Authorization]</b> Batch read data information of multiple addresses, for example, I can read the data of two tags "A", "B[0]", the data length of each address is 1, 
-    /// which means one data, and the final read returns a The entire byte array, which needs to be parsed by itself
-    /// </summary>
-    /// <param name="address">Name of the node </param>
-    /// <returns>Result data with result object </returns>
-    [HslMqttApi("ReadAddress", "")]
-    public OperateResult<byte[]> Read(string[] address)
-    {
-        if (address == null)
-        {
-            return new OperateResult<byte[]>("address can not be null");
-        }
-        var array = new ushort[address.Length];
-        for (var i = 0; i < array.Length; i++)
-        {
-            array[i] = 1;
-        }
-        return Read(address, array);
-    }
-
-    /// <summary>
-    /// <b>[商业授权]</b> 批量读取多地址的数据信息，例如我可以读取两个标签的数据 "A","B[0]"， 长度为 [1, 5]，返回的是一整个的字节数组，需要自行解析<br />
-    /// <b>[Authorization]</b> Read the data information of multiple addresses in batches. For example, I can read the data "A", "B[0]" of two tags, 
-    /// the length is [1, 5], and the return is an entire byte array, and I need to do it myself Parsing
-    /// </summary>
-    /// <param name="address">节点的名称 -&gt; Name of the node </param>
-    /// <param name="length">如果是数组，就为数组长度 -&gt; In the case of arrays, the length of the array </param>
-    /// <returns>带有结果对象的结果数据 -&gt; Result data with result object </returns>
-    public OperateResult<byte[]> Read(string[] address, ushort[] length)
-    {
-        if (address != null && address.Length > 1 && !Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
-        var operateResult = ReadWithType(address, length);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content1);
-    }
-
-    private OperateResult<byte[], ushort, bool> ReadWithType(string[] address, ushort[] length)
-    {
-        var operateResult = BuildReadCommand(address, length);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[], ushort, bool>(operateResult);
-        }
-        var operateResult2 = ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[], ushort, bool>(operateResult2);
-        }
-        var operateResult3 = CheckResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[], ushort, bool>(operateResult3);
-        }
-        return AllenBradleyHelper.ExtractActualData(operateResult2.Content, isRead: true);
-    }
-
-    /// <summary>
-    /// Read Segment Data Array form plc, use address tag name
-    /// </summary>
-    /// <param name="address">Tag name in plc</param>
-    /// <param name="startIndex">array start index, uint byte index</param>
-    /// <param name="length">array length, data item length</param>
-    /// <returns>Results Bytes</returns>
-    [HslMqttApi("ReadSegment", "")]
-    public OperateResult<byte[]> ReadSegment(string address, int startIndex, int length)
-    {
-        try
-        {
-            var list = new List<byte>();
-            OperateResult<byte[], ushort, bool> operateResult2;
-            do
-            {
-                var operateResult = ReadCipFromServer(AllenBradleyHelper.PackRequestReadSegment(address, startIndex, length));
-                if (!operateResult.IsSuccess)
-                {
-                    return operateResult;
-                }
-                operateResult2 = AllenBradleyHelper.ExtractActualData(operateResult.Content, isRead: true);
-                if (!operateResult2.IsSuccess)
-                {
-                    return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-                }
-                startIndex += operateResult2.Content1.Length;
-                list.AddRange(operateResult2.Content1);
-            }
-            while (operateResult2.Content3);
-            return OperateResult.CreateSuccessResult(list.ToArray());
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<byte[]>("Address Wrong:" + ex.Message);
-        }
-    }
-
-    private OperateResult<byte[]> ReadByCips(params byte[][] cips)
-    {
-        var operateResult = ReadCipFromServer(cips);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = AllenBradleyHelper.ExtractActualData(operateResult.Content, isRead: true);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-        }
-        return OperateResult.CreateSuccessResult(operateResult2.Content1);
-    }
-
-    /// <summary>
-    /// 使用CIP报文和服务器进行核心的数据交换
-    /// </summary>
-    /// <param name="cips">Cip commands</param>
-    /// <returns>Results Bytes</returns>
-    public OperateResult<byte[]> ReadCipFromServer(params byte[][] cips)
-    {
-        var send = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, Slot }, cips.ToArray()));
-        var operateResult = ReadFromCoreServer(send);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = CheckResponse(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content);
-    }
-
-    /// <summary>
-    /// 使用EIP报文和服务器进行核心的数据交换
-    /// </summary>
-    /// <param name="eip">eip commands</param>
-    /// <returns>Results Bytes</returns>
-    public OperateResult<byte[]> ReadEipFromServer(params byte[][] eip)
-    {
-        var send = AllenBradleyHelper.PackCommandSpecificData(eip);
-        var operateResult = ReadFromCoreServer(send);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = CheckResponse(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content);
-    }
-
-    /// <summary>
-    /// 读取单个的bool数据信息，如果读取的是单bool变量，就直接写变量名，如果是由int组成的bool数组的一个值，一律带"i="开头访问，例如"i=A[0]" <br />
-    /// Read a single bool data information, if it is a single bool variable, write the variable name directly, 
-    /// if it is a value of a bool array composed of int, it is always accessed with "i=" at the beginning, for example, "i=A[0]"
-    /// </summary>
-    /// <param name="address">节点的名称 -&gt; Name of the node </param>
-    /// <returns>带有结果对象的结果数据 -&gt; Result data with result info </returns>
-    [HslMqttApi("ReadBool", "")]
-    public override OperateResult<bool> ReadBool(string address)
-    {
-        if (address.StartsWith("i="))
-        {
-            return ByteTransformHelper.GetResultFromArray(ReadBool(address, 1));
-        }
-        var operateResult = Read(address, 1);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool>(operateResult);
-        }
-        return OperateResult.CreateSuccessResult(ByteTransform.TransBool(operateResult.Content, 0));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadBoolArray", "")]
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
-    {
-        if (address.StartsWith("i="))
-        {
-            address = address.Substring(2);
-            address = AllenBradleyHelper.AnalysisArrayIndex(address, out var arrayIndex);
-            var text = arrayIndex / 32 == 0 ? "" : $"[{arrayIndex / 32}]";
-            var length2 = (ushort)CommHelper.CalculateOccupyLength(arrayIndex, length, 32);
-            var operateResult = Read(address + text, length2);
-            if (!operateResult.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<bool[]>(operateResult);
-            }
-            return OperateResult.CreateSuccessResult(operateResult.Content.ToBoolArray().SelectMiddle(arrayIndex % 32, length));
-        }
-        var operateResult2 = Read(address, length);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult2);
-        }
-        return OperateResult.CreateSuccessResult(SoftBasic.ByteToBoolArray(operateResult2.Content, length));
-    }
-
-    /// <summary>
-    /// 批量读取的bool数组信息，如果你有个Bool数组变量名为 A, 那么读第0个位，可以通过 ReadBool("A")，但是第二个位需要使用 
-    /// ReadBoolArray("A[0]")   // 返回32个bool长度，0-31的索引，如果我想读取32-63的位索引，就需要 ReadBoolArray("A[1]") ，以此类推。<br />
-    /// For batch read bool array information, if you have a Bool array variable named A, then you can read the 0th bit through ReadBool("A"), 
-    /// but the second bit needs to use ReadBoolArray("A[0]" ) // Returns the length of 32 bools, the index is 0-31, 
-    /// if I want to read the bit index of 32-63, I need ReadBoolArray("A[1]"), and so on.
-    /// </summary>
-    /// <param name="address">节点的名称 -&gt; Name of the node </param>
-    /// <returns>带有结果对象的结果数据 -&gt; Result data with result info </returns>
-    [HslMqttApi("ReadBoolArrayAddress", "")]
-    public OperateResult<bool[]> ReadBoolArray(string address)
-    {
-        var operateResult = Read(address, 1);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content.ToBoolArray());
-    }
-
-    /// <summary>
-    /// 读取PLC的byte类型的数据<br />
-    /// Read the byte type of PLC data
-    /// </summary>
-    /// <param name="address">节点的名称 -&gt; Name of the node </param>
-    /// <returns>带有结果对象的结果数据 -&gt; Result data with result info </returns>
-    [HslMqttApi("ReadByte", "")]
-    public OperateResult<byte> ReadByte(string address)
-    {
-        return ByteTransformHelper.GetResultFromArray(Read(address, 1));
-    }
-
-    /// <summary>
-    /// 从PLC里读取一个指定标签名的原始数据信息及其数据类型信息<br />
-    /// Read the original data information of a specified tag name and its data type information from the PLC
-    /// </summary>
-    /// <remarks>
-    /// 数据类型的定义，可以参考 <see cref="T:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper" /> 的常量资源信息。
-    /// </remarks>
-    /// <param name="address">PLC的标签地址信息</param>
-    /// <param name="length">读取的数据长度</param>
-    /// <returns>包含原始数据信息及数据类型的结果对象</returns>
-    public OperateResult<ushort, byte[]> ReadTag(string address, ushort length = 1)
-    {
-        var operateResult = ReadWithType(new string[1] { address }, new ushort[1] { length });
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<ushort, byte[]>(operateResult);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content2, operateResult.Content1);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Read(System.String,System.UInt16)" />
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
         CommHelper.ExtractParameter(ref address, "type", 0);
@@ -598,31 +316,37 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return await ReadSegmentAsync(address, 0, length).ConfigureAwait(continueOnCapturedContext: false);
         }
-        return await ReadAsync(new string[1] { address }, new ushort[1] { length }).ConfigureAwait(continueOnCapturedContext: false);
+        return await ReadAsync([address], [length]).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Read(System.String[])" />
+    /// <summary>
+    /// 批量读取多地址的数据信息，例如我可以读取两个标签的数据 "A","B[0]"，每个地址的数据长度为1，表示一个数据，最终读取返回的是一整个的字节数组，需要自行解析。
+    /// </summary>
+    /// <param name="address">Name of the node </param>
+    /// <returns>Result data with result object </returns>
     public async Task<OperateResult<byte[]>> ReadAsync(string[] address)
     {
         if (address == null)
         {
             return new OperateResult<byte[]>("address can not be null");
         }
+
         var length = new ushort[address.Length];
         for (var i = 0; i < length.Length; i++)
         {
             length[i] = 1;
         }
-        return await ReadAsync(address, length);
+        return await ReadAsync(address, length).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Read(System.String[],System.UInt16[])" />
+    /// <summary>
+    /// 批量读取多地址的数据信息，例如我可以读取两个标签的数据 "A","B[0]"， 长度为 [1, 5]，返回的是一整个的字节数组，需要自行解析。
+    /// </summary>
+    /// <param name="address">节点的名称</param>
+    /// <param name="length">如果是数组，就为数组长度</param>
+    /// <returns>带有结果对象的结果数据</returns>
     public async Task<OperateResult<byte[]>> ReadAsync(string[] address, ushort[] length)
     {
-        if (address != null && address.Length > 1 && !Authorization.asdniasnfaksndiqwhawfskhfaiw())
-        {
-            return new OperateResult<byte[]>(StringResources.Language.InsufficientPrivileges);
-        }
         var read = await ReadWithTypeAsync(address, length).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
@@ -651,7 +375,13 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return AllenBradleyHelper.ExtractActualData(read.Content, isRead: true);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadSegment(System.String,System.Int32,System.Int32)" />
+    /// <summary>
+    /// Read Segment Data Array form plc, use address tag name
+    /// </summary>
+    /// <param name="address">Tag name in plc</param>
+    /// <param name="startIndex">array start index, uint byte index</param>
+    /// <param name="length">array length, data item length</param>
+    /// <returns>Results Bytes</returns>
     public async Task<OperateResult<byte[]>> ReadSegmentAsync(string address, int startIndex, int length)
     {
         try
@@ -683,7 +413,11 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         }
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadCipFromServer(System.Byte[][])" />
+    /// <summary>
+    /// 使用CIP报文和服务器进行核心的数据交换
+    /// </summary>
+    /// <param name="cips">Cip commands</param>
+    /// <returns>Results Bytes</returns>
     public async Task<OperateResult<byte[]>> ReadCipFromServerAsync(params byte[][] cips)
     {
         var commandSpecificData = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, Slot }, cips.ToArray()));
@@ -700,7 +434,11 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return OperateResult.CreateSuccessResult(read.Content);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadEipFromServer(System.Byte[][])" />
+    /// <summary>
+    /// 使用EIP报文和服务器进行核心的数据交换
+    /// </summary>
+    /// <param name="eip">eip commands</param>
+    /// <returns>Results Bytes</returns>
     public async Task<OperateResult<byte[]>> ReadEipFromServerAsync(params byte[][] eip)
     {
         var commandSpecificData = AllenBradleyHelper.PackCommandSpecificData(eip);
@@ -717,7 +455,11 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return OperateResult.CreateSuccessResult(read.Content);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadBool(System.String)" />
+    /// <summary>
+    /// 读取单个的bool数据信息，如果读取的是单bool变量，就直接写变量名，如果是由int组成的bool数组的一个值，一律带"i="开头访问，例如"i=A[0]"。
+    /// </summary>
+    /// <param name="address">节点的名称</param>
+    /// <returns>带有结果对象的结果数据</returns>
     public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
     {
         if (address.StartsWith("i="))
@@ -756,7 +498,12 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return OperateResult.CreateSuccessResult(SoftBasic.ByteToBoolArray(read.Content, length));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadBoolArray(System.String)" />
+    /// <summary>
+    /// 批量读取的bool数组信息，如果你有个Bool数组变量名为 A, 那么读第0个位，可以通过 ReadBool("A")，但是第二个位需要使用 ReadBoolArray("A[0]")，
+    /// 返回32个bool长度，0-31的索引，如果我想读取32-63的位索引，就需要 ReadBoolArray("A[1]") ，以此类推。
+    /// </summary>
+    /// <param name="address">节点的名称</param>
+    /// <returns>带有结果对象的结果数据</returns>
     public async Task<OperateResult<bool[]>> ReadBoolArrayAsync(string address)
     {
         var read = await ReadAsync(address, 1).ConfigureAwait(continueOnCapturedContext: false);
@@ -767,62 +514,30 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return OperateResult.CreateSuccessResult(read.Content.ToBoolArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadByte(System.String)" />
+    /// <summary>
+    /// 读取PLC的byte类型的数据。
+    /// </summary>
+    /// <param name="address">节点的名称</param>
+    /// <returns>带有结果对象的结果数据</returns>
     public async Task<OperateResult<byte>> ReadByteAsync(string address)
     {
-        return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1));
+        return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadTag(System.String,System.UInt16)" />
+    /// <summary>
+    /// 从PLC里读取一个指定标签名的原始数据信息及其数据类型信息。
+    /// </summary>
+    /// <param name="address">PLC的标签地址信息</param>
+    /// <param name="length">读取的数据长度</param>
+    /// <returns>包含原始数据信息及数据类型的结果对象</returns>
     public async Task<OperateResult<ushort, byte[]>> ReadTagAsync(string address, ushort length = 1)
     {
-        var read = await ReadWithTypeAsync(new string[1] { address }, new ushort[1] { length }).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadWithTypeAsync([address], [length]).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<ushort, byte[]>(read);
         }
         return OperateResult.CreateSuccessResult(read.Content2, read.Content1);
-    }
-
-    /// <summary>
-    /// 枚举当前的所有的变量名字，包含结构体信息，除去系统自带的名称数据信息<br />
-    /// Enumerate all the current variable names, including structure information, except the name data information that comes with the system
-    /// </summary>
-    /// <returns>结果对象</returns>
-    public OperateResult<AbTagItem[]> TagEnumerator()
-    {
-        var list = new List<AbTagItem>();
-        for (var i = 0; i < 2; i++)
-        {
-            var startInstance = 0u;
-            OperateResult<byte[], ushort, bool> operateResult2;
-            do
-            {
-                var operateResult = ReadCipFromServer(i == 0 ? AllenBradleyHelper.BuildEnumeratorCommand(startInstance) : AllenBradleyHelper.BuildEnumeratorProgrameMainCommand(startInstance));
-                if (!operateResult.IsSuccess)
-                {
-                    return OperateResult.CreateFailedResult<AbTagItem[]>(operateResult);
-                }
-                operateResult2 = AllenBradleyHelper.ExtractActualData(operateResult.Content, isRead: true);
-                if (!operateResult2.IsSuccess)
-                {
-                    if (i == 1)
-                    {
-                        return OperateResult.CreateSuccessResult(list.ToArray());
-                    }
-                    return OperateResult.CreateFailedResult<AbTagItem[]>(operateResult2);
-                }
-                if (operateResult.Content.Length >= 43 && BitConverter.ToUInt16(operateResult.Content, 40) == 213)
-                {
-                    list.AddRange(AbTagItem.PraseAbTagItems(operateResult.Content, 44, i == 0, out var instance));
-                    startInstance = instance + 1;
-                    continue;
-                }
-                return new OperateResult<AbTagItem[]>(StringResources.Language.UnknownError + " Source: " + operateResult.Content.ToHexString(' '));
-            }
-            while (operateResult2.Content3);
-        }
-        return OperateResult.CreateSuccessResult(list.ToArray());
     }
 
     /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.TagEnumerator" />
@@ -835,7 +550,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
             OperateResult<byte[], ushort, bool> analysis;
             do
             {
-                var readCip = await ReadCipFromServerAsync(i == 0 ? AllenBradleyHelper.BuildEnumeratorCommand(instanceAddress) : AllenBradleyHelper.BuildEnumeratorProgrameMainCommand(instanceAddress));
+                var readCip = await ReadCipFromServerAsync(i == 0 ? AllenBradleyHelper.BuildEnumeratorCommand(instanceAddress) : AllenBradleyHelper.BuildEnumeratorProgrameMainCommand(instanceAddress)).ConfigureAwait(false);
                 if (!readCip.IsSuccess)
                 {
                     return OperateResult.CreateFailedResult<AbTagItem[]>(readCip);
@@ -862,9 +577,9 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return OperateResult.CreateSuccessResult(lists.ToArray());
     }
 
-    private OperateResult<AbStructHandle> ReadTagStructHandle(AbTagItem structTag)
+    private async Task<OperateResult<AbStructHandle>> ReadTagStructHandleAsync(AbTagItem structTag)
     {
-        var operateResult = ReadCipFromServer(AllenBradleyHelper.GetStructHandleCommand(structTag.SymbolType));
+        var operateResult = await ReadCipFromServerAsync(AllenBradleyHelper.GetStructHandleCommand(structTag.SymbolType)).ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<AbStructHandle>(operateResult);
@@ -877,20 +592,18 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     }
 
     /// <summary>
-    /// 枚举结构体的方法，传入结构体的标签对象，返回结构体子属性标签列表信息，子属性有可能是标量数据，也可能是另一个结构体。<br />
-    /// The method of enumerating the structure, passing in the tag object of the structure, 
-    /// and returning the tag list information of the sub-attributes of the structure. The sub-attributes may be scalar data or another structure.
+    /// 枚举结构体的方法，传入结构体的标签对象，返回结构体子属性标签列表信息，子属性有可能是标量数据，也可能是另一个结构体。
     /// </summary>
     /// <param name="structTag">结构体的标签</param>
     /// <returns>是否成功</returns>
-    public OperateResult<AbTagItem[]> StructTagEnumerator(AbTagItem structTag)
+    public async Task<OperateResult<AbTagItem[]>> StructTagEnumeratorAsync(AbTagItem structTag)
     {
-        var operateResult = ReadTagStructHandle(structTag);
+        var operateResult = await ReadTagStructHandleAsync(structTag).ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<AbTagItem[]>(operateResult);
         }
-        var operateResult2 = ReadCipFromServer(AllenBradleyHelper.GetStructItemNameType(structTag.SymbolType, operateResult.Content, 0));
+        var operateResult2 = await ReadCipFromServerAsync(AllenBradleyHelper.GetStructItemNameType(structTag.SymbolType, operateResult.Content, 0)).ConfigureAwait(false);
         if (!operateResult2.IsSuccess)
         {
             return OperateResult.CreateFailedResult<AbTagItem[]>(operateResult2);
@@ -902,95 +615,6 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return new OperateResult<AbTagItem[]>(StringResources.Language.UnknownError + " Status:" + operateResult2.Content[42]);
     }
 
-    /// <inheritdoc />
-    [HslMqttApi("ReadInt16Array", "")]
-    public override OperateResult<short[]> ReadInt16(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransInt16(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadUInt16Array", "")]
-    public override OperateResult<ushort[]> ReadUInt16(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransUInt16(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadInt32Array", "")]
-    public override OperateResult<int[]> ReadInt32(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransInt32(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadUInt32Array", "")]
-    public override OperateResult<uint[]> ReadUInt32(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransUInt32(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadFloatArray", "")]
-    public override OperateResult<float[]> ReadFloat(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransSingle(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadInt64Array", "")]
-    public override OperateResult<long[]> ReadInt64(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransInt64(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadUInt64Array", "")]
-    public override OperateResult<ulong[]> ReadUInt64(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransUInt64(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("ReadDoubleArray", "")]
-    public override OperateResult<double[]> ReadDouble(string address, ushort length)
-    {
-        return ByteTransformHelper.GetResultFromBytes(Read(address, length), (m) => ByteTransform.TransDouble(m, 0, length));
-    }
-
-    /// <inheritdoc />
-    public OperateResult<string> ReadString(string address)
-    {
-        return ReadString(address, 1);
-    }
-
-    /// <summary>
-    /// 读取字符串数据，默认为<see cref="P:System.Text.Encoding.UTF8" />编码<br />
-    /// Read string data, default is the <see cref="P:System.Text.Encoding.UTF8" /> encoding
-    /// </summary>
-    /// <param name="address">起始地址</param>
-    /// <param name="length">数据长度</param>
-    /// <returns>带有成功标识的string数据</returns>
-    /// <example>
-    /// 以下为三菱的连接对象示例，其他的设备读写情况参照下面的代码：
-    /// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Core\NetworkDeviceBase.cs" region="ReadString" title="String类型示例" />
-    /// </example>
-    [HslMqttApi("ReadString", "")]
-    public override OperateResult<string> ReadString(string address, ushort length)
-    {
-        return ReadString(address, length, Encoding.UTF8);
-    }
-
-    /// <inheritdoc />
-    public override OperateResult<string> ReadString(string address, ushort length, Encoding encoding)
-    {
-        CommHelper.ExtractParameter(ref address, "type", 0);
-        var read = ReadWithType(new string[1] { address }, new ushort[1] { length });
-        return AllenBradleyHelper.ExtractActualString(read, ByteTransform, encoding);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice)" />
-    [HslMqttApi(Description = "获取PLC的型号信息")]
     public OperateResult<string> ReadPlcType()
     {
         return AllenBradleyHelper.ReadPlcType(this);
@@ -999,138 +623,91 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <inheritdoc />
     public override async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransInt16(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransInt16(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<ushort[]>> ReadUInt16Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransUInt16(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransUInt16(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransInt32(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransInt32(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransUInt32(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransUInt32(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransSingle(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransInt64(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransInt64(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransUInt64(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransUInt64(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (m) => ByteTransform.TransDouble(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransDouble(m, 0, length));
     }
 
     /// <inheritdoc />
     public async Task<OperateResult<string>> ReadStringAsync(string address)
     {
-        return await ReadStringAsync(address, 1);
+        return await ReadStringAsync(address, 1).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadString(System.String,System.UInt16)" />
+    /// <summary>
+    /// 读取字符串数据，默认为<see cref="P:System.Text.Encoding.UTF8" />编码
+    /// </summary>
+    /// <param name="address">起始地址</param>
+    /// <param name="length">数据长度</param>
+    /// <returns>带有成功标识的string数据</returns>
     public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length)
     {
-        return await ReadStringAsync(address, length, Encoding.UTF8);
+        return await ReadStringAsync(address, length, Encoding.UTF8).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
     {
         CommHelper.ExtractParameter(ref address, "type", 0);
-        return AllenBradleyHelper.ExtractActualString(await ReadWithTypeAsync(new string[1] { address }, new ushort[1] { length }), ByteTransform, encoding);
+        return AllenBradleyHelper.ExtractActualString(await ReadWithTypeAsync([address], [length]).ConfigureAwait(false), ByteTransform, encoding);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice)" />
     public async Task<OperateResult<string>> ReadPlcTypeAsync()
     {
-        return await AllenBradleyHelper.ReadPlcTypeAsync(this);
+        return await AllenBradleyHelper.ReadPlcTypeAsync(this).ConfigureAwait(false);
     }
 
     /// <summary>
-    /// 当前写入字节数组使用数据类型 0xD1 写入，如果其他的字节类型需要调用 <see cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteTag(System.String,System.UInt16,System.Byte[],System.Int32)" /> 方法来实现。<br />
-    /// The currently written byte array is written using the data type 0xD1. If other byte types need to be called <see cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteTag(System.String,System.UInt16,System.Byte[],System.Int32)" /> Method to achieve. <br />
+    /// 当前写入字节数组使用数据类型 0xD1 写入，如果其他的字节类型需要调用 <see cref="WriteTagAsync" /> 方法来实现。
     /// </summary>
     /// <param name="address">地址</param>
     /// <param name="value">值</param>
     /// <returns>写入结果值</returns>
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
-    {
-        return WriteTag(address, 209, value, !CommHelper.IsAddressEndWithIndex(address) ? 1 : value.Length);
-    }
-
-    /// <summary>
-    /// 使用指定的类型写入指定的节点数据，类型信息参考API文档，地址支持协议类型代号信息，例如 "type=0xD1;A"<br />
-    /// Use the specified type to write the specified node data. For type information, refer to the API documentation. The address supports protocol type code information, such as "type=0xD1;A"
-    /// </summary>
-    /// <remarks>
-    /// 关于参数 length 的含义，表示的是地址长度，一般的标量数据都是 1，如果PLC有个标签是 A，数据类型为 byte[10]，那我们写入 3 个byte就是 WriteTag( "A[5]", 0xD1, new byte[]{1,2,3}, 3 );<br />
-    /// Regarding the meaning of the parameter length, it represents the address length. The general scalar data is 1. If the PLC has a tag of A and the data type is byte[10], then we write 3 bytes as WriteTag( "A[5 ]", 0xD1, new byte[]{1,2,3}, 3 );
-    /// </remarks>
-    /// <param name="address">节点的名称 -&gt; Name of the node </param>
-    /// <param name="typeCode">类型代码，详细参见<see cref="T:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper" />上的常用字段 -&gt;  Type code, see the commonly used Fields section on the <see cref="T:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper" /> in detail</param>
-    /// <param name="value">实际的数据值 -&gt; The actual data value </param>
-    /// <param name="length">如果节点是数组，就是数组长度 -&gt; If the node is an array, it is the array length </param>
-    /// <returns>是否写入成功 -&gt; Whether to write successfully</returns>
-    public virtual OperateResult WriteTag(string address, ushort typeCode, byte[] value, int length = 1)
-    {
-        typeCode = (ushort)CommHelper.ExtractParameter(ref address, "type", typeCode);
-        var operateResult = BuildWriteCommand(address, typeCode, value, length);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            var operateResult2 = ReadFromCoreServer(operateResult.Content[i]);
-            if (!operateResult2.IsSuccess)
-            {
-                return operateResult2;
-            }
-            var operateResult3 = CheckResponse(operateResult2.Content);
-            if (!operateResult3.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-            }
-            OperateResult operateResult4 = AllenBradleyHelper.ExtractActualData(operateResult2.Content, isRead: false);
-            if (!operateResult4.IsSuccess)
-            {
-                return operateResult4;
-            }
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Byte[])" />
     public override async Task<OperateResult> WriteAsync(string address, byte[] value)
     {
-        return await WriteTagAsync(address, 209, value, !CommHelper.IsAddressEndWithIndex(address) ? 1 : value.Length);
+        return await WriteTagAsync(address, 209, value, !CommHelper.IsAddressEndWithIndex(address) ? 1 : value.Length).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteTag(System.String,System.UInt16,System.Byte[],System.Int32)" />
     public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)
     {
         typeCode = (ushort)CommHelper.ExtractParameter(ref address, "type", typeCode);
@@ -1160,196 +737,46 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return OperateResult.CreateSuccessResult();
     }
 
-    /// <inheritdoc />
-    [HslMqttApi("WriteInt16Array", "")]
-    public override OperateResult Write(string address, short[] values)
-    {
-        return WriteTag(address, 195, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteUInt16Array", "")]
-    public override OperateResult Write(string address, ushort[] values)
-    {
-        return WriteTag(address, 199, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteInt32Array", "")]
-    public override OperateResult Write(string address, int[] values)
-    {
-        return WriteTag(address, 196, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteUInt32Array", "")]
-    public override OperateResult Write(string address, uint[] values)
-    {
-        return WriteTag(address, 200, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteFloatArray", "")]
-    public override OperateResult Write(string address, float[] values)
-    {
-        return WriteTag(address, 202, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteInt64Array", "")]
-    public override OperateResult Write(string address, long[] values)
-    {
-        return WriteTag(address, 197, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteUInt64Array", "")]
-    public override OperateResult Write(string address, ulong[] values)
-    {
-        return WriteTag(address, 201, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    [HslMqttApi("WriteDoubleArray", "")]
-    public override OperateResult Write(string address, double[] values)
-    {
-        return WriteTag(address, 203, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length));
-    }
-
-    /// <inheritdoc />
-    public override OperateResult Write(string address, string value, Encoding encoding)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            value = string.Empty;
-        }
-        var num = (ushort)CommHelper.ExtractParameter(ref address, "type", 194);
-        if (num == 218)
-        {
-            var bytes = encoding.GetBytes(value);
-            return WriteTag(address, num, SoftBasic.SpliceArray(new byte[1] { (byte)bytes.Length }, bytes));
-        }
-        var bytes2 = encoding.GetBytes(value);
-        var operateResult = Write(address + ".LEN", bytes2.Length);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var value2 = SoftBasic.ArrayExpandToLengthEven(bytes2);
-        return WriteTag(address + ".DATA[0]", num, value2, bytes2.Length);
-    }
-
-    /// <summary>
-    /// 写入单个Bool的数据信息。如果读取的是单bool变量，就直接写变量名，如果是bool数组的一个值，一律带下标访问，例如a[0]<br />
-    /// Write the data information of a single Bool. If the read is a single bool variable, write the variable name directly, 
-    /// if it is a value of the bool array, it will always be accessed with a subscript, such as a[0]
-    /// </summary>
-    /// <remarks>
-    /// 如果写入的是类型代号 0xC1 的bool变量或是数组，直接使用标签名即可，比如：A,A[10]，如果写入的是类型代号0xD3的bool数组的值，则需要使用地址"i="开头，例如：i=A[10]<br />
-    /// If you write a bool variable or array of type code 0xC1, you can use the tag name directly, such as: A,A[10], 
-    /// if you write the value of a bool array of type code 0xD3, you need to use the address" i=" at the beginning, for example: i=A[10]
-    /// </remarks>
-    /// <param name="address">标签的地址数据</param>
-    /// <param name="value">bool数据值</param>
-    /// <returns>是否写入成功</returns>
-    [HslMqttApi("WriteBool", "")]
-    public override OperateResult Write(string address, bool value)
-    {
-        if (address.StartsWith("i=") && Regex.IsMatch(address, "\\[[0-9]+\\]$"))
-        {
-            var operateResult = BuildWriteCommand(address.Substring(2), value);
-            if (!operateResult.IsSuccess)
-            {
-                return operateResult;
-            }
-            var operateResult2 = ReadFromCoreServer(operateResult.Content);
-            if (!operateResult2.IsSuccess)
-            {
-                return operateResult2;
-            }
-            var operateResult3 = CheckResponse(operateResult2.Content);
-            if (!operateResult3.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-            }
-            return AllenBradleyHelper.ExtractActualData(operateResult2.Content, isRead: false);
-        }
-        return WriteTag(address, 193, !value ? new byte[2] : new byte[2] { 255, 255 });
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Core.IReadWriteNet.Write(System.String,System.Boolean[])" />
-    [HslMqttApi("WriteBoolArray", "")]
-    public override OperateResult Write(string address, bool[] value)
-    {
-        return WriteTag(address, 193, value.Select((m) => (byte)(m ? 1 : 0)).ToArray(), !CommHelper.IsAddressEndWithIndex(address) ? 1 : value.Length);
-    }
-
-    /// <summary>
-    /// 写入Byte数据，返回是否写入成功，默认使用类型 0xC2, 如果PLC的变量类型不一样，则需要指定实际的变量类型，例如PLC的变量 A 是0xD1类型，那么地址需要携带类型信息，type=0xD1;A <br />
-    /// Write Byte data and return whether the writing is successful. The default type is 0xC2. If the variable types of the PLC are different, you need to specify the actual variable type. 
-    /// For example, the variable A of the PLC is of type 0xD1, then the address needs to carry the type information, type= 0xD1;A
-    /// </summary>
-    /// <remarks>
-    /// 如何确认PLC的变量的类型呢？可以在HslCommunicationDemo程序上测试知道，也可以直接调用 <see cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadWithType(System.String[],System.UInt16[])" /> 来知道类型信息。
-    /// </remarks>
-    /// <param name="address">标签的地址数据</param>
-    /// <param name="value">Byte数据</param>
-    /// <returns>是否写入成功</returns>
-    [HslMqttApi("WriteByte", "")]
-    public virtual OperateResult Write(string address, byte value)
-    {
-        return WriteTag(address, 194, new byte[2] { value, 0 });
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Int16[])" />
     public override async Task<OperateResult> WriteAsync(string address, short[] values)
     {
         return await WriteTagAsync(address, 195, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.UInt16[])" />
     public override async Task<OperateResult> WriteAsync(string address, ushort[] values)
     {
         return await WriteTagAsync(address, 199, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Int32[])" />
     public override async Task<OperateResult> WriteAsync(string address, int[] values)
     {
         return await WriteTagAsync(address, 196, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.UInt32[])" />
     public override async Task<OperateResult> WriteAsync(string address, uint[] values)
     {
         return await WriteTagAsync(address, 200, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Single[])" />
     public override async Task<OperateResult> WriteAsync(string address, float[] values)
     {
         return await WriteTagAsync(address, 202, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Int64[])" />
     public override async Task<OperateResult> WriteAsync(string address, long[] values)
     {
         return await WriteTagAsync(address, 197, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.UInt64[])" />
     public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
     {
         return await WriteTagAsync(address, 201, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Double[])" />
     public override async Task<OperateResult> WriteAsync(string address, double[] values)
     {
         return await WriteTagAsync(address, 203, ByteTransform.TransByte(values), GetWriteValueLength(address, values.Length)).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult> WriteAsync(string address, string value, Encoding encoding)
     {
         if (string.IsNullOrEmpty(value))
@@ -1361,7 +788,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         if (typeCode == 218)
         {
             data = encoding.GetBytes(value);
-            return WriteTag(address, typeCode, SoftBasic.SpliceArray(new byte[1] { (byte)data.Length }, data));
+            return await WriteTagAsync(address, typeCode, SoftBasic.SpliceArray([(byte)data.Length], data)).ConfigureAwait(false);
         }
         data = encoding.GetBytes(value);
         var write = await WriteAsync(address + ".LEN", data.Length).ConfigureAwait(continueOnCapturedContext: false);
@@ -1372,7 +799,12 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         return await WriteTagAsync(value: SoftBasic.ArrayExpandToLengthEven(data), address: address + ".DATA[0]", typeCode: typeCode, length: data.Length).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Boolean)" />
+    /// <summary>
+    /// 写入单个Bool的数据信息。如果读取的是单bool变量，就直接写变量名，如果是bool数组的一个值，一律带下标访问，例如a[0]。
+    /// </summary>
+    /// <param name="address">标签的地址数据</param>
+    /// <param name="value">bool数据值</param>
+    /// <returns>是否写入成功</returns>
     public override async Task<OperateResult> WriteAsync(string address, bool value)
     {
         if (address.StartsWith("i=") && Regex.IsMatch(address, "\\[[0-9]+\\]$"))
@@ -1394,94 +826,55 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
             }
             return AllenBradleyHelper.ExtractActualData(read.Content, isRead: false);
         }
-        return await WriteTagAsync(address, 193, !value ? new byte[2] : new byte[2] { 255, 255 }).ConfigureAwait(continueOnCapturedContext: false);
+        return await WriteTagAsync(address, 193, !value ? new byte[2] : [255, 255]).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Boolean[])" />
     public override async Task<OperateResult> WriteAsync(string address, bool[] value)
     {
-        return await WriteTagAsync(address, 193, value.Select((m) => (byte)(m ? 1 : 0)).ToArray(), !CommHelper.IsAddressEndWithIndex(address) ? 1 : value.Length);
+        return await WriteTagAsync(address, 193, value.Select((m) => (byte)(m ? 1 : 0)).ToArray(), !CommHelper.IsAddressEndWithIndex(address) ? 1 : value.Length).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.Write(System.String,System.Byte)" />
+    /// <summary>
+    /// 写入Byte数据，返回是否写入成功，默认使用类型 0xC2, 如果PLC的变量类型不一样，则需要指定实际的变量类型，例如PLC的变量 A 是0xD1类型，那么地址需要携带类型信息，type=0xD1;A。
+    /// </summary>
+    /// <param name="address">标签的地址数据</param>
+    /// <param name="value">Byte数据</param>
+    /// <returns>是否写入成功</returns>
     public virtual async Task<OperateResult> WriteAsync(string address, byte value)
     {
-        return await WriteTagAsync(address, 194, new byte[2] { value, 0 });
+        return await WriteTagAsync(address, 194, [value, 0]).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String)" />
-    public OperateResult<DateTime> ReadDate(string address)
-    {
-        return AllenBradleyHelper.ReadDate(this, address);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.DateTime)" />
-    public OperateResult WriteDate(string address, DateTime date)
-    {
-        return AllenBradleyHelper.WriteDate(this, address, date);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteDate(System.String,System.DateTime)" />
-    public OperateResult WriteTimeAndDate(string address, DateTime date)
-    {
-        return AllenBradleyHelper.WriteTimeAndDate(this, address, date);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.ReadTime(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String)" />
-    public OperateResult<TimeSpan> ReadTime(string address)
-    {
-        return AllenBradleyHelper.ReadTime(this, address);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteTime(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.TimeSpan)" />
-    public OperateResult WriteTime(string address, TimeSpan time)
-    {
-        return AllenBradleyHelper.WriteTime(this, address, time);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.WriteTimeOfDate(HslCommunication.Profinet.AllenBradley.IReadWriteCip,System.String,System.TimeSpan)" />
-    public OperateResult WriteTimeOfDate(string address, TimeSpan timeOfDate)
-    {
-        return AllenBradleyHelper.WriteTimeOfDate(this, address, timeOfDate);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadDate(System.String)" />
     public async Task<OperateResult<DateTime>> ReadDateAsync(string address)
     {
-        return await AllenBradleyHelper.ReadDateAsync(this, address);
+        return await AllenBradleyHelper.ReadDateAsync(this, address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteDate(System.String,System.DateTime)" />
     public async Task<OperateResult> WriteDateAsync(string address, DateTime date)
     {
-        return await AllenBradleyHelper.WriteDateAsync(this, address, date);
+        return await AllenBradleyHelper.WriteDateAsync(this, address, date).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteTimeAndDate(System.String,System.DateTime)" />
     public async Task<OperateResult> WriteTimeAndDateAsync(string address, DateTime date)
     {
-        return await AllenBradleyHelper.WriteTimeAndDateAsync(this, address, date);
+        return await AllenBradleyHelper.WriteTimeAndDateAsync(this, address, date).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.ReadTime(System.String)" />
     public async Task<OperateResult<TimeSpan>> ReadTimeAsync(string address)
     {
-        return await AllenBradleyHelper.ReadTimeAsync(this, address);
+        return await AllenBradleyHelper.ReadTimeAsync(this, address).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteTime(System.String,System.TimeSpan)" />
     public async Task<OperateResult> WriteTimeAsync(string address, TimeSpan time)
     {
-        return await AllenBradleyHelper.WriteTimeAsync(this, address, time);
+        return await AllenBradleyHelper.WriteTimeAsync(this, address, time).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.WriteTimeOfDate(System.String,System.TimeSpan)" />
     public async Task<OperateResult> WriteTimeOfDateAsync(string address, TimeSpan timeOfDate)
     {
-        return await AllenBradleyHelper.WriteTimeOfDateAsync(this, address, timeOfDate);
+        return await AllenBradleyHelper.WriteTimeOfDateAsync(this, address, timeOfDate).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.AllenBradley.AllenBradleyHelper.PackCommandService(System.Byte[],System.Byte[][])" />
     protected virtual byte[] PackCommandService(byte[] portSlot, params byte[][] cips)
     {
         if (MessageRouter != null)

@@ -1,6 +1,6 @@
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Profinet.Melsec.Helper;
 
 namespace ThingsEdge.Communication.Profinet.Melsec;

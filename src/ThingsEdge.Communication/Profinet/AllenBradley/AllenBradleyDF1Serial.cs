@@ -1,9 +1,8 @@
-using ThingsEdge.Communication.BasicFramework;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Serial;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
-using ThingsEdge.Communication.HslCommunication;
-using ThingsEdge.Communication.Serial;
 
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 

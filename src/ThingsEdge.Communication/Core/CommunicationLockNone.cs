@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.HslCommunication;
-
 namespace ThingsEdge.Communication.Core;
 
 /// <summary>

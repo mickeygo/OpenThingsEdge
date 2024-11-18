@@ -1,12 +1,11 @@
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Address;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.Profinet.Melsec;
 
 namespace ThingsEdge.Communication.Profinet.Panasonic;
 
 /// <summary>
-/// 松下PLC的数据读写类，基于MC协议的实现，具体的地址格式请参考备注说明<br />
-/// Data reading and writing of Panasonic PLC, based on the implementation of the MC protocol, please refer to the note for specific address format
+/// 松下PLC的数据读写类，基于MC协议的实现。
 /// </summary>
 public class PanasonicMcNet : MelsecMcNet
 {

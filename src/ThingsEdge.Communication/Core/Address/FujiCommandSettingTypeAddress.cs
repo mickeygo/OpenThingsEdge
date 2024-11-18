@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
-using ThingsEdge.Communication.HslCommunication;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Core.Address;
 
 /// <summary>
-/// 富士CommandSettingsType的协议信息
+/// 富士CommandSettingsType的协议信息。
 /// </summary>
 public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
 {
@@ -16,7 +17,7 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
     /// <summary>
     /// 地址的头信息，缓存的情况
     /// </summary>
-    public string AddressHeader { get; set; }
+    public string? AddressHeader { get; set; }
 
     /// <inheritdoc />
     public override void Parse(string address, ushort length)
@@ -31,7 +32,7 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
     }
 
     /// <summary>
-    /// 从字符串地址解析fuji的实际地址信息，如果解析成功，则 <see cref="P:HslCommunication.OperateResult.IsSuccess" /> 为 True，取 <see cref="P:HslCommunication.OperateResult`1.Content" /> 值即可。
+    /// 从字符串地址解析fuji的实际地址信息。
     /// </summary>
     /// <param name="address">字符串地址</param>
     /// <param name="length">读取的长度信息</param>
@@ -51,11 +52,11 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
                     return new OperateResult<FujiCommandSettingTypeAddress>(StringResources.Language.NotSupportedDataType);
                 }
                 empty = match.Value;
-                empty2 = address.Substring(empty.Length);
+                empty2 = address[empty.Length..];
             }
             else
             {
-                var array = address.Split(new char[1] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                var array = address.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
                 if (array[0][0] != 'W')
                 {
                     return new OperateResult<FujiCommandSettingTypeAddress>(StringResources.Language.NotSupportedDataType);
@@ -108,9 +109,9 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
                     fujiCommandSettingTypeAddress.DataCode = 8;
                     break;
                 default:
-                    if (empty.StartsWith("W"))
+                    if (empty.StartsWith('W'))
                     {
-                        var num = Convert.ToInt32(empty.Substring(1));
+                        var num = Convert.ToInt32(empty[1..]);
                         if (num == 9)
                         {
                             fujiCommandSettingTypeAddress.DataCode = 9;
@@ -136,9 +137,9 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
                             fujiCommandSettingTypeAddress.DataCode = (byte)num;
                             break;
                         }
-                        throw new Exception(StringResources.Language.NotSupportedDataType);
+                        throw new CommunicationException(StringResources.Language.NotSupportedDataType);
                     }
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
             }
             return OperateResult.CreateSuccessResult(fujiCommandSettingTypeAddress);
         }

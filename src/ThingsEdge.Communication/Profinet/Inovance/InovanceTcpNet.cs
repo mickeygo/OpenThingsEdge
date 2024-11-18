@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using ThingsEdge.Communication.Core;
-using ThingsEdge.Communication.HslCommunication;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.Inovance;

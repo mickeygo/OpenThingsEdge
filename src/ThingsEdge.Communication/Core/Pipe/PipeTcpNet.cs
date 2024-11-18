@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
+using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.IMessage;
-using ThingsEdge.Communication.HslCommunication;
 
 namespace ThingsEdge.Communication.Core.Pipe;
 
@@ -15,14 +15,6 @@ public class PipeTcpNet : CommunicationPipe
     private int[] _port = [2000];
 
     private int _indexPort = -1;
-
-    /// <summary>
-    /// 获取或设置绑定的本地的IP地址和端口号信息，如果端口设置为0，代表任何可用的端口。
-    /// </summary>
-    /// <remarks>
-    /// 默认为NULL, 也即是不绑定任何本地的IP及端口号信息，使用系统自动分配的方式。
-    /// </remarks>
-    public IPEndPoint LocalBinding { get; set; }
 
     /// <summary>
     /// 获取或是设置远程服务器的IP地址，如果是本机测试，那么需要设置为127.0.0.1。
@@ -80,6 +72,9 @@ public class PipeTcpNet : CommunicationPipe
     /// </summary>
     public Socket? Socket { get; protected set; }
 
+    /// <summary>
+    /// 连接超时时间，默认 10s。
+    /// </summary>
     public int ConnectTimeOut { get; set; } = 10_000;
 
     public PipeTcpNet()
@@ -186,6 +181,7 @@ public class PipeTcpNet : CommunicationPipe
         {
             return;
         }
+
         var endResult = Socket.EndReceiveResult(ar);
         if (!endResult.IsSuccess)
         {
@@ -203,14 +199,8 @@ public class PipeTcpNet : CommunicationPipe
         {
             IncrConnectErrorCount();
         }
-        if (DecideWhetherQAMessageFunction != null)
-        {
-            if (DecideWhetherQAMessageFunction(this, receive))
-            {
-                SetBufferQA(receive.Content);
-            }
-        }
-        else
+
+        if (DecideWhetherQAMessageFunction == null || DecideWhetherQAMessageFunction(this, receive))
         {
             SetBufferQA(receive.Content);
         }
@@ -246,14 +236,6 @@ public class PipeTcpNet : CommunicationPipe
     }
 
     /// <inheritdoc />
-    public override async Task<OperateResult> CloseCommunicationAsync()
-    {
-        NetSupport.CloseSocket(Socket);
-        Socket = null;
-        return await Task.FromResult(OperateResult.CreateSuccessResult()).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
     public override async Task<OperateResult> SendAsync(byte[] data, int offset, int size)
     {
         var send = await NetSupport.SocketSendAsync(Socket, data, offset, size).ConfigureAwait(false);
@@ -275,6 +257,14 @@ public class PipeTcpNet : CommunicationPipe
             return new OperateResult<int>(-IncrConnectErrorCount(), "Socket Exception -> " + receive.Message);
         }
         return receive;
+    }
+
+    /// <inheritdoc />
+    public override async Task<OperateResult> CloseCommunicationAsync()
+    {
+        NetSupport.CloseSocket(Socket);
+        Socket = null;
+        return await Task.FromResult(OperateResult.CreateSuccessResult()).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

@@ -14,20 +14,17 @@ public interface INetMessage
     int ProtocolHeadBytesLength { get; }
 
     /// <summary>
-    /// 消息头字节<br />
-    /// Message header byte
+    /// 消息头字节。
     /// </summary>
     byte[] HeadBytes { get; set; }
 
     /// <summary>
-    /// 消息内容字节<br />
-    /// Message content byte
+    /// 消息内容字节。
     /// </summary>
     byte[] ContentBytes { get; set; }
 
     /// <summary>
-    /// 发送的字节信息<br />
-    /// Byte information sent
+    /// 发送的字节信息。
     /// </summary>
     byte[] SendBytes { get; set; }
 
@@ -35,7 +32,8 @@ public interface INetMessage
     /// 从当前的头子节文件中提取出接下来需要接收的数据长度。
     /// </summary>
     /// <remarks>
-    /// 如果剩余字节的长度小于0，则表示消息头数据还没有接收完整，还需要接收一定的长度(返回值的绝对值)，然后再判断剩余字节长度是否小于0，直到结果大于等于0为止，最多判断的次数为16次，超过16次将返回失败。
+    /// 如果剩余字节的长度小于0，则表示消息头数据还没有接收完整，还需要接收一定的长度(返回值的绝对值)，
+    /// 然后再判断剩余字节长度是否小于0，直到结果大于等于0为止，最多判断的次数为16次，超过16次将返回失败。
     /// </remarks>
     /// <returns>返回接下来的数据内容长度</returns>
     int GetContentLengthByHeadBytes();

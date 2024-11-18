@@ -1,5 +1,5 @@
-using ThingsEdge.Communication.BasicFramework;
-using ThingsEdge.Communication.Serial;
+using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Serial;
 
 namespace ThingsEdge.Communication.Secs.Helper;
 
