@@ -7,21 +7,44 @@ namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 /// </summary>
 public interface IHostLinkCMode : IReadWriteNet
 {
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice,System.Byte)" />
-    OperateResult<string> ReadPlcType();
+    /// <summary>
+    /// 读取PLC的当前的型号信息。
+    /// </summary>
+    /// <returns>型号</returns>
+    Task<OperateResult<string>> ReadPlcTypeAsync();
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice,System.Byte)" />
-    OperateResult<string> ReadPlcType(byte unitNumber);
+    /// <summary>
+    /// 读取PLC的当前的型号信息。
+    /// </summary>
+    /// <param name="unitNumber">站号信息</param>
+    /// <returns>型号</returns>
+    Task<OperateResult<string>> ReadPlcTypeAsync(byte unitNumber);
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.ReadPlcMode(HslCommunication.Core.IReadWriteDevice,System.Byte)" />
-    OperateResult<int> ReadPlcMode();
+    /// <summary>
+    ///  读取PLC当前的操作模式，0: 编程模式  1: 运行模式  2: 监视模式。
+    /// </summary>
+    /// <returns>0: 编程模式  1: 运行模式  2: 监视模式</returns>
+    Task<OperateResult<int>> ReadPlcModeAsync();
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.ReadPlcMode(HslCommunication.Core.IReadWriteDevice,System.Byte)" />
-    OperateResult<int> ReadPlcMode(byte unitNumber);
+    /// <summary>
+    ///  读取PLC当前的操作模式，0: 编程模式  1: 运行模式  2: 监视模式。
+    /// </summary>
+    /// <param name="unitNumber">站号信息</param>
+    /// <returns>0: 编程模式  1: 运行模式  2: 监视模式</returns>
+    Task<OperateResult<int>> ReadPlcModeAsync(byte unitNumber);
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.ChangePlcMode(HslCommunication.Core.IReadWriteDevice,System.Byte,System.Byte)" />
-    OperateResult ChangePlcMode(byte mode);
+    /// <summary>
+    /// 将当前PLC的模式变更为指定的模式，0: 编程模式  1: 运行模式  2: 监视模式。
+    /// </summary>
+    /// <param name="mode">0: 编程模式  1: 运行模式  2: 监视模式</param>
+    /// <returns>是否变更成功</returns>
+    Task<OperateResult> ChangePlcMode(byte mode);
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.ChangePlcMode(HslCommunication.Core.IReadWriteDevice,System.Byte,System.Byte)" />
-    OperateResult ChangePlcMode(byte unitNumber, byte mode);
+    /// <summary>
+    /// 将当前PLC的模式变更为指定的模式，0: 编程模式  1: 运行模式  2: 监视模式。
+    /// </summary>
+    /// <param name="unitNumber">站号信息</param>
+    /// <param name="mode">0: 编程模式  1: 运行模式  2: 监视模式</param>
+    /// <returns>是否变更成功</returns>
+    Task<OperateResult> ChangePlcModeAsync(byte unitNumber, byte mode);
 }

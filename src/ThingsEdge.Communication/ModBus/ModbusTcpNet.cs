@@ -19,7 +19,7 @@ namespace ThingsEdge.Communication.ModBus;
 /// </note>
 /// 当读写int, uint, float, double, long, ulong类型的时候，支持动态指定数据格式，也就是 DataFormat 信息。
 /// ReadInt32("format=BADC;100") 指示使用BADC的格式来解析byte数组，从而获得int数据，同时支持和站号信息叠加，例如：ReadInt32("format=BADC;s=2;100")
-/// <list type="definition">
+/// <list type="number">
 /// <item>
 ///     <term>读取线圈</term>
 ///     <description>ReadCoil("100")表示读取线圈100的值，ReadCoil("s=2;100")表示读取站号为2，线圈地址为100的值</description>
@@ -203,7 +203,7 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     {
         if (BroadcastStation >= 0 && send[0] == BroadcastStation)
         {
-            return ReadFromCoreServer(send, hasResponseData: false, usePackAndUnpack: true);
+            return await ReadFromCoreServerAsync(send, hasResponseData: false, usePackAndUnpack: true).ConfigureAwait(false);
         }
         return await base.ReadFromCoreServerAsync(send).ConfigureAwait(false);
     }

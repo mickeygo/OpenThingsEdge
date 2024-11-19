@@ -6,21 +6,17 @@ using ThingsEdge.Communication.Core.IMessage;
 namespace ThingsEdge.Communication.Profinet.Melsec;
 
 /// <summary>
-/// 三菱PLC通讯协议，采用A兼容1E帧协议实现，使用ASCII码通讯，请根据实际型号来进行选取<br />
-/// Mitsubishi PLC communication protocol, implemented using A compatible 1E frame protocol, using ascii code communication, please choose according to the actual model
+/// 三菱PLC通讯协议，采用A兼容1E帧协议实现，使用ASCII码通讯，请根据实际型号来进行选取。
 /// </summary>
-/// <remarks>
-/// <inheritdoc cref="T:HslCommunication.Profinet.Melsec.MelsecA1ENet" path="remarks" />
-/// </remarks>
 public class MelsecA1EAsciiNet : DeviceTcpNet
 {
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Melsec.MelsecA1ENet.PLCNumber" />
+    /// <summary>
+    /// PLC编号，默认为0xFF。
+    /// </summary>
     public byte PLCNumber { get; set; } = byte.MaxValue;
 
-
     /// <summary>
-    /// 实例化一个默认的对象<br />
-    /// Instantiate a default object
+    /// 实例化一个默认的对象。
     /// </summary>
     public MelsecA1EAsciiNet()
     {
@@ -29,8 +25,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     }
 
     /// <summary>
-    /// 指定ip地址和端口来来实例化一个默认的对象<br />
-    /// Specify the IP address and port to instantiate a default object
+    /// 指定ip地址和端口来来实例化一个默认的对象。
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
@@ -41,65 +36,11 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         Port = port;
     }
 
-    /// <inheritdoc />
     protected override INetMessage GetNewNetMessage()
     {
         return new MelsecA1EAsciiMessage();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1ENet.Read(System.String,System.UInt16)" />
-    public override OperateResult<byte[]> Read(string address, ushort length)
-    {
-        var operateResult = BuildReadCommand(address, length, isBit: false, PLCNumber);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult);
-        }
-        var list = new List<byte>();
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            var operateResult2 = ReadFromCoreServer(operateResult.Content[i]);
-            if (!operateResult2.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-            }
-            var operateResult3 = CheckResponseLegal(operateResult2.Content);
-            if (!operateResult3.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-            }
-            var operateResult4 = ExtractActualData(operateResult2.Content, isBit: false);
-            if (!operateResult4.IsSuccess)
-            {
-                return operateResult4;
-            }
-            list.AddRange(operateResult4.Content);
-        }
-        return OperateResult.CreateSuccessResult(list.ToArray());
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1ENet.Write(System.String,System.Byte[])" />
-    public override OperateResult Write(string address, byte[] value)
-    {
-        var operateResult = BuildWriteWordCommand(address, value, PLCNumber);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = CheckResponseLegal(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1EAsciiNet.Read(System.String,System.UInt16)" />
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
         var command = BuildReadCommand(address, length, isBit: false, PLCNumber);
@@ -110,7 +51,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         var array = new List<byte>();
         for (var i = 0; i < command.Content.Count; i++)
         {
-            var read = await ReadFromCoreServerAsync(command.Content[i]);
+            var read = await ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<byte[]>(read);
@@ -130,84 +71,11 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         return OperateResult.CreateSuccessResult(array.ToArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1EAsciiNet.Write(System.String,System.Byte[])" />
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
-    {
-        var command = BuildWriteWordCommand(address, value, PLCNumber);
-        if (!command.IsSuccess)
-        {
-            return command;
-        }
-        var read = await ReadFromCoreServerAsync(command.Content);
-        if (!read.IsSuccess)
-        {
-            return read;
-        }
-        var check = CheckResponseLegal(read.Content);
-        if (!check.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(check);
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1ENet.ReadBool(System.String,System.UInt16)" />
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
-    {
-        if (address.IndexOf('.') > 0)
-        {
-            return CommunicationHelper.ReadBool(this, address, length);
-        }
-        var operateResult = BuildReadCommand(address, length, isBit: true, PLCNumber);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult);
-        }
-        var list = new List<byte>();
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            var operateResult2 = ReadFromCoreServer(operateResult.Content[i]);
-            if (!operateResult2.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<bool[]>(operateResult2);
-            }
-            var operateResult3 = CheckResponseLegal(operateResult2.Content);
-            if (!operateResult3.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<bool[]>(operateResult3);
-            }
-            var operateResult4 = ExtractActualData(operateResult2.Content, isBit: true);
-            if (!operateResult4.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<bool[]>(operateResult4);
-            }
-            list.AddRange(operateResult4.Content);
-        }
-        return OperateResult.CreateSuccessResult(list.Select((m) => m == 1).Take(length).ToArray());
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1ENet.Write(System.String,System.Boolean[])" />
-    public override OperateResult Write(string address, bool[] values)
-    {
-        var operateResult = BuildWriteBoolCommand(address, values, PLCNumber);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        return CheckResponseLegal(operateResult2.Content);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1EAsciiNet.ReadBool(System.String,System.UInt16)" />
     public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(this, address, length);
+            return await CommunicationHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
         }
         var command = BuildReadCommand(address, length, isBit: true, PLCNumber);
         if (!command.IsSuccess)
@@ -217,7 +85,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         var array = new List<byte>();
         for (var i = 0; i < command.Content.Count; i++)
         {
-            var read = await ReadFromCoreServerAsync(command.Content[i]);
+            var read = await ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<bool[]>(read);
@@ -237,7 +105,26 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         return OperateResult.CreateSuccessResult(array.Select((m) => m == 1).Take(length).ToArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA1EAsciiNet.Write(System.String,System.Boolean[])" />
+    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    {
+        var command = BuildWriteWordCommand(address, value, PLCNumber);
+        if (!command.IsSuccess)
+        {
+            return command;
+        }
+        var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
+        if (!read.IsSuccess)
+        {
+            return read;
+        }
+        var check = CheckResponseLegal(read.Content);
+        if (!check.IsSuccess)
+        {
+            return OperateResult.CreateFailedResult<byte[]>(check);
+        }
+        return OperateResult.CreateSuccessResult();
+    }
+
     public override async Task<OperateResult> WriteAsync(string address, bool[] values)
     {
         var command = BuildWriteBoolCommand(address, values, PLCNumber);
@@ -245,18 +132,12 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         {
             return command;
         }
-        var read = await ReadFromCoreServerAsync(command.Content);
+        var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
         }
         return CheckResponseLegal(read.Content);
-    }
-
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"MelsecA1ENet[{IpAddress}:{Port}]";
     }
 
     /// <summary>
@@ -267,13 +148,14 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     /// <param name="isBit">指示是否按照位成批的读出</param>
     /// <param name="plcNumber">PLC编号</param>
     /// <returns>带有成功标志的指令数据</returns>
-    public static OperateResult<List<byte[]>> BuildReadCommand(string address, ushort length, bool isBit, byte plcNumber)
+    private static OperateResult<List<byte[]>> BuildReadCommand(string address, ushort length, bool isBit, byte plcNumber)
     {
         var operateResult = MelsecHelper.McA1EAnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
+
         var value = !isBit ? (byte)1 : (byte)0;
         var array = SoftBasic.SplitIntegerToArray(length, isBit ? 256 : 64);
         var list = new List<byte[]>();
@@ -335,6 +217,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
+
         value = MelsecHelper.TransByteArrayToAsciiByteArray(value);
         var array = new byte[24 + value.Length];
         array[0] = 48;
@@ -372,7 +255,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     /// <param name="value">数据值</param>
     /// <param name="plcNumber">PLC编号</param>
     /// <returns>带有成功标志的指令数据</returns>
-    public static OperateResult<byte[]> BuildWriteBoolCommand(string address, bool[] value, byte plcNumber)
+    private static OperateResult<byte[]> BuildWriteBoolCommand(string address, bool[] value, byte plcNumber)
     {
         var operateResult = MelsecHelper.McA1EAnalysisAddress(address);
         if (!operateResult.IsSuccess)
@@ -418,7 +301,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     /// </summary>
     /// <param name="response">接收的报文</param>
     /// <returns>是否成功</returns>
-    public static OperateResult CheckResponseLegal(byte[] response)
+    private static OperateResult CheckResponseLegal(byte[] response)
     {
         if (response.Length < 4)
         {
@@ -441,7 +324,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     /// <param name="response">反馈的数据内容</param>
     /// <param name="isBit">是否位读取</param>
     /// <returns>解析后的结果对象</returns>
-    public static OperateResult<byte[]> ExtractActualData(byte[] response, bool isBit)
+    private static OperateResult<byte[]> ExtractActualData(byte[] response, bool isBit)
     {
         if (isBit)
         {
@@ -449,5 +332,10 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
                                                       select m != 48 ? (byte)1 : (byte)0).ToArray());
         }
         return OperateResult.CreateSuccessResult(MelsecHelper.TransAsciiByteArrayToByteArray(response.RemoveBegin(4)));
+    }
+
+    public override string ToString()
+    {
+        return $"MelsecA1ENet[{IpAddress}:{Port}]";
     }
 }

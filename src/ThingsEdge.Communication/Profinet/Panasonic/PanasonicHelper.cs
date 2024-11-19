@@ -1,24 +1,15 @@
 using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Profinet.Panasonic;
 
 /// <summary>
 /// 松下PLC的辅助类，提供了基本的辅助方法，用于解析地址，计算校验和，创建报文。
 /// </summary>
-public class PanasonicHelper
+public static class PanasonicHelper
 {
-    private static string CalculateCrc(StringBuilder sb)
-    {
-        byte b = 0;
-        b = (byte)sb[0];
-        for (var i = 1; i < sb.Length; i++)
-        {
-            b ^= (byte)sb[i];
-        }
-        return SoftBasic.ByteToHexString([b]);
-    }
-
+   
     /// <summary>
     /// 位地址转换方法，101等同于10.1等同于10*16+1=161。
     /// </summary>
@@ -27,16 +18,16 @@ public class PanasonicHelper
     /// <returns>实际的位地址信息</returns>
     public static int CalculateComplexAddress(string address, int fromBase = 16)
     {
-        if (address.IndexOf(".") < 0)
+        if (address.IndexOf('.') < 0)
         {
             if (address.Length == 1)
             {
                 return Convert.ToInt32(address, fromBase);
             }
-            return Convert.ToInt32(address.Substring(0, address.Length - 1)) * fromBase + Convert.ToInt32(address.Substring(address.Length - 1), fromBase);
+            return Convert.ToInt32(address[..^1]) * fromBase + Convert.ToInt32(address[^1..], fromBase);
         }
-        var num = Convert.ToInt32(address.Substring(0, address.IndexOf("."))) * fromBase;
-        var bit = address.Substring(address.IndexOf(".") + 1);
+        var num = Convert.ToInt32(address[..address.IndexOf('.')]) * fromBase;
+        var bit = address[(address.IndexOf('.') + 1)..];
         return num + CommunicationHelper.CalculateBitStartIndex(bit);
     }
 
@@ -54,81 +45,81 @@ public class PanasonicHelper
             if (address.StartsWith("IX") || address.StartsWith("ix"))
             {
                 operateResult.Content1 = "IX";
-                operateResult.Content2 = int.Parse(address.Substring(2));
+                operateResult.Content2 = int.Parse(address[2..]);
             }
             else if (address.StartsWith("IY") || address.StartsWith("iy"))
             {
                 operateResult.Content1 = "IY";
-                operateResult.Content2 = int.Parse(address.Substring(2));
+                operateResult.Content2 = int.Parse(address[2..]);
             }
             else if (address.StartsWith("ID") || address.StartsWith("id"))
             {
                 operateResult.Content1 = "ID";
-                operateResult.Content2 = int.Parse(address.Substring(2));
+                operateResult.Content2 = int.Parse(address[2..]);
             }
             else if (address.StartsWith("SR") || address.StartsWith("sr"))
             {
                 operateResult.Content1 = "SR";
-                operateResult.Content2 = CalculateComplexAddress(address.Substring(2));
+                operateResult.Content2 = CalculateComplexAddress(address[2..]);
             }
             else if (address.StartsWith("LD") || address.StartsWith("ld"))
             {
                 operateResult.Content1 = "LD";
-                operateResult.Content2 = int.Parse(address.Substring(2));
+                operateResult.Content2 = int.Parse(address[2..]);
             }
-            else if (address[0] == 'X' || address[0] == 'x')
+            else if (address[0] is 'X' or 'x')
             {
                 operateResult.Content1 = "X";
-                operateResult.Content2 = CalculateComplexAddress(address.Substring(1));
+                operateResult.Content2 = CalculateComplexAddress(address[1..]);
             }
-            else if (address[0] == 'Y' || address[0] == 'y')
+            else if (address[0] is 'Y' or 'y')
             {
                 operateResult.Content1 = "Y";
-                operateResult.Content2 = CalculateComplexAddress(address.Substring(1));
+                operateResult.Content2 = CalculateComplexAddress(address[1..]);
             }
-            else if (address[0] == 'R' || address[0] == 'r')
+            else if (address[0] is 'R' or 'r')
             {
                 operateResult.Content1 = "R";
-                operateResult.Content2 = CalculateComplexAddress(address.Substring(1));
+                operateResult.Content2 = CalculateComplexAddress(address[1..]);
             }
-            else if (address[0] == 'T' || address[0] == 't')
+            else if (address[0] is 'T' or 't')
             {
                 operateResult.Content1 = "T";
-                operateResult.Content2 = int.Parse(address.Substring(1));
+                operateResult.Content2 = int.Parse(address[1..]);
             }
-            else if (address[0] == 'C' || address[0] == 'c')
+            else if (address[0] is 'C' or 'c')
             {
                 operateResult.Content1 = "C";
-                operateResult.Content2 = int.Parse(address.Substring(1));
+                operateResult.Content2 = int.Parse(address[1..]);
             }
-            else if (address[0] == 'L' || address[0] == 'l')
+            else if (address[0] is 'L' or 'l')
             {
                 operateResult.Content1 = "L";
-                operateResult.Content2 = CalculateComplexAddress(address.Substring(1));
+                operateResult.Content2 = CalculateComplexAddress(address[1..]);
             }
-            else if (address[0] == 'D' || address[0] == 'd')
+            else if (address[0] is 'D' or 'd')
             {
                 operateResult.Content1 = "D";
-                operateResult.Content2 = int.Parse(address.Substring(1));
+                operateResult.Content2 = int.Parse(address[1..]);
             }
-            else if (address[0] == 'F' || address[0] == 'f')
+            else if (address[0] is 'F' or 'f')
             {
                 operateResult.Content1 = "F";
-                operateResult.Content2 = int.Parse(address.Substring(1));
+                operateResult.Content2 = int.Parse(address[1..]);
             }
-            else if (address[0] == 'S' || address[0] == 's')
+            else if (address[0] is 'S' or 's')
             {
                 operateResult.Content1 = "S";
-                operateResult.Content2 = int.Parse(address.Substring(1));
+                operateResult.Content2 = int.Parse(address[1..]);
             }
             else
             {
-                if (address[0] != 'K' && address[0] != 'k')
+                if (address[0] is not 'K' and not 'k')
                 {
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
                 }
                 operateResult.Content1 = "K";
-                operateResult.Content2 = int.Parse(address.Substring(1));
+                operateResult.Content2 = int.Parse(address[1..]);
             }
         }
         catch (Exception ex)
@@ -147,14 +138,14 @@ public class PanasonicHelper
     /// <param name="cmd">松下的命令。例如 RCSR100F</param>
     /// <param name="useExpandedHeader">设置是否使用扩展的命令头消息</param>
     /// <returns>原始的字节数组的命令</returns>
-    public static OperateResult<byte[]> PackPanasonicCommand(byte station, string cmd, bool useExpandedHeader)
+    private static byte[] PackPanasonicCommand(byte station, string cmd, bool useExpandedHeader)
     {
         var stringBuilder = new StringBuilder(useExpandedHeader ? "<" : "%");
         stringBuilder.Append(station.ToString("X2"));
         stringBuilder.Append(cmd);
         stringBuilder.Append(CalculateCrc(stringBuilder));
         stringBuilder.Append('\r');
-        return OperateResult.CreateSuccessResult(Encoding.ASCII.GetBytes(stringBuilder.ToString()));
+        return Encoding.ASCII.GetBytes(stringBuilder.ToString());
     }
 
     private static OperateResult AppendCoil(StringBuilder sb, string address)
@@ -165,7 +156,7 @@ public class PanasonicHelper
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
         sb.Append(operateResult.Content1);
-        if (operateResult.Content1 == "X" || operateResult.Content1 == "Y" || operateResult.Content1 == "R" || operateResult.Content1 == "L")
+        if (operateResult.Content1 is "X" or "Y" or "R" or "L")
         {
             sb.Append((operateResult.Content2 / 16).ToString("D3"));
             sb.Append((operateResult.Content2 % 16).ToString("X1"));
@@ -176,15 +167,14 @@ public class PanasonicHelper
             {
                 return new OperateResult<byte[]>(StringResources.Language.NotSupportedDataType);
             }
-            sb.Append("0");
+            sb.Append('0');
             sb.Append(operateResult.Content2.ToString("D3"));
         }
         return OperateResult.CreateSuccessResult();
     }
 
     /// <summary>
-    /// 创建读取离散触点的报文指令<br />
-    /// Create message instructions for reading discrete contacts
+    /// 创建读取离散触点的报文指令。
     /// </summary>
     /// <param name="station">站号信息</param>
     /// <param name="address">地址信息</param>
@@ -199,13 +189,14 @@ public class PanasonicHelper
         {
             return new OperateResult<byte[]>("length must be 1-8");
         }
+
         var stringBuilder = new StringBuilder("#RCS");
         var operateResult = AppendCoil(stringBuilder, address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
-        return PackPanasonicCommand(station, stringBuilder.ToString(), useExpandedHeader: false);
+        return OperateResult.CreateSuccessResult(PackPanasonicCommand(station, stringBuilder.ToString(), false));
     }
 
     /// <summary>
@@ -221,7 +212,7 @@ public class PanasonicHelper
         for (var i = 0; i < list2.Count; i++)
         {
             var stringBuilder = new StringBuilder("#RCP");
-            stringBuilder.Append(list2[i].Length.ToString());
+            stringBuilder.Append(list2[i].Length);
             for (var j = 0; j < list2[i].Length; j++)
             {
                 var operateResult = AppendCoil(stringBuilder, list2[i][j]);
@@ -230,14 +221,13 @@ public class PanasonicHelper
                     return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
                 }
             }
-            list.Add(PackPanasonicCommand(station, stringBuilder.ToString(), useExpandedHeader: false).Content);
+            list.Add(PackPanasonicCommand(station, stringBuilder.ToString(), false));
         }
         return OperateResult.CreateSuccessResult(list);
     }
 
     /// <summary>
-    /// 创建写入离散触点的报文指令<br />
-    /// Create message instructions to write discrete contacts
+    /// 创建写入离散触点的报文指令。
     /// </summary>
     /// <param name="station">站号信息</param>
     /// <param name="address">地址信息</param>
@@ -252,7 +242,7 @@ public class PanasonicHelper
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
         stringBuilder.Append(value ? '1' : '0');
-        return PackPanasonicCommand(station, stringBuilder.ToString(), useExpandedHeader: false);
+        return OperateResult.CreateSuccessResult(PackPanasonicCommand(station, stringBuilder.ToString(), false));
     }
 
     /// <summary>
@@ -276,13 +266,14 @@ public class PanasonicHelper
         {
             return new OperateResult<List<byte[]>>("Parameter address and parameter value, length is not same!");
         }
+
         var list = new List<byte[]>();
         var list2 = SoftBasic.ArraySplitByLength(address, 8);
         var list3 = SoftBasic.ArraySplitByLength(value, 8);
         for (var i = 0; i < list2.Count; i++)
         {
             var stringBuilder = new StringBuilder("#WCP");
-            stringBuilder.Append(list2[i].Length.ToString());
+            stringBuilder.Append(list2[i].Length);
             for (var j = 0; j < list2[i].Length; j++)
             {
                 var operateResult = AppendCoil(stringBuilder, list2[i][j]);
@@ -292,14 +283,13 @@ public class PanasonicHelper
                 }
                 stringBuilder.Append(list3[i][j] ? '1' : '0');
             }
-            list.Add(PackPanasonicCommand(station, stringBuilder.ToString(), useExpandedHeader: false).Content);
+            list.Add(PackPanasonicCommand(station, stringBuilder.ToString(), false));
         }
         return OperateResult.CreateSuccessResult(list);
     }
 
     /// <summary>
-    /// 创建批量读取触点的报文指令<br />
-    /// Create message instructions for batch reading contacts
+    /// 创建批量读取触点的报文指令。
     /// </summary>
     /// <param name="station">站号信息</param>
     /// <param name="address">地址信息</param>
@@ -317,6 +307,7 @@ public class PanasonicHelper
         {
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
+
         var list = new List<byte[]>();
         if (isBit)
         {
@@ -326,7 +317,7 @@ public class PanasonicHelper
             foreach (var num in array)
             {
                 var stringBuilder = new StringBuilder("#");
-                if (operateResult.Content1 == "X" || operateResult.Content1 == "Y" || operateResult.Content1 == "R" || operateResult.Content1 == "L")
+                if (operateResult.Content1 is "X" or "Y" or "R" or "L")
                 {
                     stringBuilder.Append("RCC");
                     stringBuilder.Append(operateResult.Content1);
@@ -335,18 +326,19 @@ public class PanasonicHelper
                     stringBuilder.Append(num2.ToString("D4"));
                     stringBuilder.Append(num3.ToString("D4"));
                     operateResult.Content2 += num;
-                    list.Add(PackPanasonicCommand(station, stringBuilder.ToString(), useExpandedHeader: false).Content);
+                    list.Add(PackPanasonicCommand(station, stringBuilder.ToString(), false));
                     continue;
                 }
                 return new OperateResult<List<byte[]>>("Bit read only support X,Y,R,L");
             }
             return OperateResult.CreateSuccessResult(list);
         }
+
         var array2 = SoftBasic.SplitIntegerToArray(length, 500);
         foreach (var num4 in array2)
         {
             var stringBuilder2 = new StringBuilder("#");
-            if (operateResult.Content1 == "X" || operateResult.Content1 == "Y" || operateResult.Content1 == "R" || operateResult.Content1 == "L")
+            if (operateResult.Content1 is "X" or "Y" or "R" or "L")
             {
                 stringBuilder2.Append("RCC");
                 stringBuilder2.Append(operateResult.Content1);
@@ -356,22 +348,22 @@ public class PanasonicHelper
                 stringBuilder2.Append(num6.ToString("D4"));
                 operateResult.Content2 += num4 * 16;
             }
-            else if (operateResult.Content1 == "D" || operateResult.Content1 == "LD" || operateResult.Content1 == "F")
+            else if (operateResult.Content1 is "D" or "LD" or "F")
             {
                 stringBuilder2.Append("RD");
-                stringBuilder2.Append(operateResult.Content1.Substring(0, 1));
+                stringBuilder2.Append(operateResult.Content1.AsSpan(0, 1));
                 stringBuilder2.Append(operateResult.Content2.ToString("D5"));
                 stringBuilder2.Append((operateResult.Content2 + num4 - 1).ToString("D5"));
                 operateResult.Content2 += num4;
             }
-            else if (operateResult.Content1 == "IX" || operateResult.Content1 == "IY" || operateResult.Content1 == "ID")
+            else if (operateResult.Content1 is "IX" or "IY" or "ID")
             {
                 stringBuilder2.Append("RD");
                 stringBuilder2.Append(operateResult.Content1);
                 stringBuilder2.Append("000000000");
                 operateResult.Content2 += num4;
             }
-            else if (operateResult.Content1 == "C" || operateResult.Content1 == "T")
+            else if (operateResult.Content1 is "C" or "T")
             {
                 stringBuilder2.Append("RS");
                 stringBuilder2.Append(operateResult.Content2.ToString("D4"));
@@ -380,24 +372,23 @@ public class PanasonicHelper
             }
             else
             {
-                if (!(operateResult.Content1 == "K") && !(operateResult.Content1 == "S"))
+                if (operateResult.Content1 is not "K" and not "S")
                 {
                     return new OperateResult<List<byte[]>>(StringResources.Language.NotSupportedDataType);
                 }
-                stringBuilder2.Append("R");
+                stringBuilder2.Append('R');
                 stringBuilder2.Append(operateResult.Content1);
                 stringBuilder2.Append(operateResult.Content2.ToString("D4"));
                 stringBuilder2.Append((operateResult.Content2 + num4 - 1).ToString("D4"));
                 operateResult.Content2 += num4;
             }
-            list.Add(PackPanasonicCommand(station, stringBuilder2.ToString(), num4 > 27).Content);
+            list.Add(PackPanasonicCommand(station, stringBuilder2.ToString(), num4 > 27));
         }
         return OperateResult.CreateSuccessResult(list);
     }
 
     /// <summary>
-    /// 创建批量读取触点的报文指令<br />
-    /// Create message instructions for batch reading contacts
+    /// 创建批量读取触点的报文指令。
     /// </summary>
     /// <param name="station">设备站号</param>
     /// <param name="address">地址信息</param>
@@ -414,10 +405,11 @@ public class PanasonicHelper
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
+
         values = SoftBasic.ArrayExpandToLengthEven(values);
         var num = (short)(values.Length / 2);
         var stringBuilder = new StringBuilder("#");
-        if (operateResult.Content1 == "X" || operateResult.Content1 == "Y" || operateResult.Content1 == "R" || operateResult.Content1 == "L")
+        if (operateResult.Content1 is "X" or "Y" or "R" or "L")
         {
             stringBuilder.Append("WCC");
             stringBuilder.Append(operateResult.Content1);
@@ -426,35 +418,35 @@ public class PanasonicHelper
             stringBuilder.Append(num2.ToString("D4"));
             stringBuilder.Append(num3.ToString("D4"));
         }
-        else if (operateResult.Content1 == "D" || operateResult.Content1 == "LD" || operateResult.Content1 == "F")
+        else if (operateResult.Content1 is "D" or "LD" or "F")
         {
             stringBuilder.Append("WD");
-            stringBuilder.Append(operateResult.Content1.Substring(0, 1));
+            stringBuilder.Append(operateResult.Content1.AsSpan(0, 1));
             stringBuilder.Append(operateResult.Content2.ToString("D5"));
             stringBuilder.Append((operateResult.Content2 + num - 1).ToString("D5"));
         }
-        else if (operateResult.Content1 == "IX" || operateResult.Content1 == "IY" || operateResult.Content1 == "ID")
+        else if (operateResult.Content1 is "IX" or "IY" or "ID")
         {
             stringBuilder.Append("WD");
             stringBuilder.Append(operateResult.Content1);
             stringBuilder.Append(operateResult.Content2.ToString("D9"));
             stringBuilder.Append((operateResult.Content2 + num - 1).ToString("D9"));
         }
-        else if (operateResult.Content1 == "C" || operateResult.Content1 == "T")
+        else if (operateResult.Content1 is "C" or "T")
         {
             stringBuilder.Append("WS");
             stringBuilder.Append(operateResult.Content2.ToString("D4"));
             stringBuilder.Append((operateResult.Content2 + num - 1).ToString("D4"));
         }
-        else if (operateResult.Content1 == "K" || operateResult.Content1 == "S")
+        else if (operateResult.Content1 is "K" or "S")
         {
-            stringBuilder.Append("W");
+            stringBuilder.Append('W');
             stringBuilder.Append(operateResult.Content1);
             stringBuilder.Append(operateResult.Content2.ToString("D4"));
             stringBuilder.Append((operateResult.Content2 + num - 1).ToString("D4"));
         }
         stringBuilder.Append(SoftBasic.ByteToHexString(values));
-        return PackPanasonicCommand(station, stringBuilder.ToString(), stringBuilder.Length > 112);
+        return OperateResult.CreateSuccessResult(PackPanasonicCommand(station, stringBuilder.ToString(), stringBuilder.Length > 112));
     }
 
     /// <summary>
@@ -462,7 +454,7 @@ public class PanasonicHelper
     /// </summary>
     /// <param name="station">站号信息</param>
     /// <returns>读取PLC型号的命令报文信息</returns>
-    public static OperateResult<byte[]> BuildReadPlcModel(byte station)
+    public static byte[] BuildReadPlcModel(byte station)
     {
         var stringBuilder = new StringBuilder("#");
         stringBuilder.Append("RT");
@@ -470,8 +462,7 @@ public class PanasonicHelper
     }
 
     /// <summary>
-    /// 检查从PLC反馈的数据，并返回正确的数据内容<br />
-    /// Check the data feedback from the PLC and return the correct data content
+    /// 检查从PLC反馈的数据，并返回正确的数据内容。
     /// </summary>
     /// <param name="response">反馈信号</param>
     /// <param name="parseData">是否解析数据内容部分</param>
@@ -482,6 +473,7 @@ public class PanasonicHelper
         {
             return new OperateResult<byte[]>(StringResources.Language.PanasonicReceiveLengthMustLargerThan9);
         }
+
         try
         {
             if (response[3] == 36)
@@ -511,8 +503,7 @@ public class PanasonicHelper
     }
 
     /// <summary>
-    /// 检查从PLC反馈的数据，并返回正确的数据内容<br />
-    /// Check the data feedback from the PLC and return the correct data content
+    /// 检查从PLC反馈的数据，并返回正确的数据内容。
     /// </summary>
     /// <param name="response">反馈信号</param>
     /// <returns>是否成功的结果信息</returns>
@@ -536,8 +527,7 @@ public class PanasonicHelper
     }
 
     /// <summary>
-    /// 根据错误码获取到错误描述文本<br />
-    /// Get the error description text according to the error code
+    /// 根据错误码获取到错误描述文本。
     /// </summary>
     /// <param name="err">错误代码</param>
     /// <returns>字符信息</returns>
@@ -584,7 +574,7 @@ public class PanasonicHelper
     }
 
     /// <summary>
-    /// 根据MC的错误码去查找对象描述信息
+    /// 根据MC的错误码去查找对象描述信息。
     /// </summary>
     /// <param name="code">错误码</param>
     /// <returns>描述信息</returns>
@@ -603,5 +593,15 @@ public class PanasonicHelper
             49249 => StringResources.Language.PanasonicMcC061,
             _ => StringResources.Language.MelsecPleaseReferToManualDocument,
         };
+    }
+
+    private static string CalculateCrc(StringBuilder sb)
+    {
+        var b = (byte)sb[0];
+        for (var i = 1; i < sb.Length; i++)
+        {
+            b ^= (byte)sb[i];
+        }
+        return SoftBasic.ByteToHexString([b]);
     }
 }

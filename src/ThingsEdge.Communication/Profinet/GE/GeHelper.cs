@@ -6,11 +6,10 @@ namespace ThingsEdge.Communication.Profinet.GE;
 /// <summary>
 /// GE plc相关的辅助类对象
 /// </summary>
-public class GeHelper
+public static class GeHelper
 {
     /// <summary>
-    /// 构建一个读取数据的报文信息，需要指定操作的数据代码，读取的参数信息<br />
-    /// To construct a message information for reading data, you need to specify the data code of the operation and the parameter information to be read
+    /// 构建一个读取数据的报文信息，需要指定操作的数据代码，读取的参数信息。
     /// </summary>
     /// <param name="id">消息号</param>
     /// <param name="code">操作代码</param>
@@ -82,8 +81,7 @@ public class GeHelper
     }
 
     /// <summary>
-    /// 构建一个读取数据的报文命令，需要指定消息号，读取的 GE 地址信息<br />
-    /// To construct a message command to read data, you need to specify the message number and read GE address information
+    /// 构建一个读取数据的报文命令，需要指定消息号，读取的 GE 地址信息。
     /// </summary>
     /// <param name="id">消息号</param>
     /// <param name="address">GE 的地址</param>
@@ -94,20 +92,18 @@ public class GeHelper
         {
             address.Length /= 2;
         }
-        return BuildReadCoreCommand(id, 4, new byte[5]
-        {
+        return BuildReadCoreCommand(id, 4,
+        [
             address.DataCode,
             BitConverter.GetBytes(address.AddressStart)[0],
             BitConverter.GetBytes(address.AddressStart)[1],
             BitConverter.GetBytes(address.Length)[0],
             BitConverter.GetBytes(address.Length)[1]
-        });
+        ]);
     }
 
     /// <summary>
-    /// 构建一个读取数据的报文命令，需要指定消息号，地址，长度，是否位读取，返回完整的报文信息。<br />
-    /// To construct a message command to read data, you need to specify the message number, 
-    /// address, length, whether to read in bits, and return the complete message information.
+    /// 构建一个读取数据的报文命令，需要指定消息号，地址，长度，是否位读取，返回完整的报文信息。
     /// </summary>
     /// <param name="id">消息号</param>
     /// <param name="address">地址</param>
@@ -124,7 +120,6 @@ public class GeHelper
         return BuildReadCommand(id, operateResult.Content);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.GE.GeHelper.BuildWriteCommand(System.Int64,System.String,System.Byte[])" />
     public static OperateResult<byte[]> BuildWriteCommand(long id, GeSRTPAddress address, byte[] value)
     {
         int num = address.Length;
@@ -162,9 +157,7 @@ public class GeHelper
     }
 
     /// <summary>
-    /// 构建一个批量写入 byte 数组变量的报文，需要指定消息号，写入的地址，地址参照 <see cref="T:HslCommunication.Profinet.GE.GeSRTPNet" /> 说明。<br />
-    /// To construct a message to be written into byte array variables in batches, 
-    /// you need to specify the message number and write address. For the address, refer to the description of <see cref="T:HslCommunication.Profinet.GE.GeSRTPNet" />.
+    /// 构建一个批量写入 byte 数组变量的报文，需要指定消息号，写入的地址。
     /// </summary>
     /// <param name="id">消息的序号</param>
     /// <param name="address">地址信息</param>
@@ -181,9 +174,7 @@ public class GeHelper
     }
 
     /// <summary>
-    /// 构建一个批量写入 bool 数组变量的报文，需要指定消息号，写入的地址，地址参照 <see cref="T:HslCommunication.Profinet.GE.GeSRTPNet" /> 说明。<br />
-    /// To construct a message to be written into bool array variables in batches, 
-    /// you need to specify the message number and write address. For the address, refer to the description of <see cref="T:HslCommunication.Profinet.GE.GeSRTPNet" />.
+    /// 构建一个批量写入 bool 数组变量的报文，需要指定消息号，写入的地址。
     /// </summary>
     /// <param name="id">消息的序号</param>
     /// <param name="address">地址信息</param>
@@ -202,8 +193,7 @@ public class GeHelper
     }
 
     /// <summary>
-    /// 从PLC返回的数据中，提取出实际的数据内容，最少6个字节的数据。超出实际的数据长度的部分没有任何意义。<br />
-    /// From the data returned by the PLC, extract the actual data content, at least 6 bytes of data. The part beyond the actual data length has no meaning.
+    /// 从PLC返回的数据中，提取出实际的数据内容，最少6个字节的数据。超出实际的数据长度的部分没有任何意义。
     /// </summary>
     /// <param name="content">PLC返回的数据信息</param>
     /// <returns>解析后的实际数据内容</returns>
@@ -237,9 +227,7 @@ public class GeHelper
     }
 
     /// <summary>
-    /// 从实际的时间的字节数组里解析出C#格式的时间对象，这个时间可能是时区0的时间，需要自行转化本地时间。<br />
-    /// Analyze the time object in C# format from the actual time byte array. 
-    /// This time may be the time in time zone 0, and you need to convert the local time yourself.
+    /// 从实际的时间的字节数组里解析出C#格式的时间对象，这个时间可能是时区0的时间，需要自行转化本地时间。
     /// </summary>
     /// <param name="content">字节数组</param>
     /// <returns>包含是否成功的结果对象</returns>
@@ -247,7 +235,12 @@ public class GeHelper
     {
         try
         {
-            return OperateResult.CreateSuccessResult(new DateTime(int.Parse(content[5].ToString("X2")) + 2000, int.Parse(content[4].ToString("X2")), int.Parse(content[3].ToString("X2")), int.Parse(content[2].ToString("X2")), int.Parse(content[1].ToString("X2")), int.Parse(content[0].ToString("X2"))));
+            return OperateResult.CreateSuccessResult(new DateTime(int.Parse(content[5].ToString("X2")) + 2000,
+                int.Parse(content[4].ToString("X2")),
+                int.Parse(content[3].ToString("X2")),
+                int.Parse(content[2].ToString("X2")),
+                int.Parse(content[1].ToString("X2")),
+                int.Parse(content[0].ToString("X2"))));
         }
         catch (Exception ex)
         {
@@ -256,8 +249,7 @@ public class GeHelper
     }
 
     /// <summary>
-    /// 从实际的时间的字节数组里解析出PLC的程序的名称。<br />
-    /// Parse the name of the PLC program from the actual time byte array
+    /// 从实际的时间的字节数组里解析出PLC的程序的名称。
     /// </summary>
     /// <param name="content">字节数组</param>
     /// <returns>包含是否成功的结果对象</returns>

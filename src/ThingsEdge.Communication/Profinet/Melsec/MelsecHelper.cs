@@ -1,17 +1,15 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Profinet.Melsec;
 
 /// <summary>
-/// 所有三菱通讯类的通用辅助工具类，包含了一些通用的静态方法，可以使用本类来获取一些原始的报文信息。详细的操作参见例子<br />
-/// All general auxiliary tool classes of Mitsubishi communication class include some general static methods. 
-/// You can use this class to get some primitive message information. See the example for detailed operation
+/// 所有三菱通讯类的通用辅助工具类，包含了一些通用的静态方法，可以使用本类来获取一些原始的报文信息。
 /// </summary>
-public class MelsecHelper
+public static class MelsecHelper
 {
     /// <summary>
-    /// 解析A1E协议数据地址<br />
-    /// Parse A1E protocol data address
+    /// 解析A1E协议数据地址。
     /// </summary>
     /// <param name="address">数据地址</param>
     /// <returns>结果对象</returns>
@@ -22,53 +20,50 @@ public class MelsecHelper
         {
             switch (address[0])
             {
-                case 'T':
-                case 't':
-                    if (address[1] == 'S' || address[1] == 's')
+                case 'T' or 't':
+                    if (address[1] is 'S' or 's')
                     {
                         operateResult.Content1 = MelsecA1EDataType.TS;
                         operateResult.Content2 = Convert.ToInt32(address.Substring(2), MelsecA1EDataType.TS.FromBase);
                         break;
                     }
-                    if (address[1] == 'C' || address[1] == 'c')
+                    if (address[1] is 'C' or 'c')
                     {
                         operateResult.Content1 = MelsecA1EDataType.TC;
                         operateResult.Content2 = Convert.ToInt32(address.Substring(2), MelsecA1EDataType.TC.FromBase);
                         break;
                     }
-                    if (address[1] == 'N' || address[1] == 'n')
+                    if (address[1] is 'N' or 'n')
                     {
                         operateResult.Content1 = MelsecA1EDataType.TN;
                         operateResult.Content2 = Convert.ToInt32(address.Substring(2), MelsecA1EDataType.TN.FromBase);
                         break;
                     }
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
-                case 'C':
-                case 'c':
-                    if (address[1] == 'S' || address[1] == 's')
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
+                case 'C' or 'c':
+                    if (address[1] is 'S' or 's')
                     {
                         operateResult.Content1 = MelsecA1EDataType.CS;
                         operateResult.Content2 = Convert.ToInt32(address.Substring(2), MelsecA1EDataType.CS.FromBase);
                         break;
                     }
-                    if (address[1] == 'C' || address[1] == 'c')
+                    if (address[1] is 'C' or 'c')
                     {
                         operateResult.Content1 = MelsecA1EDataType.CC;
                         operateResult.Content2 = Convert.ToInt32(address.Substring(2), MelsecA1EDataType.CC.FromBase);
                         break;
                     }
-                    if (address[1] == 'N' || address[1] == 'n')
+                    if (address[1] is 'N' or 'n')
                     {
                         operateResult.Content1 = MelsecA1EDataType.CN;
                         operateResult.Content2 = Convert.ToInt32(address.Substring(2), MelsecA1EDataType.CN.FromBase);
                         break;
                     }
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
-                case 'X':
-                case 'x':
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
+                case 'X' or 'x':
                     operateResult.Content1 = MelsecA1EDataType.X;
-                    address = address.Substring(1);
-                    if (address.StartsWith("0"))
+                    address = address[1..];
+                    if (address.StartsWith('0'))
                     {
                         operateResult.Content2 = Convert.ToInt32(address, 8);
                     }
@@ -77,11 +72,10 @@ public class MelsecHelper
                         operateResult.Content2 = Convert.ToInt32(address, MelsecA1EDataType.X.FromBase);
                     }
                     break;
-                case 'Y':
-                case 'y':
+                case 'Y' or 'y':
                     operateResult.Content1 = MelsecA1EDataType.Y;
-                    address = address.Substring(1);
-                    if (address.StartsWith("0"))
+                    address = address[1..];
+                    if (address.StartsWith('0'))
                     {
                         operateResult.Content2 = Convert.ToInt32(address, 8);
                     }
@@ -90,43 +84,36 @@ public class MelsecHelper
                         operateResult.Content2 = Convert.ToInt32(address, MelsecA1EDataType.Y.FromBase);
                     }
                     break;
-                case 'M':
-                case 'm':
+                case 'M' or 'm':
                     operateResult.Content1 = MelsecA1EDataType.M;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.M.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.M.FromBase);
                     break;
-                case 'S':
-                case 's':
+                case 'S' or 's':
                     operateResult.Content1 = MelsecA1EDataType.S;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.S.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.S.FromBase);
                     break;
-                case 'F':
-                case 'f':
+                case 'F' or 'f':
                     operateResult.Content1 = MelsecA1EDataType.F;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.F.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.F.FromBase);
                     break;
-                case 'B':
-                case 'b':
+                case 'B' or 'b':
                     operateResult.Content1 = MelsecA1EDataType.B;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.B.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.B.FromBase);
                     break;
-                case 'D':
-                case 'd':
+                case 'D' or 'd':
                     operateResult.Content1 = MelsecA1EDataType.D;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.D.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.D.FromBase);
                     break;
-                case 'R':
-                case 'r':
+                case 'R' or 'r':
                     operateResult.Content1 = MelsecA1EDataType.R;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.R.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.R.FromBase);
                     break;
-                case 'W':
-                case 'w':
+                case 'W' or 'w':
                     operateResult.Content1 = MelsecA1EDataType.W;
-                    operateResult.Content2 = Convert.ToInt32(address.Substring(1), MelsecA1EDataType.W.FromBase);
+                    operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.W.FromBase);
                     break;
                 default:
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
+                    throw new CommunicationException(StringResources.Language.NotSupportedDataType);
             }
         }
         catch (Exception ex)
@@ -213,7 +200,7 @@ public class MelsecHelper
     }
 
     /// <summary>
-    /// 从三菱的地址中构建MC协议的6字节的ASCII格式的地址
+    /// 从三菱的地址中构建MC协议的6字节的ASCII格式的地址。
     /// </summary>
     /// <param name="address">三菱地址</param>
     /// <param name="type">三菱的数据类型</param>
@@ -221,33 +208,6 @@ public class MelsecHelper
     internal static byte[] BuildBytesFromAddress(int address, MelsecMcDataType type)
     {
         return Encoding.ASCII.GetBytes(address.ToString(type.FromBase == 10 ? "D6" : "X6"));
-    }
-
-    /// <summary>
-    /// 将0，1，0，1的字节数组压缩成三菱格式的字节数组来表示开关量的
-    /// </summary>
-    /// <param name="value">原始的数据字节</param>
-    /// <returns>压缩过后的数据字节</returns>
-    internal static byte[] TransBoolArrayToByteData(byte[] value)
-    {
-        return TransBoolArrayToByteData(value.Select((m) => m != 0).ToArray());
-    }
-
-    internal static bool[] TransByteArrayToBoolData(byte[] value, int offset, int length)
-    {
-        var array = new bool[length > (value.Length - offset) * 2 ? (value.Length - offset) * 2 : length];
-        for (var i = 0; i < array.Length; i++)
-        {
-            if (i % 2 == 0)
-            {
-                array[i] = (value[offset + i / 2] & 0x10) == 16;
-            }
-            else
-            {
-                array[i] = (value[offset + i / 2] & 1) == 1;
-            }
-        }
-        return array;
     }
 
     /// <summary>
@@ -275,10 +235,6 @@ public class MelsecHelper
 
     internal static byte[] TransByteArrayToAsciiByteArray(byte[] value)
     {
-        if (value == null)
-        {
-            return new byte[0];
-        }
         var array = new byte[value.Length * 2];
         for (var i = 0; i < value.Length / 2; i++)
         {
@@ -299,7 +255,7 @@ public class MelsecHelper
     }
 
     /// <summary>
-    /// 计算Fx协议指令的和校验信息
+    /// 计算Fx协议指令的和校验信息。
     /// </summary>
     /// <param name="data">字节数据</param>
     /// <param name="start">起始的索引信息</param>
@@ -323,11 +279,11 @@ public class MelsecHelper
     internal static bool CheckCRC(byte[] data)
     {
         var array = FxCalculateCRC(data);
-        if (array[0] != data[data.Length - 2])
+        if (array[0] != data[^2])
         {
             return false;
         }
-        if (array[1] != data[data.Length - 1])
+        if (array[1] != data[^1])
         {
             return false;
         }

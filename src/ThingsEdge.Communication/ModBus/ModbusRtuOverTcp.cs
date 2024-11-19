@@ -93,7 +93,7 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     {
         if (BroadcastStation >= 0 && send[0] == BroadcastStation)
         {
-            return await ReadFromCoreServerAsync(send, false, true).ConfigureAwait(false);
+            return await ReadFromCoreServerAsync(send, hasResponseData: false, usePackAndUnpack: true).ConfigureAwait(false);
         }
         return await base.ReadFromCoreServerAsync(send).ConfigureAwait(false);
     }
@@ -241,5 +241,10 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     public override string ToString()
     {
         return $"ModbusRtuOverTcp[{IpAddress}:{Port}]";
+    }
+
+    internal OperateResult<string> ReadString(string address, ushort length, Encoding encoding)
+    {
+        throw new NotImplementedException();
     }
 }

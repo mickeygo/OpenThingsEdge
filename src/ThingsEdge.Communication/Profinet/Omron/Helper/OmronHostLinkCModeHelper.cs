@@ -1,5 +1,6 @@
 using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 
@@ -8,41 +9,16 @@ namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 /// </summary>
 public class OmronHostLinkCModeHelper
 {
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Read(System.String,System.UInt16)" />
+    /// <summary>
+    /// 读取数据。
+    /// </summary>
     /// <remarks>
-    /// 地址里可以额外指定单元号信息，例如 s=2;D100
+    /// 地址里可以额外指定单元号信息，例如 s=2;D100。
     /// </remarks>
-    public static OperateResult<byte[]> Read(IReadWriteDevice omron, byte unitNumber, string address, ushort length)
-    {
-        var unitNumber2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
-        var operateResult = BuildReadCommand(address, length, isBit: false);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult);
-        }
-        var list = new List<byte>();
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            OperateResult<byte[]> operateResult2 = omron.ReadFromCoreServer(PackCommand(operateResult.Content[i], unitNumber2));
-            if (!operateResult2.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-            }
-            var operateResult3 = ResponseValidAnalysis(operateResult2.Content, isRead: true);
-            if (!operateResult3.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-            }
-            list.AddRange(operateResult3.Content);
-        }
-        return OperateResult.CreateSuccessResult(list.ToArray());
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.Read(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice omron, byte unitNumber, string address, ushort length)
     {
         var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
-        var command = BuildReadCommand(address, length, isBit: false);
+        var command = BuildReadCommand(address, length);
         if (!command.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(command);
@@ -50,7 +26,7 @@ public class OmronHostLinkCModeHelper
         var array = new List<byte>();
         for (var i = 0; i < command.Content.Count; i++)
         {
-            var read = await omron.ReadFromCoreServerAsync(PackCommand(command.Content[i], station));
+            var read = await omron.ReadFromCoreServerAsync(PackCommand(command.Content[i], station)).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<byte[]>(read);
@@ -65,35 +41,12 @@ public class OmronHostLinkCModeHelper
         return OperateResult.CreateSuccessResult(array.ToArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronFinsNet.Write(System.String,System.Byte[])" />
+    /// <summary>
+    /// 写入数据。
+    /// </summary>
     /// <remarks>
-    /// 地址里可以额外指定单元号信息，例如 s=2;D100
+    /// 地址里可以额外指定单元号信息，例如 s=2;D100。
     /// </remarks>
-    public static OperateResult Write(IReadWriteDevice omron, byte unitNumber, string address, byte[] value)
-    {
-        var unitNumber2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
-        var operateResult = BuildWriteWordCommand(address, value);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            OperateResult<byte[]> operateResult2 = omron.ReadFromCoreServer(PackCommand(operateResult.Content[i], unitNumber2));
-            if (!operateResult2.IsSuccess)
-            {
-                return operateResult2;
-            }
-            var operateResult3 = ResponseValidAnalysis(operateResult2.Content, isRead: false);
-            if (!operateResult3.IsSuccess)
-            {
-                return operateResult3;
-            }
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.Helper.OmronHostLinkCModeHelper.Write(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String,System.Byte[])" />
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice omron, byte unitNumber, string address, byte[] value)
     {
         var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
@@ -102,9 +55,10 @@ public class OmronHostLinkCModeHelper
         {
             return command;
         }
+
         for (var i = 0; i < command.Content.Count; i++)
         {
-            var read = await omron.ReadFromCoreServerAsync(PackCommand(command.Content[i], station));
+            var read = await omron.ReadFromCoreServerAsync(PackCommand(command.Content[i], station)).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return read;
@@ -119,15 +73,14 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// <b>[商业授权]</b> 读取PLC的当前的型号信息<br />
-    /// <b>[Authorization]</b> Read the current model information of the PLC
+    /// 读取PLC的当前的型号信息。
     /// </summary>
     /// <param name="omron">PLC连接对象</param>
     /// <param name="unitNumber">站号信息</param>
     /// <returns>型号</returns>
-    public static OperateResult<string> ReadPlcType(IReadWriteDevice omron, byte unitNumber)
+    public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteDevice omron, byte unitNumber)
     {
-        OperateResult<byte[]> operateResult = omron.ReadFromCoreServer(PackCommand(Encoding.ASCII.GetBytes("MM"), unitNumber));
+        var operateResult = await omron.ReadFromCoreServerAsync(PackCommand(Encoding.ASCII.GetBytes("MM"), unitNumber)).ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<string>(operateResult);
@@ -142,15 +95,14 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// <b>[商业授权]</b> 读取PLC当前的操作模式，0: 编程模式  1: 运行模式  2: 监视模式<br />
-    /// <b>[Authorization]</b> Reads the Operation mode of the CPU Unit. 0: PROGRAM mode  1: RUN mode  2: MONITOR mode
+    ///  读取PLC当前的操作模式，0: 编程模式  1: 运行模式  2: 监视模式。
     /// </summary>
     /// <param name="omron">PLC连接对象</param>
     /// <param name="unitNumber">站号信息</param>
     /// <returns>0: 编程模式  1: 运行模式  2: 监视模式</returns>
-    public static OperateResult<int> ReadPlcMode(IReadWriteDevice omron, byte unitNumber)
+    public static async Task<OperateResult<int>> ReadPlcModeAsync(IReadWriteDevice omron, byte unitNumber)
     {
-        OperateResult<byte[]> operateResult = omron.ReadFromCoreServer(PackCommand(Encoding.ASCII.GetBytes("MS"), unitNumber));
+        OperateResult<byte[]> operateResult = await omron.ReadFromCoreServerAsync(PackCommand(Encoding.ASCII.GetBytes("MS"), unitNumber)).ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<int>(operateResult);
@@ -165,16 +117,15 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// <b>[商业授权]</b> 将当前PLC的模式变更为指定的模式，0: 编程模式  1: 运行模式  2: 监视模式<br />
-    /// <b>[Authorization]</b> Change the current PLC mode to the specified mode, 0: programming mode 1: running mode 2: monitoring mode
+    /// 将当前PLC的模式变更为指定的模式，0: 编程模式  1: 运行模式  2: 监视模式。
     /// </summary>
     /// <param name="omron">PLC连接对象</param>
     /// <param name="unitNumber">站号信息</param>
     /// <param name="mode">0: 编程模式  1: 运行模式  2: 监视模式</param>
     /// <returns>是否变更成功</returns>
-    public static OperateResult ChangePlcMode(IReadWriteDevice omron, byte unitNumber, byte mode)
+    public static async Task<OperateResult> ChangePlcModeAsync(IReadWriteDevice omron, byte unitNumber, byte mode)
     {
-        OperateResult<byte[]> operateResult = omron.ReadFromCoreServer(PackCommand(Encoding.ASCII.GetBytes("SC" + mode.ToString("X2")), unitNumber));
+        var operateResult = await omron.ReadFromCoreServerAsync(PackCommand(Encoding.ASCII.GetBytes("SC" + mode.ToString("X2")), unitNumber)).ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<int>(operateResult);
@@ -190,74 +141,61 @@ public class OmronHostLinkCModeHelper
     private static OperateResult<string, int> GetEMAddress(string address, int start, bool isRead)
     {
         var array = address.SplitDot();
-        var num = Convert.ToInt32(array[0].Substring(start), 16);
+        var num = Convert.ToInt32(array[0][start..], 16);
         return OperateResult.CreateSuccessResult((isRead ? "RE" : "WE") + Encoding.ASCII.GetString(SoftBasic.BuildAsciiBytesFrom((byte)num)), (int)ushort.Parse(array[1]));
     }
 
     /// <summary>
-    /// 解析欧姆龙的数据地址，参考来源是Omron手册第188页，比如D100， E1.100<br />
-    /// Analyze Omron's data address, the reference source is page 188 of the Omron manual, such as D100, E1.100
+    /// 解析欧姆龙的数据地址，参考来源是Omron手册第188页，比如D100， E1.100。
     /// </summary>
     /// <param name="address">数据地址</param>
-    /// <param name="isBit">是否是位地址</param>
     /// <param name="isRead">是否读取</param>
     /// <returns>解析后的结果地址对象</returns>
-    public static OperateResult<string, int> AnalysisAddress(string address, bool isBit, bool isRead)
+    private static OperateResult<string, int> AnalysisAddress(string address, bool isRead)
     {
         try
         {
             if (address.StartsWith("DM", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RD" : "WD", (int)ushort.Parse(address.Substring(2)));
+                return OperateResult.CreateSuccessResult(isRead ? "RD" : "WD", (int)ushort.Parse(address[2..]));
             }
             if (address.StartsWith("LR", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RL" : "WL", (int)ushort.Parse(address.Substring(2)));
+                return OperateResult.CreateSuccessResult(isRead ? "RL" : "WL", (int)ushort.Parse(address[2..]));
             }
             if (address.StartsWith("HR", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RH" : "WH", (int)ushort.Parse(address.Substring(2)));
+                return OperateResult.CreateSuccessResult(isRead ? "RH" : "WH", (int)ushort.Parse(address[2..]));
             }
             if (address.StartsWith("AR", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RJ" : "WJ", (int)ushort.Parse(address.Substring(2)));
+                return OperateResult.CreateSuccessResult(isRead ? "RJ" : "WJ", (int)ushort.Parse(address[2..]));
             }
             if (address.StartsWith("CIO", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RR" : "WR", (int)ushort.Parse(address.Substring(3)));
+                return OperateResult.CreateSuccessResult(isRead ? "RR" : "WR", (int)ushort.Parse(address[3..]));
             }
             if (address.StartsWith("TIM", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RC" : "WC", (int)ushort.Parse(address.Substring(3)));
+                return OperateResult.CreateSuccessResult(isRead ? "RC" : "WC", (int)ushort.Parse(address[3..]));
             }
             if (address.StartsWith("CNT", StringComparison.OrdinalIgnoreCase))
             {
-                return OperateResult.CreateSuccessResult(isRead ? "RC" : "WC", ushort.Parse(address.Substring(3)) + 2048);
+                return OperateResult.CreateSuccessResult(isRead ? "RC" : "WC", ushort.Parse(address[3..]) + 2048);
             }
             if (address.StartsWith("EM", StringComparison.OrdinalIgnoreCase))
             {
                 return GetEMAddress(address, 2, isRead);
             }
-            switch (address[0])
+            return address[0] switch
             {
-                case 'D':
-                case 'd':
-                    return OperateResult.CreateSuccessResult(isRead ? "RD" : "WD", (int)ushort.Parse(address.Substring(1)));
-                case 'C':
-                case 'c':
-                    return OperateResult.CreateSuccessResult(isRead ? "RR" : "WR", (int)ushort.Parse(address.Substring(1)));
-                case 'H':
-                case 'h':
-                    return OperateResult.CreateSuccessResult(isRead ? "RH" : "WH", (int)ushort.Parse(address.Substring(1)));
-                case 'A':
-                case 'a':
-                    return OperateResult.CreateSuccessResult(isRead ? "RJ" : "WJ", (int)ushort.Parse(address.Substring(1)));
-                case 'E':
-                case 'e':
-                    return GetEMAddress(address, 1, isRead);
-                default:
-                    throw new Exception(StringResources.Language.NotSupportedDataType);
-            }
+                'D' or 'd' => OperateResult.CreateSuccessResult(isRead ? "RD" : "WD", (int)ushort.Parse(address[1..])),
+                'C' or 'c' => OperateResult.CreateSuccessResult(isRead ? "RR" : "WR", (int)ushort.Parse(address[1..])),
+                'H' or 'h' => OperateResult.CreateSuccessResult(isRead ? "RH" : "WH", (int)ushort.Parse(address[1..])),
+                'A' or 'a' => OperateResult.CreateSuccessResult(isRead ? "RJ" : "WJ", (int)ushort.Parse(address[1..])),
+                'E' or 'e' => GetEMAddress(address, 1, isRead),
+                _ => throw new CommunicationException(StringResources.Language.NotSupportedDataType),
+            };
         }
         catch (Exception ex)
         {
@@ -266,20 +204,19 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文<br />
-    /// According to the read address, length, whether to read the core message that creates the Fins protocol
+    /// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文。
     /// </summary>
     /// <param name="address">地址，具体格式请参照示例说明</param>
     /// <param name="length">读取的数据长度</param>
-    /// <param name="isBit">是否使用位读取</param>
     /// <returns>带有成功标识的Fins核心报文</returns>
-    public static OperateResult<List<byte[]>> BuildReadCommand(string address, ushort length, bool isBit)
+    private static OperateResult<List<byte[]>> BuildReadCommand(string address, ushort length)
     {
-        var operateResult = AnalysisAddress(address, isBit, isRead: true);
+        var operateResult = AnalysisAddress(address, isRead: true);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
+
         var array = SoftBasic.SplitIntegerToArray(length, 30);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
@@ -295,19 +232,19 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文<br />
-    /// According to the read address, length, whether to read the core message that creates the Fins protocol
+    /// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文。
     /// </summary>
     /// <param name="address">地址，具体格式请参照示例说明</param>
     /// <param name="value">等待写入的数据</param>
     /// <returns>带有成功标识的Fins核心报文</returns>
-    public static OperateResult<List<byte[]>> BuildWriteWordCommand(string address, byte[] value)
+    private static OperateResult<List<byte[]>> BuildWriteWordCommand(string address, byte[] value)
     {
-        var operateResult = AnalysisAddress(address, isBit: false, isRead: false);
+        var operateResult = AnalysisAddress(address, false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
+
         var list = SoftBasic.ArraySplitByLength(value, 60);
         var list2 = new List<byte[]>();
         for (var i = 0; i < list.Count; i++)
@@ -326,19 +263,19 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// 验证欧姆龙的Fins-TCP返回的数据是否正确的数据，如果正确的话，并返回所有的数据内容
+    /// 验证欧姆龙的Fins-TCP返回的数据是否正确的数据，如果正确的话，并返回所有的数据内容。
     /// </summary>
     /// <param name="response">来自欧姆龙返回的数据内容</param>
     /// <param name="isRead">是否读取</param>
     /// <returns>带有是否成功的结果对象</returns>
-    public static OperateResult<byte[]> ResponseValidAnalysis(byte[] response, bool isRead)
+    private static OperateResult<byte[]> ResponseValidAnalysis(byte[] response, bool isRead)
     {
         if (response.Length >= 11)
         {
             try
             {
                 var num = Convert.ToInt32(Encoding.ASCII.GetString(response, 5, 2), 16);
-                byte[] array = null;
+                byte[] array = [];
                 if (response.Length > 11)
                 {
                     array = Encoding.ASCII.GetString(response, 7, response.Length - 11).ToHexBytes();
@@ -368,22 +305,22 @@ public class OmronHostLinkCModeHelper
     /// <param name="cmd">fins指令</param>
     /// <param name="unitNumber">站号信息</param>
     /// <returns>完整的质量</returns>
-    public static byte[] PackCommand(byte[] cmd, byte unitNumber)
+    private static byte[] PackCommand(byte[] cmd, byte unitNumber)
     {
         var array = new byte[7 + cmd.Length];
         array[0] = 64;
         array[1] = SoftBasic.BuildAsciiBytesFrom(unitNumber)[0];
         array[2] = SoftBasic.BuildAsciiBytesFrom(unitNumber)[1];
-        array[array.Length - 2] = 42;
-        array[array.Length - 1] = 13;
+        array[^2] = 42;
+        array[^1] = 13;
         cmd.CopyTo(array, 3);
         int num = array[0];
         for (var i = 1; i < array.Length - 4; i++)
         {
             num ^= array[i];
         }
-        array[array.Length - 4] = SoftBasic.BuildAsciiBytesFrom((byte)num)[0];
-        array[array.Length - 3] = SoftBasic.BuildAsciiBytesFrom((byte)num)[1];
+        array[^4] = SoftBasic.BuildAsciiBytesFrom((byte)num)[0];
+        array[^3] = SoftBasic.BuildAsciiBytesFrom((byte)num)[1];
         return array;
     }
 
@@ -392,7 +329,7 @@ public class OmronHostLinkCModeHelper
     /// </summary>
     /// <param name="model">型号代码</param>
     /// <returns>是否解析成功</returns>
-    public static OperateResult<string> GetModelText(string model)
+    private static OperateResult<string> GetModelText(string model)
     {
         return model switch
         {
@@ -418,12 +355,11 @@ public class OmronHostLinkCModeHelper
     }
 
     /// <summary>
-    /// 根据错误码的信息，返回错误的具体描述的文本<br />
-    /// According to the information of the error code, return the text of the specific description of the error
+    /// 根据错误码的信息，返回错误的具体描述的文本。
     /// </summary>
     /// <param name="err">错误码</param>
     /// <returns>错误的描述文本</returns>
-    public static string GetErrorMessage(int err)
+    private static string GetErrorMessage(int err)
     {
         return err switch
         {

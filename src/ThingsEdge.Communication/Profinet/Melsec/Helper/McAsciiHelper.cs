@@ -4,9 +4,9 @@ using ThingsEdge.Communication.Core.Address;
 namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 
 /// <summary>
-/// 基于MC协议的ASCII格式的辅助类
+/// 基于MC协议的ASCII格式的辅助类。
 /// </summary>
-public class McAsciiHelper
+public static class McAsciiHelper
 {
     /// <summary>
     /// 将MC协议的核心报文打包成一个可以直接对PLC进行发送的原始报文
@@ -66,7 +66,7 @@ public class McAsciiHelper
     /// <returns>是否正确</returns>
     public static OperateResult CheckResponseContent(byte[] content)
     {
-        if (content == null || content.Length < 22)
+        if (content.Length < 22)
         {
             return new OperateResult(StringResources.Language.ReceiveDataLengthTooShort + "22, Content: " + SoftBasic.GetAsciiStringRender(content));
         }
@@ -86,8 +86,8 @@ public class McAsciiHelper
     /// <returns>带有成功标识的报文对象</returns>
     public static byte[] BuildAsciiReadMcCoreCommand(McAddressData addressData, bool isBit)
     {
-        return new byte[20]
-        {
+        return
+        [
             48,
             52,
             48,
@@ -108,7 +108,7 @@ public class McAsciiHelper
             SoftBasic.BuildAsciiBytesFrom(addressData.Length)[1],
             SoftBasic.BuildAsciiBytesFrom(addressData.Length)[2],
             SoftBasic.BuildAsciiBytesFrom(addressData.Length)[3]
-        };
+        ];
     }
 
     /// <summary>
@@ -120,8 +120,8 @@ public class McAsciiHelper
     /// <returns>带有成功标识的报文对象</returns>
     public static byte[] BuildAsciiReadMcCoreExtendCommand(McAddressData addressData, ushort extend, bool isBit)
     {
-        return new byte[32]
-        {
+        return
+        [
             48,
             52,
             48,
@@ -154,7 +154,7 @@ public class McAsciiHelper
             SoftBasic.BuildAsciiBytesFrom(addressData.Length)[1],
             SoftBasic.BuildAsciiBytesFrom(addressData.Length)[2],
             SoftBasic.BuildAsciiBytesFrom(addressData.Length)[3]
-        };
+        ];
     }
 
     /// <summary>
@@ -199,10 +199,6 @@ public class McAsciiHelper
     /// <returns>带有成功标识的报文对象</returns>
     public static byte[] BuildAsciiWriteBitCoreCommand(McAddressData addressData, bool[] value)
     {
-        if (value == null)
-        {
-            value = new bool[0];
-        }
         var array = value.Select((m) => (byte)(m ? 49 : 48)).ToArray();
         var array2 = new byte[20 + array.Length];
         array2[0] = 49;
@@ -301,7 +297,6 @@ public class McAsciiHelper
         return array;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.McBinaryHelper.BuildReadMemoryCommand(System.String,System.UInt16)" />
     public static OperateResult<byte[]> BuildAsciiReadMemoryCommand(string address, ushort length)
     {
         try
@@ -322,7 +317,6 @@ public class McAsciiHelper
         }
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.McBinaryHelper.BuildReadSmartModule(System.UInt16,System.String,System.UInt16)" />
     public static OperateResult<byte[]> BuildAsciiReadSmartModule(ushort module, string address, ushort length)
     {
         try

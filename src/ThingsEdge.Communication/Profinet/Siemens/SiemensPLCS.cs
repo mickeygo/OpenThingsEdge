@@ -33,5 +33,5 @@ public enum SiemensPLCS
     /// <summary>
     /// 200系统，需要额外配置以太网模块
     /// </summary>
-    S200
+    S200,
 }

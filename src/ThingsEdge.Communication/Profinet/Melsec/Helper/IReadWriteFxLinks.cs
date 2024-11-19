@@ -8,14 +8,12 @@ namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 public interface IReadWriteFxLinks : IReadWriteDevice, IReadWriteNet
 {
     /// <summary>
-    /// PLC的当前的站号，需要根据实际的值来设定，默认是0<br />
-    /// The current station number of the PLC needs to be set according to the actual value. The default is 0.
+    /// PLC的当前的站号，需要根据实际的值来设定，默认是0。
     /// </summary>
     byte Station { get; set; }
 
     /// <summary>
-    /// 报文等待时间，单位10ms，设置范围为0-15<br />
-    /// Message waiting time, unit is 10ms, setting range is 0-15
+    /// 报文等待时间，单位10ms，设置范围为0-15。
     /// </summary>
     byte WaittingTime { get; set; }
 
@@ -26,17 +24,28 @@ public interface IReadWriteFxLinks : IReadWriteDevice, IReadWriteNet
     bool SumCheck { get; set; }
 
     /// <summary>
-    /// 当前的PLC的Fxlinks协议格式，通常是格式1，或是格式4，所以此处可以设置1，或者是4<br />
-    /// The current PLC Fxlinks protocol format is usually format 1 or format 4, so it can be set to 1 or 4 here
+    /// 当前的PLC的Fxlinks协议格式，通常是格式1，或是格式4，所以此处可以设置1，或者是4。
     /// </summary>
     int Format { get; set; }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxLinksOverTcp.StartPLC(System.String)" />
-    OperateResult StartPLC(string parameter = "");
+    /// <summary>
+    /// 启动PLC的操作，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。
+    /// </summary>
+    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
+    /// <returns>是否启动成功</returns>
+    Task<OperateResult> StartPLCAsync(string parameter = "");
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxLinksOverTcp.StopPLC(System.String)" />
-    OperateResult StopPLC(string parameter = "");
+    /// <summary>
+    /// 停止PLC的操作，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。
+    /// </summary>
+    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
+    /// <returns>是否停止成功</returns>
+    Task<OperateResult> StopPLCAsync(string parameter = "");
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxLinksOverTcp.ReadPlcType(System.String)" />
-    OperateResult<string> ReadPlcType(string parameter = "");
+    /// <summary>
+    /// 读取PLC的型号信息，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。
+    /// </summary>
+    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
+    /// <returns>带PLC型号的结果信息</returns>
+    Task<OperateResult<string>> ReadPlcTypeAsync(string parameter = "");
 }

@@ -167,38 +167,6 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         return array;
     }
 
-    /// <inheritdoc />
-    protected override OperateResult InitializationOnConnect()
-    {
-        var operateResult = ReadFromCoreServer(CommunicationPipe, _handSingle, hasResponseData: true, usePackAndUnpack: false);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var num = BitConverter.ToInt32(
-        [
-            operateResult.Content![15],
-            operateResult.Content[14],
-            operateResult.Content[13],
-            operateResult.Content[12]
-        ], 0);
-        if (num != 0)
-        {
-            return new OperateResult(num, OmronFinsNetHelper.GetStatusDescription(num));
-        }
-        if (operateResult.Content.Length >= 20)
-        {
-            SA1 = operateResult.Content[19];
-        }
-        if (operateResult.Content.Length >= 24)
-        {
-            DA1 = operateResult.Content[23];
-        }
-        _incrementSID.ResetStartValue(0L);
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
         var read = await ReadFromCoreServerAsync(CommunicationPipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);

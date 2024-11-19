@@ -108,29 +108,11 @@ public class ModbusRtu : DeviceSerialPort, IModbus, IReadWriteDevice, IReadWrite
     /// 需要注意的是，本方法的发送和接收都只需要输入Modbus核心报文，例如读取寄存器0的字数据 01 03 00 00 00 01，最后面两个字节的CRC是自动添加的，
     /// 收到的数据也是只有modbus核心报文，例如：01 03 02 00 00 , 已经成功校验CRC校验并移除了，所以在解析的时候需要注意。
     /// </remarks>
-    public override OperateResult<byte[]> ReadFromCoreServer(byte[] send)
-    {
-        if (BroadcastStation >= 0 && send[0] == BroadcastStation)
-        {
-            return ReadFromCoreServer(send, hasResponseData: false, usePackAndUnpack: true);
-        }
-        return base.ReadFromCoreServer(send);
-    }
-
-    /// <summary>
-    /// 将Modbus报文数据发送到当前的通道中，并从通道中接收Modbus的报文，通道将根据当前连接自动获取，本方法是线程安全的。
-    /// </summary>
-    /// <param name="send">发送的完整的报文信息</param>
-    /// <returns>接收到的Modbus报文信息</returns>
-    /// <remarks>
-    /// 需要注意的是，本方法的发送和接收都只需要输入Modbus核心报文，例如读取寄存器0的字数据 01 03 00 00 00 01，最后面两个字节的CRC是自动添加的，
-    /// 收到的数据也是只有modbus核心报文，例如：01 03 02 00 00 , 已经成功校验CRC校验并移除了，所以在解析的时候需要注意。
-    /// </remarks>
     public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send)
     {
         if (BroadcastStation >= 0 && send[0] == BroadcastStation)
         {
-            return ReadFromCoreServer(send, hasResponseData: false, usePackAndUnpack: true);
+            return await ReadFromCoreServerAsync(send, hasResponseData: false, usePackAndUnpack: true).ConfigureAwait(false);
         }
         return await base.ReadFromCoreServerAsync(send).ConfigureAwait(false);
     }

@@ -8,8 +8,7 @@ namespace ThingsEdge.Communication.Profinet.Delta;
 public interface IDelta : IReadWriteDevice, IReadWriteNet
 {
     /// <summary>
-    /// 获取或设置当前的台达PLC的系列信息，默认为 DVP 系列<br />
-    /// Get or set the current series information of Delta PLC, the default is DVP series
+    /// 获取或设置当前的台达PLC的系列信息，默认为 DVP 系列。
     /// </summary>
     DeltaSeries Series { get; set; }
 }

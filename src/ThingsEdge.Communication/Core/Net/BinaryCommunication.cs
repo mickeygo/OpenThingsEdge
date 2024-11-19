@@ -17,7 +17,7 @@ public class BinaryCommunication
     /// 内置了<see cref="PipeTcpNet" />管道，<see cref="PipeUdpNet" />管道，<see cref="PipeSerialPort" />管道等。
     /// </summary>
     [NotNull]
-    public CommunicationPipe? CommunicationPipe { get; init; }
+    public CommunicationPipe? CommunicationPipe { get; set; }
 
     /// <summary>
     /// 组件的日志工具。
@@ -80,20 +80,6 @@ public class BinaryCommunication
     protected virtual bool DecideWhetherQAMessage(CommunicationPipe pipe, OperateResult<byte[]> receive)
     {
         return true;
-    }
-
-    /// <summary>
-    /// 根据实际的协议选择是否重写本方法，有些协议在创建连接之后，需要进行一些初始化的信号握手，才能最终建立网络通道。
-    /// </summary>
-    /// <returns>是否初始化成功，依据具体的协议进行重写</returns>
-    protected virtual OperateResult InitializationOnConnect()
-    {
-        if (CommunicationPipe.UseServerActivePush)
-        {
-            CommunicationPipe.DecideWhetherQAMessageFunction = DecideWhetherQAMessage;
-            CommunicationPipe.StartReceiveBackground(GetNewNetMessage());
-        }
-        return OperateResult.CreateSuccessResult();
     }
 
     /// <summary>

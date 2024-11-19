@@ -18,7 +18,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
     /// <summary>
     /// 当前产品的型号信息。
     /// </summary>
-    public string ProductName { get; private set; }
+    public string? ProductName { get; private set; }
 
     /// <summary>
     /// 获取或设置不通信时超时的时间，默认02，为 32 秒，设置06 时为8分多，计算方法为 (2的x次方乘以8) 的秒数。
@@ -26,24 +26,16 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
     public byte ConnectionTimeoutMultiplier { get; set; } = 2;
 
     /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public OmronConnectedCipNet()
-    {
-        WordLength = 2;
-        ByteTransform = new RegularByteTransform();
-    }
-
-    /// <summary>
     /// 根据指定的IP及端口来实例化这个连接对象
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口号信息</param>
     public OmronConnectedCipNet(string ipAddress, int port = 44818)
-        : this()
     {
         IpAddress = ipAddress;
         Port = port;
+        WordLength = 2;
+        ByteTransform = new RegularByteTransform();
     }
 
     /// <inheritdoc />
@@ -61,35 +53,15 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
     }
 
     /// <inheritdoc />
-    protected override OperateResult InitializationOnConnect()
-    {
-        var operateResult = base.InitializationOnConnect();
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        if (operateResult2.Content.Length > 59 && operateResult2.Content.Length >= 59 + operateResult2.Content[58])
-        {
-            ProductName = Encoding.UTF8.GetString(operateResult2.Content, 59, operateResult2.Content[58]);
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var ini = await base.InitializationOnConnectAsync().ConfigureAwait(continueOnCapturedContext: false);
+        var ini = await base.InitializationOnConnectAsync().ConfigureAwait(false);
         if (!ini.IsSuccess)
         {
             return ini;
         }
 
-        var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -99,56 +71,6 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
             ProductName = Encoding.UTF8.GetString(read.Content, 59, read.Content[58]);
         }
         return OperateResult.CreateSuccessResult();
-    }
-
-    private static byte[] GetAttributeAll()
-    {
-        return "00 00 00 00 00 00 02 00 00 00 00 00 b2 00 06 00 01 02 20 01 24 01".ToHexBytes();
-    }
-
-    private OperateResult<byte[]> BuildReadCommand(string[] address, ushort[] length)
-    {
-        try
-        {
-            var list = new List<byte[]>();
-            for (var i = 0; i < address.Length; i++)
-            {
-                list.Add(AllenBradleyHelper.PackRequsetRead(address[i], length[i], isConnectedAddress: true));
-            }
-            return OperateResult.CreateSuccessResult(PackCommandService(list.ToArray()));
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<byte[]>("Address Wrong:" + ex.Message);
-        }
-    }
-
-    private OperateResult<byte[]> BuildWriteCommand(string address, ushort typeCode, byte[] data, int length = 1)
-    {
-        try
-        {
-            return OperateResult.CreateSuccessResult(PackCommandService(AllenBradleyHelper.PackRequestWrite(address, typeCode, data, length, isConnectedAddress: true)));
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<byte[]>("Address Wrong:" + ex.Message);
-        }
-    }
-
-    public OperateResult<byte[]> ReadCipFromServer(params byte[][] cips)
-    {
-        var send = PackCommandService([.. cips]);
-        var operateResult = ReadFromCoreServer(send);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = AllenBradleyHelper.CheckResponse(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-        }
-        return OperateResult.CreateSuccessResult(operateResult.Content);
     }
 
     private async Task<OperateResult<byte[], ushort, bool>> ReadWithTypeAsync(string[] address, ushort[] length)
@@ -171,7 +93,6 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
         return ExtractActualData(read.Content, isRead: true);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronConnectedCipNet.ReadCipFromServer(System.Byte[][])" />
     public async Task<OperateResult<byte[]>> ReadCipFromServerAsync(params byte[][] cips)
     {
         var command = PackCommandService([.. cips]);
@@ -230,9 +151,9 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
         return Math.Min(length, GetMaxTransferBytes() / 8);
     }
 
-    public OperateResult<string> ReadPlcType()
+    public Task<OperateResult<string>> ReadPlcTypeAsync()
     {
-        return OperateResult.CreateSuccessResult(ProductName);
+        return Task.FromResult(OperateResult.CreateSuccessResult(ProductName ?? ""));
     }
 
     /// <summary>
@@ -358,27 +279,6 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
             return OperateResult.CreateFailedResult<ushort, byte[]>(read);
         }
         return OperateResult.CreateSuccessResult(read.Content2, read.Content1);
-    }
-
-    public virtual OperateResult WriteTag(string address, ushort typeCode, byte[] value, int length = 1)
-    {
-        typeCode = (ushort)CommunicationHelper.ExtractParameter(ref address, "type", typeCode);
-        var operateResult = BuildWriteCommand(address, typeCode, value, length);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = AllenBradleyHelper.CheckResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult3);
-        }
-        return AllenBradleyHelper.ExtractActualData(operateResult2.Content, isRead: false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, byte[] value)
@@ -558,44 +458,14 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
         return await WriteTagAsync(address, 193, !value ? new byte[2] : [255, 255]).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, bool[] value)
+    public override async Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return await WriteTagAsync(address, 193, value.Select((m) => (byte)(m ? 1 : 0)).ToArray(), !CommunicationHelper.IsAddressEndWithIndex(address) ? 1 : value.Length).ConfigureAwait(false);
+        return await WriteTagAsync(address, 193, values.Select((m) => (byte)(m ? 1 : 0)).ToArray(), !CommunicationHelper.IsAddressEndWithIndex(address) ? 1 : values.Length).ConfigureAwait(false);
     }
 
     public async Task<OperateResult> WriteAsync(string address, byte value)
     {
         return await WriteTagAsync(address, 194, [value]).ConfigureAwait(false);
-    }
-
-    public OperateResult<DateTime> ReadDate(string address)
-    {
-        return AllenBradleyHelper.ReadDate(this, address);
-    }
-
-    public OperateResult WriteDate(string address, DateTime date)
-    {
-        return AllenBradleyHelper.WriteDate(this, address, date);
-    }
-
-    public OperateResult WriteTimeAndDate(string address, DateTime date)
-    {
-        return AllenBradleyHelper.WriteTimeAndDate(this, address, date);
-    }
-
-    public OperateResult<TimeSpan> ReadTime(string address)
-    {
-        return AllenBradleyHelper.ReadTime(this, address);
-    }
-
-    public OperateResult WriteTime(string address, TimeSpan time)
-    {
-        return AllenBradleyHelper.WriteTime(this, address, time);
-    }
-
-    public OperateResult WriteTimeOfDate(string address, TimeSpan timeOfDate)
-    {
-        return AllenBradleyHelper.WriteTimeOfDate(this, address, timeOfDate);
     }
 
     public async Task<OperateResult<DateTime>> ReadDateAsync(string address)
@@ -626,6 +496,40 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
     public async Task<OperateResult> WriteTimeOfDateAsync(string address, TimeSpan timeOfDate)
     {
         return await AllenBradleyHelper.WriteTimeOfDateAsync(this, address, timeOfDate).ConfigureAwait(false);
+    }
+
+    private static byte[] GetAttributeAll()
+    {
+        return "00 00 00 00 00 00 02 00 00 00 00 00 b2 00 06 00 01 02 20 01 24 01".ToHexBytes();
+    }
+
+    private OperateResult<byte[]> BuildReadCommand(string[] address, ushort[] length)
+    {
+        try
+        {
+            var list = new List<byte[]>();
+            for (var i = 0; i < address.Length; i++)
+            {
+                list.Add(AllenBradleyHelper.PackRequsetRead(address[i], length[i], isConnectedAddress: true));
+            }
+            return OperateResult.CreateSuccessResult(PackCommandService([.. list]));
+        }
+        catch (Exception ex)
+        {
+            return new OperateResult<byte[]>("Address Wrong:" + ex.Message);
+        }
+    }
+
+    private OperateResult<byte[]> BuildWriteCommand(string address, ushort typeCode, byte[] data, int length = 1)
+    {
+        try
+        {
+            return OperateResult.CreateSuccessResult(PackCommandService(AllenBradleyHelper.PackRequestWrite(address, typeCode, data, length, true)));
+        }
+        catch (Exception ex)
+        {
+            return new OperateResult<byte[]>("Address Wrong:" + ex.Message);
+        }
     }
 
     public override string ToString()

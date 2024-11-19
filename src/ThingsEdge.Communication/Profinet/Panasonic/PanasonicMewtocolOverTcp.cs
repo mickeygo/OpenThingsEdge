@@ -9,19 +9,17 @@ namespace ThingsEdge.Communication.Profinet.Panasonic;
 /// 松下PLC的数据交互协议，采用Mewtocol协议通讯，基于Tcp透传实现的机制。
 /// </summary>
 /// <remarks>
-/// 地址支持携带站号的访问方式，例如：s=2;D100
+/// 地址支持携带站号的访问方式，例如：s=2;D100。
 /// </remarks>
 public class PanasonicMewtocolOverTcp : DeviceTcpNet
 {
     /// <summary>
-    /// PLC设备的目标站号，需要根据实际的设置来填写<br />
-    /// The target station number of the PLC device needs to be filled in according to the actual settings
+    /// PLC设备的目标站号，需要根据实际的设置来填写。
     /// </summary>
     public byte Station { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的松下PLC通信对象，默认站号为0xEE<br />
-    /// Instantiate a default Panasonic PLC communication object, the default station number is 0xEE
+    /// 实例化一个默认的松下PLC通信对象，默认站号为0xEE。
     /// </summary>
     /// <param name="station">站号信息，默认为0xEE</param>
     public PanasonicMewtocolOverTcp(byte station = 238)
@@ -33,8 +31,7 @@ public class PanasonicMewtocolOverTcp : DeviceTcpNet
     }
 
     /// <summary>
-    /// 实例化一个默认的松下PLC通信对象，指定ip地址，端口，默认站号为0xEE<br />
-    /// Instantiate a default Panasonic PLC communication object, specify the IP address, port, and the default station number is 0xEE
+    /// 实例化一个默认的松下PLC通信对象，指定ip地址，端口，默认站号为0xEE。
     /// </summary>
     /// <param name="ipAddress">Ip地址数据</param>
     /// <param name="port">端口号</param>
@@ -46,76 +43,54 @@ public class PanasonicMewtocolOverTcp : DeviceTcpNet
         Port = port;
     }
 
-    /// <inheritdoc />
     protected override INetMessage GetNewNetMessage()
     {
         return new SpecifiedCharacterMessage(13);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.Read(System.String,System.UInt16)" />
-    public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
+    public Task<OperateResult<string>> ReadPlcTypeAsync()
     {
-        return await MewtocolHelper.ReadAsync(this, Station, address, length);
+        return MewtocolHelper.ReadPlcTypeAsync(this, Station);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.Write(System.String,System.Byte[])" />
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        return await MewtocolHelper.WriteAsync(this, Station, address, value);
+        return MewtocolHelper.ReadAsync(this, Station, address, length);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.Helper.MewtocolHelper.ReadBool(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String[])" />
-    public OperateResult<bool[]> ReadBool(string[] address)
+    public override Task<OperateResult<bool>> ReadBoolAsync(string address)
     {
-        return MewtocolHelper.ReadBool(this, Station, address);
+        return MewtocolHelper.ReadBoolAsync(this, Station, address);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.Helper.MewtocolHelper.Write(HslCommunication.Core.IReadWriteDevice,System.Byte,System.String[],System.Boolean[])" />
-    public OperateResult Write(string[] address, bool[] value)
+    public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
-        return MewtocolHelper.Write(this, Station, address, value);
+        return MewtocolHelper.ReadBoolAsync(this, Station, address, length);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.ReadBool(System.String)" />
-    public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
+    public Task<OperateResult<bool[]>> ReadBoolAsync(string[] addresses)
     {
-        return await MewtocolHelper.ReadBoolAsync(this, Station, address, length);
+        return MewtocolHelper.ReadBoolAsync(this, Station, addresses);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.ReadBool(System.String)" />
-    public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
+    public override Task<OperateResult> WriteAsync(string address, byte[] values)
     {
-        return await MewtocolHelper.ReadBoolAsync(this, Station, address);
+        return MewtocolHelper.WriteAsync(this, Station, address, values);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.Write(System.String,System.Boolean[])" />
-    public override async Task<OperateResult> WriteAsync(string address, bool[] values)
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return await MewtocolHelper.WriteAsync(this, Station, address, values);
+        return MewtocolHelper.WriteAsync(this, Station, address, values);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.Write(System.String,System.Boolean)" />
-    public override async Task<OperateResult> WriteAsync(string address, bool value)
+    public override Task<OperateResult> WriteAsync(string address, bool value)
     {
-        return await MewtocolHelper.WriteAsync(this, Station, address, value);
+        return MewtocolHelper.WriteAsync(this, Station, address, value);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.ReadBool(System.String[])" />
-    public async Task<OperateResult<bool[]>> ReadBoolAsync(string[] address)
+    public Task<OperateResult> WriteAsync(string[] addresses, bool[] values)
     {
-        return await MewtocolHelper.ReadBoolAsync(this, Station, address);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.PanasonicMewtocolOverTcp.Write(System.String[],System.Boolean[])" />
-    public async Task<OperateResult> WriteAsync(string[] address, bool[] value)
-    {
-        return await MewtocolHelper.WriteAsync(this, Station, address, value);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Panasonic.Helper.MewtocolHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice,System.Byte)" />
-    public OperateResult<string> ReadPlcType()
-    {
-        return MewtocolHelper.ReadPlcType(this, Station);
+        return MewtocolHelper.WriteAsync(this, Station, addresses, values);
     }
 
     /// <inheritdoc />

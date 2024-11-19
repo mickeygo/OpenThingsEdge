@@ -6,12 +6,12 @@ using ThingsEdge.Communication.Core.Address;
 namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 
 /// <summary>
-/// 三菱的FxLinks的辅助方法信息
+/// 三菱的 FxLinks 的辅助方法信息。
 /// </summary>
-public class MelsecFxLinksHelper
+public static class MelsecFxLinksHelper
 {
     /// <summary>
-    /// 将当前的报文进行打包，根据和校验的方式以及格式信息来实现打包操作
+    /// 将当前的报文进行打包，根据和校验的方式以及格式信息来实现打包操作。
     /// </summary>
     /// <param name="plc">PLC通信对象</param>
     /// <param name="command">原始的命令数据</param>
@@ -22,6 +22,7 @@ public class MelsecFxLinksHelper
         {
             return command;
         }
+
         var array = command;
         if (plc.SumCheck)
         {
@@ -35,7 +36,7 @@ public class MelsecFxLinksHelper
         }
         if (plc.Format == 4)
         {
-            return SoftBasic.SpliceArray(new byte[1] { 5 }, array, new byte[2] { 13, 10 });
+            return SoftBasic.SpliceArray(new byte[1] { 5 }, array, "\r\n"u8.ToArray());
         }
         return SoftBasic.SpliceArray(new byte[1] { 5 }, array);
     }
@@ -56,6 +57,7 @@ public class MelsecFxLinksHelper
         {
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
+
         var array = SoftBasic.SplitIntegerToArray(length, isBool ? 256 : 64);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
@@ -106,6 +108,7 @@ public class MelsecFxLinksHelper
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
+
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(station.ToString("X2"));
         stringBuilder.Append("FF");
@@ -120,43 +123,7 @@ public class MelsecFxLinksHelper
         return OperateResult.CreateSuccessResult(Encoding.ASCII.GetBytes(stringBuilder.ToString()));
     }
 
-    /// <summary>
-    /// 创建一条别入byte数据的指令信息，需要指定一些参数，按照字单位
-    /// </summary>
-    /// <param name="station">站号</param>
-    /// <param name="address">地址</param>
-    /// <param name="value">数组值</param>
-    /// <param name="waitTime">等待时间</param>
-    /// <returns>命令报文的结果内容对象</returns>
-    public static OperateResult<byte[]> BuildWriteByteCommand(byte station, string address, byte[] value, byte waitTime = 0)
-    {
-        var operateResult = MelsecFxLinksAddress.ParseFrom(address);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult);
-        }
-        var stringBuilder = new StringBuilder();
-        stringBuilder.Append(station.ToString("X2"));
-        stringBuilder.Append("FF");
-        if (operateResult.Content.AddressStart >= 10000)
-        {
-            stringBuilder.Append("QW");
-        }
-        else
-        {
-            stringBuilder.Append("WW");
-        }
-        stringBuilder.Append(waitTime.ToString("X"));
-        stringBuilder.Append(operateResult.Content.ToString());
-        stringBuilder.Append((value.Length / 2).ToString("X2"));
-        var array = new byte[value.Length * 2];
-        for (var i = 0; i < value.Length / 2; i++)
-        {
-            SoftBasic.BuildAsciiBytesFrom(BitConverter.ToUInt16(value, i * 2)).CopyTo(array, 4 * i);
-        }
-        stringBuilder.Append(Encoding.ASCII.GetString(array));
-        return OperateResult.CreateSuccessResult(Encoding.ASCII.GetBytes(stringBuilder.ToString()));
-    }
+    
 
     /// <summary>
     /// 创建启动PLC的报文信息
@@ -257,8 +224,7 @@ public class MelsecFxLinksHelper
     }
 
     /// <summary>
-    /// 检查PLC的消息反馈是否合法，合法则提取当前的数据信息，当时写入的命令消息时，无任何的数据返回<br />
-    /// Check whether the PLC's message feedback is legal. If it is legal, extract the current data information. When the command message is written at that time, no data is returned.
+    /// 检查PLC的消息反馈是否合法，合法则提取当前的数据信息，当时写入的命令消息时，无任何的数据返回。
     /// </summary>
     /// <param name="response">从PLC反馈的数据消息</param>
     /// <returns>检查的结果消息</returns>
@@ -277,7 +243,7 @@ public class MelsecFxLinksHelper
             }
             if (response[0] == 6)
             {
-                return OperateResult.CreateSuccessResult(new byte[0]);
+                return OperateResult.CreateSuccessResult(Array.Empty<byte>());
             }
             var num2 = -1;
             for (var i = 5; i < response.Length; i++)
@@ -300,97 +266,13 @@ public class MelsecFxLinksHelper
         }
     }
 
-    private static OperateResult<byte[]> ExtraResponse(byte[] response)
-    {
-        try
-        {
-            var array = new byte[response.Length / 2];
-            for (var i = 0; i < array.Length / 2; i++)
-            {
-                var value = Convert.ToUInt16(Encoding.ASCII.GetString(response, i * 4, 4), 16);
-                BitConverter.GetBytes(value).CopyTo(array, i * 2);
-            }
-            return OperateResult.CreateSuccessResult(array);
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<byte[]>("Extra source data failed: " + ex.Message + Environment.NewLine + "Source: " + response.ToHexString(' '));
-        }
-    }
-
     /// <summary>
-    /// 批量读取PLC的数据，以字为单位，支持读取X,Y,M,S,D,T,C，具体的地址范围需要根据PLC型号来确认，地址支持动态指定站号，例如：s=2;D100<br />
-    /// Read PLC data in batches, in units of words, supports reading X, Y, M, S, D, T, C. 
-    /// The specific address range needs to be confirmed according to the PLC model, 
-    /// The address supports dynamically specifying the station number, for example: s=2;D100
+    /// 批量读取PLC的数据，以字为单位，支持读取 X,Y,M,S,D,T,C，具体的地址范围需要根据PLC型号来确认，地址支持动态指定站号，例如：s=2;D100。
     /// </summary>
     /// <param name="plc">PLC通信对象</param>
     /// <param name="address">地址信息</param>
     /// <param name="length">数据长度</param>
     /// <returns>读取结果信息</returns>
-    public static OperateResult<byte[]> Read(IReadWriteFxLinks plc, string address, ushort length)
-    {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
-        var operateResult = BuildReadCommand(station, address, length, isBool: false, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(operateResult);
-        }
-        var list = new List<byte>();
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content[i]);
-            if (!operateResult2.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<byte[]>(operateResult2);
-            }
-            var operateResult3 = CheckPlcResponse(operateResult2.Content);
-            if (!operateResult3.IsSuccess)
-            {
-                return operateResult3;
-            }
-            var operateResult4 = ExtraResponse(operateResult3.Content);
-            if (!operateResult4.IsSuccess)
-            {
-                return operateResult4;
-            }
-            list.AddRange(operateResult4.Content);
-        }
-        return OperateResult.CreateSuccessResult(list.ToArray());
-    }
-
-    /// <summary>
-    /// 批量写入PLC的数据，以字为单位，也就是说最少2个字节信息，支持X,Y,M,S,D,T,C，具体的地址范围需要根据PLC型号来确认，地址支持动态指定站号，例如：s=2;D100<br />
-    /// The data written to the PLC in batches is in units of words, that is, at least 2 bytes of information. 
-    /// It supports X, Y, M, S, D, T, and C. The specific address range needs to be confirmed according to the PLC model, 
-    /// The address supports dynamically specifying the station number, for example: s=2;D100
-    /// </summary>
-    /// <param name="plc">PLC通信对象</param>
-    /// <param name="address">地址信息</param>
-    /// <param name="value">数据值</param>
-    /// <returns>是否写入成功</returns>
-    public static OperateResult Write(IReadWriteFxLinks plc, string address, byte[] value)
-    {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
-        var operateResult = BuildWriteByteCommand(station, address, value, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = CheckPlcResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.Read(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String,System.UInt16)" />
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteFxLinks plc, string address, ushort length)
     {
         var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
@@ -399,10 +281,11 @@ public class MelsecFxLinksHelper
         {
             return OperateResult.CreateFailedResult<byte[]>(command);
         }
+
         var result = new List<byte>();
         for (var j = 0; j < command.Content.Count; j++)
         {
-            var read = await plc.ReadFromCoreServerAsync(command.Content[j]);
+            var read = await plc.ReadFromCoreServerAsync(command.Content[j]).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<byte[]>(read);
@@ -422,16 +305,22 @@ public class MelsecFxLinksHelper
         return OperateResult.CreateSuccessResult(result.ToArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.Write(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String,System.Byte[])" />
-    public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, byte[] value)
+    /// <summary>
+    /// 批量写入PLC的数据，以字为单位，也就是说最少2个字节信息，支持 X,Y,M,S,D,T,C，具体的地址范围需要根据PLC型号来确认，地址支持动态指定站号，例如：s=2;D100。
+    /// </summary>
+    /// <param name="plc">PLC通信对象</param>
+    /// <param name="address">地址信息</param>
+    /// <param name="values">数据值</param>
+    /// <returns>是否写入成功</returns>
+    public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, byte[] values)
     {
         var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
-        var command = BuildWriteByteCommand(stat, address, value, plc.WaittingTime);
+        var command = BuildWriteByteCommand(stat, address, values, plc.WaittingTime);
         if (!command.IsSuccess)
         {
             return command;
         }
-        var read = await plc.ReadFromCoreServerAsync(command.Content);
+        var read = await plc.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -445,81 +334,19 @@ public class MelsecFxLinksHelper
     }
 
     /// <summary>
-    /// 批量读取bool类型数据，支持的类型为X,Y,S,T,C，具体的地址范围取决于PLC的类型，地址支持动态指定站号，例如：s=2;D100<br />
-    /// Read bool data in batches. The supported types are X, Y, S, T, C. The specific address range depends on the type of PLC, 
-    /// The address supports dynamically specifying the station number, for example: s=2;D100
+    /// 批量读取bool类型数据，支持的类型为X,Y,S,T,C，具体的地址范围取决于PLC的类型，地址支持动态指定站号，例如：s=2;D100。
     /// </summary>
     /// <param name="plc">PLC通信对象</param>
     /// <param name="address">地址信息，比如X10,Y17，注意X，Y的地址是8进制的</param>
     /// <param name="length">读取的长度</param>
     /// <returns>读取结果信息</returns>
-    public static OperateResult<bool[]> ReadBool(IReadWriteFxLinks plc, string address, ushort length)
-    {
-        if (address.IndexOf('.') > 0)
-        {
-            return CommunicationHelper.ReadBool(plc, address, length);
-        }
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
-        var operateResult = BuildReadCommand(station, address, length, isBool: true, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<bool[]>(operateResult);
-        }
-        var list = new List<bool>();
-        for (var i = 0; i < operateResult.Content.Count; i++)
-        {
-            OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content[i]);
-            if (!operateResult2.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<bool[]>(operateResult2);
-            }
-            var operateResult3 = CheckPlcResponse(operateResult2.Content);
-            if (!operateResult3.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<bool[]>(operateResult3);
-            }
-            list.AddRange(operateResult3.Content.Select((m) => m == 49).ToArray());
-        }
-        return OperateResult.CreateSuccessResult(list.ToArray());
-    }
-
-    /// <summary>
-    /// 批量写入bool类型的数组，支持的类型为X,Y,S,T,C，具体的地址范围取决于PLC的类型，地址支持动态指定站号，例如：s=2;D100<br />
-    /// Write arrays of type bool in batches. The supported types are X, Y, S, T, C. The specific address range depends on the type of PLC, 
-    /// The address supports dynamically specifying the station number, for example: s=2;D100
-    /// </summary>
-    /// <param name="plc">PLC通信对象</param>
-    /// <param name="address">PLC的地址信息</param>
-    /// <param name="value">数据信息</param>
-    /// <returns>是否写入成功</returns>
-    public static OperateResult Write(IReadWriteFxLinks plc, string address, bool[] value)
-    {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
-        var operateResult = BuildWriteBoolCommand(station, address, value, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = CheckPlcResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.ReadBool(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String,System.UInt16)" />
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteFxLinks plc, string address, ushort length)
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(plc, address, length);
+            return await CommunicationHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
         }
+
         var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildReadCommand(stat, address, length, isBool: true, plc.WaittingTime);
         if (!command.IsSuccess)
@@ -529,7 +356,7 @@ public class MelsecFxLinksHelper
         var result = new List<bool>();
         for (var i = 0; i < command.Content.Count; i++)
         {
-            var read = await plc.ReadFromCoreServerAsync(command.Content[i]);
+            var read = await plc.ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<bool[]>(read);
@@ -544,16 +371,22 @@ public class MelsecFxLinksHelper
         return OperateResult.CreateSuccessResult(result.ToArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.Write(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String,System.Boolean[])" />
-    public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, bool[] value)
+    /// <summary>
+    /// 批量写入PLC的数据，以字为单位，也就是说最少2个字节信息，支持X,Y,M,S,D,T,C，具体的地址范围需要根据PLC型号来确认，地址支持动态指定站号，例如：s=2;D100。
+    /// </summary>
+    /// <param name="plc">PLC通信对象</param>
+    /// <param name="address">地址信息</param>
+    /// <param name="values">数据值</param>
+    /// <returns>是否写入成功</returns>
+    public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, bool[] values)
     {
         var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
-        var command = BuildWriteBoolCommand(stat, address, value, plc.WaittingTime);
+        var command = BuildWriteBoolCommand(stat, address, values, plc.WaittingTime);
         if (!command.IsSuccess)
         {
             return command;
         }
-        var read = await plc.ReadFromCoreServerAsync(command.Content);
+        var read = await plc.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -567,90 +400,11 @@ public class MelsecFxLinksHelper
     }
 
     /// <summary>
-    /// <b>[商业授权]</b> 启动PLC的操作，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。<br />
-    /// <b>[Authorization]</b> Start the PLC operation, you can carry additional parameter information and specify the station number. Example: s=2; Note: The semicolon is required.
+    /// 启动PLC的操作，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。
     /// </summary>
     /// <param name="plc">PLC通信对象</param>
     /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
     /// <returns>是否启动成功</returns>
-    public static OperateResult StartPLC(IReadWriteFxLinks plc, string parameter = "")
-    {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
-        var operateResult = BuildStart(station, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = CheckPlcResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <summary>
-    /// <b>[商业授权]</b> 停止PLC的操作，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。<br />
-    /// <b>[Authorization]</b> Stop PLC operation, you can carry additional parameter information and specify the station number. Example: s=2; Note: The semicolon is required.
-    /// </summary>
-    /// <param name="plc">PLC通信对象</param>
-    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
-    /// <returns>是否停止成功</returns>
-    public static OperateResult StopPLC(IReadWriteFxLinks plc, string parameter = "")
-    {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
-        var operateResult = BuildStop(station, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var operateResult3 = CheckPlcResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return operateResult3;
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <summary>
-    /// <b>[商业授权]</b> 读取PLC的型号信息，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。<br />
-    /// <b>[Authorization]</b> Read the PLC model information, you can carry additional parameter information, and specify the station number. Example: s=2; Note: The semicolon is required.
-    /// </summary>
-    /// <param name="plc">PLC通信对象</param>
-    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
-    /// <returns>带PLC型号的结果信息</returns>
-    public static OperateResult<string> ReadPlcType(IReadWriteFxLinks plc, string parameter = "")
-    {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
-        var operateResult = BuildReadPlcType(station, plc.WaittingTime);
-        if (!operateResult.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<string>(operateResult);
-        }
-        OperateResult<byte[]> operateResult2 = plc.ReadFromCoreServer(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<string>(operateResult2);
-        }
-        var operateResult3 = CheckPlcResponse(operateResult2.Content);
-        if (!operateResult3.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<string>(operateResult3);
-        }
-        return GetPlcTypeFromCode(Encoding.ASCII.GetString(operateResult2.Content, 5, 2));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.StartPLC(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String)" />
     public static async Task<OperateResult> StartPLCAsync(IReadWriteFxLinks plc, string parameter = "")
     {
         var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
@@ -659,7 +413,8 @@ public class MelsecFxLinksHelper
         {
             return command;
         }
-        var read = await plc.ReadFromCoreServerAsync(command.Content);
+
+        var read = await plc.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -672,7 +427,12 @@ public class MelsecFxLinksHelper
         return OperateResult.CreateSuccessResult();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.StopPLC(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String)" />
+    /// <summary>
+    /// 停止PLC的操作，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。
+    /// </summary>
+    /// <param name="plc">PLC通信对象</param>
+    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
+    /// <returns>是否停止成功</returns>
     public static async Task<OperateResult> StopPLCAsync(IReadWriteFxLinks plc, string parameter = "")
     {
         var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
@@ -681,7 +441,7 @@ public class MelsecFxLinksHelper
         {
             return command;
         }
-        var read = await plc.ReadFromCoreServerAsync(command.Content);
+        var read = await plc.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -694,7 +454,12 @@ public class MelsecFxLinksHelper
         return OperateResult.CreateSuccessResult();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxLinksHelper.ReadPlcType(HslCommunication.Profinet.Melsec.Helper.IReadWriteFxLinks,System.String)" />
+    /// <summary>
+    /// 读取PLC的型号信息，可以携带额外的参数信息，指定站号。举例：s=2; 注意：分号是必须的。
+    /// </summary>
+    /// <param name="plc">PLC通信对象</param>
+    /// <param name="parameter">允许携带的参数信息，例如s=2; 也可以为空</param>
+    /// <returns>带PLC型号的结果信息</returns>
     public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteFxLinks plc, string parameter = "")
     {
         var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
@@ -703,7 +468,8 @@ public class MelsecFxLinksHelper
         {
             return OperateResult.CreateFailedResult<string>(command);
         }
-        var read = await plc.ReadFromCoreServerAsync(command.Content);
+
+        var read = await plc.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return OperateResult.CreateFailedResult<string>(read);
@@ -714,5 +480,62 @@ public class MelsecFxLinksHelper
             return OperateResult.CreateFailedResult<string>(extra);
         }
         return GetPlcTypeFromCode(Encoding.ASCII.GetString(read.Content, 5, 2));
+    }
+
+    private static OperateResult<byte[]> ExtraResponse(byte[] response)
+    {
+        try
+        {
+            var array = new byte[response.Length / 2];
+            for (var i = 0; i < array.Length / 2; i++)
+            {
+                var value = Convert.ToUInt16(Encoding.ASCII.GetString(response, i * 4, 4), 16);
+                BitConverter.GetBytes(value).CopyTo(array, i * 2);
+            }
+            return OperateResult.CreateSuccessResult(array);
+        }
+        catch (Exception ex)
+        {
+            return new OperateResult<byte[]>("Extra source data failed: " + ex.Message + Environment.NewLine + "Source: " + response.ToHexString(' '));
+        }
+    }
+
+    /// <summary>
+    /// 创建一条别入byte数据的指令信息，需要指定一些参数，按照字单位。
+    /// </summary>
+    /// <param name="station">站号</param>
+    /// <param name="address">地址</param>
+    /// <param name="value">数组值</param>
+    /// <param name="waitTime">等待时间</param>
+    /// <returns>命令报文的结果内容对象</returns>
+    private static OperateResult<byte[]> BuildWriteByteCommand(byte station, string address, byte[] value, byte waitTime = 0)
+    {
+        var operateResult = MelsecFxLinksAddress.ParseFrom(address);
+        if (!operateResult.IsSuccess)
+        {
+            return OperateResult.CreateFailedResult<byte[]>(operateResult);
+        }
+
+        var stringBuilder = new StringBuilder();
+        stringBuilder.Append(station.ToString("X2"));
+        stringBuilder.Append("FF");
+        if (operateResult.Content.AddressStart >= 10000)
+        {
+            stringBuilder.Append("QW");
+        }
+        else
+        {
+            stringBuilder.Append("WW");
+        }
+        stringBuilder.Append(waitTime.ToString("X"));
+        stringBuilder.Append(operateResult.Content.ToString());
+        stringBuilder.Append((value.Length / 2).ToString("X2"));
+        var array = new byte[value.Length * 2];
+        for (var i = 0; i < value.Length / 2; i++)
+        {
+            SoftBasic.BuildAsciiBytesFrom(BitConverter.ToUInt16(value, i * 2)).CopyTo(array, 4 * i);
+        }
+        stringBuilder.Append(Encoding.ASCII.GetString(array));
+        return OperateResult.CreateSuccessResult(Encoding.ASCII.GetBytes(stringBuilder.ToString()));
     }
 }

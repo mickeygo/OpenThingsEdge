@@ -13,5 +13,5 @@ public enum OmronPlcType
     /// <summary>
     /// CV系列
     /// </summary>
-    CV
+    CV,
 }

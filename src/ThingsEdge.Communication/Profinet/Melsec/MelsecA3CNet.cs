@@ -5,97 +5,57 @@ using ThingsEdge.Communication.Profinet.Melsec.Helper;
 namespace ThingsEdge.Communication.Profinet.Melsec;
 
 /// <summary>
-/// 基于Qna 兼容3C帧的格式一的通讯，具体的地址需要参照三菱的基本地址<br />
-/// Based on Qna-compatible 3C frame format one communication, the specific address needs to refer to the basic address of Mitsubishi.
+/// 基于Qna 兼容3C帧的格式一的通讯，具体的地址需要参照三菱的基本地址。
 /// </summary>
-/// <remarks>
-/// <inheritdoc cref="T:HslCommunication.Profinet.Melsec.MelsecA3CNetOverTcp" path="remarks" />
-/// </remarks>
-/// <example>
-/// <inheritdoc cref="T:HslCommunication.Profinet.Melsec.MelsecA3CNetOverTcp" path="example" />
-/// </example>
 public class MelsecA3CNet : DeviceSerialPort, IReadWriteA3C, IReadWriteDevice, IReadWriteNet
 {
-    private byte station = 0;
+    public byte Station { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C.Station" />
-    public byte Station
-    {
-        get
-        {
-            return station;
-        }
-        set
-        {
-            station = value;
-        }
-    }
-
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C.SumCheck" />
     public bool SumCheck { get; set; } = true;
 
-
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C.Format" />
     public int Format { get; set; } = 1;
 
-
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Melsec.Helper.IReadWriteMc.EnableWriteBitToWordRegister" />
     public bool EnableWriteBitToWordRegister { get; set; }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA3CNetOverTcp.#ctor" />
     public MelsecA3CNet()
     {
         ByteTransform = new RegularByteTransform();
         WordLength = 1;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.Read(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C,System.String,System.UInt16)" />
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
+    public async Task<OperateResult<string>> ReadPlcTypeAsync()
     {
-        return MelsecA3CNetHelper.Read(this, address, length);
+        return await MelsecA3CNetHelper.ReadPlcTypeAsync(this).ConfigureAwait(false);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.Write(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C,System.String,System.Byte[])" />
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
+    public override Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        return MelsecA3CNetHelper.Write(this, address, value);
+        return MelsecA3CNetHelper.ReadAsync(this, address, length);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.ReadBool(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C,System.String,System.UInt16)" />
-    [HslMqttApi("ReadBoolArray", "")]
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
+    public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
-        return MelsecA3CNetHelper.ReadBool(this, address, length);
+        return MelsecA3CNetHelper.ReadBoolAsync(this, address, length);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecA3CNetOverTcp.Write(System.String,System.Boolean[])" />
-    [HslMqttApi("WriteBoolArray", "")]
-    public override OperateResult Write(string address, bool[] value)
+    public override Task<OperateResult> WriteAsync(string address, byte[] values)
     {
-        return MelsecA3CNetHelper.Write(this, address, value);
+        return MelsecA3CNetHelper.WriteAsync(this, address, values);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.RemoteRun(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C)" />
-    [HslMqttApi]
-    public OperateResult RemoteRun()
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return MelsecA3CNetHelper.RemoteRun(this);
+        return MelsecA3CNetHelper.WriteAsync(this, address, values);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.RemoteStop(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C)" />
-    [HslMqttApi]
-    public OperateResult RemoteStop()
+    public Task<OperateResult> RemoteRunAsync()
     {
-        return MelsecA3CNetHelper.RemoteStop(this);
+        return MelsecA3CNetHelper.RemoteRunAsync(this);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecA3CNetHelper.ReadPlcType(HslCommunication.Profinet.Melsec.Helper.IReadWriteA3C)" />
-    [HslMqttApi]
-    public OperateResult<string> ReadPlcType()
+    public Task<OperateResult> RemoteStopAsync()
     {
-        return MelsecA3CNetHelper.ReadPlcType(this);
+        return MelsecA3CNetHelper.RemoteStopAsync(this);
     }
 
     /// <inheritdoc />

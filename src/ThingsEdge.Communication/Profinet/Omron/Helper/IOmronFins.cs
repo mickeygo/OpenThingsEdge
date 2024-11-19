@@ -7,7 +7,9 @@ namespace ThingsEdge.Communication.Profinet.Omron.Helper;
 /// </summary>
 public interface IOmronFins : IReadWriteDevice, IReadWriteNet
 {
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.ICF" />
+    /// <summary>
+    /// 信息控制字段。
+    /// </summary>
     byte ICF { get; set; }
 
     /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.RSV" />
@@ -41,8 +43,7 @@ public interface IOmronFins : IReadWriteDevice, IReadWriteNet
     int ReadSplits { get; set; }
 
     /// <summary>
-    /// 获取或设置欧姆龙PLC的系列信息<br />
-    /// Obtain or set the series information of Omron PLC
+    /// 获取或设置欧姆龙PLC的系列信息。
     /// </summary>
     OmronPlcType PlcType { get; set; }
 

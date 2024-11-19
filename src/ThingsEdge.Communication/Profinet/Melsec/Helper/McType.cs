@@ -23,5 +23,5 @@ public enum McType
     /// <summary>
     /// 基于R系列的ASCII格式的MC协议
     /// </summary>
-    McRAscii
+    McRAscii,
 }

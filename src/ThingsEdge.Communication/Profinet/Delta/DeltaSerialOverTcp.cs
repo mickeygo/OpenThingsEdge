@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.ModBus;
 using ThingsEdge.Communication.Profinet.Delta.Helper;

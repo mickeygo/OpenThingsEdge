@@ -1,3 +1,4 @@
+using Nito.AsyncEx;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
@@ -5,37 +6,26 @@ using ThingsEdge.Communication.Profinet.Siemens.Helper;
 
 namespace ThingsEdge.Communication.Profinet.Siemens;
 
-/// <inheritdoc cref="T:HslCommunication.Profinet.Siemens.SiemensPPI" />
+/// <summary>
+/// 西门子的PPI协议，适用于s7-200plc，注意，由于本类库的每次通讯分成2次操作，内部增加了一个同步锁，所以单次通信时间比较久，另外，地址支持携带站号，例如：s=2;M100。
+/// </summary>
+/// <remarks>
+/// 适用于西门子200的通信。注意：M地址范围有限 0-31地址。
+/// </remarks>
 public class SiemensPPIOverTcp : DeviceTcpNet, ISiemensPPI, IReadWriteNet
 {
-    private byte station = 2;
+    private readonly AsyncLock _mutex = new();
 
-    private object communicationLock;
+    public byte Station { get; set; } = 2;
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Siemens.SiemensPPI.Station" />
-    public byte Station
-    {
-        get
-        {
-            return station;
-        }
-        set
-        {
-            station = value;
-        }
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.#ctor" />
     public SiemensPPIOverTcp()
     {
         WordLength = 2;
         ByteTransform = new ReverseBytesTransform();
-        communicationLock = new object();
     }
 
     /// <summary>
-    /// 使用指定的ip地址和端口号来实例化对象<br />
-    /// Instantiate the object with the specified IP address and port number
+    /// 使用指定的ip地址和端口号来实例化对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址信息</param>
     /// <param name="port">端口号信息</param>
@@ -46,116 +36,59 @@ public class SiemensPPIOverTcp : DeviceTcpNet, ISiemensPPI, IReadWriteNet
         Port = port;
     }
 
-    /// <inheritdoc />
     protected override INetMessage GetNewNetMessage()
     {
         return new SiemensPPIMessage();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Read(System.String,System.UInt16)" />
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
+    public override Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        return SiemensPPIHelper.Read(this, address, length, Station, communicationLock);
+        return SiemensPPIHelper.ReadAsync(this, address, length, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.Helper.SiemensPPIHelper.ReadBool(HslCommunication.Core.IReadWriteDevice,System.String,System.Byte,System.Object)" />
-    [HslMqttApi("ReadBool", "")]
-    public override OperateResult<bool> ReadBool(string address)
+    public override Task<OperateResult<bool>> ReadBoolAsync(string address)
     {
-        return SiemensPPIHelper.ReadBool(this, address, Station, communicationLock);
+        return SiemensPPIHelper.ReadBoolAsync(this, address, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.Helper.SiemensPPIHelper.ReadBool(HslCommunication.Core.IReadWriteDevice,System.String,System.Byte,System.Object)" />
-    [HslMqttApi("ReadBoolArray", "")]
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
+    public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
-        return SiemensPPIHelper.ReadBool(this, address, length, Station, communicationLock);
+        return SiemensPPIHelper.ReadBoolAsync(this, address, length, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Write(System.String,System.Byte[])" />
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
-    {
-        return SiemensPPIHelper.Write(this, address, value, Station, communicationLock);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Write(System.String,System.Boolean[])" />
-    [HslMqttApi("WriteBoolArray", "")]
-    public override OperateResult Write(string address, bool[] value)
-    {
-        return SiemensPPIHelper.Write(this, address, value, Station, communicationLock);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.ReadByte(System.String)" />
-    [HslMqttApi("ReadByte", "")]
-    public OperateResult<byte> ReadByte(string address)
-    {
-        return ByteTransformHelper.GetResultFromArray(Read(address, 1));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Write(System.String,System.Byte)" />
-    [HslMqttApi("WriteByte", "")]
-    public OperateResult Write(string address, byte value)
-    {
-        return Write(address, new byte[1] { value });
-    }
-
-    /// <inheritdoc />
-    public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
-    {
-        return await Task.Run(() => ReadBool(address));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPIOverTcp.ReadByte(System.String)" />
     public async Task<OperateResult<byte>> ReadByteAsync(string address)
     {
-        return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1));
+        return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPIOverTcp.Write(System.String,System.Byte)" />
-    public async Task<OperateResult> WriteAsync(string address, byte value)
+    public override Task<OperateResult> WriteAsync(string address, byte[] values)
     {
-        return await WriteAsync(address, new byte[1] { value });
+        return SiemensPPIHelper.WriteAsync(this, address, values, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Start(System.String)" />
-    [HslMqttApi]
-    public OperateResult Start(string parameter = "")
+    public Task<OperateResult> WriteAsync(string address, byte value)
     {
-        return SiemensPPIHelper.Start(this, parameter, Station, communicationLock);
+        return WriteAsync(address, [value]);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Stop(System.String)" />
-    [HslMqttApi]
-    public OperateResult Stop(string parameter = "")
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return SiemensPPIHelper.Stop(this, parameter, Station, communicationLock);
+        return SiemensPPIHelper.WriteAsync(this, address, values, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.Helper.SiemensPPIHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice,System.String,System.Byte,System.Object)" />
-    [HslMqttApi]
-    public OperateResult<string> ReadPlcType(string parameter = "")
+    public Task<OperateResult> StartAsync(string parameter = "")
     {
-        return SiemensPPIHelper.ReadPlcType(this, parameter, Station, communicationLock);
+        return SiemensPPIHelper.StartAsync(this, parameter, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Start(System.String)" />
-    public async Task<OperateResult> StartAsync(string parameter = "")
+    public Task<OperateResult> StopAsync(string parameter = "")
     {
-        return await Task.Run(() => Start(parameter));
+        return SiemensPPIHelper.StopAsync(this, parameter, Station, _mutex);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.SiemensPPI.Stop(System.String)" />
-    public async Task<OperateResult> StopAsync(string parameter = "")
+    public Task<OperateResult<string>> ReadPlcTypeAsync(string parameter = "")
     {
-        return await Task.Run(() => Stop(parameter));
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Siemens.Helper.SiemensPPIHelper.ReadPlcType(HslCommunication.Core.IReadWriteDevice,System.String,System.Byte,System.Object)" />
-    public async Task<OperateResult<string>> ReadPlcTypeAsync(string parameter = "")
-    {
-        return await Task.Run(() => SiemensPPIHelper.ReadPlcType(this, parameter, Station, communicationLock));
+        return SiemensPPIHelper.ReadPlcTypeAsync(this, parameter, Station, _mutex);
     }
 
     /// <inheritdoc />

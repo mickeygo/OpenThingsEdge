@@ -7,9 +7,9 @@ namespace ThingsEdge.Communication.Profinet.Melsec.Helper;
 /// </summary>
 public interface IMelsecFxSerial : IReadWriteNet
 {
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxSerialHelper.ActivePlc(HslCommunication.Core.IReadWriteDevice)" />
-    OperateResult ActivePlc();
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxSerialHelper.ActivePlc(HslCommunication.Core.IReadWriteDevice)" />
+    /// <summary>
+    /// 激活PLC的接收状态。
+    /// </summary>
+    /// <returns>是否激活成功</returns>
     Task<OperateResult> ActivePlcAsync();
 }

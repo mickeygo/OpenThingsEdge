@@ -11,12 +11,9 @@ public abstract class DeviceSerialPort : DeviceCommunication
     private PipeSerialPort _pipe;
 
     /// <inheritdoc />
-    public override CommunicationPipe CommunicationPipe
+    public CommunicationPipe CommunicationPipe
     {
-        get
-        {
-            return base.CommunicationPipe;
-        }
+        get => base.CommunicationPipe;
         set
         {
             base.CommunicationPipe = value;
@@ -113,29 +110,12 @@ public abstract class DeviceSerialPort : DeviceCommunication
         BaudRate = baudRate;
     }
 
-    /// <inheritdoc cref="PipeSerialPort.SerialPortInni(System.Action{System.IO.Ports.SerialPort})" />
+    /// <inheritdoc cref="PipeSerialPort.SerialPortInni(Action{SerialPort})" />
     public void SerialPortInni(Action<SerialPort> initi)
     {
         _pipe.SerialPortInni(initi);
         PortName = _pipe.GetPipe().PortName;
         BaudRate = _pipe.GetPipe().BaudRate;
-    }
-
-    /// <summary>
-    /// 打开一个新的串行端口连接。
-    /// </summary>
-    public virtual OperateResult Open()
-    {
-        var operateResult = CommunicationPipe.OpenCommunication();
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        if (operateResult.Content)
-        {
-            return InitializationOnConnect();
-        }
-        return OperateResult.CreateSuccessResult();
     }
 
     /// <summary>

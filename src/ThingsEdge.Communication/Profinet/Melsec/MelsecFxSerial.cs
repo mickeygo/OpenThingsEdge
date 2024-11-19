@@ -7,28 +7,21 @@ using ThingsEdge.Communication.Profinet.Melsec.Helper;
 namespace ThingsEdge.Communication.Profinet.Melsec;
 
 /// <summary>
-/// 三菱的串口通信的对象，适用于读取FX系列的串口数据，支持的类型参考文档说明<br />
-/// Mitsubishi's serial communication object is suitable for reading serial data of the FX series. Refer to the documentation for the supported types.
+/// 三菱的串口通信的对象，适用于读取FX系列的串口数据。
 /// </summary>
 /// <remarks>
-/// 一般老旧的型号，例如FX2N之类的，需要将<see cref="P:HslCommunication.Profinet.Melsec.MelsecFxSerial.IsNewVersion" />设置为<c>False</c>，如果是FX3U新的型号，则需要将<see cref="P:HslCommunication.Profinet.Melsec.MelsecFxSerial.IsNewVersion" />设置为<c>True</c>
+/// 一般老旧的型号，例如FX2N之类的，需要将<see cref="IsNewVersion" />设置为<c>False</c>，
+/// 如果是FX3U新的型号，则需要将<see cref="IsNewVersion" />设置为<c>True</c>。
 /// </remarks>
-/// <example>
-/// <inheritdoc cref="T:HslCommunication.Profinet.Melsec.MelsecFxSerialOverTcp" path="remarks" />
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Profinet\MelsecFxSerial.cs" region="Usage" title="简单的使用" />
-/// </example>
 public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
 {
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Melsec.MelsecFxSerialOverTcp.IsNewVersion" />
     public bool IsNewVersion { get; set; }
 
     /// <summary>
-    /// 获取或设置是否动态修改PLC的波特率，如果为 <c>True</c>，那么如果本对象设置了波特率 115200，就会自动修改PLC的波特率到 115200，因为三菱PLC再重启后都会使用默认的波特率9600 <br />
-    /// Get or set whether to dynamically modify the baud rate of the PLC. If it is <c>True</c>, then if the baud rate of this object is set to 115200, 
-    /// the baud rate of the PLC will be automatically modified to 115200, because the Mitsubishi PLC is not After restart, the default baud rate of 9600 will be used
+    /// 获取或设置是否动态修改PLC的波特率，如果为 <c>True</c>，那么如果本对象设置了波特率 115200，
+    /// 就会自动修改PLC的波特率到 115200，因为三菱PLC再重启后都会使用默认的波特率9600。
     /// </summary>
-    public bool AutoChangeBaudRate { get; set; } = false;
-
+    public bool AutoChangeBaudRate { get; set; }
 
     /// <summary>
     /// 实例化一个默认的对象
@@ -41,31 +34,39 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
         ByteTransform.IsStringReverseByteWord = true;
     }
 
-    /// <inheritdoc />
     protected override INetMessage GetNewNetMessage()
     {
         return new MelsecFxSerialMessage();
     }
 
-    /// <inheritdoc />
-    public override OperateResult Open()
+    protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        if (!(CommunicationPipe is PipeSerialPort pipeSerialPort))
+        if (AutoChangeBaudRate)
+        {
+            return await CommunicationPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
+        }
+        return await base.InitializationOnConnectAsync().ConfigureAwait(false);
+    }
+
+    public override async Task<OperateResult> OpenAsync()
+    {
+        if (CommunicationPipe is not PipeSerialPort pipeSerialPort)
         {
             return new OperateResult("PipeSerialPort get failed");
         }
+
         var baudRate = pipeSerialPort.GetPipe().BaudRate;
         if (AutoChangeBaudRate && baudRate != 9600)
         {
             pipeSerialPort.GetPipe().BaudRate = 9600;
-            OperateResult operateResult = pipeSerialPort.OpenCommunication();
+            OperateResult operateResult = await pipeSerialPort.OpenCommunicationAsync().ConfigureAwait(false);
             if (!operateResult.IsSuccess)
             {
                 return operateResult;
             }
             for (var i = 0; i < 3; i++)
             {
-                var operateResult2 = pipeSerialPort.ReadFromCoreServer(GetNewNetMessage(), new byte[1] { 5 }, hasResponseData: true);
+                var operateResult2 = await pipeSerialPort.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
                 if (!operateResult2.IsSuccess)
                 {
                     return operateResult2;
@@ -79,15 +80,16 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
                     return new OperateResult("check 0x06 back before send data failed!");
                 }
             }
-            var sendValue = baudRate switch
+
+            byte[] sendValue = baudRate switch
             {
-                115200 => new byte[6] { 2, 65, 53, 3, 55, 57 },
-                57600 => new byte[6] { 2, 65, 51, 3, 55, 55 },
-                38400 => new byte[6] { 2, 65, 50, 3, 55, 54 },
-                19200 => new byte[6] { 2, 65, 49, 3, 55, 53 },
-                _ => new byte[6] { 2, 65, 53, 3, 55, 57 },
+                115200 => [2, 65, 53, 3, 55, 57],
+                57600 => [2, 65, 51, 3, 55, 55],
+                38400 => [2, 65, 50, 3, 55, 54],
+                19200 => [2, 65, 49, 3, 55, 53],
+                _ => [2, 65, 53, 3, 55, 57],
             };
-            var operateResult3 = pipeSerialPort.ReadFromCoreServer(GetNewNetMessage(), sendValue, hasResponseData: true);
+            var operateResult3 = await pipeSerialPort.ReadFromCoreServerAsync(GetNewNetMessage(), sendValue, hasResponseData: true).ConfigureAwait(false);
             if (!operateResult3.IsSuccess)
             {
                 return operateResult3;
@@ -99,62 +101,45 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
             pipeSerialPort.CloseCommunication();
             pipeSerialPort.GetPipe().BaudRate = baudRate;
         }
-        return base.Open();
+
+        return await base.OpenAsync().ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
-    protected override OperateResult InitializationOnConnect()
-    {
-        if (AutoChangeBaudRate)
-        {
-            return CommunicationPipe.ReadFromCoreServer(GetNewNetMessage(), new byte[1] { 5 }, hasResponseData: true);
-        }
-        return base.InitializationOnConnect();
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxSerialOverTcp.Read(System.String,System.UInt16)" />
-    public override OperateResult<byte[]> Read(string address, ushort length)
-    {
-        return MelsecFxSerialHelper.Read(this, address, length, IsNewVersion);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxSerialOverTcp.Write(System.String,System.Byte[])" />
-    public override OperateResult Write(string address, byte[] value)
-    {
-        return MelsecFxSerialHelper.Write(this, address, value, IsNewVersion);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxSerialOverTcp.ReadBool(System.String,System.UInt16)" />
-    public override OperateResult<bool[]> ReadBool(string address, ushort length)
-    {
-        return MelsecFxSerialHelper.ReadBool(this, address, length, IsNewVersion);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecFxSerialOverTcp.Write(System.String,System.Boolean)" />
-    public override OperateResult Write(string address, bool value)
-    {
-        return MelsecFxSerialHelper.Write(this, address, value);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxSerialHelper.ActivePlc(HslCommunication.Core.IReadWriteDevice)" />
-    public OperateResult ActivePlc()
-    {
-        return MelsecFxSerialHelper.ActivePlc(this);
-    }
-
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.Helper.MelsecFxSerialHelper.ActivePlc(HslCommunication.Core.IReadWriteDevice)" />
+    /// <summary>
+    /// 激活PLC的接收状态，需要再和PLC交互之前进行调用。
+    /// </summary>
+    /// <returns>是否激活成功</returns>
     public async Task<OperateResult> ActivePlcAsync()
     {
-        return await MelsecFxSerialHelper.ActivePlcAsync(this);
+        return await MelsecFxSerialHelper.ActivePlcAsync(this).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
+    public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
+    {
+        return await MelsecFxSerialHelper.ReadAsync(this, address, length, IsNewVersion).ConfigureAwait(false);
+    }
+
+    public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
+    {
+        return await MelsecFxSerialHelper.ReadBoolAsync(this, address, length, IsNewVersion).ConfigureAwait(false);
+    }
+
+    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    {
+        return await MelsecFxSerialHelper.WriteAsync(this, address, values, IsNewVersion).ConfigureAwait(false);
+    }
+
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
+    {
+        // DOTO: [NotImplemented] MelsecFxSerial -> WriteAsync
+        throw new NotImplementedException();
+    }
+
     public override async Task<OperateResult> WriteAsync(string address, bool value)
     {
-        return await Task.Run(() => Write(address, value));
+        return await MelsecFxSerialHelper.WriteAsync(this, address, value).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
     public override string ToString()
     {
         return $"MelsecFxSerial[{CommunicationPipe}]";

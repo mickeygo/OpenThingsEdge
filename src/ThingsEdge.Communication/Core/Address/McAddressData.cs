@@ -255,7 +255,7 @@ public class McAddressData : DeviceAddressDataBase
     /// <inheritdoc cref="M:HslCommunication.Core.Address.McAddressData.ParseMelsecFrom(System.String,System.UInt16,System.Boolean)" />
     public static OperateResult<McAddressData> ParseMelsecRFrom(string address, ushort length, bool isBit)
     {
-        var operateResult = MelsecMcRNet.AnalysisAddress(address);
+        var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<McAddressData>(operateResult);
@@ -380,5 +380,167 @@ public class McAddressData : DeviceAddressDataBase
             return new OperateResult<McAddressData>(GetUnsupportedAddressInfo(address, ex));
         }
         return OperateResult.CreateSuccessResult(mcAddressData);
+    }
+
+
+    /// <summary>
+    /// 分析三菱R系列的地址，并返回解析后的数据对象
+    /// </summary>
+    /// <param name="address">字符串地址</param>
+    /// <returns>是否解析成功</returns>
+    private static OperateResult<MelsecMcDataType, int> AnalysisAddress(string address)
+    {
+        try
+        {
+            if (address.StartsWith("LSTS"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LSTS, Convert.ToInt32(address[4..], MelsecMcDataType.R_LSTS.FromBase));
+            }
+            if (address.StartsWith("LSTC"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LSTC, Convert.ToInt32(address[4..], MelsecMcDataType.R_LSTC.FromBase));
+            }
+            if (address.StartsWith("LSTN"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LSTN, Convert.ToInt32(address[4..], MelsecMcDataType.R_LSTN.FromBase));
+            }
+            if (address.StartsWith("STS"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_STS, Convert.ToInt32(address[3..], MelsecMcDataType.R_STS.FromBase));
+            }
+            if (address.StartsWith("STC"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_STC, Convert.ToInt32(address[3..], MelsecMcDataType.R_STC.FromBase));
+            }
+            if (address.StartsWith("STN"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_STN, Convert.ToInt32(address[3..], MelsecMcDataType.R_STN.FromBase));
+            }
+            if (address.StartsWith("LTS"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LTS, Convert.ToInt32(address[3..], MelsecMcDataType.R_LTS.FromBase));
+            }
+            if (address.StartsWith("LTC"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LTC, Convert.ToInt32(address[3..], MelsecMcDataType.R_LTC.FromBase));
+            }
+            if (address.StartsWith("LTN"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LTN, Convert.ToInt32(address[3..], MelsecMcDataType.R_LTN.FromBase));
+            }
+            if (address.StartsWith("LCS"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LCS, Convert.ToInt32(address[3..], MelsecMcDataType.R_LCS.FromBase));
+            }
+            if (address.StartsWith("LCC"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LCC, Convert.ToInt32(address[3..], MelsecMcDataType.R_LCC.FromBase));
+            }
+            if (address.StartsWith("LCN"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_LCN, Convert.ToInt32(address[3..], MelsecMcDataType.R_LCN.FromBase));
+            }
+            if (address.StartsWith("TS"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_TS, Convert.ToInt32(address[2..], MelsecMcDataType.R_TS.FromBase));
+            }
+            if (address.StartsWith("TC"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_TC, Convert.ToInt32(address[2..], MelsecMcDataType.R_TC.FromBase));
+            }
+            if (address.StartsWith("TN"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_TN, Convert.ToInt32(address[2..], MelsecMcDataType.R_TN.FromBase));
+            }
+            if (address.StartsWith("CS"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_CS, Convert.ToInt32(address[2..], MelsecMcDataType.R_CS.FromBase));
+            }
+            if (address.StartsWith("CC"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_CC, Convert.ToInt32(address[2..], MelsecMcDataType.R_CC.FromBase));
+            }
+            if (address.StartsWith("CN"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_CN, Convert.ToInt32(address[2..], MelsecMcDataType.R_CN.FromBase));
+            }
+            if (address.StartsWith("SM"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_SM, Convert.ToInt32(address[2..], MelsecMcDataType.R_SM.FromBase));
+            }
+            if (address.StartsWith("SB"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_SB, Convert.ToInt32(address[2..], MelsecMcDataType.R_SB.FromBase));
+            }
+            if (address.StartsWith("DX"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_DX, Convert.ToInt32(address[2..], MelsecMcDataType.R_DX.FromBase));
+            }
+            if (address.StartsWith("DY"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_DY, Convert.ToInt32(address[2..], MelsecMcDataType.R_DY.FromBase));
+            }
+            if (address.StartsWith("SD"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_SD, Convert.ToInt32(address[2..], MelsecMcDataType.R_SD.FromBase));
+            }
+            if (address.StartsWith("SW"))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_SW, Convert.ToInt32(address[2..], MelsecMcDataType.R_SW.FromBase));
+            }
+            if (address.StartsWith('X'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_X, Convert.ToInt32(address[1..], MelsecMcDataType.R_X.FromBase));
+            }
+            if (address.StartsWith('Y'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_Y, Convert.ToInt32(address[1..], MelsecMcDataType.R_Y.FromBase));
+            }
+            if (address.StartsWith('M'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_M, Convert.ToInt32(address[1..], MelsecMcDataType.R_M.FromBase));
+            }
+            if (address.StartsWith('L'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_L, Convert.ToInt32(address[1..], MelsecMcDataType.R_L.FromBase));
+            }
+            if (address.StartsWith('F'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_F, Convert.ToInt32(address[1..], MelsecMcDataType.R_F.FromBase));
+            }
+            if (address.StartsWith('V'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_V, Convert.ToInt32(address[1..], MelsecMcDataType.R_V.FromBase));
+            }
+            if (address.StartsWith('S'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_S, Convert.ToInt32(address[1..], MelsecMcDataType.R_S.FromBase));
+            }
+            if (address.StartsWith('B'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_B, Convert.ToInt32(address[1..], MelsecMcDataType.R_B.FromBase));
+            }
+            if (address.StartsWith('D'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_D, Convert.ToInt32(address[1..], MelsecMcDataType.R_D.FromBase));
+            }
+            if (address.StartsWith('W'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_W, Convert.ToInt32(address[1..], MelsecMcDataType.R_W.FromBase));
+            }
+            if (address.StartsWith('R'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_R, Convert.ToInt32(address[1..], MelsecMcDataType.R_R.FromBase));
+            }
+            if (address.StartsWith('Z'))
+            {
+                return OperateResult.CreateSuccessResult(MelsecMcDataType.R_Z, Convert.ToInt32(address[1..], MelsecMcDataType.R_Z.FromBase));
+            }
+            return new OperateResult<MelsecMcDataType, int>(StringResources.Language.NotSupportedDataType);
+        }
+        catch (Exception ex)
+        {
+            return new OperateResult<MelsecMcDataType, int>(ex.Message);
+        }
     }
 }

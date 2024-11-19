@@ -10,16 +10,14 @@ namespace ThingsEdge.Communication.Profinet.Panasonic;
 public class PanasonicMcNet : MelsecMcNet
 {
     /// <summary>
-    /// 实例化松下的的Qna兼容3E帧协议的通讯对象<br />
-    /// Instantiate Panasonic's Qna compatible 3E frame protocol communication object
+    /// 实例化松下的的Qna兼容3E帧协议的通讯对象。
     /// </summary>
     public PanasonicMcNet()
     {
     }
 
     /// <summary>
-    /// 指定ip地址及端口号来实例化一个松下的Qna兼容3E帧协议的通讯对象<br />
-    /// Specify an IP address and port number to instantiate a Panasonic Qna compatible 3E frame protocol communication object
+    /// 指定ip地址及端口号来实例化一个松下的Qna兼容3E帧协议的通讯对象。
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
@@ -28,13 +26,11 @@ public class PanasonicMcNet : MelsecMcNet
     {
     }
 
-    /// <inheritdoc />
     public override OperateResult<McAddressData> McAnalysisAddress(string address, ushort length, bool isBit)
     {
         return McAddressData.ParsePanasonicFrom(address, length, isBit);
     }
 
-    /// <inheritdoc />
     public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         var num = BitConverter.ToUInt16(response, 9);
@@ -45,7 +41,6 @@ public class PanasonicMcNet : MelsecMcNet
         return OperateResult.CreateSuccessResult(response.RemoveBegin(11));
     }
 
-    /// <inheritdoc />
     public override string ToString()
     {
         return $"PanasonicMcNet[{IpAddress}:{Port}]";

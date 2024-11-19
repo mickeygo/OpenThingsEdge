@@ -18,5 +18,5 @@ public enum XinJESeries
     /// <summary>
     /// XL系列
     /// </summary>
-    XL
+    XL,
 }
