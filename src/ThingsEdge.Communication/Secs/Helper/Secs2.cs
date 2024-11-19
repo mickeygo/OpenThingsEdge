@@ -7,7 +7,7 @@ namespace ThingsEdge.Communication.Secs.Helper;
 /// <summary>
 /// Secs2相关的规则
 /// </summary>
-public class Secs2
+public static class Secs2
 {
     /// <summary>
     /// 列表的类型信息

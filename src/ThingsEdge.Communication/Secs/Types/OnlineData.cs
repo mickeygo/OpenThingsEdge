@@ -16,13 +16,6 @@ public class OnlineData
     public string SoftVersion { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public OnlineData()
-    {
-    }
-
-    /// <summary>
     /// 指定类型及其版本号来实例化一个对象
     /// </summary>
     /// <param name="model">类型信息</param>
@@ -34,9 +27,9 @@ public class OnlineData
     }
 
     /// <summary>
-    /// 赋值操作，可以直接赋值 <see cref="T:HslCommunication.Secs.Types.OnlineData" /> 数据
+    /// 赋值操作，可以直接赋值 <see cref="OnlineData" /> 数据
     /// </summary>
-    /// <param name="value"><see cref="T:HslCommunication.Secs.Types.SecsValue" /> 数值</param>
+    /// <param name="value"><see cref="SecsValue" /> 数值</param>
     /// <returns>等值的消息对象</returns>
     public static implicit operator OnlineData(SecsValue value)
     {
@@ -49,9 +42,9 @@ public class OnlineData
     }
 
     /// <summary>
-    /// 也可以赋值给<see cref="T:HslCommunication.Secs.Types.SecsValue" /> 数据
+    /// 也可以赋值给<see cref="SecsValue" /> 数据
     /// </summary>
-    /// <param name="value"><see cref="T:HslCommunication.Secs.Types.SecsValue" /> 对象</param>
+    /// <param name="value"><see cref="SecsValue" /> 对象</param>
     /// <returns>等值的消息对象</returns>
     public static implicit operator SecsValue(OnlineData value)
     {

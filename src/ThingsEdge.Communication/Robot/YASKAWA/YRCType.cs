@@ -13,5 +13,5 @@ public enum YRCType
     /// <summary>
     /// YRC100 型号，含有七轴机器人
     /// </summary>
-    YRC100
+    YRC100,
 }

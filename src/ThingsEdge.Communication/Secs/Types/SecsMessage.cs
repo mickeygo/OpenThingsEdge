@@ -58,7 +58,10 @@ public class SecsMessage
     /// </summary>
     public Encoding StringEncoding { get; set; } = Encoding.Default;
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsMessage.#ctor(System.Byte[],System.Int32)" />
+    /// <summary>
+    /// 通过原始的报文信息来实例化一个默认的对象
+    /// </summary>
+    /// <param name="message">原始的字节信息</param>
     public SecsMessage(byte[] message)
         : this(message, 0)
     {

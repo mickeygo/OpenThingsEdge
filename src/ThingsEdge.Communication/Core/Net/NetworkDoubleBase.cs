@@ -23,11 +23,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
     private byte[] _bufferQA = null;
 
-    /// <summary>
-    /// 是否是长连接的状态。
-    /// </summary>
-    private bool _isPersistentConn;
-
+   
     private bool _disposedValue;
 
     private byte[] _sendbyteBefore = null;
@@ -35,6 +31,11 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     private string _sendBefore = string.Empty;
 
     private readonly Lazy<Ping> _ping = new(() => new Ping());
+
+    /// <summary>
+    /// 是否是长连接的状态。
+    /// </summary>
+    public bool IsPersistentConn { get; private set; }
 
     /// <summary>
     /// 获取或设置当前的连接是否激活从服务器主动推送的功能
@@ -53,7 +54,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
                 {
                     _autoResetEvent = new AutoResetEvent(initialState: false);
                 }
-                _isPersistentConn = true;
+                IsPersistentConn = true;
             }
             _useServerActivePush = value;
         }
@@ -182,7 +183,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     /// </summary>
     public void SetPersistentConnection()
     {
-        _isPersistentConn = true;
+        IsPersistentConn = true;
     }
 
     /// <summary>
@@ -297,7 +298,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     /// <inheritdoc cref="M:HslCommunication.Core.Net.NetworkDoubleBase.GetAvailableSocket" />
     protected async Task<OperateResult<Socket>> GetAvailableSocketAsync()
     {
-        if (_isPersistentConn)
+        if (IsPersistentConn)
         {
             if (_isUseSpecifiedSocket)
             {
@@ -329,7 +330,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     /// <returns>返回连接结果，如果失败的话（也即IsSuccess为False），包含失败信息</returns>
     public async Task<OperateResult> ConnectServerAsync()
     {
-        _isPersistentConn = true;
+        IsPersistentConn = true;
         pipeSocket.Socket?.Close();
         var rSocket = await CreateSocketAndInitialicationAsync().ConfigureAwait(continueOnCapturedContext: false);
         if (!rSocket.IsSuccess)
@@ -353,21 +354,18 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     /// <returns>关闭连接，不需要查看IsSuccess属性查看</returns>
     public async Task<OperateResult> ConnectCloseAsync()
     {
-        new OperateResult();
-        _isPersistentConn = false;
-        OperateResult result;
+        IsPersistentConn = false;
         try
         {
-            result = await ExtraOnDisconnectAsync(pipeSocket.Socket).ConfigureAwait(continueOnCapturedContext: false);
+            var result = await ExtraOnDisconnectAsync(pipeSocket.Socket).ConfigureAwait(continueOnCapturedContext: false);
             pipeSocket.Socket?.Close();
             pipeSocket.Socket = null;
+            return result;
         }
         catch
         {
             throw;
         }
-
-        return result;
     }
 
     /// <inheritdoc cref="M:HslCommunication.Core.Net.NetworkDoubleBase.ReadFromCoreServer(System.Net.Sockets.Socket,System.Byte[],System.Boolean,System.Boolean)" />
@@ -525,7 +523,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
             pipeSocket.PipeLockLeave();
             throw;
         }
-        if (!_isPersistentConn)
+        if (!IsPersistentConn)
         {
             resultSocket?.Content?.Close();
         }

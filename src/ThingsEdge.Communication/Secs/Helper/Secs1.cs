@@ -6,7 +6,7 @@ namespace ThingsEdge.Communication.Secs.Helper;
 /// <summary>
 /// Secs-1的协议信息
 /// </summary>
-public class Secs1
+public static class Secs1
 {
     /// <summary>
     /// 根据传入的参数信息，构建完整的SECS消息报文列表
@@ -59,10 +59,7 @@ public class Secs1
     /// <returns>完整的报文信息</returns>
     public static byte[] BuildHSMSMessage(ushort deviceID, byte streamNo, byte functionNo, ushort blockNo, uint messageID, byte[] data, bool wBit)
     {
-        if (data == null)
-        {
-            data = new byte[0];
-        }
+        data ??= [];
         var array = new byte[14 + data.Length];
         array[0] = BitConverter.GetBytes(array.Length - 4)[3];
         array[1] = BitConverter.GetBytes(array.Length - 4)[2];

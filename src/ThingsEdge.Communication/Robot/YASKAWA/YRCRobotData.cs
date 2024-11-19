@@ -124,9 +124,11 @@ public class YRCRobotData
     {
         if (type == YRCType.YRC100)
         {
-            return $"{SpeedPercent},{Frame},{X},{Y},{Z},{Rx},{Ry},{Rz},{Re},{SoftBasic.BoolArrayToByte(Status)[0]}," + $"{ToolNumber},{Axis7PulseNumber},{Axis8PulseNumber},{Axis9PulseNumber},{Axis10PulseNumber},{Axis11PulseNumber},{Axis12PulseNumber}";
+            return $"{SpeedPercent},{Frame},{X},{Y},{Z},{Rx},{Ry},{Rz},{Re},{SoftBasic.BoolArrayToByte(Status)[0]},"
+                + $"{ToolNumber},{Axis7PulseNumber},{Axis8PulseNumber},{Axis9PulseNumber},{Axis10PulseNumber},{Axis11PulseNumber},{Axis12PulseNumber}";
         }
-        return $"{SpeedPercent},{Frame},{X},{Y},{Z},{Rx},{Ry},{Rz},{SoftBasic.BoolArrayToByte(Status)[0]}," + $"{ToolNumber},{Axis7PulseNumber},{Axis8PulseNumber},{Axis9PulseNumber},{Axis10PulseNumber},{Axis11PulseNumber},{Axis12PulseNumber}";
+        return $"{SpeedPercent},{Frame},{X},{Y},{Z},{Rx},{Ry},{Rz},{SoftBasic.BoolArrayToByte(Status)[0]},"
+            + $"{ToolNumber},{Axis7PulseNumber},{Axis8PulseNumber},{Axis9PulseNumber},{Axis10PulseNumber},{Axis11PulseNumber},{Axis12PulseNumber}";
     }
 
     /// <summary>
@@ -136,7 +138,7 @@ public class YRCRobotData
     /// <param name="value">值</param>
     public void Parse(YRCType type, string value)
     {
-        var array = value.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        var array = value.Split([','], StringSplitOptions.RemoveEmptyEntries);
         var num = 0;
         X = float.Parse(array[num++]);
         Y = float.Parse(array[num++]);
@@ -161,7 +163,6 @@ public class YRCRobotData
         }
     }
 
-    /// <inheritdoc />
     public override string ToString()
     {
         return $"[{X},{Y},{Z},{Rx},{Ry},{Rz}]";

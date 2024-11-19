@@ -6,26 +6,15 @@ using ThingsEdge.Communication.Core.Net;
 namespace ThingsEdge.Communication.Robot.KUKA;
 
 /// <summary>
-/// Kuka机器人的数据交互类，通讯支持的条件为KUKA 的 KRC4 控制器中运行KUKAVARPROXY 这个第三方软件，端口通常为7000。
+/// Kuka 机器人的数据交互类，通讯支持的条件为KUKA 的 KRC4 控制器中运行 KUKAVARPROXY 这个第三方软件，端口通常为 7000。
 /// </summary>
 /// <remarks>
-/// 非常感谢 昆山-LT 网友的测试和意见反馈。<br />
-/// 其中KUKAVARPROXY 这个第三方软件在来源地址：
-/// https://github.com/ImtsSrl/KUKAVARPROXY <br />
+/// 其中 KUKAVARPROXY 这个第三方软件在来源地址：
+/// https://github.com/ImtsSrl/KUKAVARPROXY。
 /// </remarks>
-public class KukaAvarProxyNet : NetworkDoubleBase, IRobotNet
+public sealed class KukaAvarProxyNet : NetworkDoubleBase, IRobotNet
 {
-    private SoftIncrementCount softIncrementCount;
-
-    /// <summary>
-    /// 实例化一个默认的对象<br />
-    /// Instantiate a default object
-    /// </summary>
-    public KukaAvarProxyNet()
-    {
-        softIncrementCount = new SoftIncrementCount(65535L, 0L);
-        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
-    }
+    private readonly SoftIncrementCount _softIncrementCount = new(65535L, 0L);
 
     /// <summary>
     /// 实例化一个默认的Kuka机器人对象，并指定IP地址和端口号，端口号通常为7000。
@@ -33,10 +22,10 @@ public class KukaAvarProxyNet : NetworkDoubleBase, IRobotNet
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
     public KukaAvarProxyNet(string ipAddress, int port)
-        : this()
     {
         IpAddress = ipAddress;
         Port = port;
+        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
     }
 
     /// <inheritdoc />
@@ -96,7 +85,7 @@ public class KukaAvarProxyNet : NetworkDoubleBase, IRobotNet
     private byte[] PackCommand(byte[] commandCore)
     {
         var array = new byte[commandCore.Length + 4];
-        ByteTransform.TransByte((ushort)softIncrementCount.GetCurrentValue()).CopyTo(array, 0);
+        ByteTransform.TransByte((ushort)_softIncrementCount.GetCurrentValue()).CopyTo(array, 0);
         ByteTransform.TransByte((ushort)commandCore.Length).CopyTo(array, 2);
         commandCore.CopyTo(array, 4);
         return array;
@@ -146,7 +135,6 @@ public class KukaAvarProxyNet : NetworkDoubleBase, IRobotNet
         return BuildCommands(1, [address, value]);
     }
 
-    /// <inheritdoc />
     public override string ToString()
     {
         return $"KukaAvarProxyNet Robot[{IpAddress}:{Port}]";

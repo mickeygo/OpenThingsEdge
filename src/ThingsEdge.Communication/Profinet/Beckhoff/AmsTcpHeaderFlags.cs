@@ -28,5 +28,5 @@ public enum AmsTcpHeaderFlags : ushort
     /// <summary>
     /// Get LocalNetId header
     /// </summary>
-    GetLocalNetId = 4098
+    GetLocalNetId = 4098,
 }

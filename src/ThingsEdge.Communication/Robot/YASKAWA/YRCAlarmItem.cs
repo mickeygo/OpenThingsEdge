@@ -24,14 +24,7 @@ public class YRCAlarmItem
     public string Message { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public YRCAlarmItem()
-    {
-    }
-
-    /// <summary>
-    /// 使用原始数据来实例化一个报警的对象
+    /// 使用原始数据来实例化一个报警的对象。
     /// </summary>
     /// <param name="byteTransform">字节的变换顺序</param>
     /// <param name="content">原始字节数据</param>

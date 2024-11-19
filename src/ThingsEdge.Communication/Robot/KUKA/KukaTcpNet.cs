@@ -7,28 +7,20 @@ using ThingsEdge.Communication.Exceptions;
 namespace ThingsEdge.Communication.Robot.KUKA;
 
 /// <summary>
-/// Kuka机器人的数据交互类，通讯支持的条件为KUKA 的 TCP通讯
+/// Kuka 机器人的数据交互类，通讯支持的条件为 KUKA 的 TCP 通讯。
 /// </summary>
 public class KukaTcpNet : NetworkDoubleBase, IRobotNet
 {
-    /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public KukaTcpNet()
-    {
-        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
-    }
-
     /// <summary>
     /// 实例化一个默认的Kuka机器人对象，并指定IP地址和端口号，端口号通常为9999。
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
     public KukaTcpNet(string ipAddress, int port)
-        : this()
     {
         IpAddress = ipAddress;
         Port = port;
+        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
     }
 
     public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(Socket socket, byte[] send, bool hasResponseData = true, bool usePackHeader = true)
@@ -121,8 +113,7 @@ public class KukaTcpNet : NetworkDoubleBase, IRobotNet
     }
 
     /// <summary>
-    /// 启动机器人的指定的程序<br />
-    /// Start the specified program of the robot
+    /// 启动机器人的指定的程序。
     /// </summary>
     /// <param name="program">程序的名字</param>
     /// <returns>是否启动成功</returns>
@@ -154,18 +145,12 @@ public class KukaTcpNet : NetworkDoubleBase, IRobotNet
         return OperateResult.CreateSuccessResult(response);
     }
 
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"KukaTcpNet[{IpAddress}:{Port}]";
-    }
-
     /// <summary>
     /// 构建读取变量的报文命令
     /// </summary>
     /// <param name="address">地址信息</param>
     /// <returns>报文内容</returns>
-    public static string BuildReadCommands(string[] address)
+    private static string BuildReadCommands(string[] address)
     {
         if (address == null)
         {
@@ -189,7 +174,7 @@ public class KukaTcpNet : NetworkDoubleBase, IRobotNet
     /// </summary>
     /// <param name="address">地址信息</param>
     /// <returns>报文内容</returns>
-    public static string BuildReadCommands(string address)
+    private static string BuildReadCommands(string address)
     {
         return BuildReadCommands([address]);
     }
@@ -200,7 +185,7 @@ public class KukaTcpNet : NetworkDoubleBase, IRobotNet
     /// <param name="address">地址信息</param>
     /// <param name="values">数据信息</param>
     /// <returns>字符串信息</returns>
-    public static string BuildWriteCommands(string[] address, string[] values)
+    private static string BuildWriteCommands(string[] address, string[] values)
     {
         if (address == null || values == null)
         {
@@ -223,14 +208,8 @@ public class KukaTcpNet : NetworkDoubleBase, IRobotNet
         return stringBuilder.ToString();
     }
 
-    /// <summary>
-    /// 构建写入变量的报文命令
-    /// </summary>
-    /// <param name="address">地址信息</param>
-    /// <param name="value">数据信息</param>
-    /// <returns>字符串信息</returns>
-    public static string BuildWriteCommands(string address, string value)
+    public override string ToString()
     {
-        return BuildWriteCommands([address], [value]);
+        return $"KukaTcpNet[{IpAddress}:{Port}]";
     }
 }

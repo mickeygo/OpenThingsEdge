@@ -3,7 +3,7 @@ namespace ThingsEdge.Communication.Secs.Types;
 /// <summary>
 /// 扩展类
 /// </summary>
-public static class SecsMessageExtension
+public static class SecsMessageExtensions
 {
     /// <summary>
     /// 获取显示的字符串文本信息

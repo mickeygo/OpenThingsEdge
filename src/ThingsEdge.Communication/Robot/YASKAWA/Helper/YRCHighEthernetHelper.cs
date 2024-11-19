@@ -5,7 +5,7 @@ namespace ThingsEdge.Communication.Robot.YASKAWA.Helper;
 /// <summary>
 /// 安川机器人的高速以太网的辅助方法
 /// </summary>
-public class YRCHighEthernetHelper
+public static class YRCHighEthernetHelper
 {
     /// <summary>
     /// 构建完整的读取指令
@@ -18,17 +18,17 @@ public class YRCHighEthernetHelper
     /// <param name="dataHandle">处理请求，定义数据的请方法</param>
     /// <param name="dataPart">数据部分的内容</param>
     /// <returns>构建结果</returns>
-    public static byte[] BuildCommand(byte handle, byte requestID, ushort command, ushort dataAddress, byte dataAttribute, byte dataHandle, byte[] dataPart)
+    public static byte[] BuildCommand(byte handle, byte requestID, ushort command, ushort dataAddress, byte dataAttribute, byte dataHandle, byte[]? dataPart)
     {
         var memoryStream = new MemoryStream();
         memoryStream.Write(Encoding.ASCII.GetBytes("YERC"));
-        memoryStream.Write(new byte[4] { 32, 0, 0, 0 });
-        memoryStream.Write(new byte[4] { 3, handle, 0, requestID });
+        memoryStream.Write([32, 0, 0, 0]);
+        memoryStream.Write([3, handle, 0, requestID]);
         memoryStream.Write(new byte[4]);
         memoryStream.Write(Encoding.ASCII.GetBytes("99999999"));
         memoryStream.Write(BitConverter.GetBytes(command));
         memoryStream.Write(BitConverter.GetBytes(dataAddress));
-        memoryStream.Write(new byte[4] { dataAttribute, dataHandle, 0, 0 });
+        memoryStream.Write([dataAttribute, dataHandle, 0, 0]);
         if (dataPart != null)
         {
             memoryStream.Write(dataPart);

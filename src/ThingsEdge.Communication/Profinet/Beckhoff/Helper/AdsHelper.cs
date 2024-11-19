@@ -1,9 +1,10 @@
 using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Profinet.Beckhoff.Helper;
 
-internal class AdsHelper
+internal static class AdsHelper
 {
     /// <summary>
     /// 根据命令码ID，消息ID，数据信息组成AMS的命令码
@@ -11,12 +12,9 @@ internal class AdsHelper
     /// <param name="commandId">命令码ID</param>
     /// <param name="data">数据内容</param>
     /// <returns>打包之后的数据信息，没有填写AMSNetId的Target和Source内容</returns>
-    public static byte[] BuildAmsHeaderCommand(ushort commandId, byte[] data)
+    public static byte[] BuildAmsHeaderCommand(ushort commandId, byte[]? data)
     {
-        if (data == null)
-        {
-            data = new byte[0];
-        }
+        data ??= [];
         var array = new byte[32 + data.Length];
         array[16] = BitConverter.GetBytes(commandId)[0];
         array[17] = BitConverter.GetBytes(commandId)[1];
@@ -61,11 +59,7 @@ internal class AdsHelper
     /// <returns>报文信息</returns>
     public static OperateResult<byte[]> BuildWriteControlCommand(short state, short deviceState, byte[] data)
     {
-        if (data == null)
-        {
-            data = new byte[0];
-        }
-        var array = new byte[8 + data.Length];
+        data ??= [];
         return OperateResult.CreateSuccessResult(BuildAmsHeaderCommand(5, SoftBasic.SpliceArray(BitConverter.GetBytes(state), BitConverter.GetBytes(deviceState), BitConverter.GetBytes(data.Length), data)));
     }
 
@@ -296,7 +290,7 @@ internal class AdsHelper
             if (address.StartsWith("i=") || address.StartsWith("I="))
             {
                 operateResult.Content1 = 61445u;
-                operateResult.Content2 = uint.Parse(address.Substring(2));
+                operateResult.Content2 = uint.Parse(address[2..]);
             }
             else if (address.StartsWith("s=") || address.StartsWith("S="))
             {
@@ -318,12 +312,12 @@ internal class AdsHelper
                         if (isBit)
                         {
                             operateResult.Content1 = 16417u;
-                            operateResult.Content2 = (uint)CalculateAddressStarted(address.Substring(1));
+                            operateResult.Content2 = (uint)CalculateAddressStarted(address[1..]);
                         }
                         else
                         {
                             operateResult.Content1 = 16416u;
-                            operateResult.Content2 = uint.Parse(address.Substring(1));
+                            operateResult.Content2 = uint.Parse(address[1..]);
                         }
                         break;
                     case 'I':
@@ -331,12 +325,12 @@ internal class AdsHelper
                         if (isBit)
                         {
                             operateResult.Content1 = 61473u;
-                            operateResult.Content2 = (uint)(CalculateAddressStarted(address.Substring(1)) + 1024000);
+                            operateResult.Content2 = (uint)(CalculateAddressStarted(address[1..]) + 1024000);
                         }
                         else
                         {
                             operateResult.Content1 = 61472u;
-                            operateResult.Content2 = uint.Parse(address.Substring(1)) + 128000;
+                            operateResult.Content2 = uint.Parse(address[1..]) + 128000;
                         }
                         break;
                     case 'Q':
@@ -344,16 +338,16 @@ internal class AdsHelper
                         if (isBit)
                         {
                             operateResult.Content1 = 61489u;
-                            operateResult.Content2 = (uint)(CalculateAddressStarted(address.Substring(1)) + 2048000);
+                            operateResult.Content2 = (uint)(CalculateAddressStarted(address[1..]) + 2048000);
                         }
                         else
                         {
                             operateResult.Content1 = 61488u;
-                            operateResult.Content2 = uint.Parse(address.Substring(1)) + 256000;
+                            operateResult.Content2 = uint.Parse(address[1..]) + 256000;
                         }
                         break;
                     default:
-                        throw new Exception(StringResources.Language.NotSupportedDataType);
+                        throw new CommunicationException(StringResources.Language.NotSupportedDataType);
                 }
             }
         }
@@ -389,7 +383,7 @@ internal class AdsHelper
         if (amsNetId.IndexOf(':') > 0)
         {
             array = new byte[8];
-            var array2 = amsNetId.Split(new char[1] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            var array2 = amsNetId.Split([':'], StringSplitOptions.RemoveEmptyEntries);
             text = array2[0];
             array[6] = BitConverter.GetBytes(int.Parse(array2[1]))[0];
             array[7] = BitConverter.GetBytes(int.Parse(array2[1]))[1];
@@ -416,17 +410,17 @@ internal class AdsHelper
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(data[index]);
-        stringBuilder.Append(".");
+        stringBuilder.Append('.');
         stringBuilder.Append(data[index + 1]);
-        stringBuilder.Append(".");
+        stringBuilder.Append('.');
         stringBuilder.Append(data[index + 2]);
-        stringBuilder.Append(".");
+        stringBuilder.Append('.');
         stringBuilder.Append(data[index + 3]);
-        stringBuilder.Append(".");
+        stringBuilder.Append('.');
         stringBuilder.Append(data[index + 4]);
-        stringBuilder.Append(".");
+        stringBuilder.Append('.');
         stringBuilder.Append(data[index + 5]);
-        stringBuilder.Append(":");
+        stringBuilder.Append(':');
         stringBuilder.Append(BitConverter.ToUInt16(data, index + 6));
         return stringBuilder.ToString();
     }

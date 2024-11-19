@@ -6,11 +6,10 @@ namespace ThingsEdge.Communication.Robot.YASKAWA.Helper;
 /// <summary>
 /// 安川机器人的静态辅助方法
 /// </summary>
-public class YRCHelper
+public static class YRCHelper
 {
     /// <summary>
-    /// 根据错误信息获取安川机器人的错误信息文本<br />
-    /// Obtain the error message text of the Yaskawa robot according to the error message
+    /// 根据错误信息获取安川机器人的错误信息文本。
     /// </summary>
     /// <param name="err">错误号</param>
     /// <returns>错误文本信息</returns>
@@ -89,9 +88,7 @@ public class YRCHelper
     }
 
     /// <summary>
-    /// 当机器人返回ERROR的错误指令后，检测消息里面是否有相关的错误码数据，如果存在，就解析出错误对应的文本<br />
-    /// When the robot returns the error instruction of ERROR, it checks whether there is related error code data in the message, 
-    /// and if it exists, it parses out the text corresponding to the error
+    /// 当机器人返回ERROR的错误指令后，检测消息里面是否有相关的错误码数据，如果存在，就解析出错误对应的文本。
     /// </summary>
     /// <param name="errText">返回的完整的报文</param>
     /// <returns>带有错误文本的数据信息</returns>
@@ -100,7 +97,7 @@ public class YRCHelper
         var match = Regex.Match(errText, "\\([0-9]+\\)\\.$");
         if (match.Success)
         {
-            var s = match.Value.Substring(1, match.Value.Length - 3);
+            var s = match.Value[1..^2];
             if (int.TryParse(s, out var result))
             {
                 return new OperateResult<string>(errText + Environment.NewLine + GetErrorMessage(result));

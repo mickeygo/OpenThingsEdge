@@ -5,26 +5,20 @@ using ThingsEdge.Communication.Secs.Helper;
 namespace ThingsEdge.Communication.Secs.Types;
 
 /// <summary>
-/// SECS数据的对象信息，可以用来表示层级及嵌套的数据内容，如果需要显示，只需要<see cref="M:HslCommunication.Secs.Types.SecsValue.ToString" /> 方法即可，
-/// 如果需要发送SECS设备，只需要 <see cref="M:HslCommunication.Secs.Types.SecsValue.ToSourceBytes" />，并支持反序列化操作 <see cref="M:HslCommunication.Secs.Types.SecsValue.ParseFromSource(System.Byte[],System.Text.Encoding)" />，无论是XML元素还是byte[]类型。<br />
-/// SECS data object information, can be used to represent the hierarchy and nested data content, if you need to display, just need to <see cref="M:HslCommunication.Secs.Types.SecsValue.ToString" /> method can be.
-/// If you need to send SECS equipment, only need <see cref="M:HslCommunication.Secs.Types.SecsValue.ToSourceBytes" />, and support the deserialization operation <see cref="M:HslCommunication.Secs.Types.SecsValue.ParseFromSource(System.Byte[],System.Text.Encoding)" />. Whether it's an XML element or byte[] type.
+/// SECS数据的对象信息，可以用来表示层级及嵌套的数据内容，如果需要显示，只需要<see cref="ToString" /> 方法即可，
+/// 如果需要发送SECS设备，只需要 <see cref="ToSourceBytes" />，并支持反序列化操作 <see cref="ParseFromSource" />，无论是XML元素还是byte[]类型。
 /// </summary>
 /// <remarks>
-/// XML序列化，反序列化例子：<br />
-/// SecsValue value = new SecsValue( new object[]{ 1.23f, "ABC" } );<br />
-/// XElement xml = value.ToXElement( ); <br />
+/// XML序列化，反序列化例子：
+/// SecsValue value = new SecsValue( new object[]{ 1.23f, "ABC" } );
+/// XElement xml = value.ToXElement( ); 
 /// SecsValue value2 = new SecsValue(xml);
 /// </remarks>
-/// <example>
-/// 关于<see cref="T:HslCommunication.Secs.Types.SecsValue" />类型，可以非常灵活的实例化，参考下面的示例代码
-/// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\Secs\SecsGemSample.cs" region="Sample2" title="SecsValue说明" />
-/// </example>
 public class SecsValue
 {
-    private object obj = null;
+    private object? _obj;
 
-    private int length = 1;
+    private int _length = 1;
 
     /// <summary>
     /// 类型信息
@@ -32,29 +26,27 @@ public class SecsValue
     public SecsItemType ItemType { get; set; }
 
     /// <summary>
-    /// 字节长度信息，如果是 <see cref="F:HslCommunication.Secs.Types.SecsItemType.List" /> 类型的话，就是数组长度，如果如 <see cref="F:HslCommunication.Secs.Types.SecsItemType.ASCII" /> 类型，就是字符串的字节长度，其他类型都是表示数据个数<br />
-    /// Byte length information, if it is of type <see cref="F:HslCommunication.Secs.Types.SecsItemType.List" />, it is the length of the array, if it is of type <see cref="F:HslCommunication.Secs.Types.SecsItemType.ASCII" />,
-    /// it is the byte length of the string, other types are the number of data
+    /// 字节长度信息，如果是 <see cref="SecsItemType.List" /> 类型的话，就是数组长度，如果如 <see cref="F:HslCommunication.Secs.Types.SecsItemType.ASCII" /> 类型，就是字符串的字节长度，其他类型都是表示数据个数。
     /// </summary>
-    public int Length => length;
+    public int Length => _length;
 
     /// <summary>
-    /// 数据值信息，也可以是 <see cref="T:HslCommunication.Secs.Types.SecsValue" /> 的列表信息，在设置列表之前，必须先设置类型
+    /// 数据值信息，也可以是 <see cref="SecsValue" /> 的列表信息，在设置列表之前，必须先设置类型。
     /// </summary>
     public object Value
     {
         get
         {
-            return obj;
+            return _obj;
         }
         set
         {
             if (ItemType == SecsItemType.None && value != null)
             {
-                throw new ArgumentException("Must set ItemType before set value.", "value");
+                throw new ArgumentException("Must set ItemType before set value.", nameof(value));
             }
-            obj = value;
-            length = GetValueLength(this);
+            _obj = value;
+            _length = GetValueLength(this);
         }
     }
 
@@ -83,10 +75,7 @@ public class SecsValue
     {
         ItemType = SecsItemType.List;
         var list = new List<SecsValue>();
-        if (value == null)
-        {
-            value = new string[0];
-        }
+        value ??= [];
         var array = value;
         foreach (var value2 in array)
         {
@@ -96,7 +85,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.SByte" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="sbyte" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(sbyte value)
@@ -104,14 +93,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.SByte)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="sbyte" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(sbyte[] value)
         : this(SecsItemType.SByte, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Byte" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="byte" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(byte value)
@@ -120,7 +112,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Int16" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="short" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(short value)
@@ -129,7 +121,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Int32" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="short" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(short[] value)
@@ -138,7 +130,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.UInt16" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="ushort" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(ushort value)
@@ -146,14 +138,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.UInt16)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="ushort" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(ushort[] value)
         : this(SecsItemType.UInt16, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Int32" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="int" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(int value)
@@ -162,7 +157,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Int32" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="int" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(int[] value)
@@ -171,7 +166,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.UInt32" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="uint" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(uint value)
@@ -179,14 +174,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.UInt32)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="uint" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(uint[] value)
         : this(SecsItemType.UInt32, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Int64" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="long" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(long value)
@@ -194,14 +192,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.Int64)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="long" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(long[] value)
         : this(SecsItemType.Int64, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.UInt64" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="ulong" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(ulong value)
@@ -209,14 +210,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.UInt64)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="ulong" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(ulong[] value)
         : this(SecsItemType.UInt64, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Single" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="float" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(float value)
@@ -224,14 +228,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.Single)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="float" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(float[] value)
         : this(SecsItemType.Single, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Double" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="double" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(double value)
@@ -239,14 +246,17 @@ public class SecsValue
     {
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Secs.Types.SecsValue.#ctor(System.Double)" />
+    /// <summary>
+    /// 从一个类型为 <see cref="double" /> 的对象初始化数据
+    /// </summary>
+    /// <param name="value">数据值信息</param>
     public SecsValue(double[] value)
         : this(SecsItemType.Double, value)
     {
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Byte" /> 数组的对象初始化数据，需要指定 <see cref="T:HslCommunication.Secs.Types.SecsItemType" /> 来表示二进制还是byte数组类型
+    /// 从一个类型为 <see cref="byte" /> 数组的对象初始化数据，需要指定 <see cref="SecsItemType" /> 来表示二进制还是byte数组类型
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(byte[] value)
@@ -256,7 +266,7 @@ public class SecsValue
     }
 
     /// <summary>
-    /// 从一个类型为 <see cref="T:System.Boolean" /> 的对象初始化数据
+    /// 从一个类型为 <see cref="bool" /> 的对象初始化数据
     /// </summary>
     /// <param name="value">数据值信息</param>
     public SecsValue(bool value)
@@ -415,7 +425,7 @@ public class SecsValue
     {
         ItemType = type;
         Value = value;
-        this.length = length;
+        this._length = length;
     }
 
     /// <summary>
@@ -617,7 +627,7 @@ public class SecsValue
         return list.ToArray();
     }
 
-    private static string getSourceCode(SecsValue secsValue)
+    private static string GetSourceCode(SecsValue secsValue)
     {
         if (secsValue.ItemType == SecsItemType.List)
         {
@@ -626,8 +636,8 @@ public class SecsValue
             {
                 foreach (var item in enumerable)
                 {
-                    stringBuilder.Append(getSourceCode(item));
-                    stringBuilder.Append(",");
+                    stringBuilder.Append(GetSourceCode(item));
+                    stringBuilder.Append(',');
                 }
             }
             if (stringBuilder[stringBuilder.Length - 1] == ',')
@@ -639,7 +649,7 @@ public class SecsValue
         }
         if (secsValue.ItemType == SecsItemType.Binary || secsValue.ItemType == SecsItemType.JIS8)
         {
-            return "\"" + (secsValue.Value as byte[]).ToHexString() + "\".ToHexBytes( )";
+            return "\"" + ((byte[])secsValue.Value).ToHexString() + "\".ToHexBytes( )";
         }
         if (secsValue.ItemType == SecsItemType.ASCII)
         {
@@ -659,7 +669,7 @@ public class SecsValue
             {
                 return "new bool[]{ " + getArrayString(array2) + " }";
             }
-            return secsValue.Value.ToString().ToLower() ?? "";
+            return secsValue.Value.ToString()!.ToLower() ?? "";
         }
         if (secsValue.ItemType == SecsItemType.UInt16)
         {
@@ -737,7 +747,7 @@ public class SecsValue
         {
             return "Unkonw data";
         }
-        return secsValue.Value.ToString();
+        return secsValue.Value.ToString()!;
     }
 
     private static string getArrayString(Array array, string tail = "")
@@ -745,22 +755,21 @@ public class SecsValue
         var stringBuilder = new StringBuilder("");
         for (var i = 0; i < array.Length; i++)
         {
-            stringBuilder.Append(array.GetValue(i).ToString());
+            stringBuilder.Append(array.GetValue(i)!.ToString());
             if (!string.IsNullOrEmpty(tail))
             {
                 stringBuilder.Append(tail);
             }
             if (i != array.Length - 1)
             {
-                stringBuilder.Append(",");
+                stringBuilder.Append(',');
             }
         }
         return stringBuilder.ToString();
     }
 
     /// <summary>
-    /// 获取当前 <see cref="T:HslCommunication.Secs.Types.SecsValue" /> 对象的源代码表示方式，可以直接复制生成同等对象<br />
-    /// Obtain the source code representation of the current <see cref="T:HslCommunication.Secs.Types.SecsValue" /> object, and you can directly copy and generate an equivalent object
+    /// 获取当前 <see cref="SecsValue" /> 对象的源代码表示方式，可以直接复制生成同等对象。
     /// </summary>
     /// <returns>对象的源代码表示方式</returns>
     public string ToSourceCode()
@@ -770,8 +779,8 @@ public class SecsValue
             return "SecsValue.EmptySecsValue( )";
         }
         var stringBuilder = new StringBuilder("new SecsValue( ");
-        stringBuilder.Append(getSourceCode(this));
-        stringBuilder.Append(")");
+        stringBuilder.Append(GetSourceCode(this));
+        stringBuilder.Append(')');
         return stringBuilder.ToString();
     }
 
@@ -860,61 +869,64 @@ public class SecsValue
         {
             return 0;
         }
+
+        var vtype = secsValue.Value.GetType();
+
         if (secsValue.ItemType == SecsItemType.SByte)
         {
-            return secsValue.Value.GetType() == typeof(sbyte) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(sbyte) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Byte)
         {
-            return secsValue.Value.GetType() == typeof(byte) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(byte) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Int16)
         {
-            return secsValue.Value.GetType() == typeof(short) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(short) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.UInt16)
         {
-            return secsValue.Value.GetType() == typeof(ushort) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(ushort) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Int32)
         {
-            return secsValue.Value.GetType() == typeof(int) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(int) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.UInt32)
         {
-            return secsValue.Value.GetType() == typeof(uint) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(uint) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Int64)
         {
-            return secsValue.Value.GetType() == typeof(long) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(long) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.UInt64)
         {
-            return secsValue.Value.GetType() == typeof(ulong) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(ulong) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Single)
         {
-            return secsValue.Value.GetType() == typeof(float) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(float) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Double)
         {
-            return secsValue.Value.GetType() == typeof(double) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(double) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Bool)
         {
-            return secsValue.Value.GetType() == typeof(bool) ? 1 : (secsValue.Value as Array).Length;
+            return vtype == typeof(bool) ? 1 : ((Array)secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.Binary)
         {
-            return (secsValue.Value as byte[]).Length;
+            return ((byte[])secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.JIS8)
         {
-            return (secsValue.Value as byte[]).Length;
+            return ((byte[])secsValue.Value).Length;
         }
         if (secsValue.ItemType == SecsItemType.ASCII)
         {
-            return secsValue.Value.ToString().Length;
+            return secsValue.Value.ToString()!.Length;
         }
         return 0;
     }
@@ -922,9 +934,9 @@ public class SecsValue
     private static object GetObjectValue<T>(XElement element, Func<string, T> trans)
     {
         var attribute = GetAttribute(element, "Value", "", (m) => m);
-        if (!attribute.Contains(","))
+        if (!attribute.Contains(','))
         {
-            return trans(attribute);
+            return trans(attribute)!;
         }
         return attribute.ToStringArray(trans);
     }
