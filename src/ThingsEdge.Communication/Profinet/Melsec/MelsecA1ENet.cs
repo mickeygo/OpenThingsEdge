@@ -17,24 +17,14 @@ public class MelsecA1ENet : DeviceTcpNet
     public byte PLCNumber { get; set; } = byte.MaxValue;
 
     /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public MelsecA1ENet()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform();
-    }
-
-    /// <summary>
     /// 指定ip地址和端口来来实例化一个默认的对象。
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public MelsecA1ENet(string ipAddress, int port)
-        : this()
+    public MelsecA1ENet(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform();
     }
 
     protected override INetMessage GetNewNetMessage()

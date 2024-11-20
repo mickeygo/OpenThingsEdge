@@ -14,14 +14,8 @@ public class MessageRouter
     /// </summary>
     public byte Backplane
     {
-        get
-        {
-            return _router[0];
-        }
-        set
-        {
-            _router[0] = value;
-        }
+        get => _router[0];
+        set => _router[0] = value;
     }
 
     /// <summary>
@@ -29,19 +23,12 @@ public class MessageRouter
     /// </summary>
     public byte Slot
     {
-        get
-        {
-            return _router[5];
-        }
-        set
-        {
-            _router[5] = value;
-        }
+        get => _router[5];
+        set => _router[5] = value;
     }
 
     /// <summary>
-    /// 实例化一个默认的实例对象<br />
-    /// instantiate a default instance object
+    /// 实例化一个默认的实例对象。
     /// </summary>
     public MessageRouter()
     {

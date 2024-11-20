@@ -19,8 +19,7 @@ public class FujiSPHAddress : DeviceAddressDataBase
     public int BitIndex { get; set; }
 
     /// <summary>
-    /// 从实际的Fuji的地址里面解析出地址对象<br />
-    /// Resolve the address object from the actual Fuji address
+    /// 从实际的Fuji的地址里面解析出地址对象。
     /// </summary>
     /// <param name="address">富士的地址数据信息</param>
     /// <returns>是否成功的结果对象</returns>
@@ -30,8 +29,7 @@ public class FujiSPHAddress : DeviceAddressDataBase
     }
 
     /// <summary>
-    /// 从实际的Fuji的地址里面解析出地址对象<br />
-    /// Resolve the address object from the actual Fuji address
+    /// 从实际的Fuji的地址里面解析出地址对象。
     /// </summary>
     /// <param name="address">富士的地址数据信息</param>
     /// <param name="length">读取的数据长度</param>
@@ -46,20 +44,13 @@ public class FujiSPHAddress : DeviceAddressDataBase
                 case 'M' or 'm':
                     {
                         var array2 = address.SplitDot();
-                        switch (int.Parse(array2[0][1..]))
+                        fujiSPHAddress.TypeCode = int.Parse(array2[0][1..]) switch
                         {
-                            case 1:
-                                fujiSPHAddress.TypeCode = 2;
-                                break;
-                            case 3:
-                                fujiSPHAddress.TypeCode = 4;
-                                break;
-                            case 10:
-                                fujiSPHAddress.TypeCode = 8;
-                                break;
-                            default:
-                                throw new CommunicationException(StringResources.Language.NotSupportedDataType);
-                        }
+                            1 => 2,
+                            3 => 4,
+                            10 => 8,
+                            _ => throw new CommunicationException(StringResources.Language.NotSupportedDataType),
+                        };
                         fujiSPHAddress.AddressStart = Convert.ToInt32(array2[1]);
                         if (array2.Length > 2)
                         {

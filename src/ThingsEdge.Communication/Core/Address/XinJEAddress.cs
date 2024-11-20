@@ -24,13 +24,6 @@ public class XinJEAddress : DeviceAddressDataBase
     public int CriticalAddress { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public XinJEAddress()
-    {
-    }
-
-    /// <summary>
     /// 指定类型，地址偏移，临界地址来实例化一个对象。
     /// </summary>
     /// <param name="dataCode">数据的类型代号</param>

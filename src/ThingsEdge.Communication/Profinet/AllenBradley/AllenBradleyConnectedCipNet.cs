@@ -13,13 +13,6 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 public class AllenBradleyConnectedCipNet : OmronConnectedCipNet
 {
     /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public AllenBradleyConnectedCipNet()
-    {
-    }
-
-    /// <summary>
     /// 根据指定的IP及端口来实例化这个连接对象
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>

@@ -7,7 +7,7 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public interface IReadWriteCip : IReadWriteNet
 {
-    IByteTransform ByteTransform { get; set; }
+    IByteTransform ByteTransform { get; }
 
     Task<OperateResult<string>> ReadPlcTypeAsync();
 
@@ -20,7 +20,7 @@ public interface IReadWriteCip : IReadWriteNet
     /// 关于参数 length 的含义，表示的是地址长度，一般的标量数据都是 1，如果PLC有个标签是 A，数据类型为 byte[10]，那我们写入 3 个byte就是 WriteTag( "A[5]", 0xD1, new byte[]{1,2,3}, 3 )。
     /// </remarks>
     /// <param name="address">节点的名称</param>
-    /// <param name="typeCode">类型代码，详细参见<see cref="T:Profinet.AllenBradley.AllenBradleyHelper" />上的常用字段</param>
+    /// <param name="typeCode">类型代码</param>
     /// <param name="value">实际的数据值</param>
     /// <param name="length">如果节点是数组，就是数组长度</param>
     /// <returns>是否写入成功</returns>

@@ -12,24 +12,14 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     private readonly SoftIncrementCount _incrementCount = new(65535L, 2L, 2);
 
     /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public AllenBradleyPcccNet()
-    {
-        WordLength = 2;
-        ByteTransform = new RegularByteTransform();
-    }
-
-    /// <summary>
     /// 根据指定的IP及端口来实例化这个连接对象
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口号信息</param>
-    public AllenBradleyPcccNet(string ipAddress, int port = 44818)
-        : this()
+    public AllenBradleyPcccNet(string ipAddress, int port = 44818) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 2;
+        ByteTransform = new RegularByteTransform();
     }
 
     /// <inheritdoc />
@@ -46,6 +36,16 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     protected override byte[] GetLargeForwardClose()
     {
         return "\r\n00 00 00 00 0a 00 02 00 00 00 00 00 b2 00 18 00\r\n4e 02 20 06 24 01 0a 05 27 04 09 10 0b 46 a5 c1\r\n03 00 01 00 20 02 24 01".ToHexBytes();
+    }
+
+    public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
+    {
+        throw new NotImplementedException();
     }
 
     /// <inheritdoc />

@@ -10,13 +10,12 @@ namespace ThingsEdge.Communication.Core.Net;
 /// </summary>
 public abstract class NetworkConnectedCip : DeviceTcpNet
 {
-    private SoftIncrementCount _incrementCount = new(65535L, 3L, 2);
+    private readonly SoftIncrementCount _incrementCount = new(65535L, 3L, 2);
 
     private long _openForwardId = 256L;
 
-    private long _context = 0L;
+    private long _context;
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.AllenBradley.AllenBradleyNet.SessionHandle" />
     public uint SessionHandle { get; protected set; }
 
     /// <summary>
@@ -29,10 +28,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// </summary>
     public uint TOConnectionId { get; set; }
 
-    /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public NetworkConnectedCip()
+    protected NetworkConnectedCip(string ipAddress, int port) : base(ipAddress, port)
     {
     }
 
@@ -49,103 +45,33 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    protected override OperateResult InitializationOnConnect()
-    {
-        var operateResult = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), hasResponseData: true, usePackAndUnpack: false);
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
-        var operateResult2 = AllenBradleyHelper.CheckResponse(operateResult.Content);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        var num = ByteTransform.TransUInt32(operateResult.Content, 4);
-        for (var i = 0; i < 10; i++)
-        {
-            var value = Interlocked.Increment(ref _openForwardId);
-            var connectionID = i < 7 ? (ushort)i : (ushort)CommunicationHelper.HslRandom.Next(7, 200);
-            var operateResult3 = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, num, GetLargeForwardOpen(connectionID), ByteTransform.TransByte(value)), hasResponseData: true, usePackAndUnpack: false);
-            if (!operateResult3.IsSuccess)
-            {
-                return operateResult3;
-            }
-            try
-            {
-                if (operateResult3.Content.Length >= 46 && operateResult3.Content[42] != 0)
-                {
-                    var num2 = ByteTransform.TransUInt16(operateResult3.Content, 44);
-                    if (num2 == 256 && i < 9)
-                    {
-                        continue;
-                    }
-                    return num2 switch
-                    {
-                        256 => new OperateResult("Connection in use or duplicate Forward Open"),
-                        275 => new OperateResult("Extended Status: Out of connections (0x0113)"),
-                        _ => new OperateResult("Forward Open failed, Code: " + ByteTransform.TransUInt16(operateResult3.Content, 44)),
-                    };
-                }
-                OTConnectionId = ByteTransform.TransUInt32(operateResult3.Content, 44);
-            }
-            catch (Exception ex)
-            {
-                return new OperateResult(ex.Message + Environment.NewLine + "Source: " + operateResult3.Content.ToHexString(' '));
-            }
-            break;
-        }
-        _incrementCount.ResetCurrentValue();
-        SessionHandle = num;
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc />
-    protected override OperateResult ExtraOnDisconnect()
-    {
-        if (CommunicationPipe == null)
-        {
-            return OperateResult.CreateSuccessResult();
-        }
-        var largeForwardClose = GetLargeForwardClose();
-        if (largeForwardClose != null)
-        {
-            var operateResult = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, largeForwardClose), hasResponseData: true, usePackAndUnpack: false);
-            if (!operateResult.IsSuccess)
-            {
-                return operateResult;
-            }
-        }
-        var operateResult2 = ReadFromCoreServer(CommunicationPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), hasResponseData: true, usePackAndUnpack: false);
-        if (!operateResult2.IsSuccess)
-        {
-            return operateResult2;
-        }
-        return OperateResult.CreateSuccessResult();
-    }
-
-    /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read1 = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
+        var read1 = await ReadFromCoreServerAsync(Pipe,
+            AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), true, false)
+            .ConfigureAwait(continueOnCapturedContext: false);
         if (!read1.IsSuccess)
         {
             return read1;
         }
+
         var check = AllenBradleyHelper.CheckResponse(read1.Content);
         if (!check.IsSuccess)
         {
             return check;
         }
+
         var sessionHandle = ByteTransform.TransUInt32(read1.Content, 4);
         for (var i = 0; i < 10; i++)
         {
             var id = Interlocked.Increment(ref _openForwardId);
-            var read2 = await ReadFromCoreServerAsync(send: AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommunicationHelper.HslRandom.Next(7, 200)), ByteTransform.TransByte(id)), pipe: CommunicationPipe, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(continueOnCapturedContext: false);
+            var send = AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommunicationHelper.HslRandom.Next(7, 200)), ByteTransform.TransByte(id));
+            var read2 = await ReadFromCoreServerAsync(Pipe, send, true, false).ConfigureAwait(false);
             if (!read2.IsSuccess)
             {
                 return read2;
             }
+
             try
             {
                 if (read2.Content.Length >= 46 && read2.Content[42] != 0)
@@ -179,20 +105,21 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> ExtraOnDisconnectAsync()
     {
-        if (CommunicationPipe == null)
+        if (Pipe == null)
         {
             return OperateResult.CreateSuccessResult();
         }
+
         var forwardClose = GetLargeForwardClose();
         if (forwardClose != null)
         {
-            var close = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, forwardClose), hasResponseData: true, usePackAndUnpack: false);
+            var close = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, forwardClose), true, false).ConfigureAwait(false);
             if (!close.IsSuccess)
             {
                 return close;
             }
         }
-        var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), hasResponseData: true, usePackAndUnpack: false);
+        var read = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -221,7 +148,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         }
         else
         {
-            memoryStream.Write(new byte[6] { 10, 2, 32, 2, 36, 1 }, 0, 6);
+            memoryStream.Write([10, 2, 32, 2, 36, 1], 0, 6);
             memoryStream.WriteByte(BitConverter.GetBytes(cip.Length)[0]);
             memoryStream.WriteByte(BitConverter.GetBytes(cip.Length)[1]);
             var num = 2 + cip.Length * 2;
@@ -256,7 +183,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// 获取数据通信的后置关闭命令，不同的PLC的信息不一样。
     /// </summary>
     /// <returns>原始命令数据</returns>
-    protected virtual byte[] GetLargeForwardClose()
+    protected virtual byte[]? GetLargeForwardClose()
     {
         return null;
     }
@@ -269,9 +196,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     }
 
     /// <summary>
-    /// 从PLC反馈的数据解析出真实的数据内容，结果内容分别是原始字节数据，数据类型代码，是否有很多的数据<br />
-    /// The real data content is parsed from the data fed back by the PLC. The result content is the original byte data, 
-    /// the data type code, and whether there is a lot of data.
+    /// 从PLC反馈的数据解析出真实的数据内容，结果内容分别是原始字节数据，数据类型代码，是否有很多的数据。
     /// </summary>
     /// <param name="response">PLC的反馈数据</param>
     /// <param name="isRead">是否是返回的操作</param>

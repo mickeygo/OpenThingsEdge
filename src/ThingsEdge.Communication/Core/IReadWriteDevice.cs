@@ -12,7 +12,7 @@ public interface IReadWriteDevice : IReadWriteNet
     /// 提供了三种数据变换机制，分别是 <see cref="RegularByteTransform" />, <see cref="ReverseBytesTransform" />, <see cref="ReverseWordTransform" />，
     /// 各自的<see cref="DataFormat" />属性也可以自定调整，基本满足所有的情况使用。
     /// </remarks>
-    IByteTransform ByteTransform { get; set; }
+    IByteTransform ByteTransform { get; }
 
     /// <summary>
     /// 将当前的数据报文发送到设备去，具体使用什么通信方式取决于设备信息，然后从设备接收数据回来，并返回给调用者。
@@ -26,7 +26,7 @@ public interface IReadWriteDevice : IReadWriteNet
 
     /// <summary>
     /// 将多个数据报文按顺序发到设备，并从设备接收返回的数据内容，然后拼接成一个Byte[]信息，
-    /// 需要重写<see cref="Net.NetworkDoubleBase.UnpackResponseContent(byte[],System.Byte[])" />方法才能返回正确的结果。
+    /// 需要重写相关的 UnpackResponseContent 方法才能返回正确的结果。
     /// </summary>
     /// <param name="sends">发送的报文列表信息</param>
     /// <returns>是否接收成功</returns>

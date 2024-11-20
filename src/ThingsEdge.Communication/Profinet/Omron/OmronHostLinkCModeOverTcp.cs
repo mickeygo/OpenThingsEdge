@@ -18,18 +18,13 @@ public sealed class OmronHostLinkCModeOverTcp : DeviceTcpNet, IHostLinkCMode, IR
     /// </summary>
     public byte UnitNumber { get; set; }
 
-    public OmronHostLinkCModeOverTcp()
+    public OmronHostLinkCModeOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
-        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
         WordLength = 1;
-        ByteTransform.IsStringReverseByteWord = true;
-    }
-
-    public OmronHostLinkCModeOverTcp(string ipAddress, int port)
-        : this()
-    {
-        IpAddress = ipAddress;
-        Port = port;
+        ByteTransform = new RegularByteTransform(DataFormat.CDAB)
+        {
+            IsStringReverseByteWord = true,
+        };
     }
 
     protected override INetMessage GetNewNetMessage()

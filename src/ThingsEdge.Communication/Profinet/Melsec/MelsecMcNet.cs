@@ -29,24 +29,14 @@ public class MelsecMcNet : DeviceTcpNet, IReadWriteMc, IReadWriteDevice, IReadWr
     public ushort TargetIOStation { get; set; } = 1023;
 
     /// <summary>
-    /// 实例化三菱的Qna兼容3E帧协议的通讯对象。
-    /// </summary>
-    public MelsecMcNet()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform();
-    }
-
-    /// <summary>
     /// 指定ip地址和端口号来实例化一个默认的对象。
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public MelsecMcNet(string ipAddress, int port)
-        : this()
+    public MelsecMcNet(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform();
     }
 
     protected override INetMessage GetNewNetMessage()

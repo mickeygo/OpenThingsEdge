@@ -21,15 +21,6 @@ public class InovanceSerialOverTcp : ModbusRtuOverTcp
     public InovanceSeries Series { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public InovanceSerialOverTcp()
-    {
-        Series = InovanceSeries.AM;
-        DataFormat = DataFormat.CDAB;
-    }
-
-    /// <summary>
     /// 通过指定站号，ip地址，端口号来实例化一个新的对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>

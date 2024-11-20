@@ -19,24 +19,14 @@ public class GeSRTPNet : DeviceTcpNet
     private readonly SoftIncrementCount _incrementCount = new(65535L, 0L);
 
     /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public GeSRTPNet()
-    {
-        ByteTransform = new RegularByteTransform();
-        WordLength = 2;
-    }
-
-    /// <summary>
     /// 指定IP地址和端口号来实例化一个对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
-    public GeSRTPNet(string ipAddress, int port = 18245)
-        : this()
+    public GeSRTPNet(string ipAddress, int port = 18245) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        ByteTransform = new RegularByteTransform();
+        WordLength = 2;
     }
 
     /// <inheritdoc />
@@ -47,7 +37,7 @@ public class GeSRTPNet : DeviceTcpNet
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(CommunicationPipe, new byte[56], hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadFromCoreServerAsync(Pipe, new byte[56], hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
             return read;

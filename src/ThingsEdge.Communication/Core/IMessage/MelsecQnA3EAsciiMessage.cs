@@ -5,10 +5,8 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class MelsecQnA3EAsciiMessage : NetMessageBase, INetMessage
 {
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => 18;
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
         var bytes = new byte[4]
@@ -21,7 +19,6 @@ public class MelsecQnA3EAsciiMessage : NetMessageBase, INetMessage
         return Convert.ToInt32(Encoding.ASCII.GetString(bytes), 16);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.CheckHeadBytesLegal(System.Byte[])" />
     public override bool CheckHeadBytesLegal(byte[] token)
     {
         if (HeadBytes == null)

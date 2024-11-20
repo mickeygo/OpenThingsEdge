@@ -14,11 +14,6 @@ public sealed class DeltaSerialAsciiOverTcp : ModbusAsciiOverTcp, IDelta, IReadW
 {
     public DeltaSeries Series { get; set; } = DeltaSeries.Dvp;
 
-    public DeltaSerialAsciiOverTcp()
-    {
-        ByteTransform.DataFormat = DataFormat.CDAB;
-    }
-
     public DeltaSerialAsciiOverTcp(string ipAddress, int port = 502, byte station = 1)
         : base(ipAddress, port, station)
     {

@@ -13,5 +13,5 @@ public enum CheckType
     /// <summary>
     /// CRC校验的方式
     /// </summary>
-    CRC16
+    CRC16,
 }

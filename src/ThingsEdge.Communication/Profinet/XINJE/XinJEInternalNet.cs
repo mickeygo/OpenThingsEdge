@@ -11,7 +11,7 @@ namespace ThingsEdge.Communication.Profinet.XINJE;
 /// </summary>
 public class XinJEInternalNet : DeviceTcpNet
 {
-    private readonly SoftIncrementCount _softIncrementCount;
+    private readonly SoftIncrementCount _softIncrementCount = new(65535L, 0L);
 
     /// <summary>
     /// 获取或者重新修改服务器的默认站号信息，当然，你可以再读写的时候动态指定。
@@ -45,27 +45,15 @@ public class XinJEInternalNet : DeviceTcpNet
     public SoftIncrementCount MessageId => _softIncrementCount;
 
     /// <summary>
-    /// 实例化一个XINJE-Tcp协议的客户端对象。
-    /// </summary>
-    public XinJEInternalNet()
-    {
-        _softIncrementCount = new SoftIncrementCount(65535L, 0L);
-        WordLength = 1;
-        Station = 1;
-        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
-    }
-
-    /// <summary>
     /// 指定服务器地址，端口号，客户端自己的站号来初始化。
     /// </summary>
     /// <param name="ipAddress">服务器的Ip地址</param>
     /// <param name="port">服务器的端口号</param>
     /// <param name="station">客户端自身的站号</param>
-    public XinJEInternalNet(string ipAddress, int port = 502, byte station = 1)
-        : this()
+    public XinJEInternalNet(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
         Station = station;
     }
 

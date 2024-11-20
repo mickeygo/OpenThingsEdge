@@ -787,10 +787,6 @@ public class ModbusInfo
     /// <inheritdoc cref="Core.IMessage.NetMessageBase.CheckReceiveDataComplete(byte[],MemoryStream)" />
     public static bool CheckRtuReceiveDataComplete(byte[] send, byte[] response)
     {
-        if (send == null)
-        {
-            return CheckRtuReceiveDataComplete(response);
-        }
         if (send.Length < 5)
         {
             return CheckRtuReceiveDataComplete(response);
@@ -867,8 +863,7 @@ public class ModbusInfo
         return CheckAsciiReceiveDataComplete(modbusAscii, modbusAscii.Length);
     }
 
-    /// <inheritdoc cref="Core.IMessage.NetMessageBase.CheckReceiveDataComplete(byte[],MemoryStream)" />
-    public static bool CheckAsciiReceiveDataComplete(byte[] modbusAscii, int length)
+    private static bool CheckAsciiReceiveDataComplete(byte[] modbusAscii, int length)
     {
         if (length > 5)
         {

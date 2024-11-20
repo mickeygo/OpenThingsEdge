@@ -40,7 +40,7 @@ public class DeviceAddressDataBase
     /// <param name="address">地址信息</param>
     /// <param name="ex">解析地址时候的异常信息</param>
     /// <returns>地址不支持的信息</returns>
-    public static string GetUnsupportedAddressInfo(string address, Exception ex = null)
+    public static string GetUnsupportedAddressInfo(string address, Exception? ex = null)
     {
         if (ex == null)
         {

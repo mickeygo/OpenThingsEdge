@@ -220,22 +220,18 @@ public sealed class SiemensS7Net : DeviceTcpNet
     public int PDULength { get; private set; } = 200;
 
     /// <summary>
-    /// 实例化一个西门子的S7协议的通讯对象。
-    /// </summary>
-    /// <param name="siemens">指定西门子的型号</param>
-    public SiemensS7Net(SiemensPLCS siemens)
-    {
-        Initialization(siemens, string.Empty);
-    }
-
-    /// <summary>
     /// 实例化一个西门子的S7协议的通讯对象并指定Ip地址。
     /// </summary>
     /// <param name="siemens">指定西门子的型号</param>
     /// <param name="ipAddress">Ip地址</param>
-    public SiemensS7Net(SiemensPLCS siemens, string ipAddress)
+    /// <param name="port">端口号，默认 102</param>
+    public SiemensS7Net(SiemensPLCS siemens, string ipAddress, int port = 102) : base(ipAddress, port)
     {
-        Initialization(siemens, ipAddress);
+        WordLength = 2;
+        ByteTransform = new ReverseBytesTransform();
+        _currentPlc = siemens;
+
+        Initialization(siemens);
     }
 
     /// <inheritdoc />
@@ -244,18 +240,8 @@ public sealed class SiemensS7Net : DeviceTcpNet
         return new S7Message();
     }
 
-    /// <summary>
-    /// 初始化方法。
-    /// </summary>
-    /// <param name="siemens">指定西门子的型号</param>
-    /// <param name="ipAddress">Ip地址</param>
-    private void Initialization(SiemensPLCS siemens, string ipAddress)
+    private void Initialization(SiemensPLCS siemens)
     {
-        WordLength = 2;
-        IpAddress = ipAddress;
-        Port = 102;
-        _currentPlc = siemens;
-        ByteTransform = new ReverseBytesTransform();
         switch (siemens)
         {
             case SiemensPLCS.S1200:
@@ -287,12 +273,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read_first = await ReadFromCoreServerAsync(CommunicationPipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
+        var read_first = await ReadFromCoreServerAsync(Pipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
         if (!read_first.IsSuccess)
         {
             return read_first;
         }
-        var read_second = await ReadFromCoreServerAsync(CommunicationPipe, _plcHead2, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
+        var read_second = await ReadFromCoreServerAsync(Pipe, _plcHead2, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
         if (!read_second.IsSuccess)
         {
             return read_second;
@@ -306,7 +292,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         return OperateResult.CreateSuccessResult();
     }
 
-    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         OperateResult<byte[]> read;
         byte[] content;

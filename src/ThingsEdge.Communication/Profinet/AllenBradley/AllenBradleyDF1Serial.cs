@@ -11,7 +11,7 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public class AllenBradleyDF1Serial : DeviceSerialPort
 {
-    private SoftIncrementCount _incrementCount;
+    private readonly SoftIncrementCount _incrementCount = new(65535L, 0L);
 
     /// <summary>
     /// 站号信息
@@ -40,7 +40,6 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     {
         WordLength = 2;
         ByteTransform = new RegularByteTransform();
-        _incrementCount = new SoftIncrementCount(65535L, 0L);
         CheckType = CheckType.CRC16;
     }
 
@@ -50,8 +49,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <param name="address">PLC的地址信息，支持的类型见类型注释说明</param>
     /// <param name="length">读取的长度，单位，字节</param>
     /// <returns>是否读取成功的结果对象</returns>
-    [HslMqttApi("ReadByteArray", "")]
-    public override OperateResult<byte[]> Read(string address, ushort length)
+    public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
         var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
         var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
@@ -61,7 +59,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         {
             return operateResult;
         }
-        var operateResult2 = ReadFromCoreServer(PackCommand(station, operateResult.Content));
+        var operateResult2 = await ReadFromCoreServerAsync(PackCommand(station, operateResult.Content)).ConfigureAwait(false);
         if (!operateResult2.IsSuccess)
         {
             return operateResult2;
@@ -69,29 +67,38 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         return ExtractActualData(operateResult2.Content);
     }
 
+    public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// 写入PLC的原始数据信息，地址示例：N7:0  可以携带站号 s=2;N7:0, 携带 dst 和 src 信息，例如 dst=1;src=2;N7:0
     /// </summary>
     /// <param name="address">PLC的地址信息，支持的类型见类型注释说明</param>
-    /// <param name="value">原始的数据值</param>
+    /// <param name="values">原始的数据值</param>
     /// <returns>是否写入成功</returns>
-    [HslMqttApi("WriteByteArray", "")]
-    public override OperateResult Write(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
     {
         var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
         var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
         var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
-        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, value);
+        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, values);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
         }
-        var operateResult2 = ReadFromCoreServer(PackCommand(station, operateResult.Content));
+        var operateResult2 = await ReadFromCoreServerAsync(PackCommand(station, operateResult.Content)).ConfigureAwait(false);
         if (!operateResult2.IsSuccess)
         {
             return operateResult2;
         }
         return ExtractActualData(operateResult2.Content);
+    }
+
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
+    {
+        throw new NotImplementedException();
     }
 
     private byte[] CalculateCheckResult(byte station, byte[] command)
@@ -117,7 +124,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <param name="station">站号信息</param>
     /// <param name="command">等待发送的命令</param>
     /// <returns>打包之后的数据内容</returns>
-    public byte[] PackCommand(byte station, byte[] command)
+    private byte[] PackCommand(byte station, byte[] command)
     {
         var array = CalculateCheckResult(station, command);
         var memoryStream = new MemoryStream();
@@ -430,7 +437,6 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         };
     }
 
-    /// <inheritdoc />
     public override string ToString()
     {
         return $"AllenBradleyDF1Serial[{PortName}:{BaudRate}]";

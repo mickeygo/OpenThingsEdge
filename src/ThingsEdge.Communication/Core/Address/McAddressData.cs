@@ -68,7 +68,7 @@ public class McAddressData : DeviceAddressDataBase
                     break;
                 case 'X' or 'x':
                     mcAddressData.McDataType = MelsecMcDataType.X;
-                    address = address.Substring(1);
+                    address = address[1..];
                     if (address.StartsWith('0'))
                     {
                         mcAddressData.AddressStart = Convert.ToInt32(address, 8);
@@ -252,7 +252,6 @@ public class McAddressData : DeviceAddressDataBase
         return OperateResult.CreateSuccessResult(mcAddressData);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.Address.McAddressData.ParseMelsecFrom(System.String,System.UInt16,System.Boolean)" />
     public static OperateResult<McAddressData> ParseMelsecRFrom(string address, ushort length, bool isBit)
     {
         var operateResult = AnalysisAddress(address);
@@ -381,7 +380,6 @@ public class McAddressData : DeviceAddressDataBase
         }
         return OperateResult.CreateSuccessResult(mcAddressData);
     }
-
 
     /// <summary>
     /// 分析三菱R系列的地址，并返回解析后的数据对象

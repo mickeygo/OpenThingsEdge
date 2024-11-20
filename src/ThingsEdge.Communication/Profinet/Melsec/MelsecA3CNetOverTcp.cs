@@ -21,25 +21,15 @@ public class MelsecA3CNetOverTcp : DeviceTcpNet, IReadWriteA3C, IReadWriteDevice
     public bool EnableWriteBitToWordRegister { get; set; }
 
     /// <summary>
-    /// 实例化默认的对象。
-    /// </summary>
-    public MelsecA3CNetOverTcp()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform();
-        SleepTime = 20;
-    }
-
-    /// <summary>
     /// 指定ip地址和端口号来实例化对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址信息</param>
     /// <param name="port">端口号信息</param>
-    public MelsecA3CNetOverTcp(string ipAddress, int port)
-        : this()
+    public MelsecA3CNetOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform();
+        SleepTime = 20;
     }
 
     public Task<OperateResult<string>> ReadPlcTypeAsync()

@@ -3,24 +3,22 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// <summary>
 /// 消息类的基类。
 /// </summary>
-public class NetMessageBase
+public abstract class NetMessageBase
 {
-    /// <inheritdoc cref="INetMessage.HeadBytes" />
+    [NotNull]
     public byte[]? HeadBytes { get; set; }
 
-    /// <inheritdoc cref="INetMessage.ContentBytes" />
+    [NotNull]
     public byte[]? ContentBytes { get; set; }
 
-    /// <inheritdoc cref="INetMessage.SendBytes" />
+    [NotNull]
     public byte[]? SendBytes { get; set; }
 
-    /// <inheritdoc cref="INetMessage.PependedUselesByteLength(byte[])" />
     public virtual int PependedUselesByteLength(byte[] headByte)
     {
         return 0;
     }
 
-    /// <inheritdoc cref="INetMessage.GetHeadBytesIdentity" />
     public virtual int GetHeadBytesIdentity()
     {
         return 0;

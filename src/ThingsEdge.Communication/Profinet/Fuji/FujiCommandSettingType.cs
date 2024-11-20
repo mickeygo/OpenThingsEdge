@@ -14,40 +14,23 @@ namespace ThingsEdge.Communication.Profinet.Fuji;
 /// </remarks>
 public class FujiCommandSettingType : DeviceTcpNet
 {
-    private bool _dataSwap;
-
     /// <summary>
-    /// 获取或设置当前的对象是否进行数据交换操作，将根据PLC的实际值来设定。
+    /// 获取当前的对象是否进行数据交换操作，将根据PLC的实际值来设定。
     /// </summary>
-    public bool DataSwap
-    {
-        get => _dataSwap;
-        set
-        {
-            _dataSwap = value;
-            ByteTransform = value ? new RegularByteTransform() : new ReverseBytesTransform();
-        }
-    }
-
-    /// <summary>
-    /// 实例化一个默认的对象
-    /// </summary>
-    public FujiCommandSettingType()
-    {
-        ByteTransform = new ReverseBytesTransform();
-        WordLength = 2;
-    }
+    public bool DataSwap { get; }
 
     /// <summary>
     /// 使用指定的IP地址和端口号来实例化一个对象
     /// </summary>
     /// <param name="ipAddress">IP地址信息</param>
     /// <param name="port">端口号信息</param>
-    public FujiCommandSettingType(string ipAddress, int port)
-        : this()
+    /// <param name="dataSwap">当前的对象是否进行数据交换操作，将根据PLC的实际值来设定</param>
+    public FujiCommandSettingType(string ipAddress, int port, bool dataSwap = false) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        DataSwap = dataSwap;
+
+        WordLength = 2;
+        ByteTransform = dataSwap ? new RegularByteTransform() : new ReverseBytesTransform();
     }
 
     /// <inheritdoc />

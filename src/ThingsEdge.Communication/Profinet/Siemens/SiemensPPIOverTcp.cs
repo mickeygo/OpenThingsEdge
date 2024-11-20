@@ -18,22 +18,15 @@ public class SiemensPPIOverTcp : DeviceTcpNet, ISiemensPPI, IReadWriteNet
 
     public byte Station { get; set; } = 2;
 
-    public SiemensPPIOverTcp()
-    {
-        WordLength = 2;
-        ByteTransform = new ReverseBytesTransform();
-    }
-
     /// <summary>
     /// 使用指定的ip地址和端口号来实例化对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址信息</param>
     /// <param name="port">端口号信息</param>
-    public SiemensPPIOverTcp(string ipAddress, int port)
-        : this()
+    public SiemensPPIOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 2;
+        ByteTransform = new ReverseBytesTransform();
     }
 
     protected override INetMessage GetNewNetMessage()

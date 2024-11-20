@@ -43,14 +43,14 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
     {
         if (AutoChangeBaudRate)
         {
-            return await CommunicationPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
+            return await Pipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
         }
         return await base.InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> OpenAsync()
     {
-        if (CommunicationPipe is not PipeSerialPort pipeSerialPort)
+        if (Pipe is not PipeSerialPort pipeSerialPort)
         {
             return new OperateResult("PipeSerialPort get failed");
         }
@@ -142,6 +142,6 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
 
     public override string ToString()
     {
-        return $"MelsecFxSerial[{CommunicationPipe}]";
+        return $"MelsecFxSerial[{Pipe}]";
     }
 }

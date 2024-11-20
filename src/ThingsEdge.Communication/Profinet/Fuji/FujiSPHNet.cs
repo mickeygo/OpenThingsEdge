@@ -20,25 +20,14 @@ public class FujiSPHNet : DeviceTcpNet
     public byte ConnectionID { get; set; } = 254;
 
     /// <summary>
-    /// 实例化一个默认的对象<br />
-    /// Instantiate a default object
-    /// </summary>
-    public FujiSPHNet()
-    {
-        ByteTransform = new RegularByteTransform();
-        WordLength = 1;
-    }
-
-    /// <summary>
     /// 指定IP地址和端口号来实例化一个对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
-    public FujiSPHNet(string ipAddress, int port = 18245)
-        : this()
+    public FujiSPHNet(string ipAddress, int port = 18245) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        ByteTransform = new RegularByteTransform();
+        WordLength = 1;
     }
 
     /// <summary>
@@ -232,8 +221,6 @@ public class FujiSPHNet : DeviceTcpNet
     {
         return new FujiSPHMessage();
     }
-
-
 
     private async Task<OperateResult<byte[]>> ReadFujiSPHAddressAsync(FujiSPHAddress address, ushort length)
     {

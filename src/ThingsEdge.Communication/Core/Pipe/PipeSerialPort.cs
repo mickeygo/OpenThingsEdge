@@ -7,7 +7,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 串口管道信息
 /// </summary>
-public class PipeSerialPort : CommunicationPipe, IDisposable
+public class PipeSerialPort : PipeNetBase, IDisposable
 {
     private readonly SerialPort _serialPort;
 
@@ -16,14 +16,8 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     /// </summary>
     public bool RtsEnable
     {
-        get
-        {
-            return _serialPort.RtsEnable;
-        }
-        set
-        {
-            _serialPort.RtsEnable = value;
-        }
+        get => _serialPort.RtsEnable;
+        set => _serialPort.RtsEnable = value;
     }
 
     /// <summary>
@@ -31,14 +25,8 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     /// </summary>
     public bool DtrEnable
     {
-        get
-        {
-            return _serialPort.DtrEnable;
-        }
-        set
-        {
-            _serialPort.DtrEnable = value;
-        }
+        get => _serialPort.DtrEnable;
+        set => _serialPort.DtrEnable = value;
     }
 
     /// <summary>
@@ -46,11 +34,9 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     /// </summary>
     public int AtLeastReceiveLength { get; set; } = 1;
 
-
     /// <summary>
-    /// 获取或设置连续接收空的数据次数，在数据接收完成时有效，每个单位消耗的时间为<see cref="CommunicationPipe.SleepTime" />。
+    /// 获取或设置连续接收空的数据次数，在数据接收完成时有效，每个单位消耗的时间为 DelayTime />。
     public int ReceiveEmptyDataCount { get; set; } = 1;
-
 
     /// <summary>
     /// 是否在发送数据前清空缓冲数据，默认是false。
@@ -63,7 +49,7 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     public PipeSerialPort()
     {
         _serialPort = new SerialPort();
-        SleepTime = 20;
+        DelayTime = 20;
     }
 
     /// <summary>
@@ -75,7 +61,7 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     public PipeSerialPort(string portName)
     {
         _serialPort = new SerialPort();
-        SleepTime = 20;
+        DelayTime = 20;
         SerialPortInni(portName);
     }
 
@@ -195,13 +181,15 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
         return OperateResult.CreateSuccessResult();
     }
 
-    private OperateResult Send(byte[] data, int offset, int size)
+    public override async Task<OperateResult> SendAsync(byte[] data)
     {
-        if (data != null && data.Length != 0)
+        await Task.CompletedTask.ConfigureAwait(false);
+
+        if (data.Length != 0)
         {
             try
             {
-                _serialPort.Write(data, offset, size);
+                _serialPort.Write(data, 0, data.Length);
                 return OperateResult.CreateSuccessResult();
             }
             catch (Exception ex)
@@ -238,9 +226,8 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     /// <param name="netMessage">定义的消息体对象</param>
     /// <param name="sendValue">等待发送的数据对象</param>
     /// <param name="awaitData">是否必须要等待数据返回</param>
-    /// <param name="logMessage">用于消息记录的日志信息</param>
     /// <returns>结果数据对象</returns>
-    private OperateResult<byte[]> SPReceived(SerialPort serialPort, INetMessage netMessage, byte[] sendValue, bool awaitData, Action<byte[]>? logMessage = null)
+    private OperateResult<byte[]> SPReceived(SerialPort serialPort, INetMessage netMessage, byte[] sendValue, bool awaitData)
     {
         byte[] array;
         MemoryStream memoryStream;
@@ -260,9 +247,9 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
         while (true)
         {
             num2++;
-            if (num2 > 1 && SleepTime >= 0)
+            if (num2 > 1 && DelayTime >= 0)
             {
-                CommunicationHelper.ThreadSleep(SleepTime);
+                CommunicationHelper.ThreadSleep(DelayTime);
             }
             try
             {
@@ -272,9 +259,9 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
                     {
                         continue;
                     }
-                    if ((DateTime.Now - now).TotalMilliseconds > ReceiveTimeOut)
+                    if ((DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
                     {
-                        return new OperateResult<byte[]>(-IncrConnectErrorCount(), $"Time out: {ReceiveTimeOut}, received: {memoryStream.ToArray().ToHexString(' ')}");
+                        return new OperateResult<byte[]>(-IncrConnectErrorCount(), $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
                     }
                     if (memoryStream.Length >= AtLeastReceiveLength)
                     {
@@ -296,15 +283,14 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
                 if (num3 > 0)
                 {
                     memoryStream.Write(array, 0, num3);
-                    logMessage?.Invoke(array.SelectBegin(num3));
                 }
                 if (netMessage != null && CheckMessageComplete(netMessage, sendValue, ref memoryStream))
                 {
                     break;
                 }
-                if (ReceiveTimeOut > 0 && (DateTime.Now - now).TotalMilliseconds > ReceiveTimeOut)
+                if (ReceiveTimeout > 0 && (DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
                 {
-                    return new OperateResult<byte[]>(-IncrConnectErrorCount(), $"Time out: {ReceiveTimeOut}, received: {memoryStream.ToArray().ToHexString(' ')}");
+                    return new OperateResult<byte[]>(-IncrConnectErrorCount(), $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
                 }
                 continue;
             }
@@ -318,23 +304,19 @@ public class PipeSerialPort : CommunicationPipe, IDisposable
     }
 
     /// <inheritdoc />
-    private OperateResult<byte[]> ReceiveMessage(INetMessage netMessage, byte[] sendValue, bool useActivePush = true, Action<long, long>? reportProgress = null, Action<byte[]>? logMessage = null)
+    private OperateResult<byte[]> ReceiveMessage(INetMessage netMessage, byte[] sendValue, bool useActivePush = true)
     {
-        if (UseServerActivePush)
-        {
-            return base.ReceiveMessage(netMessage, sendValue, useActivePush, reportProgress);
-        }
-        return SPReceived(_serialPort, netMessage, sendValue, awaitData: true, logMessage);
+        return SPReceived(_serialPort, netMessage, sendValue, awaitData: true);
     }
 
     /// <inheritdoc />
-    private OperateResult<byte[]> ReadFromCoreServer(INetMessage netMessage, byte[] sendValue, bool hasResponseData, Action<byte[]>? logMessage = null)
+    private OperateResult<byte[]> ReadFromCoreServer(INetMessage netMessage, byte[] sendValue, bool hasResponseData)
     {
         if (IsClearCacheBeforeRead)
         {
             ClearSerialCache();
         }
-        var operateResult = ReadFromCoreServerHelper(netMessage, sendValue, hasResponseData, 0, logMessage);
+        var operateResult = ReadFromCoreServerHelper(netMessage, sendValue, hasResponseData, 0);
         if (operateResult.IsSuccess)
         {
             ResetConnectErrorCount();

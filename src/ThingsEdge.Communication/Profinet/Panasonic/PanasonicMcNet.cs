@@ -10,13 +10,6 @@ namespace ThingsEdge.Communication.Profinet.Panasonic;
 public class PanasonicMcNet : MelsecMcNet
 {
     /// <summary>
-    /// 实例化松下的的Qna兼容3E帧协议的通讯对象。
-    /// </summary>
-    public PanasonicMcNet()
-    {
-    }
-
-    /// <summary>
     /// 指定ip地址及端口号来实例化一个松下的Qna兼容3E帧协议的通讯对象。
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>

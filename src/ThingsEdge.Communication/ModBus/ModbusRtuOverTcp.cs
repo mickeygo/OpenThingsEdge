@@ -37,18 +37,11 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     /// <inheritdoc cref="IModbus.BroadcastStation" />
     public int BroadcastStation { get; set; } = -1;
 
-    public ModbusRtuOverTcp()
+    public ModbusRtuOverTcp(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
     {
+        Station = station;
         ByteTransform = new RegularByteTransform(DataFormat.CDAB);
         WordLength = 1;
-    }
-
-    public ModbusRtuOverTcp(string ipAddress, int port = 502, byte station = 1)
-        : this()
-    {
-        IpAddress = ipAddress;
-        Port = port;
-        Station = station;
     }
 
     protected override INetMessage GetNewNetMessage()

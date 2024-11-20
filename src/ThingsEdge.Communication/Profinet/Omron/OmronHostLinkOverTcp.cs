@@ -45,17 +45,10 @@ public class OmronHostLinkOverTcp : DeviceTcpNet, IHostLink, IReadWriteDevice, I
 
     public OmronPlcType PlcType { get; set; } = OmronPlcType.CSCJ;
 
-    public OmronHostLinkOverTcp()
+    public OmronHostLinkOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
         ByteTransform = new RegularByteTransform(DataFormat.CDAB);
         WordLength = 1;
-    }
-
-    public OmronHostLinkOverTcp(string ipAddress, int port)
-        : this()
-    {
-        IpAddress = ipAddress;
-        Port = port;
     }
 
     protected override INetMessage GetNewNetMessage()

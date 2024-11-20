@@ -12,17 +12,10 @@ public class MelsecMcAsciiNet : MelsecMcNet
 {
     public override McType McType => McType.MCAscii;
 
-    public MelsecMcAsciiNet()
+    public MelsecMcAsciiNet(string ipAddress, int port) : base(ipAddress, port)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
-    }
-
-    public MelsecMcAsciiNet(string ipAddress, int port)
-        : this()
-    {
-        IpAddress = ipAddress;
-        Port = port;
     }
 
     protected override INetMessage GetNewNetMessage()

@@ -1,5 +1,4 @@
 using System.Globalization;
-using ThingsEdge.Communication.Language;
 using ThingsEdge.Communication.Languages;
 
 namespace ThingsEdge.Communication.Common;

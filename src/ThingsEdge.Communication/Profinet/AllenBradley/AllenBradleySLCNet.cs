@@ -106,22 +106,10 @@ public class AllenBradleySLCNet : DeviceTcpNet
     /// <summary>
     /// Instantiate a communication object for a Allenbradley PLC protocol
     /// </summary>
-    public AllenBradleySLCNet()
-    {
-        WordLength = 2;
-        ByteTransform = new RegularByteTransform();
-    }
-
-    /// <summary>
-    /// Instantiate a communication object for a Allenbradley PLC protocol
-    /// </summary>
     /// <param name="ipAddress">PLC IpAddress</param>
     /// <param name="port">PLC Port</param>
-    public AllenBradleySLCNet(string ipAddress, int port = 44818)
-        : this()
+    public AllenBradleySLCNet(string ipAddress, int port = 44818) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
     }
 
     /// <inheritdoc />
@@ -133,7 +121,7 @@ public class AllenBradleySLCNet : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(CommunicationPipe, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes(), hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadFromCoreServerAsync(Pipe, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes(), hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
             return read;
@@ -143,6 +131,16 @@ public class AllenBradleySLCNet : DeviceTcpNet
             SessionHandle = ByteTransform.TransUInt32(read.Content, 4);
         }
         return OperateResult.CreateSuccessResult();
+    }
+
+    public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
+    {
+        throw new NotImplementedException();
     }
 
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)

@@ -192,7 +192,14 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address[0] == 'P')
             {
                 s7AddressData.DataCode = 128;
-                if (address.StartsWith("PIX") || address.StartsWith("PIB") || address.StartsWith("PIW") || address.StartsWith("PID") || address.StartsWith("PQX") || address.StartsWith("PQB") || address.StartsWith("PQW") || address.StartsWith("PQD"))
+                if (address.StartsWith("PIX")
+                    || address.StartsWith("PIB")
+                    || address.StartsWith("PIW")
+                    || address.StartsWith("PID")
+                    || address.StartsWith("PQX")
+                    || address.StartsWith("PQB")
+                    || address.StartsWith("PQW")
+                    || address.StartsWith("PQD"))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[3..]);
                 }

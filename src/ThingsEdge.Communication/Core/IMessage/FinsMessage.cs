@@ -5,19 +5,17 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class FinsMessage : NetMessageBase, INetMessage
 {
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => 16;
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
-        var num = BitConverter.ToInt32(new byte[4]
-        {
+        var num = BitConverter.ToInt32(
+        [
             HeadBytes[7],
             HeadBytes[6],
             HeadBytes[5],
             HeadBytes[4]
-        }, 0);
+        ], 0);
         if (num > 10000)
         {
             num = 10000;
@@ -29,7 +27,6 @@ public class FinsMessage : NetMessageBase, INetMessage
         return num - 8;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.CheckHeadBytesLegal(System.Byte[])" />
     public override bool CheckHeadBytesLegal(byte[] token)
     {
         if (HeadBytes == null)
@@ -43,7 +40,6 @@ public class FinsMessage : NetMessageBase, INetMessage
         return false;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.PependedUselesByteLength(System.Byte[])" />
     public override int PependedUselesByteLength(byte[] headByte)
     {
         if (headByte == null)
@@ -60,7 +56,6 @@ public class FinsMessage : NetMessageBase, INetMessage
         return base.PependedUselesByteLength(headByte);
     }
 
-    /// <inheritdoc />
     public override int CheckMessageMatch(byte[] send, byte[] receive)
     {
         if (send == null || receive == null)

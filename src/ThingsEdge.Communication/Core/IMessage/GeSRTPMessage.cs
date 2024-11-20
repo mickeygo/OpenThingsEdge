@@ -5,10 +5,8 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class GeSRTPMessage : NetMessageBase, INetMessage
 {
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => 56;
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
         return HeadBytes[4] + HeadBytes[5] * 256;

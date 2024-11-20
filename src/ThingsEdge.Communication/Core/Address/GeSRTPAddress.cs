@@ -13,7 +13,6 @@ public class GeSRTPAddress : DeviceAddressDataBase
     /// </summary>
     public byte DataCode { get; set; }
 
-    /// <inheritdoc />
     public override void Parse(string address, ushort length)
     {
         var operateResult = ParseFrom(address, length, isBit: false);

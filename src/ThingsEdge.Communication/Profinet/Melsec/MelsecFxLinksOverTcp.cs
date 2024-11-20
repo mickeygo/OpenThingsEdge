@@ -42,24 +42,14 @@ public class MelsecFxLinksOverTcp : DeviceTcpNet, IReadWriteFxLinks, IReadWriteD
     public int Format { get; set; } = 1;
 
     /// <summary>
-    /// 实例化默认的对象。
-    /// </summary>
-    public MelsecFxLinksOverTcp()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform();
-    }
-
-    /// <summary>
     /// 指定ip地址和端口号来实例化默认的对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址信息</param>
     /// <param name="port">端口号</param>
-    public MelsecFxLinksOverTcp(string ipAddress, int port)
-        : this()
+    public MelsecFxLinksOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform();
     }
 
     protected override INetMessage GetNewNetMessage()

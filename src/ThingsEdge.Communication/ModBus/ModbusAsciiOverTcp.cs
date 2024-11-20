@@ -7,13 +7,6 @@ namespace ThingsEdge.Communication.ModBus;
 /// </summary>
 public class ModbusAsciiOverTcp : ModbusRtuOverTcp
 {
-    /// <summary>
-    /// 实例化一个Modbus-ascii协议的客户端对象。
-    /// </summary>
-    public ModbusAsciiOverTcp()
-    {
-    }
-
     public ModbusAsciiOverTcp(string ipAddress, int port = 502, byte station = 1)
         : base(ipAddress, port, station)
     {

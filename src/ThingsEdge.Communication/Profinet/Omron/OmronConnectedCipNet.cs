@@ -30,10 +30,8 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口号信息</param>
-    public OmronConnectedCipNet(string ipAddress, int port = 44818)
+    public OmronConnectedCipNet(string ipAddress, int port = 44818) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
         WordLength = 2;
         ByteTransform = new RegularByteTransform();
     }
@@ -61,7 +59,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
             return ini;
         }
 
-        var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

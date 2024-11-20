@@ -157,28 +157,18 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     public SoftIncrementCount MessageId { get; }
 
     /// <summary>
-    /// 实例化一个Modbus-Tcp协议的客户端对象。
-    /// </summary>
-    public ModbusTcpNet()
-    {
-        MessageId = new SoftIncrementCount(65535L, 0L);
-        WordLength = 1;
-        Station = 1;
-        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
-    }
-
-    /// <summary>
     /// 指定服务器地址，端口号，客户端自己的站号来初始化。
     /// </summary>
     /// <param name="ipAddress">服务器的Ip地址</param>
     /// <param name="port">服务器的端口号</param>
     /// <param name="station">客户端自身的站号</param>
-    public ModbusTcpNet(string ipAddress, int port = 502, byte station = 1)
-        : this()
+    public ModbusTcpNet(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
         Station = station;
+
+        MessageId = new SoftIncrementCount(65535L, 0L);
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
     }
 
     /// <inheritdoc />
@@ -246,32 +236,32 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
 
     public override async Task<OperateResult> WriteAsync(string address, int[] values)
     {
-        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(address, CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values)).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, uint[] values)
     {
-        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(address, CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values)).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, float[] values)
     {
-        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(address, CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values)).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, long[] values)
     {
-        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(address, CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values)).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
     {
-        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(address, CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values)).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, double[] values)
     {
-        return await WriteAsync(value: CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+        return await WriteAsync(address, CommunicationHelper.ExtractTransformParameter(ref address, ByteTransform).TransByte(values)).ConfigureAwait(false);
     }
 
     public virtual OperateResult<string> TranslateToModbusAddress(string address, byte modbusCode)
@@ -355,15 +345,15 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
         return await ModbusHelper.ReadAsync(this, address, length).ConfigureAwait(false);
     }
 
-    public async Task<OperateResult<byte[]>> ReadWriteAsync(string readAddress, ushort length, string writeAddress, byte[] value)
+    public async Task<OperateResult<byte[]>> ReadWriteAsync(string readAddress, ushort length, string writeAddress, byte[] values)
     {
-        return await ModbusHelper.ReadWriteAsync(this, readAddress, length, writeAddress, value).ConfigureAwait(false);
+        return await ModbusHelper.ReadWriteAsync(this, readAddress, length, writeAddress, values).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
     {
-        return await ModbusHelper.WriteAsync(this, address, value).ConfigureAwait(false);
+        return await ModbusHelper.WriteAsync(this, address, values).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

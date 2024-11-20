@@ -5,10 +5,6 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public sealed class AllenBradleyMicroCip : AllenBradleyNet
 {
-    public AllenBradleyMicroCip()
-    {
-    }
-
     public AllenBradleyMicroCip(string ipAddress, int port = 44818)
         : base(ipAddress, port)
     {

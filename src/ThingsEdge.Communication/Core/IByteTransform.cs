@@ -2,7 +2,7 @@ namespace ThingsEdge.Communication.Core;
 
 /// <summary>
 /// 支持转换器的基础接口，规定了实际的数据类型和字节数组进行相互转换的方法。
-/// 主要为<see cref="bool" />,<see cref="Byte" />,<see cref="short" />,
+/// 主要为<see cref="bool" />,<see cref="byte" />,<see cref="short" />,
 /// <see cref="ushort" />,<see cref="int" />,<see cref="uint" />,
 /// <see cref="long" />,<see cref="ulong" />,<see cref="float" />,
 /// <see cref="double" />,<see cref="string" /> 之间的变换关系。

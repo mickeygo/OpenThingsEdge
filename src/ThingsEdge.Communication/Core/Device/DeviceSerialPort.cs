@@ -4,52 +4,24 @@ using ThingsEdge.Communication.Core.Pipe;
 namespace ThingsEdge.Communication.Core.Device;
 
 /// <summary>
-/// 串口的设备类对象信息
+/// 基于串口的设备类对象信息基础类。
 /// </summary>
 public abstract class DeviceSerialPort : DeviceCommunication
 {
-    private PipeSerialPort _pipe;
-
-    /// <inheritdoc />
-    public CommunicationPipe CommunicationPipe
-    {
-        get => base.CommunicationPipe;
-        set
-        {
-            base.CommunicationPipe = value;
-            if (value is PipeSerialPort pipeSerialPort)
-            {
-                _pipe = pipeSerialPort;
-                PortName = _pipe.GetPipe().PortName;
-                BaudRate = _pipe.GetPipe().BaudRate;
-            }
-        }
-    }
+    private readonly PipeSerialPort _pipe;
 
     /// <inheritdoc cref="PipeSerialPort.RtsEnable" />
     public bool RtsEnable
     {
-        get
-        {
-            return _pipe.RtsEnable;
-        }
-        set
-        {
-            _pipe.RtsEnable = value;
-        }
+        get => _pipe.RtsEnable;
+        set => _pipe.RtsEnable = value;
     }
 
     /// <inheritdoc cref="PipeSerialPort.ReceiveEmptyDataCount" />
     public int ReceiveEmptyDataCount
     {
-        get
-        {
-            return _pipe.ReceiveEmptyDataCount;
-        }
-        set
-        {
-            _pipe.ReceiveEmptyDataCount = value;
-        }
+        get => _pipe.ReceiveEmptyDataCount;
+        set => _pipe.ReceiveEmptyDataCount = value;
     }
 
     /// <summary>
@@ -57,14 +29,8 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public bool IsClearCacheBeforeRead
     {
-        get
-        {
-            return _pipe.IsClearCacheBeforeRead;
-        }
-        set
-        {
-            _pipe.IsClearCacheBeforeRead = value;
-        }
+        get => _pipe.IsClearCacheBeforeRead;
+        set => _pipe.IsClearCacheBeforeRead = value;
     }
 
     /// <summary>
@@ -82,8 +48,7 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public DeviceSerialPort()
     {
-        _pipe = new PipeSerialPort();
-        CommunicationPipe = _pipe;
+        Pipe = _pipe = new PipeSerialPort();
     }
 
     /// <inheritdoc cref="PipeSerialPort.SerialPortInni(string)" />
@@ -123,7 +88,7 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public virtual async Task<OperateResult> OpenAsync()
     {
-        var operateResult = await CommunicationPipe.OpenCommunicationAsync().ConfigureAwait(false);
+        var operateResult = await Pipe.OpenCommunicationAsync().ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -141,10 +106,6 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// <returns>是或否</returns>
     public bool IsOpen()
     {
-        if (CommunicationPipe is PipeSerialPort pipeSerialPort)
-        {
-            return pipeSerialPort.GetPipe().IsOpen;
-        }
         return _pipe.GetPipe().IsOpen;
     }
 
@@ -153,24 +114,16 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public void Close()
     {
-        if (CommunicationPipe is PipeSerialPort)
-        {
-            if (_pipe.GetPipe().IsOpen)
-            {
-                ExtraOnDisconnect();
-                _pipe.CloseCommunication();
-            }
-        }
-        else
+        if (_pipe.GetPipe().IsOpen)
         {
             ExtraOnDisconnect();
-            CommunicationPipe.CloseCommunication();
+            Pipe.CloseCommunication();
         }
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceSerialPort<{ByteTransform}>{{{CommunicationPipe}}}";
+        return $"DeviceSerialPort<{ByteTransform}>{{{Pipe}}}";
     }
 }

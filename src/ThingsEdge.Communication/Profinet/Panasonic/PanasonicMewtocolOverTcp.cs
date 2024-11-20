@@ -19,28 +19,19 @@ public class PanasonicMewtocolOverTcp : DeviceTcpNet
     public byte Station { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的松下PLC通信对象，默认站号为0xEE。
-    /// </summary>
-    /// <param name="station">站号信息，默认为0xEE</param>
-    public PanasonicMewtocolOverTcp(byte station = 238)
-    {
-        ByteTransform = new RegularByteTransform();
-        Station = station;
-        ByteTransform.DataFormat = DataFormat.DCBA;
-        WordLength = 1;
-    }
-
-    /// <summary>
     /// 实例化一个默认的松下PLC通信对象，指定ip地址，端口，默认站号为0xEE。
     /// </summary>
     /// <param name="ipAddress">Ip地址数据</param>
     /// <param name="port">端口号</param>
     /// <param name="station">站号信息，默认为0xEE</param>
-    public PanasonicMewtocolOverTcp(string ipAddress, int port, byte station = 238)
-        : this(station)
+    public PanasonicMewtocolOverTcp(string ipAddress, int port, byte station = 238) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        ByteTransform = new RegularByteTransform
+        {
+            DataFormat = DataFormat.DCBA,
+        };
+        WordLength = 1;
+        Station = station;
     }
 
     protected override INetMessage GetNewNetMessage()

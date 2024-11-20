@@ -19,22 +19,11 @@ public class SiemensFetchWriteNet : DeviceTcpNet
     /// <summary>
     /// 实例化一个西门子的Fetch/Write协议的通讯对象。
     /// </summary>
-    public SiemensFetchWriteNet()
-    {
-        WordLength = 2;
-        ByteTransform = new ReverseBytesTransform();
-    }
-
-    /// <summary>
-    /// 实例化一个西门子的Fetch/Write协议的通讯对象。
-    /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public SiemensFetchWriteNet(string ipAddress, int port)
+    public SiemensFetchWriteNet(string ipAddress, int port) : base(ipAddress, port)
     {
         WordLength = 2;
-        IpAddress = ipAddress;
-        Port = port;
         ByteTransform = new ReverseBytesTransform();
     }
 

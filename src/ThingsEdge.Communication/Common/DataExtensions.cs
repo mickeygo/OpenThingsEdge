@@ -289,19 +289,32 @@ public static class DataExtensions
     /// <param name="keepAliveTime">保持活动时间</param>
     /// <param name="keepAliveInterval">保持活动的间歇时间</param>
     /// <returns>返回获取的参数的字节</returns>
-    public static int SetKeepAlive(this Socket socket, int keepAliveTime, int keepAliveInterval)
+    public static void SetKeepAlive(this Socket socket, int keepAliveTime, int keepAliveInterval)
     {
-        var array = new byte[12];
-        BitConverter.GetBytes(keepAliveTime >= 0 ? 1 : 0).CopyTo(array, 0);
-        BitConverter.GetBytes(keepAliveTime).CopyTo(array, 4);
-        BitConverter.GetBytes(keepAliveInterval).CopyTo(array, 8);
+        if (keepAliveTime <= 0)
+        {
+            return;
+        }
+
         try
         {
-            return socket.IOControl(IOControlCode.KeepAliveValues, array, null);
+            var size = sizeof(uint);
+            var optionInValue = new byte[size * 3];
+            BitConverter.GetBytes(1u).CopyTo(optionInValue, 0);
+            BitConverter.GetBytes((uint)keepAliveTime).CopyTo(optionInValue, size);
+            BitConverter.GetBytes((uint)keepAliveInterval).CopyTo(optionInValue, size * 2);
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                socket.IOControl(IOControlCode.KeepAliveValues, optionInValue, null);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, optionInValue);
+            }
         }
         catch
         {
-            return 0;
         }
     }
 

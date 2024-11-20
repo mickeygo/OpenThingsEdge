@@ -29,7 +29,8 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         "10025E000000FC00000000001212000000FFFF030000FF0300002F001C091A18000000000000000000FC000012120414000113960AC4E5D70102090000000245303030453830343003453910034538",
         "10025E000000FC00000000001212000000FFFF030000FF0300002F001C091A18000000000000000000FC000012120414000113960AC4E5D701020A0000000245303030454330343003463410034630",
     ];
-    private readonly SoftIncrementCount _incrementCount;
+
+    private readonly SoftIncrementCount _incrementCount = new(2147483647L, 1L);
 
     /// <summary>
     /// 获取或设置是否使用GOT连接三菱的PLC，当使用了GOT连接到。
@@ -42,30 +43,20 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
     public bool IsNewVersion { get; set; }
 
     /// <summary>
-    /// 实例化网络版的三菱的串口协议的通讯对象。
-    /// </summary>
-    public MelsecFxSerialOverTcp()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform();
-        IsNewVersion = true;
-        ByteTransform.IsStringReverseByteWord = true;
-        SleepTime = 20;
-        _incrementCount = new SoftIncrementCount(2147483647L, 1L);
-    }
-
-    /// <summary>
     /// 指定ip地址及端口号来实例化三菱的串口协议的通讯对象。
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
-    public MelsecFxSerialOverTcp(string ipAddress, int port)
-        : this()
+    public MelsecFxSerialOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform()
+        {
+            IsStringReverseByteWord = true,
+        };
+        IsNewVersion = true;
+        SleepTime = 20;
     }
-
 
     /// <inheritdoc />
     public override byte[] PackCommandWithHeader(byte[] command)
@@ -140,7 +131,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         return base.UnpackResponseContent(send, response);
     }
 
-    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
+    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
     {
         var read = await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         if (!read.IsSuccess)
@@ -169,7 +160,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         {
             for (var i = 0; i < _inis.Count; i++)
             {
-                OperateResult ini1 = await ReadFromCoreServerAsync(CommunicationPipe, _inis[i].ToHexBytes(), true, false).ConfigureAwait(false);
+                OperateResult ini1 = await ReadFromCoreServerAsync(Pipe, _inis[i].ToHexBytes(), true, false).ConfigureAwait(false);
                 if (!ini1.IsSuccess)
                 {
                     return ini1;

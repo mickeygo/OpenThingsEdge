@@ -27,10 +27,6 @@ public static class SoftCRC16
     /// <returns>返回校验成功与否</returns>
     public static bool CheckCRC16(byte[] value, byte CH, byte CL)
     {
-        if (value == null)
-        {
-            return false;
-        }
         if (value.Length < 2)
         {
             return false;
@@ -92,8 +88,8 @@ public static class SoftCRC16
                 }
             }
         }
-        array[array.Length - 2] = b;
-        array[array.Length - 1] = b2;
+        array[^2] = b;
+        array[^1] = b2;
         return array;
     }
 

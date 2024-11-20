@@ -14,11 +14,6 @@ public class DeltaTcpNet : ModbusTcpNet, IDelta, IReadWriteDevice, IReadWriteNet
 {
     public DeltaSeries Series { get; set; } = DeltaSeries.Dvp;
 
-    public DeltaTcpNet()
-    {
-        ByteTransform.DataFormat = DataFormat.CDAB;
-    }
-
     public DeltaTcpNet(string ipAddress, int port = 502, byte station = 1)
         : base(ipAddress, port, station)
     {

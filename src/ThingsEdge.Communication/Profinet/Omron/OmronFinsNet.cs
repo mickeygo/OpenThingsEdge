@@ -112,25 +112,17 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
     public OmronPlcType PlcType { get; set; } = OmronPlcType.CSCJ;
 
     /// <summary>
-    /// 实例化一个欧姆龙PLC Fins帧协议的通讯对象。
-    /// </summary>
-    public OmronFinsNet()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform(DataFormat.CDAB);
-        ByteTransform.IsStringReverseByteWord = true;
-    }
-
-    /// <summary>
     /// 指定ip地址和端口号来实例化一个欧姆龙PLC Fins帧协议的通讯对象。
     /// </summary>
     /// <param name="ipAddress">PLCd的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public OmronFinsNet(string ipAddress, int port)
-        : this()
+    public OmronFinsNet(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform(DataFormat.CDAB)
+        {
+            IsStringReverseByteWord = true,
+        };
     }
 
     /// <inheritdoc />
@@ -169,7 +161,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(CommunicationPipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(Pipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

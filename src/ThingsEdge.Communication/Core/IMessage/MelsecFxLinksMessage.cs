@@ -5,11 +5,10 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class MelsecFxLinksMessage : NetMessageBase, INetMessage
 {
-    private int format = 1;
+    private int _format = 1;
 
-    private bool sumCheck = true;
+    private bool _sumCheck = true;
 
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => -1;
 
     /// <summary>
@@ -19,17 +18,15 @@ public class MelsecFxLinksMessage : NetMessageBase, INetMessage
     /// <param name="sumCheck">是否和校验</param>
     public MelsecFxLinksMessage(int format, bool sumCheck)
     {
-        this.format = format;
-        this.sumCheck = sumCheck;
+        _format = format;
+        _sumCheck = sumCheck;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
         return 0;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.CheckReceiveDataComplete(System.Byte[],System.IO.MemoryStream)" />
     public override bool CheckReceiveDataComplete(byte[] send, MemoryStream ms)
     {
         var array = ms.ToArray();
@@ -37,7 +34,8 @@ public class MelsecFxLinksMessage : NetMessageBase, INetMessage
         {
             return false;
         }
-        if (format == 1)
+
+        if (_format == 1)
         {
             if (array[0] == 21)
             {
@@ -49,17 +47,17 @@ public class MelsecFxLinksMessage : NetMessageBase, INetMessage
             }
             if (array[0] == 2)
             {
-                if (sumCheck)
+                if (_sumCheck)
                 {
-                    return array[array.Length - 3] == 3;
+                    return array[^3] == 3;
                 }
-                return array[array.Length - 1] == 3;
+                return array[^1] == 3;
             }
             return false;
         }
-        if (format == 4)
+        if (_format == 4)
         {
-            return array[array.Length - 1] == 10 && array[array.Length - 2] == 13;
+            return array[^1] == 10 && array[^2] == 13;
         }
         return false;
     }

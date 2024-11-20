@@ -1,14 +1,13 @@
 using System.Net;
 using System.Net.Sockets;
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Core.IMessage;
 
 namespace ThingsEdge.Communication.Core.Pipe;
 
 /// <summary>
 /// 用于TCP/IP协议的传输管道信息。
 /// </summary>
-public class PipeTcpNet : CommunicationPipe
+public class PipeTcpNet : PipeNetBase
 {
     private string _ipAddress = "127.0.0.1";
 
@@ -44,6 +43,7 @@ public class PipeTcpNet : CommunicationPipe
             {
                 return _port[0];
             }
+
             var num = _indexPort;
             if (num < 0 || num >= _port.Length)
             {
@@ -77,21 +77,10 @@ public class PipeTcpNet : CommunicationPipe
     /// </summary>
     public int ConnectTimeOut { get; set; } = 10_000;
 
-    public PipeTcpNet()
-    {
-    }
-
     public PipeTcpNet(string ipAddress, int port)
     {
         IpAddress = ipAddress;
         Port = port;
-    }
-
-    public PipeTcpNet(Socket socket, IPEndPoint iPEndPoint)
-    {
-        Socket = socket;
-        IpAddress = iPEndPoint.Address.ToString();
-        Port = iPEndPoint.Port;
     }
 
     /// <summary>
@@ -161,52 +150,6 @@ public class PipeTcpNet : CommunicationPipe
     }
 
     /// <inheritdoc />
-    public override OperateResult StartReceiveBackground(INetMessage netMessage)
-    {
-        if (UseServerActivePush)
-        {
-            var operateResult = Socket.BeginReceiveResult(ServerSocketActivePushAsync, netMessage);
-            if (!operateResult.IsSuccess)
-            {
-                return operateResult;
-            }
-        }
-        return base.StartReceiveBackground(netMessage);
-    }
-
-    private async void ServerSocketActivePushAsync(IAsyncResult ar)
-    {
-        var asyncState = ar.AsyncState;
-        if (asyncState is not INetMessage netMessage)
-        {
-            return;
-        }
-
-        var endResult = Socket.EndReceiveResult(ar);
-        if (!endResult.IsSuccess)
-        {
-            IncrConnectErrorCount();
-            return;
-        }
-        var receive = await ReceiveMessageAsync(netMessage, null, useActivePush: false).ConfigureAwait(false);
-        if (!receive.IsSuccess)
-        {
-            IncrConnectErrorCount();
-            return;
-        }
-        var receiveAgain = Socket.BeginReceiveResult(ServerSocketActivePushAsync, netMessage);
-        if (!receiveAgain.IsSuccess)
-        {
-            IncrConnectErrorCount();
-        }
-
-        if (DecideWhetherQAMessageFunction == null || DecideWhetherQAMessageFunction(this, receive))
-        {
-            SetBufferQA(receive.Content);
-        }
-    }
-
-    /// <inheritdoc />
     public override async Task<OperateResult<bool>> OpenCommunicationAsync()
     {
         if (IsConnectError())
@@ -216,13 +159,13 @@ public class PipeTcpNet : CommunicationPipe
             var connect = await NetSupport.CreateSocketAndConnectAsync(endPoint, ConnectTimeOut).ConfigureAwait(false);
             if (connect.IsSuccess)
             {
-                var onOpen = OnCommunicationOpen(connect.Content!);
+                var onOpen = OnCommunicationOpen(connect.Content);
                 if (!onOpen.IsSuccess)
                 {
                     return onOpen.ConvertFailed<bool>();
                 }
 
-                Socket = connect.Content!;
+                Socket = connect.Content;
                 ResetConnectErrorCount();
                 if (SocketKeepAliveTime > 0)
                 {
@@ -235,10 +178,9 @@ public class PipeTcpNet : CommunicationPipe
         return OperateResult.CreateSuccessResult(false);
     }
 
-    /// <inheritdoc />
-    public override async Task<OperateResult> SendAsync(byte[] data, int offset, int size)
+    public override async Task<OperateResult> SendAsync(byte[] data)
     {
-        var send = await NetSupport.SocketSendAsync(Socket, data, offset, size).ConfigureAwait(false);
+        var send = await NetSupport.SocketSendAsync(Socket, data).ConfigureAwait(false);
         if (!send.IsSuccess && send.ErrorCode == NetSupport.SocketErrorCode)
         {
             await CloseCommunicationAsync().ConfigureAwait(false);

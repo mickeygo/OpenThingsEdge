@@ -5,19 +5,21 @@ using ThingsEdge.Communication.Core.Pipe;
 namespace ThingsEdge.Communication.Core.Net;
 
 /// <summary>
-/// 基于二进制的通信类。
+/// 基于二进制的通信基础类。
 /// </summary>
-public class BinaryCommunication
+public abstract class BinaryCommunication
 {
-    /// <inheritdoc cref="IReadWriteNet.ConnectionId" />
-    public string ConnectionId { get; init; }
+    /// <summary>
+    /// 当前连接的唯一ID号，默认为长度20的guid码加随机数组成，方便列表管理。
+    /// </summary>
+    public string ConnectionId { get; }
 
     /// <summary>
-    /// 获取当前的管道信息，管道类型为<see cref="CommunicationPipe" />的继承类，
-    /// 内置了<see cref="PipeTcpNet" />管道，<see cref="PipeUdpNet" />管道，<see cref="PipeSerialPort" />管道等。
+    /// 获取当前的管道信息，管道类型为<see cref="Pipe" />的继承类，
+    /// 内置<see cref="PipeTcpNet" />管道和<see cref="PipeSerialPort" /> 管道等。
     /// </summary>
     [NotNull]
-    public CommunicationPipe? CommunicationPipe { get; set; }
+    public PipeNetBase? Pipe { get; init; }
 
     /// <summary>
     /// 组件的日志工具。
@@ -29,14 +31,8 @@ public class BinaryCommunication
     /// </summary>
     public int ReceiveTimeOut
     {
-        get
-        {
-            return CommunicationPipe.ReceiveTimeOut;
-        }
-        set
-        {
-            CommunicationPipe.ReceiveTimeOut = value;
-        }
+        get => Pipe.ReceiveTimeout;
+        set => Pipe.ReceiveTimeout = value;
     }
 
     /// <summary>
@@ -44,14 +40,8 @@ public class BinaryCommunication
     /// </summary>
     public int SleepTime
     {
-        get
-        {
-            return CommunicationPipe.SleepTime;
-        }
-        set
-        {
-            CommunicationPipe.SleepTime = value;
-        }
+        get => Pipe.DelayTime;
+        set => Pipe.DelayTime = value;
     }
 
     /// <summary>
@@ -68,18 +58,7 @@ public class BinaryCommunication
     /// <returns>消息类对象</returns>
     protected virtual INetMessage GetNewNetMessage()
     {
-        return null;
-    }
-
-    /// <summary>
-    /// 决定当前的消息是否是用于问答机制返回的消息，默认直接返回 true, 实际的情况需要根据协议进行重写方法。
-    /// </summary>
-    /// <param name="pipe">管道信息</param>
-    /// <param name="receive">接收的数据信息</param>
-    /// <returns>是否是问答的数据</returns>
-    protected virtual bool DecideWhetherQAMessage(CommunicationPipe pipe, OperateResult<byte[]> receive)
-    {
-        return true;
+        return default;
     }
 
     /// <summary>
@@ -105,11 +84,6 @@ public class BinaryCommunication
     /// <returns>是否初始化成功，依据具体的协议进行重写</returns>
     protected virtual async Task<OperateResult> InitializationOnConnectAsync()
     {
-        if (CommunicationPipe.UseServerActivePush)
-        {
-            CommunicationPipe.DecideWhetherQAMessageFunction = DecideWhetherQAMessage;
-            CommunicationPipe.StartReceiveBackground(GetNewNetMessage());
-        }
         return await Task.FromResult(OperateResult.CreateSuccessResult()).ConfigureAwait(false);
     }
 
@@ -181,7 +155,7 @@ public class BinaryCommunication
     /// <returns>接收的完整的报文信息</returns>
     public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        var enter = CommunicationPipe.CommunicationLock.EnterLock(CommunicationPipe.ReceiveTimeOut);
+        var enter = Pipe.CommunicationLock.EnterLock(Pipe.ReceiveTimeout);
         if (!enter.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(enter);
@@ -190,7 +164,7 @@ public class BinaryCommunication
         var read = new OperateResult<byte[]>();
         try
         {
-            var pipe = await CommunicationPipe.OpenCommunicationAsync().ConfigureAwait(false);
+            var pipe = await Pipe.OpenCommunicationAsync().ConfigureAwait(false);
             if (!pipe.IsSuccess)
             {
                 read.CopyErrorFromOther(pipe);
@@ -204,9 +178,9 @@ public class BinaryCommunication
                     return OperateResult.CreateFailedResult<byte[]>(ini);
                 }
             }
-            read = await ReadFromCoreServerAsync(CommunicationPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
+            read = await ReadFromCoreServerAsync(Pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
             ExtraAfterReadFromCoreServer(read);
-            CommunicationPipe.CommunicationLock.LeaveLock();
+            Pipe.CommunicationLock.LeaveLock();
         }
         catch
         {
@@ -214,13 +188,13 @@ public class BinaryCommunication
         }
         finally
         {
-            CommunicationPipe.CommunicationLock.LeaveLock();
+            Pipe.CommunicationLock.LeaveLock();
         }
 
-        if (!CommunicationPipe.IsPersistentConnection)
+        if (!Pipe.IsPersistentConnection)
         {
             await ExtraOnDisconnectAsync().ConfigureAwait(false);
-            await CommunicationPipe.CloseCommunicationAsync().ConfigureAwait(false);
+            await Pipe.CloseCommunicationAsync().ConfigureAwait(false);
         }
         return read;
     }
@@ -233,7 +207,7 @@ public class BinaryCommunication
     /// <param name="hasResponseData">是否有等待的数据返回</param>
     /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写 <see cref="PackCommandWithHeader" /> 方法后才会有影响</param>
     /// <returns>是否成功的结果对象</returns>
-    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         if (usePackAndUnpack)
         {

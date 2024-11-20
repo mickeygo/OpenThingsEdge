@@ -15,25 +15,15 @@ public class FujiSPBOverTcp : DeviceTcpNet
     public byte Station { get; set; } = 1;
 
     /// <summary>
-    /// 使用默认的构造方法实例化对象。
-    /// </summary>
-    public FujiSPBOverTcp()
-    {
-        WordLength = 1;
-        ByteTransform = new RegularByteTransform();
-        SleepTime = 20;
-    }
-
-    /// <summary>
     /// 使用指定的ip地址和端口来实例化一个对象。
     /// </summary>
     /// <param name="ipAddress">设备的Ip地址</param>
     /// <param name="port">设备的端口号</param>
-    public FujiSPBOverTcp(string ipAddress, int port)
-        : this()
+    public FujiSPBOverTcp(string ipAddress, int port) : base(ipAddress, port)
     {
-        IpAddress = ipAddress;
-        Port = port;
+        WordLength = 1;
+        ByteTransform = new RegularByteTransform();
+        SleepTime = 20;
     }
 
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)

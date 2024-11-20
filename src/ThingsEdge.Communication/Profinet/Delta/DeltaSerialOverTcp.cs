@@ -14,11 +14,6 @@ public class DeltaSerialOverTcp : ModbusRtuOverTcp, IDelta, IReadWriteDevice, IR
 {
     public DeltaSeries Series { get; set; } = DeltaSeries.Dvp;
 
-    public DeltaSerialOverTcp()
-    {
-        ByteTransform.DataFormat = DataFormat.CDAB;
-    }
-
     public DeltaSerialOverTcp(string ipAddress, int port = 502, byte station = 1)
         : base(ipAddress, port, station)
     {

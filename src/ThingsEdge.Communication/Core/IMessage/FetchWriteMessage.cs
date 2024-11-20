@@ -5,10 +5,8 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class FetchWriteMessage : NetMessageBase, INetMessage
 {
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => 16;
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
         if (HeadBytes[5] == 5 || HeadBytes[5] == 4)
@@ -42,7 +40,6 @@ public class FetchWriteMessage : NetMessageBase, INetMessage
         return 0;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.CheckHeadBytesLegal(System.Byte[])" />
     public override bool CheckHeadBytesLegal(byte[] token)
     {
         if (HeadBytes == null)
@@ -56,7 +53,6 @@ public class FetchWriteMessage : NetMessageBase, INetMessage
         return false;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetHeadBytesIdentity" />
     public override int GetHeadBytesIdentity()
     {
         return HeadBytes[3];

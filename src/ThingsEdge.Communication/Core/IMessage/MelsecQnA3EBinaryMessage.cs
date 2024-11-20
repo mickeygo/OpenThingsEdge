@@ -5,16 +5,13 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class MelsecQnA3EBinaryMessage : NetMessageBase, INetMessage
 {
-    /// <inheritdoc cref="P:HslCommunication.Core.IMessage.INetMessage.ProtocolHeadBytesLength" />
     public int ProtocolHeadBytesLength => 9;
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.GetContentLengthByHeadBytes" />
     public int GetContentLengthByHeadBytes()
     {
         return BitConverter.ToUInt16(HeadBytes, 7);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IMessage.INetMessage.CheckHeadBytesLegal(System.Byte[])" />
     public override bool CheckHeadBytesLegal(byte[] token)
     {
         if (HeadBytes == null)
