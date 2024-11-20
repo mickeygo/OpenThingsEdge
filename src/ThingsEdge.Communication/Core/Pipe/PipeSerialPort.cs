@@ -304,27 +304,6 @@ public class PipeSerialPort : PipeNetBase, IDisposable
     }
 
     /// <inheritdoc />
-    private OperateResult<byte[]> ReceiveMessage(INetMessage netMessage, byte[] sendValue, bool useActivePush = true)
-    {
-        return SPReceived(_serialPort, netMessage, sendValue, awaitData: true);
-    }
-
-    /// <inheritdoc />
-    private OperateResult<byte[]> ReadFromCoreServer(INetMessage netMessage, byte[] sendValue, bool hasResponseData)
-    {
-        if (IsClearCacheBeforeRead)
-        {
-            ClearSerialCache();
-        }
-        var operateResult = ReadFromCoreServerHelper(netMessage, sendValue, hasResponseData, 0);
-        if (operateResult.IsSuccess)
-        {
-            ResetConnectErrorCount();
-        }
-        return operateResult;
-    }
-
-    /// <inheritdoc />
     public override async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage netMessage, byte[] sendValue, bool useActivePush = true)
     {
         return await Task.Run(() => SPReceived(_serialPort, netMessage, sendValue, awaitData: true)).ConfigureAwait(continueOnCapturedContext: false);
@@ -333,7 +312,16 @@ public class PipeSerialPort : PipeNetBase, IDisposable
     /// <inheritdoc />
     public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage netMessage, byte[] sendValue, bool hasResponseData)
     {
-        return await Task.Run(() => ReadFromCoreServer(netMessage, sendValue, hasResponseData)).ConfigureAwait(continueOnCapturedContext: false);
+        if (IsClearCacheBeforeRead)
+        {
+            ClearSerialCache();
+        }
+        var operateResult = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData, 0).ConfigureAwait(false);
+        if (operateResult.IsSuccess)
+        {
+            ResetConnectErrorCount();
+        }
+        return operateResult;
     }
 
     /// <inheritdoc />

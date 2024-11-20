@@ -15,8 +15,8 @@ public abstract class BinaryCommunication
     public string ConnectionId { get; }
 
     /// <summary>
-    /// 获取当前的管道信息，管道类型为<see cref="Pipe" />的继承类，
-    /// 内置<see cref="PipeTcpNet" />管道和<see cref="PipeSerialPort" /> 管道等。
+    /// 获取当前的管道信息，管道类型为 <see cref="PipeNetBase" /> 的继承类，
+    /// 内置 <see cref="PipeTcpNet" /> 管道和 <see cref="PipeSerialPort" /> 管道。
     /// </summary>
     [NotNull]
     public PipeNetBase? Pipe { get; init; }

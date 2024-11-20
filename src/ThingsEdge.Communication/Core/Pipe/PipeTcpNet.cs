@@ -97,21 +97,6 @@ public class PipeTcpNet : PipeNetBase
     }
 
     /// <summary>
-    /// 获取当前的远程连接信息，如果端口号设置了可选的数组，那么每次获取对象就会发生端口号切换的操作。
-    /// </summary>
-    /// <returns>远程连接的对象</returns>
-    public IPEndPoint GetConnectIPEndPoint()
-    {
-        if (_port.Length == 1)
-        {
-            return new IPEndPoint(IPAddress.Parse(IpAddress), _port[0]);
-        }
-        ChangePorts();
-        var port = _port[_indexPort];
-        return new IPEndPoint(IPAddress.Parse(IpAddress), port);
-    }
-
-    /// <summary>
     /// 变更当前的端口号信息，如果设置了多个端口号的话，就切换其他可用的端口。
     /// </summary>
     private void ChangePorts()
@@ -208,6 +193,22 @@ public class PipeTcpNet : PipeNetBase
         Socket = null;
         return await Task.FromResult(OperateResult.CreateSuccessResult()).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// 获取当前的远程连接信息，如果端口号设置了可选的数组，那么每次获取对象就会发生端口号切换的操作。
+    /// </summary>
+    /// <returns>远程连接的对象</returns>
+    private IPEndPoint GetConnectIPEndPoint()
+    {
+        if (_port.Length == 1)
+        {
+            return new IPEndPoint(IPAddress.Parse(IpAddress), _port[0]);
+        }
+        ChangePorts();
+        var port = _port[_indexPort];
+        return new IPEndPoint(IPAddress.Parse(IpAddress), port);
+    }
+
 
     /// <inheritdoc />
     public override string ToString()

@@ -125,7 +125,6 @@ public static class NetSupport
             return OperateResult.CreateSuccessResult(length);
         }
 
-        var hslTimeOut = CommTimeOut.HandleTimeOutCheck(socket, timeOut);
         try
         {
             int count;
@@ -139,13 +138,11 @@ public static class NetSupport
                     alreadyCount += count;
                     if (count > 0)
                     {
-                        hslTimeOut.StartTime = DateTime.Now;
                         continue;
                     }
                     throw new RemoteClosedException();
                 }
                 while (alreadyCount < length);
-                hslTimeOut.IsSuccessful = true;
 
                 await socket.ReceiveAsync(buffer).ConfigureAwait(false);
 
@@ -157,23 +154,21 @@ public static class NetSupport
             {
                 throw new RemoteClosedException();
             }
-            hslTimeOut.IsSuccessful = true;
             return OperateResult.CreateSuccessResult(count);
         }
         catch (RemoteClosedException)
         {
             socket?.Close();
-            hslTimeOut.IsSuccessful = true;
             return new OperateResult<int>(SocketErrorCode, StringResources.Language.RemoteClosedConnection);
+        }
+        catch (OperationCanceledException)
+        {
+            socket?.Close();
+            return new OperateResult<int>(SocketErrorCode, StringResources.Language.ReceiveDataTimeout + timeOut);
         }
         catch (Exception ex)
         {
             socket?.Close();
-            hslTimeOut.IsSuccessful = true;
-            if (hslTimeOut.IsTimeout)
-            {
-                return new OperateResult<int>(SocketErrorCode, StringResources.Language.ReceiveDataTimeout + hslTimeOut.DelayTime);
-            }
             return new OperateResult<int>(SocketErrorCode, "Socket Exception -> " + ex.Message);
         }
     }
