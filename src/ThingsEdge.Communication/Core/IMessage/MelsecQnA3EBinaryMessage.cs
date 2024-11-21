@@ -12,7 +12,7 @@ public class MelsecQnA3EBinaryMessage : NetMessageBase, INetMessage
         return BitConverter.ToUInt16(HeadBytes, 7);
     }
 
-    public override bool CheckHeadBytesLegal(byte[] token)
+    public override bool CheckHeadBytesLegal()
     {
         if (HeadBytes == null)
         {

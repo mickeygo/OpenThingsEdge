@@ -48,7 +48,7 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public DeviceSerialPort()
     {
-        Pipe = _pipe = new PipeSerialPort();
+        NetworkPipe = _pipe = new PipeSerialPort();
     }
 
     /// <inheritdoc cref="PipeSerialPort.SerialPortInni(string)" />
@@ -88,7 +88,7 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public virtual async Task<OperateResult> OpenAsync()
     {
-        var operateResult = await Pipe.OpenCommunicationAsync().ConfigureAwait(false);
+        var operateResult = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -112,18 +112,17 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// <summary>
     /// 关闭当前的串口连接。
     /// </summary>
-    public void Close()
+    public override void Close()
     {
         if (_pipe.GetPipe().IsOpen)
         {
-            ExtraOnDisconnect();
-            Pipe.CloseCommunication();
+            base.Close();
         }
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceSerialPort<{ByteTransform}>{{{Pipe}}}";
+        return $"DeviceSerialPort<{ByteTransform}>{{{NetworkPipe}}}";
     }
 }

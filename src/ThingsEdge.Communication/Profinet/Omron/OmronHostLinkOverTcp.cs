@@ -56,7 +56,7 @@ public class OmronHostLinkOverTcp : DeviceTcpNet, IHostLink, IReadWriteDevice, I
         return new SpecifiedCharacterMessage(13);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return OmronHostLinkHelper.ResponseValidAnalysis(send, response);
     }
@@ -76,9 +76,9 @@ public class OmronHostLinkOverTcp : DeviceTcpNet, IHostLink, IReadWriteDevice, I
         return OmronHostLinkHelper.ReadAsync(this, address, length);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return OmronHostLinkHelper.WriteAsync(this, address, value);
+        return OmronHostLinkHelper.WriteAsync(this, address, data);
     }
 
     public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)

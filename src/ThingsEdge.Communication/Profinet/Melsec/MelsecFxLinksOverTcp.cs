@@ -20,21 +20,8 @@ public class MelsecFxLinksOverTcp : DeviceTcpNet, IReadWriteFxLinks, IReadWriteD
 
     public byte WaittingTime
     {
-        get
-        {
-            return _waittingTime;
-        }
-        set
-        {
-            if (value > 15)
-            {
-                _waittingTime = 15;
-            }
-            else
-            {
-                _waittingTime = value;
-            }
-        }
+        get => _waittingTime;
+        set => _waittingTime = value > 15 ? (byte)15 : value;
     }
 
     public bool SumCheck { get; set; } = true;
@@ -57,7 +44,7 @@ public class MelsecFxLinksOverTcp : DeviceTcpNet, IReadWriteFxLinks, IReadWriteD
         return new MelsecFxLinksMessage(Format, SumCheck);
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return MelsecFxLinksHelper.PackCommandWithHeader(this, command);
     }
@@ -72,14 +59,14 @@ public class MelsecFxLinksOverTcp : DeviceTcpNet, IReadWriteFxLinks, IReadWriteD
         return MelsecFxLinksHelper.ReadBoolAsync(this, address, length);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return MelsecFxLinksHelper.WriteAsync(this, address, value);
+        return MelsecFxLinksHelper.WriteAsync(this, address, data);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, bool[] value)
+    public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return MelsecFxLinksHelper.WriteAsync(this, address, value);
+        return MelsecFxLinksHelper.WriteAsync(this, address, values);
     }
 
     public Task<OperateResult> StartPLCAsync(string parameter = "")

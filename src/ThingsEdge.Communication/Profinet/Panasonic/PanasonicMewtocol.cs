@@ -54,9 +54,9 @@ public class PanasonicMewtocol : DeviceSerialPort
         return MewtocolHelper.ReadBoolAsync(this, Station, addresses);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return MewtocolHelper.WriteAsync(this, Station, address, values);
+        return MewtocolHelper.WriteAsync(this, Station, address, data);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool value)

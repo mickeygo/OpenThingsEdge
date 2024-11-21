@@ -142,43 +142,9 @@ public class PipeSerialPort : PipeNetBase, IDisposable
     /// 清除串口缓冲区的数据，并返回该数据，如果缓冲区没有数据，返回的字节数组长度为0。
     /// </summary>
     /// <returns>是否操作成功的方法</returns>
-    public OperateResult<byte[]> ClearSerialCache()
+    private Task<OperateResult<byte[]>> ClearSerialCacheAsync()
     {
-        return SPReceived(_serialPort, null, null, awaitData: false);
-    }
-
-    private OperateResult<bool> OpenCommunication()
-    {
-        try
-        {
-            if (!_serialPort.IsOpen)
-            {
-                _serialPort.Open();
-                ResetConnectErrorCount();
-                return OperateResult.CreateSuccessResult(value: true);
-            }
-            return OperateResult.CreateSuccessResult(value: false);
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<bool>("OpenCommunication failed: " + ex.Message);
-        }
-    }
-
-    private OperateResult CloseCommunication()
-    {
-        if (_serialPort.IsOpen)
-        {
-            try
-            {
-                _serialPort.Close();
-            }
-            catch (Exception ex)
-            {
-                return new OperateResult(ex.Message);
-            }
-        }
-        return OperateResult.CreateSuccessResult();
+        return SerialPortReceivedAsync(_serialPort, null, null, awaitData: false);
     }
 
     public override async Task<OperateResult> SendAsync(byte[] data)
@@ -227,8 +193,9 @@ public class PipeSerialPort : PipeNetBase, IDisposable
     /// <param name="sendValue">等待发送的数据对象</param>
     /// <param name="awaitData">是否必须要等待数据返回</param>
     /// <returns>结果数据对象</returns>
-    private OperateResult<byte[]> SPReceived(SerialPort serialPort, INetMessage netMessage, byte[] sendValue, bool awaitData)
+    private async Task<OperateResult<byte[]>> SerialPortReceivedAsync(SerialPort serialPort, INetMessage? netMessage, byte[] sendValue, bool awaitData)
     {
+        // TODO: 此代码需要优化
         byte[] array;
         MemoryStream memoryStream;
         try
@@ -249,8 +216,9 @@ public class PipeSerialPort : PipeNetBase, IDisposable
             num2++;
             if (num2 > 1 && DelayTime >= 0)
             {
-                CommunicationHelper.ThreadSleep(DelayTime);
+                await Task.Delay(DelayTime).ConfigureAwait(false);
             }
+
             try
             {
                 if (serialPort.BytesToRead < 1)
@@ -303,18 +271,16 @@ public class PipeSerialPort : PipeNetBase, IDisposable
         return OperateResult.CreateSuccessResult(memoryStream.ToArray());
     }
 
-    /// <inheritdoc />
-    public override async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage netMessage, byte[] sendValue, bool useActivePush = true)
+    public override async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage? netMessage, byte[] sendValue, bool useActivePush = true)
     {
-        return await Task.Run(() => SPReceived(_serialPort, netMessage, sendValue, awaitData: true)).ConfigureAwait(continueOnCapturedContext: false);
+        return await SerialPortReceivedAsync(_serialPort, netMessage, sendValue, awaitData: true).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    /// <inheritdoc />
-    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage netMessage, byte[] sendValue, bool hasResponseData)
+    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
         if (IsClearCacheBeforeRead)
         {
-            ClearSerialCache();
+            await ClearSerialCacheAsync().ConfigureAwait(false);
         }
         var operateResult = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData, 0).ConfigureAwait(false);
         if (operateResult.IsSuccess)

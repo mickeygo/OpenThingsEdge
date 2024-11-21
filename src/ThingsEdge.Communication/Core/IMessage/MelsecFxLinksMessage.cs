@@ -5,9 +5,9 @@ namespace ThingsEdge.Communication.Core.IMessage;
 /// </summary>
 public class MelsecFxLinksMessage : NetMessageBase, INetMessage
 {
-    private int _format = 1;
+    private readonly int _format = 1;
 
-    private bool _sumCheck = true;
+    private readonly bool _sumCheck = true;
 
     public int ProtocolHeadBytesLength => -1;
 

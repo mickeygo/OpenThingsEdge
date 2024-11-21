@@ -23,12 +23,12 @@ public class MelsecMcAsciiNet : MelsecMcNet
         return new MelsecQnA3EAsciiMessage();
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return McAsciiHelper.PackMcCommand(this, command);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         var operateResult = McAsciiHelper.CheckResponseContent(response);
         if (!operateResult.IsSuccess)

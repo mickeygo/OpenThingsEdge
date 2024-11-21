@@ -36,7 +36,7 @@ public static class NetSupport
         {
             return new OperateResult<Socket>("Socket Create Exception -> " + ex.Message);
         }
-        
+      
         try
         {
             using CancellationTokenSource cts = new(timeOut);
@@ -75,10 +75,10 @@ public static class NetSupport
     }
 
     /// <summary>
-    /// 关闭指定的socket套接字对象
+    /// 安全关闭指定的socket套接字对象
     /// </summary>
     /// <param name="socket">套接字对象</param>
-    public static void CloseSocket(Socket? socket)
+    public static void SafeCloseSocket(Socket? socket)
     {
         try
         {
@@ -144,7 +144,8 @@ public static class NetSupport
                 }
                 while (alreadyCount < length);
 
-                await socket.ReceiveAsync(buffer).ConfigureAwait(false);
+                // 使用下面代码代替
+                //await socket.ReceiveAsync(buffer).ConfigureAwait(false);
 
                 return OperateResult.CreateSuccessResult(length);
             }
@@ -158,16 +159,19 @@ public static class NetSupport
         }
         catch (RemoteClosedException)
         {
+            Debug.WriteLine("没有可读数据，关闭 Socket");
             socket?.Close();
             return new OperateResult<int>(SocketErrorCode, StringResources.Language.RemoteClosedConnection);
         }
         catch (OperationCanceledException)
         {
+            Debug.WriteLine("超时取消，关闭 Socket");
             socket?.Close();
             return new OperateResult<int>(SocketErrorCode, StringResources.Language.ReceiveDataTimeout + timeOut);
         }
         catch (Exception ex)
         {
+            Debug.WriteLine($"数据接收异常，关闭 Socket，{ex.Message}");
             socket?.Close();
             return new OperateResult<int>(SocketErrorCode, "Socket Exception -> " + ex.Message);
         }
@@ -194,11 +198,13 @@ public static class NetSupport
         }
         catch (OperationCanceledException)
         {
+            Debug.WriteLine("超时取消，关闭 Socket");
             socket?.Close();
             return new OperateResult<int>(SocketErrorCode, StringResources.Language.ReceiveDataTimeout + timeOut);
         }
         catch (SocketException ex)
         {
+            Debug.WriteLine($"Socket异常，关闭 Socket，{ex.Message}");
             socket?.Close();
             return new OperateResult<int>(SocketErrorCode, "Socket Exception -> " + ex.Message);
         }

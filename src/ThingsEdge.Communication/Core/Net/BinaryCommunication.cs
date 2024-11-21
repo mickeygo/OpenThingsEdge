@@ -19,7 +19,7 @@ public abstract class BinaryCommunication
     /// 内置 <see cref="PipeTcpNet" /> 管道和 <see cref="PipeSerialPort" /> 管道。
     /// </summary>
     [NotNull]
-    public PipeNetBase? Pipe { get; init; }
+    protected PipeNetBase? NetworkPipe { get; init; }
 
     /// <summary>
     /// 组件的日志工具。
@@ -29,19 +29,19 @@ public abstract class BinaryCommunication
     /// <summary>
     /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈。
     /// </summary>
-    public int ReceiveTimeOut
+    public int ReceiveTimeout
     {
-        get => Pipe.ReceiveTimeout;
-        set => Pipe.ReceiveTimeout = value;
+        get => NetworkPipe.ReceiveTimeout;
+        set => NetworkPipe.ReceiveTimeout = value;
     }
 
     /// <summary>
-    /// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
+    /// 获取或设置在正式接收对方返回数据前的时候，需要延迟的时间，当设置为0的时候，不需要延迟。
     /// </summary>
-    public int SleepTime
+    public int DelayTime
     {
-        get => Pipe.DelayTime;
-        set => Pipe.DelayTime = value;
+        get => NetworkPipe.DelayTime;
+        set => NetworkPipe.DelayTime = value;
     }
 
     /// <summary>
@@ -53,30 +53,23 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
-    /// 获取一个新的消息对象的方法，需要在继承类里面进行重写。
+    /// 获取一个新的消息对象的方法，需要在继承类里面进行重写，默认返回 null。
     /// </summary>
     /// <returns>消息类对象</returns>
-    protected virtual INetMessage GetNewNetMessage()
+    protected virtual INetMessage? GetNewNetMessage()
     {
         return default;
     }
 
     /// <summary>
-    /// 根据实际的协议选择是否重写本方法，有些协议在断开连接之前，需要发送一些报文来关闭当前的网络通道。
+    /// 连接上服务器的事件。
     /// </summary>
-    /// <returns>当断开连接时额外的操作结果</returns>
-    protected virtual OperateResult ExtraOnDisconnect()
-    {
-        return OperateResult.CreateSuccessResult();
-    }
+    public Action<string>? OnExtraOnConnect { get; set; }
 
     /// <summary>
-    /// 和服务器交互完成的时候调用的方法，可以根据读写结果进行一些额外的操作，具体的操作需要根据实际的需求来重写实现。
+    /// 与服务器断开后的事件。
     /// </summary>
-    /// <param name="read">读取结果</param>
-    protected virtual void ExtraAfterReadFromCoreServer(OperateResult read)
-    {
-    }
+    public Action<string>? OnExtraOnDisconnect { get; set; }
 
     /// <summary>
     /// 根据实际的协议选择是否重写本方法，有些协议在创建连接之后，需要进行一些初始化的信号握手，才能最终建立网络通道。
@@ -104,7 +97,7 @@ public abstract class BinaryCommunication
     /// </remarks>
     /// <param name="command">发送的数据命令内容</param>
     /// <returns>打包之后的数据结果信息</returns>
-    public virtual byte[] PackCommandWithHeader(byte[] command)
+    protected virtual byte[] PackCommandWithHeader(byte[] command)
     {
         return command;
     }
@@ -118,7 +111,7 @@ public abstract class BinaryCommunication
     /// <param name="send">发送的原始报文数据</param>
     /// <param name="response">设备方反馈的原始报文内容</param>
     /// <returns>返回拆包之后的报文信息，默认不进行任何的拆包操作</returns>
-    public virtual OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected virtual OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return OperateResult.CreateSuccessResult(response);
     }
@@ -153,9 +146,9 @@ public abstract class BinaryCommunication
     /// <param name="hasResponseData">是否有等待的数据返回</param>
     /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(byte[])" />方法后才会有影响</param>
     /// <returns>接收的完整的报文信息</returns>
-    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        var enter = Pipe.CommunicationLock.EnterLock(Pipe.ReceiveTimeout);
+        var enter = NetworkPipe.CommunicationLock.EnterLock(NetworkPipe.ReceiveTimeout);
         if (!enter.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(enter);
@@ -164,7 +157,7 @@ public abstract class BinaryCommunication
         var read = new OperateResult<byte[]>();
         try
         {
-            var pipe = await Pipe.OpenCommunicationAsync().ConfigureAwait(false);
+            var pipe = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
             if (!pipe.IsSuccess)
             {
                 read.CopyErrorFromOther(pipe);
@@ -178,9 +171,7 @@ public abstract class BinaryCommunication
                     return OperateResult.CreateFailedResult<byte[]>(ini);
                 }
             }
-            read = await ReadFromCoreServerAsync(Pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
-            ExtraAfterReadFromCoreServer(read);
-            Pipe.CommunicationLock.LeaveLock();
+            read = await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         }
         catch
         {
@@ -188,13 +179,7 @@ public abstract class BinaryCommunication
         }
         finally
         {
-            Pipe.CommunicationLock.LeaveLock();
-        }
-
-        if (!Pipe.IsPersistentConnection)
-        {
-            await ExtraOnDisconnectAsync().ConfigureAwait(false);
-            await Pipe.CloseCommunicationAsync().ConfigureAwait(false);
+            NetworkPipe.CommunicationLock.LeaveLock();
         }
         return read;
     }
@@ -207,8 +192,10 @@ public abstract class BinaryCommunication
     /// <param name="hasResponseData">是否有等待的数据返回</param>
     /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写 <see cref="PackCommandWithHeader" /> 方法后才会有影响</param>
     /// <returns>是否成功的结果对象</returns>
-    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
+        // TODO: 此方法逻辑可以移至上述方法并移除
+
         if (usePackAndUnpack)
         {
             send = PackCommandWithHeader(send);

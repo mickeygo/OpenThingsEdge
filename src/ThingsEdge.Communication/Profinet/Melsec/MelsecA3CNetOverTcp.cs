@@ -29,7 +29,7 @@ public class MelsecA3CNetOverTcp : DeviceTcpNet, IReadWriteA3C, IReadWriteDevice
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
-        SleepTime = 20;
+        DelayTime = 20;
     }
 
     public Task<OperateResult<string>> ReadPlcTypeAsync()
@@ -57,11 +57,11 @@ public class MelsecA3CNetOverTcp : DeviceTcpNet, IReadWriteA3C, IReadWriteDevice
     /// 批量写入PLC的数据，以字为单位，也就是说最少2个字节信息，支持 X,Y,M,S,D,T,C，具体的地址范围需要根据PLC型号来确认。
     /// </summary>
     /// <param name="address">地址信息</param>
-    /// <param name="values">数据值</param>
+    /// <param name="data">数据值</param>
     /// <returns>是否写入成功</returns>
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return MelsecA3CNetHelper.WriteAsync(this, address, values);
+        return MelsecA3CNetHelper.WriteAsync(this, address, data);
     }
 
     /// <summary>

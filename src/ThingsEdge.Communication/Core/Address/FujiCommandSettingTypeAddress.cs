@@ -19,13 +19,11 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
     /// </summary>
     public string? AddressHeader { get; set; }
 
-    /// <inheritdoc />
     public override void Parse(string address, ushort length)
     {
         base.Parse(address, length);
     }
 
-    /// <inheritdoc />
     public override string ToString()
     {
         return AddressHeader + AddressStart;

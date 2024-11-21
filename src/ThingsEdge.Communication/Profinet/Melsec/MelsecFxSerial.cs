@@ -43,14 +43,14 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
     {
         if (AutoChangeBaudRate)
         {
-            return await Pipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
+            return await NetworkPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
         }
         return await base.InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> OpenAsync()
     {
-        if (Pipe is not PipeSerialPort pipeSerialPort)
+        if (NetworkPipe is not PipeSerialPort pipeSerialPort)
         {
             return new OperateResult("PipeSerialPort get failed");
         }
@@ -124,9 +124,9 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
         return await MelsecFxSerialHelper.ReadBoolAsync(this, address, length, IsNewVersion).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await MelsecFxSerialHelper.WriteAsync(this, address, values, IsNewVersion).ConfigureAwait(false);
+        return await MelsecFxSerialHelper.WriteAsync(this, address, data, IsNewVersion).ConfigureAwait(false);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)
@@ -142,6 +142,6 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
 
     public override string ToString()
     {
-        return $"MelsecFxSerial[{Pipe}]";
+        return $"MelsecFxSerial[{NetworkPipe}]";
     }
 }

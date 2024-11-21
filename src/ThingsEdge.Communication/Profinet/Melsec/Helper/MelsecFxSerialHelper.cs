@@ -27,7 +27,7 @@ public static class MelsecFxSerialHelper
                 return true;
             }
         }
-        else if (buffer[0] == 2 && buffer.Length >= 5 && buffer[buffer.Length - 3] == 3 && MelsecHelper.CheckCRC(buffer))
+        else if (buffer[0] == 2 && buffer.Length >= 5 && buffer[^3] == 3 && MelsecHelper.CheckCRC(buffer))
         {
             return true;
         }

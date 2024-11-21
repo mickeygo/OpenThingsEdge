@@ -13,7 +13,7 @@ public class OperateResult
     /// <summary>
     /// 指示本次操作是否成功。
     /// </summary>
-    public bool IsSuccess { get; set; }
+    public virtual bool IsSuccess { get; set; }
 
     /// <summary>
     /// 具体的错误描述。
@@ -375,7 +375,7 @@ public class OperateResult<T> : OperateResult
     /// 指示本次操作是否成功。
     /// </summary>
     [MemberNotNullWhen(true, nameof(Content))]
-    public new bool IsSuccess { get; set; }
+    public override bool IsSuccess { get; set; }
 
     /// <summary>
     /// 实例化一个默认的结果对象
@@ -509,7 +509,7 @@ public class OperateResult<T1, T2> : OperateResult
     /// 指示本次操作是否成功。
     /// </summary>
     [MemberNotNullWhen(true, nameof(Content1), nameof(Content2))]
-    public new bool IsSuccess { get; set; }
+    public override bool IsSuccess { get; set; }
 
     /// <summary>
     /// 实例化一个默认的结果对象
@@ -649,7 +649,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
     /// 指示本次操作是否成功。
     /// </summary>
     [MemberNotNullWhen(true, nameof(Content1), nameof(Content2), nameof(Content3))]
-    public new bool IsSuccess { get; set; }
+    public override bool IsSuccess { get; set; }
 
     /// <summary>
     /// 实例化一个默认的结果对象

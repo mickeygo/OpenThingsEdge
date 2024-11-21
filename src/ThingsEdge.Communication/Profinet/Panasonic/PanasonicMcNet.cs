@@ -24,7 +24,7 @@ public class PanasonicMcNet : MelsecMcNet
         return McAddressData.ParsePanasonicFrom(address, length, isBit);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         var num = BitConverter.ToUInt16(response, 9);
         if (num != 0)

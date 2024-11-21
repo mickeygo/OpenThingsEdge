@@ -5,20 +5,17 @@ namespace ThingsEdge.Communication.Core;
 /// </summary>
 public class CommunicationLockNone : ICommunicationLock, IDisposable
 {
-    private bool disposedValue = false;
+    private bool _disposedValue;
 
-    /// <inheritdoc cref="M:HslCommunication.Core.ICommunicationLock.EnterLock(System.Int32)" />
     public virtual OperateResult EnterLock(int timeout)
     {
         return OperateResult.CreateSuccessResult();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.ICommunicationLock.LeaveLock" />
     public virtual void LeaveLock()
     {
     }
 
-    /// <inheritdoc cref="M:System.IDisposable.Dispose" />
     protected virtual void Dispose(bool disposing)
     {
         if (!disposing)
@@ -29,10 +26,10 @@ public class CommunicationLockNone : ICommunicationLock, IDisposable
     /// <inheritdoc cref="M:System.IDisposable.Dispose" />
     public void Dispose()
     {
-        if (!disposedValue)
+        if (!_disposedValue)
         {
             Dispose(disposing: true);
-            disposedValue = true;
+            _disposedValue = true;
         }
     }
 }

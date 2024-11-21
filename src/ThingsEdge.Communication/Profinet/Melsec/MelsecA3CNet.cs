@@ -38,9 +38,9 @@ public class MelsecA3CNet : DeviceSerialPort, IReadWriteA3C, IReadWriteDevice, I
         return MelsecA3CNetHelper.ReadBoolAsync(this, address, length);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return MelsecA3CNetHelper.WriteAsync(this, address, values);
+        return MelsecA3CNetHelper.WriteAsync(this, address, data);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)

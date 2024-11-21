@@ -27,7 +27,7 @@ public class MelsecA1EBinaryMessage : NetMessageBase, INetMessage
         return 0;
     }
 
-    public override bool CheckHeadBytesLegal(byte[] token)
+    public override bool CheckHeadBytesLegal()
     {
         if (HeadBytes != null)
         {

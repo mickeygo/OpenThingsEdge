@@ -136,15 +136,15 @@ public class ModbusAddress : DeviceAddressDataBase
         var stringBuilder = new StringBuilder();
         if (Station >= 0)
         {
-            stringBuilder.Append("s=" + Station + ";");
+            stringBuilder.AppendFormat("s={0};", Station);
         }
         if (Function == 2 || Function == 4 || Function > 6)
         {
-            stringBuilder.Append("x=" + Function + ";");
+            stringBuilder.AppendFormat("x={0};", Function);
         }
         if (WriteFunction > 0)
         {
-            stringBuilder.Append("w=" + WriteFunction + ";");
+            stringBuilder.AppendFormat("w={0};", WriteFunction);
         }
         stringBuilder.Append(AddressStart);
         return stringBuilder.ToString();

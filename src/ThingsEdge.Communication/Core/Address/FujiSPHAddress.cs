@@ -4,7 +4,7 @@ using ThingsEdge.Communication.Exceptions;
 namespace ThingsEdge.Communication.Core.Address;
 
 /// <summary>
-/// 富士SPH地址类对象
+/// 富士SPH地址类对象。
 /// </summary>
 public class FujiSPHAddress : DeviceAddressDataBase
 {

@@ -222,7 +222,6 @@ public class RegularByteTransform : IByteTransform
         return CommunicationHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.IByteTransform.TransDouble(System.Byte[],System.Int32)" />
     public virtual double TransDouble(byte[] buffer, int index)
     {
         return BitConverter.ToDouble(ByteTransDataFormat8(buffer, index), 0);

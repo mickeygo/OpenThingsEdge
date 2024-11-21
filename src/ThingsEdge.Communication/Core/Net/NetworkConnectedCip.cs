@@ -39,7 +39,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return AllenBradleyHelper.PackRequestHeader(112, SessionHandle, AllenBradleyHelper.PackCommandSpecificData(GetOTConnectionIdService(), command));
     }
@@ -47,7 +47,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read1 = await ReadFromCoreServerAsync(Pipe,
+        var read1 = await ReadFromCoreServerAsync(NetworkPipe,
             AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), true, false)
             .ConfigureAwait(continueOnCapturedContext: false);
         if (!read1.IsSuccess)
@@ -65,8 +65,8 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         for (var i = 0; i < 10; i++)
         {
             var id = Interlocked.Increment(ref _openForwardId);
-            var send = AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommunicationHelper.HslRandom.Next(7, 200)), ByteTransform.TransByte(id));
-            var read2 = await ReadFromCoreServerAsync(Pipe, send, true, false).ConfigureAwait(false);
+            var send = AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommunicationHelper.Random.Next(7, 200)), ByteTransform.TransByte(id));
+            var read2 = await ReadFromCoreServerAsync(NetworkPipe, send, true, false).ConfigureAwait(false);
             if (!read2.IsSuccess)
             {
                 return read2;
@@ -105,21 +105,16 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> ExtraOnDisconnectAsync()
     {
-        if (Pipe == null)
-        {
-            return OperateResult.CreateSuccessResult();
-        }
-
         var forwardClose = GetLargeForwardClose();
         if (forwardClose != null)
         {
-            var close = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, forwardClose), true, false).ConfigureAwait(false);
+            var close = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, forwardClose), true, false).ConfigureAwait(false);
             if (!close.IsSuccess)
             {
                 return close;
             }
         }
-        var read = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

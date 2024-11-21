@@ -6,12 +6,13 @@ namespace ThingsEdge.Communication.Core.Device;
 /// <summary>
 /// 设备通信的基类信息。
 /// </summary>
-public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevice, IReadWriteNet, IDisposable, IAsyncDisposable
+public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevice, IReadWriteNet, IDisposable
 {
+    private bool _isClosed;
     private bool _disposedValue;
 
     /// <summary>
-    /// 一个字单位的数据表示的地址长度，西门子为2，三菱，欧姆龙，modbusTcp就为1，AB PLC无效。
+    /// 一个字单位（word，16位）的数据表示的地址长度，西门子为2，三菱，欧姆龙，modbusTcp 为1，AB PLC无效。
     /// </summary>
     /// <remarks>
     /// 对设备来说，一个地址的数据对应的字节数，或是1个字节或是2个字节，4个字节，通常是这四个选择，当设置为0时，则表示4字节的地址长度信息。
@@ -28,7 +29,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     public IByteTransform ByteTransform { get; init; } = new RegularByteTransform();
 
     /// <summary>
-    /// 一个字单位的数据表示的地址长度，西门子为2，三菱，欧姆龙，modbusTcp就为1，AB PLC无效。
+    /// 一个字单位的数据表示的地址长度，西门子为2，三菱，欧姆龙，modbusTcp 为1，AB PLC 无效。
     /// </summary>
     /// <remarks>
     /// 对设备来说，一个地址的数据对应的字节数，或是1个字节或是2个字节，通常是这两个选择。
@@ -70,7 +71,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 1)).ConfigureAwait(false), (m) => ByteTransform.TransInt16(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 1)).ConfigureAwait(false),
+            (m) => ByteTransform.TransInt16(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -82,7 +85,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<ushort[]>> ReadUInt16Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 1)).ConfigureAwait(false), (m) => ByteTransform.TransUInt16(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 1)).ConfigureAwait(false),
+            (m) => ByteTransform.TransUInt16(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -94,7 +99,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransInt32(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false),
+            (m) => ByteTransform.TransInt32(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -106,13 +113,17 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransUInt32(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false),
+            (m) => ByteTransform.TransUInt32(m, 0, length));
     }
 
     /// <inheritdoc />
     public virtual async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 2)).ConfigureAwait(false),
+            (m) => ByteTransform.TransSingle(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -130,7 +141,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => ByteTransform.TransInt64(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false),
+            (m) => ByteTransform.TransInt64(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -142,7 +155,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => ByteTransform.TransUInt64(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false),
+            (m) => ByteTransform.TransUInt64(m, 0, length));
     }
     
     /// <inheritdoc />
@@ -154,7 +169,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => ByteTransform.TransDouble(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false),
+            (m) => ByteTransform.TransDouble(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -166,7 +183,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     /// <inheritdoc />
     public virtual async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransString(m, 0, m.Length, encoding));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransString(m, 0, m.Length, encoding));
     }
 
     #endregion
@@ -318,13 +337,27 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
 
     #endregion
 
+    /// <summary>
+    /// 关闭连接。
+    /// </summary>
+    public virtual void Close()
+    {
+        if (!_isClosed)
+        {
+            NetworkPipe.CloseCommunication();
+            NetworkPipe.Dispose();
+            OnExtraOnDisconnect?.Invoke(ConnectionId);
+
+            _isClosed = true;
+        }
+    }
+
     /// <inheritdoc />
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {
-            Pipe?.CloseCommunication();
-            Pipe?.Dispose();
+            Close();
         }
     }
 
@@ -338,22 +371,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         }
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        if (!_disposedValue)
-        {
-            if (Pipe != null)
-            {
-                await Pipe.CloseCommunicationAsync().ConfigureAwait(false);
-                Pipe.Dispose();
-            }
-            _disposedValue = true;
-        }
-    }
-
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceCommunication<{ByteTransform}>{{{Pipe}}}";
+        return $"DeviceCommunication<{ByteTransform}>{{{NetworkPipe}}}";
     }
 }

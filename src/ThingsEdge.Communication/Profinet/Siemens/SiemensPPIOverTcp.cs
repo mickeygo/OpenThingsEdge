@@ -54,9 +54,9 @@ public class SiemensPPIOverTcp : DeviceTcpNet, ISiemensPPI, IReadWriteNet
         return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return SiemensPPIHelper.WriteAsync(this, address, values, Station, _mutex);
+        return SiemensPPIHelper.WriteAsync(this, address, data, Station, _mutex);
     }
 
     public Task<OperateResult> WriteAsync(string address, byte value)

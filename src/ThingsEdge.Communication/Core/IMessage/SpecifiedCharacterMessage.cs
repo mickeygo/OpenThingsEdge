@@ -56,7 +56,7 @@ public class SpecifiedCharacterMessage : NetMessageBase, INetMessage
         return 0;
     }
 
-    public override bool CheckHeadBytesLegal(byte[] token)
+    public override bool CheckHeadBytesLegal()
     {
         return true;
     }

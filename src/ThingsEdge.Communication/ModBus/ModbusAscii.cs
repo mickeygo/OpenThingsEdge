@@ -19,7 +19,6 @@ public class ModbusAscii : ModbusRtu
         ReceiveEmptyDataCount = 5;
     }
 
-    /// <inheritdoc cref="M:HslCommunication.ModBus.ModbusRtu.#ctor(System.Byte)" />
     public ModbusAscii(byte station = 1)
         : base(station)
     {
@@ -33,13 +32,13 @@ public class ModbusAscii : ModbusRtu
     }
 
     /// <inheritdoc />
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return ModbusInfo.TransModbusCoreToAsciiPackCommand(command);
     }
 
     /// <inheritdoc />
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return ModbusHelper.ExtraAsciiResponseContent(send, response, BroadcastStation);
     }

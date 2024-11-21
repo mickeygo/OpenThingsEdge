@@ -56,7 +56,7 @@ public class AllenBradleyConnectedCipNet : OmronConnectedCipNet
         {
             return write;
         }
-        return await WriteTagAsync(value: SoftBasic.ArrayExpandToLengthEven(data), address: address + ".DATA[0]", typeCode: 194, length: data.Length).ConfigureAwait(false);
+        return await WriteTagAsync(address + ".DATA[0]", typeCode: 194, SoftBasic.ArrayExpandToLengthEven(data), data.Length).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

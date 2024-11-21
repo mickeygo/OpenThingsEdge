@@ -106,9 +106,9 @@ public class MelsecA1ENet : DeviceTcpNet
         return OperateResult.CreateSuccessResult(array.Select((m) => m == 1).Take(length).ToArray());
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var command = BuildWriteWordCommand(address, values, PLCNumber);
+        var command = BuildWriteWordCommand(address, data, PLCNumber);
         if (!command.IsSuccess)
         {
             return command;

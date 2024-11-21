@@ -62,12 +62,12 @@ public class XinJEInternalNet : DeviceTcpNet
         return new ModbusTcpMessage();
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return ModbusInfo.PackCommandToTcp(command, (ushort)_softIncrementCount.GetCurrentValue());
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return ModbusInfo.ExtractActualData(ModbusInfo.ExplodeTcpCommandToCore(response));
     }
@@ -97,9 +97,9 @@ public class XinJEInternalNet : DeviceTcpNet
         return OperateResult.CreateSuccessResult(read.Content.ToBoolArray().SelectBegin(length));
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var command = XinJEHelper.BuildWriteWordCommand(Station, address, value);
+        var command = XinJEHelper.BuildWriteWordCommand(Station, address, data);
         if (!command.IsSuccess)
         {
             return command;

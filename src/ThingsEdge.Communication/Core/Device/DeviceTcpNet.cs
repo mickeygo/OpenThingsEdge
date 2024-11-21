@@ -12,16 +12,13 @@ public abstract class DeviceTcpNet : DeviceCommunication
 
     private readonly Lazy<Ping> _ping = new(() => new Ping());
 
-    public int ConnectTimeOut
+    /// <summary>
+    /// 连接服务器超时时间。
+    /// </summary>
+    public int ConnectTimeout
     {
         get => _pipeTcpNet.ConnectTimeOut;
-        set
-        {
-            if (value >= 0)
-            {
-                _pipeTcpNet.ConnectTimeOut = value;
-            }
-        }
+        set => _pipeTcpNet.ConnectTimeOut = value;
     }
 
     /// <summary>
@@ -41,7 +38,7 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <param name="port">设备方的端口号信息</param>
     public DeviceTcpNet(string ipAddress, int port)
     {
-        Pipe = _pipeTcpNet = new PipeTcpNet(ipAddress, port);
+        NetworkPipe = _pipeTcpNet = new PipeTcpNet(ipAddress, port);
     }
 
     /// <summary>
@@ -66,8 +63,8 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <returns>返回连接结果，如果失败的话（也即IsSuccess为False），包含失败信息</returns>
     public async Task<OperateResult> ConnectServerAsync()
     {
-        await Pipe.CloseCommunicationAsync().ConfigureAwait(false);
-        var open = await Pipe.OpenCommunicationAsync().ConfigureAwait(false);
+        NetworkPipe.CloseCommunication();
+        var open = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
         if (!open.IsSuccess)
         {
             return open;
@@ -89,36 +86,14 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// </example>
     public OperateResult CloseConnect()
     {
-        var operateResult = ExtraOnDisconnect();
-        if (!operateResult.IsSuccess)
-        {
-            return operateResult;
-        }
+        OnExtraOnDisconnect?.Invoke(ConnectionId);
 
-        return Pipe.CloseCommunication();
-    }
-
-    /// <summary>
-    /// 手动断开与远程服务器的连接，如果当前是长连接模式，那么就会切换到短连接模式。
-    /// </summary>
-    /// <returns>关闭连接，不需要查看IsSuccess属性查看</returns>
-    /// <example>
-    /// 直接关闭连接即可，基本上是不需要进行成功的判定。
-    /// </example>
-    public async Task<OperateResult> CloseConnectAsync()
-    {
-        var result = await ExtraOnDisconnectAsync().ConfigureAwait(continueOnCapturedContext: false);
-        if (!result.IsSuccess)
-        {
-            return result;
-        }
-
-        return await Pipe.CloseCommunicationAsync().ConfigureAwait(continueOnCapturedContext: false);
+        return NetworkPipe.CloseCommunication();
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceTcpNet<{ByteTransform}>{{{Pipe}}}";
+        return $"DeviceTcpNet<{ByteTransform}>{{{NetworkPipe}}}";
     }
 }

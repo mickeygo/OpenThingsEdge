@@ -34,9 +34,9 @@ public class FujiSPB : DeviceSerialPort
         return await FujiSPBHelper.ReadBoolAsync(this, Station, address, length).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await FujiSPBHelper.WriteAsync(this, Station, address, values).ConfigureAwait(false);
+        return await FujiSPBHelper.WriteAsync(this, Station, address, data).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, bool value)
@@ -46,7 +46,7 @@ public class FujiSPB : DeviceSerialPort
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        // TODO: FujiSPB -> WriteAsync
+        // TODO: [NotImplemented] FujiSPB -> WriteAsync
 
         throw new NotImplementedException();
     }

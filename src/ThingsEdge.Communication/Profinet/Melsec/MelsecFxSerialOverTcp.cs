@@ -55,11 +55,11 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
             IsStringReverseByteWord = true,
         };
         IsNewVersion = true;
-        SleepTime = 20;
+        DelayTime = 20;
     }
 
     /// <inheritdoc />
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         if (UseGOT)
         {
@@ -105,7 +105,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         return base.PackCommandWithHeader(command);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         if (UseGOT)
         {
@@ -131,7 +131,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         return base.UnpackResponseContent(send, response);
     }
 
-    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
     {
         var read = await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         if (!read.IsSuccess)
@@ -160,7 +160,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         {
             for (var i = 0; i < _inis.Count; i++)
             {
-                OperateResult ini1 = await ReadFromCoreServerAsync(Pipe, _inis[i].ToHexBytes(), true, false).ConfigureAwait(false);
+                OperateResult ini1 = await ReadFromCoreServerAsync(NetworkPipe, _inis[i].ToHexBytes(), true, false).ConfigureAwait(false);
                 if (!ini1.IsSuccess)
                 {
                     return ini1;
@@ -185,9 +185,9 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         return await MelsecFxSerialHelper.ReadBoolAsync(this, address, length, IsNewVersion).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await MelsecFxSerialHelper.WriteAsync(this, address, values, IsNewVersion).ConfigureAwait(false);
+        return await MelsecFxSerialHelper.WriteAsync(this, address, data, IsNewVersion).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, bool value)

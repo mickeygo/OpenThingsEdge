@@ -161,7 +161,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(Pipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(NetworkPipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -191,13 +191,13 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
     }
 
     /// <inheritdoc />
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return PackCommand(command);
     }
 
     /// <inheritdoc />
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return OmronFinsNetHelper.ResponseValidAnalysis(response);
     }
@@ -207,9 +207,9 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         return await OmronFinsNetHelper.ReadAsync(this, address, length, ReadSplits).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await OmronFinsNetHelper.WriteAsync(this, address, value).ConfigureAwait(false);
+        return await OmronFinsNetHelper.WriteAsync(this, address, data).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

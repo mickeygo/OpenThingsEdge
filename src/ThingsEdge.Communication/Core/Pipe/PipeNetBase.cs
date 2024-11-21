@@ -12,12 +12,12 @@ public abstract class PipeNetBase : IDisposable
     private int _connectErrorCount;
 
     /// <summary>
-    /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈。
+    /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈，默认 5s。
     /// </summary>
     public int ReceiveTimeout { get; set; } = 5_000;
 
     /// <summary>
-    /// 获取或设置在正式接收对方返回数据前的时候，需要延迟的时间，当设置为0的时候，不需要休息。
+    /// 获取或设置在正式接收对方返回数据前的时候，需要延迟的时间，当设置为0的时候，不需要延迟。
     /// </summary>
     public int DelayTime { get; set; }
 
@@ -27,16 +27,6 @@ public abstract class PipeNetBase : IDisposable
     public ICommunicationLock CommunicationLock => new CommunicationLockSimple();
 
     /// <summary>
-    /// 获取或设置当前的管道是否是长连接，仅对于串口及TCP是有效的，默认都是长连接。
-    /// </summary>
-    public bool IsPersistentConnection { get; set; } = true;
-
-    /// <summary>
-    /// 用来决定当前接收的消息是否是问答服务的消息。
-    /// </summary>
-    public Func<PipeNetBase, OperateResult<byte[]>, bool>? DecideWhetherQAMessageFunction { get; set; }
-
-    /// <summary>
     /// 接收固定长度的字节数组，允许指定超时时间，默认为60秒，当length大于0时，接收固定长度的数据内容，当length小于0时，buffer长度的缓存数据。
     /// </summary>
     /// <param name="buffer">等待接收的数据缓存信息</param>
@@ -44,20 +34,16 @@ public abstract class PipeNetBase : IDisposable
     /// <param name="length">准备接收的数据长度，当length大于0时，接收固定长度的数据内容，当length小于0时，接收不大于2048长度的随机数据信息</param>
     /// <param name="timeOut">单位：毫秒，超时时间，默认为60秒，如果设置小于0，则不检查超时时间</param>
     /// <returns>包含了字节数据的结果类</returns>
-    public virtual async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeOut = 60000)
+    public virtual async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeOut = 60_000)
     {
         return await Task.FromResult(new OperateResult<int>(StringResources.Language.NotSupportedFunction)).ConfigureAwait(false);
     }
 
-    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage netMessage, byte[] sendValue, bool hasResponseData)
+    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
         var read = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData, DelayTime).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
-            if (read.ErrorCode < 0 && read.ErrorCode != int.MinValue)
-            {
-                // TODO: NULL ?
-            }
             return read;
         }
         ResetConnectErrorCount();
@@ -71,7 +57,7 @@ public abstract class PipeNetBase : IDisposable
     /// <param name="sendValue">发送的数据内容</param>
     /// <param name="ms">接收数据的流</param>
     /// <returns>是否接收完成数据</returns>
-    protected bool CheckMessageComplete(INetMessage netMessage, byte[] sendValue, ref MemoryStream ms)
+    protected bool CheckMessageComplete(INetMessage? netMessage, byte[] sendValue, ref MemoryStream ms)
     {
         if (netMessage == null)
         {
@@ -103,6 +89,7 @@ public abstract class PipeNetBase : IDisposable
         }
         else if (netMessage.ProtocolHeadBytesLength > 0)
         {
+            // TODO: 需要清理逻辑并优化代码
             var array2 = ms.ToArray();
             if (array2.Length >= netMessage.ProtocolHeadBytesLength)
             {
@@ -229,15 +216,6 @@ public abstract class PipeNetBase : IDisposable
         return new OperateResult(StringResources.Language.NotSupportedFunction);
     }
 
-    /// <summary>
-    /// 关闭当前的管道信息，返回是否关闭成功的结果对象。
-    /// </summary>
-    /// <returns>是否关闭成功</returns>
-    public virtual Task<OperateResult> CloseCommunicationAsync()
-    {
-        return Task.FromResult(new OperateResult(StringResources.Language.NotSupportedFunction));
-    }
-
     private async Task<OperateResult<byte[]>> ReceiveCommandLineFromPipeAsync(byte endCode, int timeout = 60000)
     {
         try
@@ -272,7 +250,7 @@ public abstract class PipeNetBase : IDisposable
         }
     }
 
-    public virtual async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage netMessage, byte[] sendValue, bool useActivePush = true)
+    public virtual async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage? netMessage, byte[] sendValue, bool useActivePush = true)
     {
         OperateResult<byte[]> read;
         if (netMessage == null || netMessage.ProtocolHeadBytesLength == -1)
@@ -310,12 +288,13 @@ public abstract class PipeNetBase : IDisposable
         return read;
     }
 
-    protected async Task<OperateResult<byte[]>> ReadFromCoreServerHelperAsync(INetMessage netMessage, byte[] sendValue, bool hasResponseData, int sleep)
+    protected async Task<OperateResult<byte[]>> ReadFromCoreServerHelperAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData, int sleep)
     {
         if (netMessage != null)
         {
             netMessage.SendBytes = sendValue;
         }
+
         var sendResult = await SendAsync(sendValue).ConfigureAwait(continueOnCapturedContext: false);
         if (!sendResult.IsSuccess)
         {
@@ -348,7 +327,7 @@ public abstract class PipeNetBase : IDisposable
             bool num;
             if (netMessage != null)
             {
-                switch (netMessage.CheckMessageMatch(sendValue, resultReceive.Content!))
+                switch (netMessage.CheckMessageMatch(sendValue, resultReceive.Content))
                 {
                     case 0:
                         return new OperateResult<byte[]>("INetMessage.CheckMessageMatch failed" + Environment.NewLine + StringResources.Language.Send + ": " + SoftBasic.ByteToHexString(sendValue, ' ') + Environment.NewLine + StringResources.Language.Receive + ": " + SoftBasic.ByteToHexString(resultReceive.Content, ' '));
@@ -369,7 +348,7 @@ public abstract class PipeNetBase : IDisposable
             }
             break;
         }
-        if (netMessage != null && !netMessage.CheckHeadBytesLegal(null))
+        if (netMessage != null && !netMessage.CheckHeadBytesLegal())
         {
             return new OperateResult<byte[]>(StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine + StringResources.Language.Send + ": " + SoftBasic.ByteToHexString(sendValue, ' ') + Environment.NewLine + StringResources.Language.Receive + ": " + SoftBasic.ByteToHexString(resultReceive.Content, ' '));
         }

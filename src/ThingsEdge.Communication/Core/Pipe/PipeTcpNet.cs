@@ -9,29 +9,13 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// </summary>
 public class PipeTcpNet : PipeNetBase
 {
-    private string _ipAddress = "127.0.0.1";
-
     private int[] _port = [2000];
-
     private int _indexPort = -1;
 
     /// <summary>
     /// 获取或是设置远程服务器的IP地址，如果是本机测试，那么需要设置为127.0.0.1。
     /// </summary>
-    public string IpAddress
-    {
-        get => _ipAddress;
-        set
-        {
-            Host = value;
-            _ipAddress = CommunicationHelper.GetIpAddressFromInput(value);
-        }
-    }
-
-    /// <summary>
-    /// 获取当前设置的远程的地址，可能是IP地址，也可能是网址，也就是初始设置的地址信息。
-    /// </summary>
-    public string Host { get; private set; } = "127.0.0.1";
+    public string IpAddress { get; }
 
     public int SocketKeepAliveTime { get; set; } = -1;
 
@@ -124,31 +108,17 @@ public class PipeTcpNet : PipeNetBase
         return base.IsConnectError();
     }
 
-    /// <summary>
-    /// 当管道打开成功的时候执行的事件，如果返回失败，则管道的打开操作返回失败。
-    /// </summary>
-    /// <param name="socket">通信的套接字</param>
-    /// <returns>是否真的打开成功</returns>
-    protected virtual OperateResult OnCommunicationOpen(Socket socket)
-    {
-        return OperateResult.CreateSuccessResult();
-    }
-
     /// <inheritdoc />
     public override async Task<OperateResult<bool>> OpenCommunicationAsync()
     {
         if (IsConnectError())
         {
-            NetSupport.CloseSocket(Socket);
+            NetSupport.SafeCloseSocket(Socket);
             var endPoint = GetConnectIPEndPoint();
             var connect = await NetSupport.CreateSocketAndConnectAsync(endPoint, ConnectTimeOut).ConfigureAwait(false);
             if (connect.IsSuccess)
             {
-                var onOpen = OnCommunicationOpen(connect.Content);
-                if (!onOpen.IsSuccess)
-                {
-                    return onOpen.ConvertFailed<bool>();
-                }
+                Debug.WriteLine("已成功创建 Socket 并连接上服务器");
 
                 Socket = connect.Content;
                 ResetConnectErrorCount();
@@ -160,6 +130,7 @@ public class PipeTcpNet : PipeNetBase
             }
             return new OperateResult<bool>(-IncrConnectErrorCount(), connect.Message);
         }
+        Debug.WriteLine("复用已有的 Socket");
         return OperateResult.CreateSuccessResult(false);
     }
 
@@ -168,7 +139,7 @@ public class PipeTcpNet : PipeNetBase
         var send = await NetSupport.SocketSendAsync(Socket, data).ConfigureAwait(false);
         if (!send.IsSuccess && send.ErrorCode == NetSupport.SocketErrorCode)
         {
-            await CloseCommunicationAsync().ConfigureAwait(false);
+            CloseCommunication();
             return new OperateResult<byte[]>(-IncrConnectErrorCount(), send.Message);
         }
         return send;
@@ -180,18 +151,19 @@ public class PipeTcpNet : PipeNetBase
         var receive = await NetSupport.SocketReceiveAsync(Socket, buffer, offset, length, timeOut).ConfigureAwait(false);
         if (!receive.IsSuccess && receive.ErrorCode == NetSupport.SocketErrorCode)
         {
-            await CloseCommunicationAsync().ConfigureAwait(false);
+            CloseCommunication();
             return new OperateResult<int>(-IncrConnectErrorCount(), "Socket Exception -> " + receive.Message);
         }
         return receive;
     }
 
-    /// <inheritdoc />
-    public override async Task<OperateResult> CloseCommunicationAsync()
+    public override OperateResult CloseCommunication()
     {
-        NetSupport.CloseSocket(Socket);
+        NetSupport.SafeCloseSocket(Socket);
         Socket = null;
-        return await Task.FromResult(OperateResult.CreateSuccessResult()).ConfigureAwait(false);
+        Debug.WriteLine("关闭并重置 Socket");
+
+        return OperateResult.CreateSuccessResult();
     }
 
     /// <summary>
@@ -213,6 +185,6 @@ public class PipeTcpNet : PipeNetBase
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"PipeTcpNet[{_ipAddress}:{Port}]";
+        return $"PipeTcpNet[{IpAddress}:{Port}]";
     }
 }

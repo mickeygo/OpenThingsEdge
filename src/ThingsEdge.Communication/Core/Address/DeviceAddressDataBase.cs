@@ -44,8 +44,8 @@ public class DeviceAddressDataBase
     {
         if (ex == null)
         {
-            return "Address[" + address + "]: " + StringResources.Language.NotSupportedDataType;
+            return $"Address[{address}]: {StringResources.Language.NotSupportedDataType}";
         }
-        return "Parse [" + address + "] failed: " + ex.Message;
+        return $"Parse [{address}]: {ex.Message}";
     }
 }

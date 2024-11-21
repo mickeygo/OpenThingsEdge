@@ -38,7 +38,6 @@ public class ModbusRtu : DeviceSerialPort, IModbus, IReadWriteDevice, IReadWrite
     /// <inheritdoc cref="IModbus.EnableWriteMaskCode" />
     public bool EnableWriteMaskCode { get; set; } = true;
 
-    /// <inheritdoc cref="IModbus.BroadcastStation" />
     public int BroadcastStation { get; set; } = -1;
 
     /// <summary>
@@ -89,12 +88,12 @@ public class ModbusRtu : DeviceSerialPort, IModbus, IReadWriteDevice, IReadWrite
         _addressMapping = mapping;
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return ModbusInfo.PackCommandToRtu(command);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return ModbusHelper.ExtraRtuResponseContent(send, response, Crc16CheckEnable, BroadcastStation);
     }

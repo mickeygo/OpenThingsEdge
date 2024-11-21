@@ -62,9 +62,9 @@ public class SiemensPPI : DeviceSerialPort, ISiemensPPI, IReadWriteNet
         return SiemensPPIHelper.ReadBoolAsync(this, address, length, Station, _mutex);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return SiemensPPIHelper.WriteAsync(this, address, values, Station, _mutex);
+        return SiemensPPIHelper.WriteAsync(this, address, data, Station, _mutex);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)

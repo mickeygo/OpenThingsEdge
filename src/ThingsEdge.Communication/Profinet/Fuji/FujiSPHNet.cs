@@ -72,11 +72,11 @@ public class FujiSPHNet : DeviceTcpNet
     /// 批量写入字节数组到PLC的地址里，地址支持M1.1000，M3.1000，M10.1000，返回是否写入成功。
     /// </summary>
     /// <param name="address">PLC的地址，支持M1.1000，M3.1000，M10.1000</param>
-    /// <param name="values"></param>
+    /// <param name="data">要写入的数据</param>
     /// <returns>是否写入成功</returns>
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var command = BuildWriteCommand(ConnectionID, address, values);
+        var command = BuildWriteCommand(ConnectionID, address, data);
         if (!command.IsSuccess)
         {
             return command.ConvertFailed<byte[]>();

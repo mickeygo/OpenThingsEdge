@@ -40,7 +40,7 @@ public class FujiCommandSettingType : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return UnpackResponseContentHelper(send, response);
     }
@@ -55,9 +55,9 @@ public class FujiCommandSettingType : DeviceTcpNet
         return await ReadFromCoreServerAsync(bulid.Content).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var bulid = BuildWriteCommand(address, values);
+        var bulid = BuildWriteCommand(address, data);
         if (!bulid.IsSuccess)
         {
             return bulid;
@@ -74,7 +74,7 @@ public class FujiCommandSettingType : DeviceTcpNet
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        // TODO: FujiCommandSettingType -> WriteAsync
+        // TODO: [NotImplemented] FujiCommandSettingType -> WriteAsync
 
         throw new NotImplementedException();
     }

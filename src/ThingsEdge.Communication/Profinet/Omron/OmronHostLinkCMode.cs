@@ -41,9 +41,9 @@ public class OmronHostLinkCMode : DeviceSerialPort, IHostLinkCMode, IReadWriteNe
         throw new NotImplementedException();
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return OmronHostLinkCModeHelper.WriteAsync(this, UnitNumber, address, values);
+        return OmronHostLinkCModeHelper.WriteAsync(this, UnitNumber, address, data);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)

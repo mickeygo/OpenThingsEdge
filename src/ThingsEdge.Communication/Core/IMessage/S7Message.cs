@@ -7,7 +7,7 @@ public class S7Message : NetMessageBase, INetMessage
 {
     public int ProtocolHeadBytesLength => 4;
 
-    public override bool CheckHeadBytesLegal(byte[] token)
+    public override bool CheckHeadBytesLegal()
     {
         if (HeadBytes == null)
         {

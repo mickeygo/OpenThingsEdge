@@ -27,7 +27,7 @@ public class FinsMessage : NetMessageBase, INetMessage
         return num - 8;
     }
 
-    public override bool CheckHeadBytesLegal(byte[] token)
+    public override bool CheckHeadBytesLegal()
     {
         if (HeadBytes == null)
         {

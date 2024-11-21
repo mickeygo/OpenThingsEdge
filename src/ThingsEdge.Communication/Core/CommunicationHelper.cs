@@ -12,10 +12,9 @@ namespace ThingsEdge.Communication.Core;
 public static class CommunicationHelper
 {
     /// <summary>
-    /// 本通讯项目的随机数信息<br />
-    /// Random number information for this newsletter
+    /// 本通讯项目的随机数信息。
     /// </summary>
-    public static Random HslRandom { get; private set; } = new Random();
+    public static Random Random => new();
 
     /// <summary>
     /// 本通讯项目单个通信对象最多的锁累积次数，超过该次数，将直接返回失败。
@@ -54,7 +53,9 @@ public static class CommunicationHelper
                 return new OperateResult<int>("Address [" + address + "] can't find [" + paraName + "] Parameters. for example : " + paraName + "=1;100");
             }
             var text = match.Value.Substring(paraName.Length + 1, match.Value.Length - paraName.Length - 2);
-            var value = text.StartsWith("0x") || text.StartsWith("0X") ? Convert.ToInt32(text.Substring(2), 16) : text.StartsWith('0') ? Convert.ToInt32(text, 8) : Convert.ToInt32(text);
+            var value = text.StartsWith("0x") || text.StartsWith("0X")
+                ? Convert.ToInt32(text[2..], 16)
+                : text.StartsWith('0') ? Convert.ToInt32(text, 8) : Convert.ToInt32(text);
             address = address.Replace(match.Value, "");
             return OperateResult.CreateSuccessResult(value);
         }
@@ -90,7 +91,8 @@ public static class CommunicationHelper
     }
 
     /// <summary>
-    /// 解析地址的附加<see cref="DataFormat" />参数方法，比如你的地址是format=ABCD;D100，可以提取出"format"的值的同时，修改地址本身，如果"format"不存在的话，返回默认的<see cref="IByteTransform" />对象。
+    /// 解析地址的附加<see cref="DataFormat" />参数方法，比如你的地址是format=ABCD;D100，可以提取出"format"的值的同时，修改地址本身，
+    /// 如果"format"不存在的话，返回默认的<see cref="IByteTransform" />对象。
     /// </summary>
     /// <param name="address">复杂的地址格式，比如：format=ABCD;D100</param>
     /// <param name="defaultTransform">默认的数据转换信息</param>
@@ -176,44 +178,6 @@ public static class CommunicationHelper
             address = address[..num];
         }
         return result;
-    }
-
-    /// <summary>
-    /// 从当前的字符串信息获取IP地址数据，如果是ip地址直接返回，如果是域名，会自动解析IP地址，否则抛出异常。
-    /// </summary>
-    /// <param name="value">输入的字符串信息</param>
-    /// <returns>真实的IP地址信息</returns>
-    public static string GetIpAddressFromInput(string value)
-    {
-        if (!string.IsNullOrEmpty(value))
-        {
-            if (!value.EndsWith([".com", ".cn", ".net", ".top", ".vip", ".club"]) && IPAddress.TryParse(value, out var _))
-            {
-                return value;
-            }
-            var hostEntry = Dns.GetHostEntry(value);
-            var addressList = hostEntry.AddressList;
-            if (addressList.Length != 0)
-            {
-                return addressList[0].ToString();
-            }
-        }
-        return "127.0.0.1";
-    }
-
-    /// <summary>
-    /// 休眠指定的时间，时间单位为毫秒
-    /// </summary>
-    /// <param name="millisecondsTimeout">毫秒的时间值</param>
-    public static void ThreadSleep(int millisecondsTimeout)
-    {
-        try
-        {
-            Thread.Sleep(millisecondsTimeout);
-        }
-        catch
-        {
-        }
     }
 
     /// <summary>

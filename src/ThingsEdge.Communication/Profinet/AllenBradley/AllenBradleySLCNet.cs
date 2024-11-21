@@ -121,7 +121,7 @@ public class AllenBradleySLCNet : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(Pipe, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes(), hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadFromCoreServerAsync(NetworkPipe, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes(), hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
             return read;
@@ -165,9 +165,9 @@ public class AllenBradleySLCNet : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var command = BuildWriteCommand(address, value);
+        var command = BuildWriteCommand(address, data);
         if (!command.IsSuccess)
         {
             return command;

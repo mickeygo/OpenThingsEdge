@@ -36,7 +36,6 @@ public class MelsecFxLinksAddress : DeviceAddressDataBase
         };
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.Address.MelsecFxLinksAddress.Parse(System.String,System.UInt16)" />
     public static OperateResult<MelsecFxLinksAddress> ParseFrom(string address)
     {
         return ParseFrom(address, 0);

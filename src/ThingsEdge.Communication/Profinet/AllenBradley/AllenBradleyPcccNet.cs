@@ -25,7 +25,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     /// <inheritdoc />
     protected override byte[] GetLargeForwardOpen(ushort connectionID)
     {
-        TOConnectionId = (uint)CommunicationHelper.HslRandom.Next();
+        TOConnectionId = (uint)CommunicationHelper.Random.Next();
         var array = "\r\n00 00 00 00 0a 00 02 00 00 00 00 00 b2 00 30 00\r\n54 02 20 06 24 01 0a 05 00 00 00 00 e8 a3 14 00\r\n27 04 09 10 0b 46 a5 c1 07 00 00 00 01 40 20 00\r\nf4 43 01 40 20 00 f4 43 a3 03 01 00 20 02 24 01".ToHexBytes();
         BitConverter.GetBytes((ushort)4105).CopyTo(array, 34);
         BitConverter.GetBytes(3248834059u).CopyTo(array, 36);

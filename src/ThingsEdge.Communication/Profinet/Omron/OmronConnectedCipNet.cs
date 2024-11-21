@@ -45,7 +45,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
         BitConverter.GetBytes(value).CopyTo(array, 28);
         BitConverter.GetBytes((ushort)(2 + connectionID)).CopyTo(array, 32);
         BitConverter.GetBytes((ushort)4105).CopyTo(array, 34);
-        CommunicationHelper.HslRandom.GetBytes(4).CopyTo(array, 36);
+        CommunicationHelper.Random.GetBytes(4).CopyTo(array, 36);
         array[40] = ConnectionTimeoutMultiplier;
         return array;
     }
@@ -59,7 +59,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
             return ini;
         }
 
-        var read = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -248,7 +248,6 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
         return OperateResult.CreateSuccessResult(array.ToArray());
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Profinet.Omron.OmronConnectedCipNet.Read(System.String[],System.UInt16[])" />
     public async Task<OperateResult<byte[]>> ReadAsync(string[] address, ushort[] length)
     {
         var read = await ReadWithTypeAsync(address, length).ConfigureAwait(false);
@@ -279,15 +278,15 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
         return OperateResult.CreateSuccessResult(read.Content2, read.Content1);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await WriteTagAsync(address, 209, value, !CommunicationHelper.IsAddressEndWithIndex(address) ? 1 : value.Length).ConfigureAwait(false);
+        return await WriteTagAsync(address, 209, data, !CommunicationHelper.IsAddressEndWithIndex(address) ? 1 : data.Length).ConfigureAwait(false);
     }
 
-    public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)
+    public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] data, int length = 1)
     {
         typeCode = (ushort)CommunicationHelper.ExtractParameter(ref address, "type", typeCode);
-        var command = BuildWriteCommand(address, typeCode, value, length);
+        var command = BuildWriteCommand(address, typeCode, data, length);
         if (!command.IsSuccess)
         {
             return command;

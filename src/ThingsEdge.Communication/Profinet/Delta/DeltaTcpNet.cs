@@ -41,9 +41,9 @@ public class DeltaTcpNet : ModbusTcpNet, IDelta, IReadWriteDevice, IReadWriteNet
         return await DeltaHelper.ReadAsync(this, base.ReadAsync, address, length).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await DeltaHelper.WriteAsync(this, base.WriteAsync, address, value).ConfigureAwait(false);
+        return await DeltaHelper.WriteAsync(this, base.WriteAsync, address, data).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

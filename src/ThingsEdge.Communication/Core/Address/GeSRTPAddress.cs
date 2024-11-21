@@ -42,7 +42,7 @@ public class GeSRTPAddress : DeviceAddressDataBase
         try
         {
             geSRTPAddress.Length = length;
-            if (address.StartsWith("AI") || address.StartsWith("ai"))
+            if (address.StartsWith("AI", StringComparison.OrdinalIgnoreCase))
             {
                 if (isBit)
                 {
@@ -51,7 +51,7 @@ public class GeSRTPAddress : DeviceAddressDataBase
                 geSRTPAddress.DataCode = 10;
                 geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
-            else if (address.StartsWith("AQ") || address.StartsWith("aq"))
+            else if (address.StartsWith("AQ", StringComparison.OrdinalIgnoreCase))
             {
                 if (isBit)
                 {
@@ -69,17 +69,17 @@ public class GeSRTPAddress : DeviceAddressDataBase
                 geSRTPAddress.DataCode = 8;
                 geSRTPAddress.AddressStart = Convert.ToInt32(address[1..]);
             }
-            else if (address.StartsWith("SA") || address.StartsWith("sa"))
+            else if (address.StartsWith("SA", StringComparison.OrdinalIgnoreCase))
             {
                 geSRTPAddress.DataCode = (byte)(isBit ? 78 : 24);
                 geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
-            else if (address.StartsWith("SB") || address.StartsWith("sb"))
+            else if (address.StartsWith("SB", StringComparison.OrdinalIgnoreCase))
             {
                 geSRTPAddress.DataCode = (byte)(isBit ? 80 : 26);
                 geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);
             }
-            else if (address.StartsWith("SC") || address.StartsWith("sc"))
+            else if (address.StartsWith("SC", StringComparison.OrdinalIgnoreCase))
             {
                 geSRTPAddress.DataCode = (byte)(isBit ? 82 : 28);
                 geSRTPAddress.AddressStart = Convert.ToInt32(address[2..]);

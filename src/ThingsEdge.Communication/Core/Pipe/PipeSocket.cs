@@ -8,21 +8,11 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// </summary>
 public class PipeSocket : PipeBase, IDisposable
 {
-    private string _ipAddress = "127.0.0.1";
-
     private int[] _port = [2000];
-
     private int _indexPort = -1;
 
-    public IPEndPoint LocalBinding { get; set; }
+    public string IpAddress { get; }
 
-    public string IpAddress
-    {
-        get => _ipAddress;
-        set => _ipAddress = CommunicationHelper.GetIpAddressFromInput(value);
-    }
-
-    /// <inheritdoc cref="P:HslCommunication.Core.Net.NetworkDoubleBase.Port" />
     public int Port
     {
         get
@@ -62,7 +52,7 @@ public class PipeSocket : PipeBase, IDisposable
     /// <summary>
     /// 获取或设置当前的客户端用于服务器连接的套接字。
     /// </summary>
-    public Socket Socket { get; set; }
+    public Socket? Socket { get; set; }
 
     public int ConnectTimeOut { get; set; } = 10_000;
 
@@ -77,7 +67,7 @@ public class PipeSocket : PipeBase, IDisposable
     /// <param name="port">端口号</param>
     public PipeSocket(string ipAddress, int port)
     {
-        _ipAddress = ipAddress;
+        IpAddress = ipAddress;
         _port = [port];
     }
 
@@ -90,7 +80,6 @@ public class PipeSocket : PipeBase, IDisposable
         return IsSocketError || Socket == null;
     }
 
-    /// <inheritdoc cref="M:System.IDisposable.Dispose" />
     public override void Dispose()
     {
         base.Dispose();
@@ -146,6 +135,6 @@ public class PipeSocket : PipeBase, IDisposable
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"PipeSocket[{_ipAddress}:{Port}]";
+        return $"PipeSocket[{IpAddress}:{Port}]";
     }
 }

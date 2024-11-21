@@ -130,18 +130,18 @@ public class AllenBradleySLCAddress : DeviceAddressDataBase
 
             allenBradleySLCAddress.DbBlock = allenBradleySLCAddress.DataCode switch
             {
-                132 => (ushort)(array[0].Length == 1 ? 2 : ushort.Parse(array[0].Substring(1))),
-                130 => (ushort)(array[0].Length != 1 ? ushort.Parse(array[0].Substring(1)) : 0),
-                131 => (ushort)(array[0].Length == 1 ? 1 : ushort.Parse(array[0].Substring(1))),
-                141 => (ushort)(array[0].Length == 2 ? 1 : ushort.Parse(array[0].Substring(2))),
-                _ => ushort.Parse(array[0].Substring(1)),
+                132 => (ushort)(array[0].Length == 1 ? 2 : ushort.Parse(array[0][1..])),
+                130 => (ushort)(array[0].Length != 1 ? ushort.Parse(array[0][1..]) : 0),
+                131 => (ushort)(array[0].Length == 1 ? 1 : ushort.Parse(array[0][1..])),
+                141 => (ushort)(array[0].Length == 2 ? 1 : ushort.Parse(array[0][2..])),
+                _ => ushort.Parse(array[0][1..]),
             };
             allenBradleySLCAddress.AddressStart = ushort.Parse(array[1]);
             return OperateResult.CreateSuccessResult(allenBradleySLCAddress);
         }
         catch (Exception ex)
         {
-            return new OperateResult<AllenBradleySLCAddress>("Wrong Address format: " + ex.Message);
+            return new OperateResult<AllenBradleySLCAddress>($"Wrong Address format: {ex.Message}");
         }
     }
 }

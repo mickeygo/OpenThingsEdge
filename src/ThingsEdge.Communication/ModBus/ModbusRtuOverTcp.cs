@@ -34,7 +34,6 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
     /// <inheritdoc cref="IModbus.EnableWriteMaskCode" />
     public bool EnableWriteMaskCode { get; set; } = true;
 
-    /// <inheritdoc cref="IModbus.BroadcastStation" />
     public int BroadcastStation { get; set; } = -1;
 
     public ModbusRtuOverTcp(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
@@ -63,12 +62,12 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
         _addressMapping = mapping;
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return ModbusInfo.PackCommandToRtu(command);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return ModbusHelper.ExtraRtuResponseContent(send, response, Crc16CheckEnable, BroadcastStation);
     }
@@ -161,9 +160,9 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
         return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, GetWordLength(address, length, 4)).ConfigureAwait(false), (m) => transform.TransDouble(m, 0, length));
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await ModbusHelper.WriteAsync(this, address, values).ConfigureAwait(false);
+        return await ModbusHelper.WriteAsync(this, address, data).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, short value)

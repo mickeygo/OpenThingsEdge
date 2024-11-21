@@ -41,9 +41,9 @@ public sealed class DeltaSerialAsciiOverTcp : ModbusAsciiOverTcp, IDelta, IReadW
         return await DeltaHelper.ReadAsync(this, base.ReadAsync, address, length).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await DeltaHelper.WriteAsync(this, base.WriteAsync, address, values).ConfigureAwait(false);
+        return await DeltaHelper.WriteAsync(this, base.WriteAsync, address, data).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

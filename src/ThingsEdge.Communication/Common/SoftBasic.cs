@@ -8,29 +8,6 @@ namespace ThingsEdge.Communication.Common;
 public static class SoftBasic
 {
     /// <summary>
-    /// 从一个时间差返回带单位的描述，主要是用于显示操作。
-    /// </summary>
-    /// <param name="ts">实际的时间差</param>
-    /// <returns>最终的字符串值</returns>
-
-    public static string GetTimeSpanDescription(TimeSpan ts)
-    {
-        if (ts.TotalSeconds <= 60.0)
-        {
-            return (int)ts.TotalSeconds + StringResources.Language.TimeDescriptionSecond;
-        }
-        if (ts.TotalMinutes <= 60.0)
-        {
-            return ts.TotalMinutes.ToString("F1") + StringResources.Language.TimeDescriptionMinute;
-        }
-        if (ts.TotalHours <= 24.0)
-        {
-            return ts.TotalHours.ToString("F2") + StringResources.Language.TimeDescriptionHour;
-        }
-        return ts.TotalDays.ToString("F2") + StringResources.Language.TimeDescriptionDay;
-    }
-
-    /// <summary>
     /// 将一个数组进行扩充到指定长度，或是缩短到指定长度。
     /// </summary>
     /// <typeparam name="T">数组的类型</typeparam>
@@ -158,36 +135,6 @@ public static class SoftBasic
     }
 
     /// <summary>
-    /// 判断两个字节的指定部分是否相同。
-    /// </summary>
-    /// <param name="b1">第一个字节</param>
-    /// <param name="b2">第二个字节</param>
-    /// <returns>返回是否相等</returns>
-    public static bool IsTwoBytesEquel(byte[] b1, byte[] b2)
-    {
-        if (b1 == null || b2 == null)
-        {
-            return false;
-        }
-        if (b1.Length != b2.Length)
-        {
-            return false;
-        }
-        return IsTwoBytesEquel(b1, 0, b2, 0, b1.Length);
-    }
-
-    /// <summary>
-    /// 判断两个数据的令牌是否相等。
-    /// </summary>
-    /// <param name="head">字节数据</param>
-    /// <param name="token">GUID数据</param>
-    /// <returns>返回是否相等</returns>
-    public static bool IsByteTokenEquel(byte[] head, Guid token)
-    {
-        return IsTwoBytesEquel(head, 12, token.ToByteArray(), 0, 16);
-    }
-
-    /// <summary>
     /// 字节数据转化成16进制表示的字符串。
     /// </summary>
     /// <param name="InBytes">字节数组</param>
@@ -242,16 +189,6 @@ public static class SoftBasic
             stringBuilder.Remove(stringBuilder.Length - 1, 1);
         }
         return stringBuilder.ToString();
-    }
-
-    /// <summary>
-    /// 字符串数据转化成16进制表示的字符串。
-    /// </summary>
-    /// <param name="InString">输入的字符串数据</param>
-    /// <returns>返回的字符串</returns>
-    public static string ByteToHexString(string InString)
-    {
-        return ByteToHexString(Encoding.Unicode.GetBytes(InString));
     }
 
     private static int GetHexCharIndex(char ch)
@@ -493,27 +430,6 @@ public static class SoftBasic
     }
 
     /// <summary>
-    /// 从Byte数组中提取位数组，length代表位数，例如数组 01 00 长度10转为 [true,false]。
-    /// </summary>
-    /// <param name="inBytes">原先的字节数组</param>
-    /// <param name="length">想要转换的长度，如果超出自动会缩小到数组最大长度</param>
-    /// <param name="trueValue">当为true时对应的byte值</param>
-    /// <returns>转换后bool数组</returns>
-    public static bool[] ByteToBoolArray(byte[] inBytes, int length, byte trueValue)
-    {
-        if (length > inBytes.Length)
-        {
-            length = inBytes.Length;
-        }
-        var array = new bool[length];
-        for (var i = 0; i < length; i++)
-        {
-            array[i] = inBytes[i] == trueValue;
-        }
-        return array;
-    }
-
-    /// <summary>
     /// 从Byte数组中提取所有的位数组。
     /// </summary>
     /// <param name="InBytes">原先的字节数组</param>
@@ -657,6 +573,6 @@ public static class SoftBasic
     /// <returns>随机字符串数据</returns>
     public static string GetUniqueStringByGuidAndRandom()
     {
-        return Guid.NewGuid().ToString("N") + CommunicationHelper.HslRandom.Next(1000, 10000);
+        return Guid.NewGuid().ToString("N") + CommunicationHelper.Random.Next(1000, 10000);
     }
 }

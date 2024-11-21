@@ -156,7 +156,7 @@ public class S7AddressData : DeviceAddressDataBase
             if (address.StartsWith("SM"))
             {
                 s7AddressData.DataCode = 5;
-                if (address.StartsWith("SMX") || address.StartsWith("SMB") || address.StartsWith("SMW") || address.StartsWith("SMD"))
+                if (address.StartsWith(["SMX", "SMB", "SMW", "SMD"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[3..]);
                 }
@@ -168,7 +168,7 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address.StartsWith("AI"))
             {
                 s7AddressData.DataCode = 6;
-                if (address.StartsWith("AIX") || address.StartsWith("AIB") || address.StartsWith("AIW") || address.StartsWith("AID"))
+                if (address.StartsWith(["AIX", "AIB", "AIW", "AID"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[3..]);
                 }
@@ -180,7 +180,7 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address.StartsWith("AQ"))
             {
                 s7AddressData.DataCode = 7;
-                if (address.StartsWith("AQX") || address.StartsWith("AQB") || address.StartsWith("AQW") || address.StartsWith("AQD"))
+                if (address.StartsWith(["AQX", "AQB", "AQW", "AQD"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[3..]);
                 }
@@ -192,18 +192,11 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address[0] == 'P')
             {
                 s7AddressData.DataCode = 128;
-                if (address.StartsWith("PIX")
-                    || address.StartsWith("PIB")
-                    || address.StartsWith("PIW")
-                    || address.StartsWith("PID")
-                    || address.StartsWith("PQX")
-                    || address.StartsWith("PQB")
-                    || address.StartsWith("PQW")
-                    || address.StartsWith("PQD"))
+                if (address.StartsWith(["PIX", "PIB", "PIW", "PID", "PQX", "PQB", "PQW", "PQD"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[3..]);
                 }
-                else if (address.StartsWith("PI") || address.StartsWith("PQ"))
+                else if (address.StartsWith(["PI", "PQ"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[2..]);
                 }
@@ -215,7 +208,7 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address[0] == 'I')
             {
                 s7AddressData.DataCode = 129;
-                if (address.StartsWith("IX") || address.StartsWith("IB") || address.StartsWith("IW") || address.StartsWith("ID"))
+                if (address.StartsWith(["IX", "IB", "IW", "ID"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[2..]);
                 }
@@ -227,7 +220,7 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address[0] == 'Q')
             {
                 s7AddressData.DataCode = 130;
-                if (address.StartsWith("QX") || address.StartsWith("QB") || address.StartsWith("QW") || address.StartsWith("QD"))
+                if (address.StartsWith(["QX", "QB", "QW", "QD"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[2..]);
                 }
@@ -239,7 +232,7 @@ public class S7AddressData : DeviceAddressDataBase
             else if (address[0] == 'M')
             {
                 s7AddressData.DataCode = 131;
-                if (address.StartsWith("MX") || address.StartsWith("MB") || address.StartsWith("MW") || address.StartsWith("MD"))
+                if (address.StartsWith(["MX", "MB", "MW", "MD"]))
                 {
                     s7AddressData.AddressStart = CalculateAddressStarted(address[2..]);
                 }
@@ -254,14 +247,14 @@ public class S7AddressData : DeviceAddressDataBase
                 var array = address.Split('.');
                 if (address[1] == 'B')
                 {
-                    s7AddressData.DbBlock = Convert.ToUInt16(array[0].Substring(2));
+                    s7AddressData.DbBlock = Convert.ToUInt16(array[0][2..]);
                 }
                 else
                 {
-                    s7AddressData.DbBlock = Convert.ToUInt16(array[0].Substring(1));
+                    s7AddressData.DbBlock = Convert.ToUInt16(array[0][1..]);
                 }
                 var text = address[(address.IndexOf('.') + 1)..];
-                if (text.StartsWith("DBX") || text.StartsWith("DBB") || text.StartsWith("DBW") || text.StartsWith("DBD"))
+                if (text.StartsWith(["DBX", "DBB", "DBW", "DBD"]))
                 {
                     text = text[3..];
                 }
@@ -286,13 +279,13 @@ public class S7AddressData : DeviceAddressDataBase
 
                 s7AddressData.DataCode = 132;
                 s7AddressData.DbBlock = 1;
-                if (address.StartsWith("VB") || address.StartsWith("VW") || address.StartsWith("VD") || address.StartsWith("VX"))
+                if (address.StartsWith(["VB", "VW", "VD", "VX"]))
                 {
-                    s7AddressData.AddressStart = CalculateAddressStarted(address.Substring(2));
+                    s7AddressData.AddressStart = CalculateAddressStarted(address[2..]);
                 }
                 else
                 {
-                    s7AddressData.AddressStart = CalculateAddressStarted(address.Substring(1));
+                    s7AddressData.AddressStart = CalculateAddressStarted(address[1..]);
                 }
             }
         }

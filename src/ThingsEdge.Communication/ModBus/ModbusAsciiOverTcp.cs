@@ -19,13 +19,13 @@ public class ModbusAsciiOverTcp : ModbusRtuOverTcp
     }
 
     /// <inheritdoc />
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return ModbusInfo.TransModbusCoreToAsciiPackCommand(command);
     }
 
     /// <inheritdoc />
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return ModbusHelper.ExtraAsciiResponseContent(send, response, BroadcastStation);
     }

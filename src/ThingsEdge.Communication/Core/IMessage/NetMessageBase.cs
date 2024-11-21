@@ -9,9 +9,6 @@ public abstract class NetMessageBase
     public byte[]? HeadBytes { get; set; }
 
     [NotNull]
-    public byte[]? ContentBytes { get; set; }
-
-    [NotNull]
     public byte[]? SendBytes { get; set; }
 
     public virtual int PependedUselesByteLength(byte[] headByte)
@@ -24,8 +21,8 @@ public abstract class NetMessageBase
         return 0;
     }
 
-    /// <inheritdoc cref="INetMessage.CheckHeadBytesLegal(byte[])" />
-    public virtual bool CheckHeadBytesLegal(byte[] token)
+    /// <inheritdoc cref="INetMessage.CheckHeadBytesLegal" />
+    public virtual bool CheckHeadBytesLegal()
     {
         return true;
     }

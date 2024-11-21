@@ -76,14 +76,14 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// 写入PLC的原始数据信息，地址示例：N7:0  可以携带站号 s=2;N7:0, 携带 dst 和 src 信息，例如 dst=1;src=2;N7:0
     /// </summary>
     /// <param name="address">PLC的地址信息，支持的类型见类型注释说明</param>
-    /// <param name="values">原始的数据值</param>
+    /// <param name="data">原始的数据值</param>
     /// <returns>是否写入成功</returns>
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
         var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
         var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
         var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
-        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, values);
+        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, data);
         if (!operateResult.IsSuccess)
         {
             return operateResult;

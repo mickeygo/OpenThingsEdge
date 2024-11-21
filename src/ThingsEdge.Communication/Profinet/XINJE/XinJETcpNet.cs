@@ -52,9 +52,9 @@ public class XinJETcpNet : ModbusTcpNet
         return XinJEHelper.ReadAsync(this, address, length, base.ReadAsync);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return XinJEHelper.WriteAsync(this, address, value, base.WriteAsync);
+        return XinJEHelper.WriteAsync(this, address, data, base.WriteAsync);
     }
 
     public override Task<OperateResult> WriteAsync(string address, short value)

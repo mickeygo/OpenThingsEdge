@@ -47,12 +47,12 @@ public class MelsecMcRNet : DeviceTcpNet, IReadWriteMc, IReadWriteDevice, IReadW
         return McAddressData.ParseMelsecRFrom(address, length, isBit);
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return McBinaryHelper.PackMcCommand(this, command);
     }
 
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         var operateResult = McBinaryHelper.CheckResponseContentHelper(response);
         if (!operateResult.IsSuccess)
@@ -78,9 +78,9 @@ public class MelsecMcRNet : DeviceTcpNet, IReadWriteMc, IReadWriteDevice, IReadW
         return await McHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await McHelper.WriteAsync(this, address, values).ConfigureAwait(false);
+        return await McHelper.WriteAsync(this, address, data).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, bool[] values)

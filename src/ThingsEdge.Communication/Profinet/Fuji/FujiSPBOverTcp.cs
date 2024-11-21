@@ -23,7 +23,7 @@ public class FujiSPBOverTcp : DeviceTcpNet
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
-        SleepTime = 20;
+        DelayTime = 20;
     }
 
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
@@ -36,9 +36,9 @@ public class FujiSPBOverTcp : DeviceTcpNet
         return await FujiSPBHelper.ReadBoolAsync(this, Station, address, length).ConfigureAwait(false);
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await FujiSPBHelper.WriteAsync(this, Station, address, values).ConfigureAwait(false);
+        return await FujiSPBHelper.WriteAsync(this, Station, address, data).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, bool value)
@@ -48,7 +48,7 @@ public class FujiSPBOverTcp : DeviceTcpNet
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        // TODO: FujiSPBOverTcp -> WriteAsync
+        // TODO: [NotImplemented] FujiSPBOverTcp -> WriteAsync
         throw new NotImplementedException();
     }
 

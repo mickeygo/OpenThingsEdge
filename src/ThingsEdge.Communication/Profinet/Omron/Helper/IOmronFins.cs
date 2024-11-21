@@ -12,34 +12,24 @@ public interface IOmronFins : IReadWriteDevice, IReadWriteNet
     /// </summary>
     byte ICF { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.RSV" />
     byte RSV { get; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.GCT" />
     byte GCT { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.DNA" />
     byte DNA { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.DA1" />
     byte DA1 { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.DA2" />
     byte DA2 { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.SNA" />
     byte SNA { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.SA1" />
     byte SA1 { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.SA2" />
     byte SA2 { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.SID" />
     byte SID { get; set; }
 
-    /// <inheritdoc cref="P:HslCommunication.Profinet.Omron.OmronFinsNet.ReadSplits" />
     int ReadSplits { get; set; }
 
     /// <summary>

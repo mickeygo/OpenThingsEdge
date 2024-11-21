@@ -5,7 +5,7 @@ using ThingsEdge.Communication.Profinet.Fuji;
 namespace ThingsEdge.Communication.Core.Address;
 
 /// <summary>
-/// FujiSPB的地址信息，可以携带数据类型，起始地址操作
+/// FujiSPB的地址信息，可以携带数据类型，起始地址操作。
 /// </summary>
 public class FujiSPBAddress : DeviceAddressDataBase
 {

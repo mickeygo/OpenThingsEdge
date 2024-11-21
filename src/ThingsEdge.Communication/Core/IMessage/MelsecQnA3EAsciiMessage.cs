@@ -19,7 +19,7 @@ public class MelsecQnA3EAsciiMessage : NetMessageBase, INetMessage
         return Convert.ToInt32(Encoding.ASCII.GetString(bytes), 16);
     }
 
-    public override bool CheckHeadBytesLegal(byte[] token)
+    public override bool CheckHeadBytesLegal()
     {
         if (HeadBytes == null)
         {

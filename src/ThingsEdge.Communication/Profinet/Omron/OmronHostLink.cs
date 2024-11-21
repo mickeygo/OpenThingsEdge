@@ -42,7 +42,7 @@ public class OmronHostLink : DeviceSerialPort, IHostLink, IReadWriteDevice, IRea
     }
 
     /// <inheritdoc />
-    public override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
+    protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
         return OmronHostLinkHelper.ResponseValidAnalysis(send, response);
     }
@@ -86,9 +86,9 @@ public class OmronHostLink : DeviceSerialPort, IHostLink, IReadWriteDevice, IRea
         return OmronHostLinkHelper.ReadBoolAsync(this, address, length);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return OmronHostLinkHelper.WriteAsync(this, address, values);
+        return OmronHostLinkHelper.WriteAsync(this, address, data);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)

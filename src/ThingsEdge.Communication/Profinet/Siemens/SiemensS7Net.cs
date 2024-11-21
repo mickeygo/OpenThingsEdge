@@ -21,6 +21,11 @@ namespace ThingsEdge.Communication.Profinet.Siemens;
 /// </remarks>
 public sealed class SiemensS7Net : DeviceTcpNet
 {
+    private readonly SiemensPLCS _currentPlc = SiemensPLCS.S1200;
+
+    /// <summary>
+    /// 第一次初始化指令交互报文
+    /// </summary>
     private byte[] _plcHead1 =
     [
         3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
@@ -28,6 +33,9 @@ public sealed class SiemensS7Net : DeviceTcpNet
         1, 0
     ];
 
+    /// <summary>
+    /// 第二次初始化指令交互报文
+    /// </summary>
     private byte[] _plcHead2 =
     [
         3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
@@ -43,8 +51,6 @@ public sealed class SiemensS7Net : DeviceTcpNet
         17, 0, 0
     ];
 
-    private SiemensPLCS _currentPlc = SiemensPLCS.S1200;
-
     private readonly byte[] _plcHead1_200smart =
     [
         3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
@@ -52,6 +58,9 @@ public sealed class SiemensS7Net : DeviceTcpNet
         1, 10
     ];
 
+    /// <summary>
+    /// 第二次初始化指令交互报文
+    /// </summary>
     private readonly byte[] _plcHead2_200smart =
     [
         3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
@@ -107,10 +116,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// </summary>
     public byte Slot
     {
-        get
-        {
-            return _plc_slot;
-        }
+        get => _plc_slot;
         set
         {
             _plc_slot = value;
@@ -126,10 +132,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// </summary>
     public byte Rack
     {
-        get
-        {
-            return _plc_rack;
-        }
+        get => _plc_rack;
         set
         {
             _plc_rack = value;
@@ -145,10 +148,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// </summary>
     public byte ConnectionType
     {
-        get
-        {
-            return _plcHead1[20];
-        }
+        get => _plcHead1[20];
         set
         {
             if (_currentPlc is not SiemensPLCS.S200 and not SiemensPLCS.S200Smart)
@@ -273,12 +273,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read_first = await ReadFromCoreServerAsync(Pipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
+        var read_first = await ReadFromCoreServerAsync(NetworkPipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
         if (!read_first.IsSuccess)
         {
             return read_first;
         }
-        var read_second = await ReadFromCoreServerAsync(Pipe, _plcHead2, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
+        var read_second = await ReadFromCoreServerAsync(NetworkPipe, _plcHead2, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
         if (!read_second.IsSuccess)
         {
             return read_second;
@@ -292,7 +292,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         return OperateResult.CreateSuccessResult();
     }
 
-    public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         OperateResult<byte[]> read;
         byte[] content;
@@ -455,14 +455,14 @@ public sealed class SiemensS7Net : DeviceTcpNet
     }
 
     /// <inheritdoc />
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
         var analysis = S7AddressData.ParseFrom(address);
         if (!analysis.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(analysis);
         }
-        return await WriteAsync(analysis.Content, values).ConfigureAwait(false);
+        return await WriteAsync(analysis.Content, data).ConfigureAwait(false);
     }
 
     private async Task<OperateResult> WriteAsync(S7AddressData address, byte[] values)

@@ -37,7 +37,7 @@ public class GeSRTPNet : DeviceTcpNet
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(Pipe, new byte[56], hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadFromCoreServerAsync(NetworkPipe, new byte[56], hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
             return read;
@@ -119,9 +119,9 @@ public class GeSRTPNet : DeviceTcpNet
         return OperateResult.CreateSuccessResult(extra.Content.ToBoolArray().SelectMiddle(analysis.Content.AddressStart % 8, length));
     }
 
-    public override async Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var build = GeHelper.BuildWriteCommand(_incrementCount.GetCurrentValue(), address, values);
+        var build = GeHelper.BuildWriteCommand(_incrementCount.GetCurrentValue(), address, data);
         if (!build.IsSuccess)
         {
             return build;

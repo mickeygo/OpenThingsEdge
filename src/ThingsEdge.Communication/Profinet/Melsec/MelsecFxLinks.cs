@@ -21,10 +21,7 @@ public class MelsecFxLinks : DeviceSerialPort, IReadWriteFxLinks, IReadWriteDevi
 
     public byte WaittingTime
     {
-        get
-        {
-            return _watiingTime;
-        }
+        get => _watiingTime;
         set
         {
             if (_watiingTime > 15)
@@ -53,7 +50,7 @@ public class MelsecFxLinks : DeviceSerialPort, IReadWriteFxLinks, IReadWriteDevi
         return new MelsecFxLinksMessage(Format, SumCheck);
     }
 
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return MelsecFxLinksHelper.PackCommandWithHeader(this, command);
     }
@@ -68,9 +65,9 @@ public class MelsecFxLinks : DeviceSerialPort, IReadWriteFxLinks, IReadWriteDevi
         return MelsecFxLinksHelper.ReadBoolAsync(this, address, length);
     }
 
-    public override Task<OperateResult> WriteAsync(string address, byte[] values)
+    public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return MelsecFxLinksHelper.WriteAsync(this, address, values);
+        return MelsecFxLinksHelper.WriteAsync(this, address, data);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)

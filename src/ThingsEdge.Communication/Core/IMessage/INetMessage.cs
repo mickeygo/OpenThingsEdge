@@ -19,11 +19,6 @@ public interface INetMessage
     byte[] HeadBytes { get; set; }
 
     /// <summary>
-    /// 消息内容字节。
-    /// </summary>
-    byte[] ContentBytes { get; set; }
-
-    /// <summary>
     /// 发送的字节信息。
     /// </summary>
     byte[] SendBytes { get; set; }
@@ -48,9 +43,8 @@ public interface INetMessage
     /// <summary>
     /// 检查头子节的合法性。
     /// </summary>
-    /// <param name="token">特殊的令牌，有些特殊消息的验证</param>
     /// <returns>是否成功的结果</returns>
-    bool CheckHeadBytesLegal(byte[] token);
+    bool CheckHeadBytesLegal();
 
     /// <summary>
     /// 获取头子节里的消息标识。

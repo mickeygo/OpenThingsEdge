@@ -71,14 +71,14 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     }
 
     /// <inheritdoc />
-    public override byte[] PackCommandWithHeader(byte[] command)
+    protected override byte[] PackCommandWithHeader(byte[] command)
     {
         return AllenBradleyHelper.PackRequestHeader(CipCommand, SessionHandle, command);
     }
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.RegisterSessionHandle(), true, false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.RegisterSessionHandle(), true, false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -96,7 +96,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             var cip = MessageRouter.GetRouterCIP();
             var send = AllenBradleyHelper.PackCommandSpecificData(new byte[4], AllenBradleyHelper.PackCommandSingleService(cip, 178, isConnected: false, 0));
-            var messageRouter = await ReadFromCoreServerAsync(Pipe, send, true, false).ConfigureAwait(false);
+            var messageRouter = await ReadFromCoreServerAsync(NetworkPipe, send, true, false).ConfigureAwait(false);
             if (!messageRouter.IsSuccess)
             {
                 return messageRouter;
@@ -108,13 +108,10 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <inheritdoc />
     protected override async Task<OperateResult> ExtraOnDisconnectAsync()
     {
-        if (Pipe != null)
+        var read = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
+        if (!read.IsSuccess)
         {
-            var read = await ReadFromCoreServerAsync(Pipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
-            if (!read.IsSuccess)
-            {
-                return read;
-            }
+            return read;
         }
         return OperateResult.CreateSuccessResult();
     }
@@ -236,7 +233,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         var operateResult = AllenBradleyHelper.CheckResponse(response);
         if (!operateResult.IsSuccess && operateResult.ErrorCode == 100)
         {
-            Pipe.RaisePipeError();
+            NetworkPipe.RaisePipeError();
         }
         return operateResult;
     }

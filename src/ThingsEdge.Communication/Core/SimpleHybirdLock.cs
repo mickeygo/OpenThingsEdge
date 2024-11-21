@@ -39,12 +39,12 @@ public sealed class SimpleHybirdLock : IDisposable
     public int LockingTick => _lock_tick;
 
     /// <summary>
-    /// 获取当前HslCommunication组件里正总的所有进入锁的信息。
+    /// 获取当前组件里正总的所有进入锁的信息。
     /// </summary>
     public static long SimpleHybirdLockCount => s_simpleHybirdLockCount;
 
     /// <summary>
-    /// 当前HslCommunication组件里正在等待的锁的统计信息，此时已经发生了竞争了。
+    /// 当前组件里正在等待的锁的统计信息，此时已经发生了竞争了。
     /// </summary>
     public static long SimpleHybirdLockWaitCount => s_simpleHybirdLockWaitCount;
 

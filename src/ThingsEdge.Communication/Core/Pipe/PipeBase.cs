@@ -5,34 +5,30 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// </summary>
 public class PipeBase : IDisposable
 {
-    private SimpleHybirdLock hybirdLock;
+    private SimpleHybirdLock _hybirdLock;
 
-    /// <inheritdoc cref="P:HslCommunication.Core.SimpleHybirdLock.LockingTick" />
-    public int LockingTick => hybirdLock.LockingTick;
+    public int LockingTick => _hybirdLock.LockingTick;
 
     /// <summary>
     /// 实例化一个默认的对象
     /// </summary>
     public PipeBase()
     {
-        hybirdLock = new SimpleHybirdLock();
+        _hybirdLock = new SimpleHybirdLock();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.SimpleHybirdLock.Enter" />
     public bool PipeLockEnter()
     {
-        return hybirdLock.Enter();
+        return _hybirdLock.Enter();
     }
 
-    /// <inheritdoc cref="M:HslCommunication.Core.SimpleHybirdLock.Leave" />
     public bool PipeLockLeave()
     {
-        return hybirdLock.Leave();
+        return _hybirdLock.Leave();
     }
 
-    /// <inheritdoc cref="M:System.IDisposable.Dispose" />
     public virtual void Dispose()
     {
-        hybirdLock?.Dispose();
+        _hybirdLock?.Dispose();
     }
 }
