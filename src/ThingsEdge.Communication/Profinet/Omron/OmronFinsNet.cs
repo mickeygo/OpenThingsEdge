@@ -13,7 +13,7 @@ namespace ThingsEdge.Communication.Profinet.Omron;
 /// <note type="important">PLC的IP地址的要求，最后一个整数的范围应该小于250，否则会发生连接不上的情况。</note>
 /// <note type="warning">如果在测试的时候报错误码64，经网友 上海-Lex 指点，是因为PLC中产生了报警，如伺服报警，模块错误等产生的，但是数据还是能正常读到的，屏蔽64报警或清除plc错误可解决</note>
 /// <note type="warning">如果碰到NX系列连接失败，或是无法读取的，需要使用网口2，配置ip地址，网线连接网口2，配置FINSTCP，把UDP的端口改成9601的，这样就可以读写了。</note>
-/// 需要特别注意<see cref="P:OmronFinsNet.ReadSplits" />属性，在超长数据读取时，规定了切割读取的长度，在不是CP1H及扩展模块的时候，可以设置为999，提高一倍的通信速度。
+/// 需要特别注意 <see cref="ReadSplits" /> 属性，在超长数据读取时，规定了切割读取的长度，在不是CP1H及扩展模块的时候，可以设置为999，提高一倍的通信速度。
 /// </remarks>
 public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWriteNet
 {
@@ -23,7 +23,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
 
-    private readonly SoftIncrementCount _incrementSID = new(255L, 0L);
+    private readonly IncrementCounter _conter = new(255L, 0L);
 
     /// <summary>
     /// 信息控制字段，默认0x80。
@@ -153,7 +153,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         array[22] = SNA;
         array[23] = SA1;
         array[24] = SA2;
-        array[25] = (byte)_incrementSID.GetCurrentValue();
+        array[25] = (byte)_conter.OnNext();
         cmd.CopyTo(array, 26);
         SID = array[25];
         return array;
@@ -186,7 +186,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         {
             DA1 = read.Content[23];
         }
-        _incrementSID.ResetStartValue(0L);
+        _conter.Reset();
         return OperateResult.CreateSuccessResult();
     }
 

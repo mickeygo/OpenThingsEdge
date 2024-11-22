@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core.Address;
 
 namespace ThingsEdge.Communication.Profinet.GE;
@@ -189,7 +190,7 @@ public static class GeHelper
         }
         var array = new bool[operateResult.Content.AddressStart % 8 + value.Length];
         value.CopyTo(array, operateResult.Content.AddressStart % 8);
-        return BuildWriteCommand(id, operateResult.Content, SoftBasic.BoolArrayToByte(array));
+        return BuildWriteCommand(id, operateResult.Content, array.ToByteArray());
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public class AllenBradleyPcccNet : NetworkConnectedCip
 {
-    private readonly SoftIncrementCount _incrementCount = new(65535L, 2L, 2);
+    private readonly IncrementCounter _counter = new(65535L, 2L, 2);
 
     /// <summary>
     /// 根据指定的IP及端口来实例化这个连接对象
@@ -25,7 +25,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     /// <inheritdoc />
     protected override byte[] GetLargeForwardOpen(ushort connectionID)
     {
-        TOConnectionId = (uint)CommunicationHelper.Random.Next();
+        TOConnectionId = (uint)RandomExtensions.Random.Next();
         var array = "\r\n00 00 00 00 0a 00 02 00 00 00 00 00 b2 00 30 00\r\n54 02 20 06 24 01 0a 05 00 00 00 00 e8 a3 14 00\r\n27 04 09 10 0b 46 a5 c1 07 00 00 00 01 40 20 00\r\nf4 43 01 40 20 00 f4 43 a3 03 01 00 20 02 24 01".ToHexBytes();
         BitConverter.GetBytes((ushort)4105).CopyTo(array, 34);
         BitConverter.GetBytes(3248834059u).CopyTo(array, 36);
@@ -54,7 +54,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     /// </remarks>
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        var command = AllenBradleyHelper.PackExecutePCCCRead((int)_incrementCount.GetCurrentValue(), address, length);
+        var command = AllenBradleyHelper.PackExecutePCCCRead((int)_counter.OnNext(), address, length);
         if (!command.IsSuccess)
         {
             return command;
@@ -84,7 +84,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     /// </remarks>
     public override async Task<OperateResult> WriteAsync(string address, byte[] values)
     {
-        var command = AllenBradleyHelper.PackExecutePCCCWrite((int)_incrementCount.GetCurrentValue(), address, values);
+        var command = AllenBradleyHelper.PackExecutePCCCWrite((int)_counter.OnNext(), address, values);
         if (!command.IsSuccess)
         {
             return command;
@@ -121,7 +121,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     public override async Task<OperateResult> WriteAsync(string address, bool value)
     {
         address = AllenBradleySLCNet.AnalysisBitIndex(address, out var bitIndex);
-        var command = AllenBradleyHelper.PackExecutePCCCWrite((int)_incrementCount.GetCurrentValue(), address, bitIndex, value);
+        var command = AllenBradleyHelper.PackExecutePCCCWrite((int)_counter.OnNext(), address, bitIndex, value);
         if (!command.IsSuccess)
         {
             return command;
@@ -172,7 +172,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
                 {
                     return OperateResult.CreateFailedResult<string>(read);
                 }
-                return OperateResult.CreateSuccessResult(encoding.GetString(SoftBasic.BytesReverseByWord(read.Content), 2, len));
+                return OperateResult.CreateSuccessResult(encoding.GetString(read.Content.ReverseByWord(), 2, len));
             }
             read = await ReadAsync(address, (ushort)(length % 2 != 0 ? length + 3 : length + 2)).ConfigureAwait(false);
             if (!read.IsSuccess)
@@ -184,7 +184,7 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
             {
                 len = read.Content.Length - 2;
             }
-            return OperateResult.CreateSuccessResult(encoding.GetString(SoftBasic.BytesReverseByWord(read.Content), 2, len));
+            return OperateResult.CreateSuccessResult(encoding.GetString(read.Content.ReverseByWord(), 2, len));
         }
         return await base.ReadStringAsync(address, length, encoding).ConfigureAwait(false);
     }
@@ -196,12 +196,12 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
         {
             var temp = ByteTransform.TransByte(value, encoding);
             var len = temp.Length;
-            temp = SoftBasic.ArrayExpandToLengthEven(temp);
-            return await WriteAsync(address, SoftBasic.SpliceArray(
+            temp = CollectionUtils.ExpandToEvenLength(temp);
+            return await WriteAsync(address, CollectionUtils.SpliceArray(
             [
                 BitConverter.GetBytes(len)[0],
                 BitConverter.GetBytes(len)[1]
-            ], SoftBasic.BytesReverseByWord(temp))).ConfigureAwait(false);
+            ], temp.ReverseByWord())).ConfigureAwait(false);
         }
         return await base.WriteAsync(address, value, encoding).ConfigureAwait(false);
     }

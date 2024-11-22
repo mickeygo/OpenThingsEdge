@@ -6,6 +6,7 @@ using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Profinet.Siemens.Helper;
 using ThingsEdge.Communication.Exceptions;
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 
 namespace ThingsEdge.Communication.Profinet.Siemens;
 
@@ -109,7 +110,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     private byte _plc_rack;
     private byte _plc_slot;
 
-    private SoftIncrementCount _incrementCount = new(65535L, 1L);
+    private IncrementCounter _incrementCount = new(65535L, 1L);
 
     /// <summary>
     /// PLC的槽号，针对S7-400的PLC设置的。
@@ -283,16 +284,16 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return read_second;
         }
-        PDULength = ByteTransform.TransUInt16(read_second.Content!.SelectLast(2), 0) - 28;
+        PDULength = ByteTransform.TransUInt16(read_second.Content.SelectLast(2), 0) - 28;
         if (PDULength < 200)
         {
             PDULength = 200;
         }
-        _incrementCount = new SoftIncrementCount(65535L, 1L);
+        _incrementCount = new IncrementCounter(65535L, 1L);
         return OperateResult.CreateSuccessResult();
     }
 
-    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         OperateResult<byte[]> read;
         byte[] content;
@@ -502,7 +503,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
 
-        CommunicationHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
@@ -592,7 +593,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
 
-        CommunicationHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
+        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
@@ -603,7 +604,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
         var boolArray = read.Content!.ToBoolArray();
         Array.Copy(values, 0, boolArray, offset, values.Length);
-        return await WriteAsync(analysis.Content, SoftBasic.BoolArrayToByte(boolArray)).ConfigureAwait(false);
+        return await WriteAsync(analysis.Content, boolArray.ToByteArray()).ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> WriteAsync(string address, string value, Encoding encoding)
@@ -736,7 +737,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     private int GetMessageId()
     {
-        return (int)_incrementCount.GetCurrentValue();
+        return (int)_incrementCount.OnNext();
     }
 
     public override string ToString()
@@ -1079,11 +1080,11 @@ public sealed class SiemensS7Net : DeviceTcpNet
                 }
                 return OperateResult.CreateSuccessResult(array);
             }
-            return new OperateResult<byte[]>(StringResources.Language.SiemensDataLengthCheckFailed + " Msg:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>(StringResources.Language.SiemensDataLengthCheckFailed + " Msg:" + content.ToHexString(' '));
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("AnalysisReadByte failed: " + ex.Message + Environment.NewLine + " Msg:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>("AnalysisReadByte failed: " + ex.Message + Environment.NewLine + " Msg:" + content.ToHexString(' '));
         }
     }
 
@@ -1106,18 +1107,18 @@ public sealed class SiemensS7Net : DeviceTcpNet
                         case 10:
                             return new OperateResult(b, StringResources.Language.SiemensError000A);
                         default:
-                            return new OperateResult(b, StringResources.Language.SiemensWriteError + b + " Msg:" + SoftBasic.ByteToHexString(content, ' '));
+                            return new OperateResult(b, StringResources.Language.SiemensWriteError + b + " Msg:" + content.ToHexString(' '));
                         case byte.MaxValue:
                             break;
                     }
                 }
                 return OperateResult.CreateSuccessResult();
             }
-            return new OperateResult(StringResources.Language.UnknownError + " Msg:" + SoftBasic.ByteToHexString(content ?? [], ' '));
+            return new OperateResult(StringResources.Language.UnknownError + " Msg:" + content.ToHexString(' '));
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("AnalysisWrite failed: " + ex.Message + Environment.NewLine + " Msg:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>("AnalysisWrite failed: " + ex.Message + Environment.NewLine + " Msg:" + content.ToHexString(' '));
         }
     }
 

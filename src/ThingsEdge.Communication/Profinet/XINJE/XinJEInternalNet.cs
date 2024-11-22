@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
@@ -11,7 +12,7 @@ namespace ThingsEdge.Communication.Profinet.XINJE;
 /// </summary>
 public class XinJEInternalNet : DeviceTcpNet
 {
-    private readonly SoftIncrementCount _softIncrementCount = new(65535L, 0L);
+    private readonly IncrementCounter _counter = new(65535L, 0L);
 
     /// <summary>
     /// 获取或者重新修改服务器的默认站号信息，当然，你可以再读写的时候动态指定。
@@ -42,7 +43,7 @@ public class XinJEInternalNet : DeviceTcpNet
     /// <summary>
     /// 获取协议自增的消息号，可以自定义modbus的消息号的规则。
     /// </summary>
-    public SoftIncrementCount MessageId => _softIncrementCount;
+    public IncrementCounter MessageId => _counter;
 
     /// <summary>
     /// 指定服务器地址，端口号，客户端自己的站号来初始化。
@@ -64,7 +65,7 @@ public class XinJEInternalNet : DeviceTcpNet
 
     protected override byte[] PackCommandWithHeader(byte[] command)
     {
-        return ModbusInfo.PackCommandToTcp(command, (ushort)_softIncrementCount.GetCurrentValue());
+        return ModbusInfo.PackCommandToTcp(command, (ushort)_counter.OnNext());
     }
 
     protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)

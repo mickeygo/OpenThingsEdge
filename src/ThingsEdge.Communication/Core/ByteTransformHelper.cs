@@ -28,7 +28,7 @@ public static class ByteTransformHelper
         {
             var operateResult = new OperateResult<TResult>
             {
-                Message = $"{StringResources.Language.DataTransformError} {SoftBasic.ByteToHexString(result.Content ?? [])} : Length({result.Content?.Length}) {ex.Message}"
+                Message = $"{StringResources.Language.DataTransformError} {result.Content.ToHexString()} : Length({result.Content?.Length}) {ex.Message}"
             };
             return operateResult;
         }

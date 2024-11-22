@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Exceptions;
 using ThingsEdge.Communication.Profinet.Fuji;
 
 namespace ThingsEdge.Communication.Core.Address;
@@ -79,7 +78,7 @@ public class FujiSPBAddress : DeviceAddressDataBase
         };
         try
         {
-            fujiSPBAddress.BitIndex = CommunicationHelper.GetBitIndexInformation(ref address);
+            fujiSPBAddress.BitIndex = StringExtensions.GetBitIndexInformation(ref address);
             switch (address[0])
             {
                 case 'X' or 'x':

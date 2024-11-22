@@ -16,26 +16,26 @@ public static class McAsciiHelper
     /// <returns>原始报文信息</returns>
     public static byte[] PackMcCommand(IReadWriteMc mc, byte[] mcCore)
     {
-        var array = SoftBasic.BuildAsciiBytesFrom(mc.TargetIOStation);
+        var array = ByteExtensions.BuildAsciiBytesFrom(mc.TargetIOStation);
         var array2 = new byte[22 + mcCore.Length];
         array2[0] = 53;
         array2[1] = 48;
         array2[2] = 48;
         array2[3] = 48;
-        array2[4] = SoftBasic.BuildAsciiBytesFrom(mc.NetworkNumber)[0];
-        array2[5] = SoftBasic.BuildAsciiBytesFrom(mc.NetworkNumber)[1];
-        array2[6] = SoftBasic.BuildAsciiBytesFrom(mc.PLCNumber)[0];
-        array2[7] = SoftBasic.BuildAsciiBytesFrom(mc.PLCNumber)[1];
+        array2[4] = ByteExtensions.BuildAsciiBytesFrom(mc.NetworkNumber)[0];
+        array2[5] = ByteExtensions.BuildAsciiBytesFrom(mc.NetworkNumber)[1];
+        array2[6] = ByteExtensions.BuildAsciiBytesFrom(mc.PLCNumber)[0];
+        array2[7] = ByteExtensions.BuildAsciiBytesFrom(mc.PLCNumber)[1];
         array2[8] = array[0];
         array2[9] = array[1];
         array2[10] = array[2];
         array2[11] = array[3];
-        array2[12] = SoftBasic.BuildAsciiBytesFrom(mc.NetworkStationNumber)[0];
-        array2[13] = SoftBasic.BuildAsciiBytesFrom(mc.NetworkStationNumber)[1];
-        array2[14] = SoftBasic.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[0];
-        array2[15] = SoftBasic.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[1];
-        array2[16] = SoftBasic.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[2];
-        array2[17] = SoftBasic.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[3];
+        array2[12] = ByteExtensions.BuildAsciiBytesFrom(mc.NetworkStationNumber)[0];
+        array2[13] = ByteExtensions.BuildAsciiBytesFrom(mc.NetworkStationNumber)[1];
+        array2[14] = ByteExtensions.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[0];
+        array2[15] = ByteExtensions.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[1];
+        array2[16] = ByteExtensions.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[2];
+        array2[17] = ByteExtensions.BuildAsciiBytesFrom((ushort)(array2.Length - 18))[3];
         array2[18] = 48;
         array2[19] = 48;
         array2[20] = 49;
@@ -68,7 +68,7 @@ public static class McAsciiHelper
     {
         if (content.Length < 22)
         {
-            return new OperateResult(StringResources.Language.ReceiveDataLengthTooShort + "22, Content: " + SoftBasic.GetAsciiStringRender(content));
+            return new OperateResult(StringResources.Language.ReceiveDataLengthTooShort + "22, Content: " + content.ToAsciiString());
         }
         var num = Convert.ToUInt16(Encoding.ASCII.GetString(content, 18, 4), 16);
         if (num != 0)
@@ -104,10 +104,10 @@ public static class McAsciiHelper
             MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[3],
             MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[4],
             MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[5],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[0],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[1],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[2],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[3]
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[0],
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[1],
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[2],
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[3]
         ];
     }
 
@@ -133,9 +133,9 @@ public static class McAsciiHelper
             48,
             48,
             74,
-            SoftBasic.BuildAsciiBytesFrom(extend)[1],
-            SoftBasic.BuildAsciiBytesFrom(extend)[2],
-            SoftBasic.BuildAsciiBytesFrom(extend)[3],
+            ByteExtensions.BuildAsciiBytesFrom(extend)[1],
+            ByteExtensions.BuildAsciiBytesFrom(extend)[2],
+            ByteExtensions.BuildAsciiBytesFrom(extend)[3],
             48,
             48,
             48,
@@ -150,10 +150,10 @@ public static class McAsciiHelper
             48,
             48,
             48,
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[0],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[1],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[2],
-            SoftBasic.BuildAsciiBytesFrom(addressData.Length)[3]
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[0],
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[1],
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[2],
+            ByteExtensions.BuildAsciiBytesFrom(addressData.Length)[3]
         ];
     }
 
@@ -183,10 +183,10 @@ public static class McAsciiHelper
         array[13] = MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[3];
         array[14] = MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[4];
         array[15] = MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[5];
-        array[16] = SoftBasic.BuildAsciiBytesFrom((ushort)(value.Length / 4))[0];
-        array[17] = SoftBasic.BuildAsciiBytesFrom((ushort)(value.Length / 4))[1];
-        array[18] = SoftBasic.BuildAsciiBytesFrom((ushort)(value.Length / 4))[2];
-        array[19] = SoftBasic.BuildAsciiBytesFrom((ushort)(value.Length / 4))[3];
+        array[16] = ByteExtensions.BuildAsciiBytesFrom((ushort)(value.Length / 4))[0];
+        array[17] = ByteExtensions.BuildAsciiBytesFrom((ushort)(value.Length / 4))[1];
+        array[18] = ByteExtensions.BuildAsciiBytesFrom((ushort)(value.Length / 4))[2];
+        array[19] = ByteExtensions.BuildAsciiBytesFrom((ushort)(value.Length / 4))[3];
         value.CopyTo(array, 20);
         return array;
     }
@@ -217,10 +217,10 @@ public static class McAsciiHelper
         array2[13] = MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[3];
         array2[14] = MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[4];
         array2[15] = MelsecHelper.BuildBytesFromAddress(addressData.AddressStart, addressData.McDataType)[5];
-        array2[16] = SoftBasic.BuildAsciiBytesFrom((ushort)value.Length)[0];
-        array2[17] = SoftBasic.BuildAsciiBytesFrom((ushort)value.Length)[1];
-        array2[18] = SoftBasic.BuildAsciiBytesFrom((ushort)value.Length)[2];
-        array2[19] = SoftBasic.BuildAsciiBytesFrom((ushort)value.Length)[3];
+        array2[16] = ByteExtensions.BuildAsciiBytesFrom((ushort)value.Length)[0];
+        array2[17] = ByteExtensions.BuildAsciiBytesFrom((ushort)value.Length)[1];
+        array2[18] = ByteExtensions.BuildAsciiBytesFrom((ushort)value.Length)[2];
+        array2[19] = ByteExtensions.BuildAsciiBytesFrom((ushort)value.Length)[3];
         array.CopyTo(array2, 20);
         return array2;
     }
@@ -241,8 +241,8 @@ public static class McAsciiHelper
         array[5] = 48;
         array[6] = 48;
         array[7] = 48;
-        array[8] = SoftBasic.BuildAsciiBytesFrom((byte)address.Length)[0];
-        array[9] = SoftBasic.BuildAsciiBytesFrom((byte)address.Length)[1];
+        array[8] = ByteExtensions.BuildAsciiBytesFrom((byte)address.Length)[0];
+        array[9] = ByteExtensions.BuildAsciiBytesFrom((byte)address.Length)[1];
         array[10] = 48;
         array[11] = 48;
         for (var i = 0; i < address.Length; i++)
@@ -275,8 +275,8 @@ public static class McAsciiHelper
         array[5] = 48;
         array[6] = 48;
         array[7] = 48;
-        array[8] = SoftBasic.BuildAsciiBytesFrom((byte)address.Length)[0];
-        array[9] = SoftBasic.BuildAsciiBytesFrom((byte)address.Length)[1];
+        array[8] = ByteExtensions.BuildAsciiBytesFrom((byte)address.Length)[0];
+        array[9] = ByteExtensions.BuildAsciiBytesFrom((byte)address.Length)[1];
         array[10] = 48;
         array[11] = 48;
         for (var i = 0; i < address.Length; i++)
@@ -289,10 +289,10 @@ public static class McAsciiHelper
             array[i * 12 + 17] = MelsecHelper.BuildBytesFromAddress(address[i].AddressStart, address[i].McDataType)[3];
             array[i * 12 + 18] = MelsecHelper.BuildBytesFromAddress(address[i].AddressStart, address[i].McDataType)[4];
             array[i * 12 + 19] = MelsecHelper.BuildBytesFromAddress(address[i].AddressStart, address[i].McDataType)[5];
-            array[i * 12 + 20] = SoftBasic.BuildAsciiBytesFrom(address[i].Length)[0];
-            array[i * 12 + 21] = SoftBasic.BuildAsciiBytesFrom(address[i].Length)[1];
-            array[i * 12 + 22] = SoftBasic.BuildAsciiBytesFrom(address[i].Length)[2];
-            array[i * 12 + 23] = SoftBasic.BuildAsciiBytesFrom(address[i].Length)[3];
+            array[i * 12 + 20] = ByteExtensions.BuildAsciiBytesFrom(address[i].Length)[0];
+            array[i * 12 + 21] = ByteExtensions.BuildAsciiBytesFrom(address[i].Length)[1];
+            array[i * 12 + 22] = ByteExtensions.BuildAsciiBytesFrom(address[i].Length)[2];
+            array[i * 12 + 23] = ByteExtensions.BuildAsciiBytesFrom(address[i].Length)[3];
         }
         return array;
     }
@@ -307,8 +307,8 @@ public static class McAsciiHelper
                 48, 54, 49, 51, 48, 48, 48, 48, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             };
-            SoftBasic.BuildAsciiBytesFrom(value).CopyTo(array, 8);
-            SoftBasic.BuildAsciiBytesFrom(length).CopyTo(array, 16);
+            ByteExtensions.BuildAsciiBytesFrom(value).CopyTo(array, 8);
+            ByteExtensions.BuildAsciiBytesFrom(length).CopyTo(array, 16);
             return OperateResult.CreateSuccessResult(array);
         }
         catch (Exception ex)
@@ -328,9 +328,9 @@ public static class McAsciiHelper
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0
             };
-            SoftBasic.BuildAsciiBytesFrom(value).CopyTo(array, 8);
-            SoftBasic.BuildAsciiBytesFrom(length).CopyTo(array, 16);
-            SoftBasic.BuildAsciiBytesFrom(module).CopyTo(array, 20);
+            ByteExtensions.BuildAsciiBytesFrom(value).CopyTo(array, 8);
+            ByteExtensions.BuildAsciiBytesFrom(length).CopyTo(array, 16);
+            ByteExtensions.BuildAsciiBytesFrom(module).CopyTo(array, 20);
             return OperateResult.CreateSuccessResult(array);
         }
         catch (Exception ex)

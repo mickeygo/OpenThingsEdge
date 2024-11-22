@@ -30,7 +30,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         "10025E000000FC00000000001212000000FFFF030000FF0300002F001C091A18000000000000000000FC000012120414000113960AC4E5D701020A0000000245303030454330343003463410034630",
     ];
 
-    private readonly SoftIncrementCount _incrementCount = new(2147483647L, 1L);
+    private readonly IncrementCounter _counter = new(2147483647L, 1L);
 
     /// <summary>
     /// 获取或设置是否使用GOT连接三菱的PLC，当使用了GOT连接到。
@@ -55,7 +55,6 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
             IsStringReverseByteWord = true,
         };
         IsNewVersion = true;
-        DelayTime = 20;
     }
 
     /// <inheritdoc />
@@ -95,7 +94,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
             array[55] = IPAddress.Parse(IpAddress).GetAddressBytes()[3];
             array[56] = 1;
             array[57] = 2;
-            BitConverter.GetBytes((int)_incrementCount.GetCurrentValue()).CopyTo(array, 58);
+            BitConverter.GetBytes((int)_counter.OnNext()).CopyTo(array, 58);
             command.CopyTo(array, 62);
             array[array.Length - 4] = 16;
             array[array.Length - 3] = 3;
@@ -123,7 +122,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
                 }
                 if (num >= 0)
                 {
-                    return OperateResult.CreateSuccessResult(response.RemoveDouble(64 + num, 4));
+                    return OperateResult.CreateSuccessResult(response.RemoveBoth(64 + num, 4));
                 }
             }
             return new OperateResult<byte[]>("Got failed: " + response.ToHexString(' ', 16));
@@ -131,7 +130,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         return base.UnpackResponseContent(send, response);
     }
 
-    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
     {
         var read = await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         if (!read.IsSuccess)
@@ -151,7 +150,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         {
             return read2;
         }
-        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(read.Content, read2.Content));
+        return OperateResult.CreateSuccessResult(CollectionUtils.SpliceArray(read.Content, read2.Content));
     }
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()

@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Common;
-
 namespace ThingsEdge.Communication.Core.Net;
 
 /// <summary>

@@ -191,12 +191,12 @@ public interface IReadWriteNet
     /// 异步写入原始的byte数组数据到指定的地址，返回是否写入成功。
     /// </summary>
     /// <param name="address">起始地址</param>
-    /// <param name="data">要写入的数据/param>
+    /// <param name="data">要写入的数据</param>
     /// <returns>带有成功标识的结果类对象</returns>
     Task<OperateResult> WriteAsync(string address, byte[] data);
 
     /// <summary>
-    /// 异步批量写入<see cref="bool" />数组数据，返回是否成功。
+    /// 异步批量写入 <see cref="bool" /> 数组数据，返回是否成功。
     /// </summary>
     /// <param name="address">起始地址</param>
     /// <param name="value">写入值</param>

@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 
 namespace ThingsEdge.Communication.Profinet.Omron.Helper;
@@ -24,7 +25,7 @@ public static class OmronHostLinkHelper
                 var string2 = Encoding.ASCII.GetString(response, 15, 4);
                 if (string2 != @string)
                 {
-                    return new OperateResult<byte[]>("Send Command [" + @string + "] not the same as receive command [" + string2 + "] source:[" + SoftBasic.GetAsciiStringRender(response) + "]");
+                    return new OperateResult<byte[]>($"Send Command [{@string}] not the same as receive command [{string2}] source:[{response.ToAsciiString()}]");
                 }
 
                 int num;
@@ -34,13 +35,13 @@ public static class OmronHostLinkHelper
                 }
                 catch (Exception ex)
                 {
-                    return new OperateResult<byte[]>("Get error code failed: " + ex.Message + Environment.NewLine + "Source Data: " + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>($"Get error code failed: {ex.Message}{Environment.NewLine}Source Data: {response.ToAsciiString()}");
                 }
 
                 byte[] array = [];
                 if (response.Length > 27)
                 {
-                    array = SoftBasic.HexStringToBytes(Encoding.ASCII.GetString(response, 23, response.Length - 27));
+                    array = Encoding.ASCII.GetString(response, 23, response.Length - 27).ToHexBytes();
                 }
                 if (num > 0)
                 {
@@ -76,7 +77,7 @@ public static class OmronHostLinkHelper
     /// </remarks>
     public static async Task<OperateResult<byte[]>> ReadAsync(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: false, hostLink.ReadSplits);
         if (!command.IsSuccess)
         {
@@ -98,7 +99,7 @@ public static class OmronHostLinkHelper
 
     public static async Task<OperateResult> WriteAsync(IHostLink hostLink, string address, byte[] value)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, value, isBit: false);
         if (!command.IsSuccess)
         {
@@ -117,7 +118,7 @@ public static class OmronHostLinkHelper
         var station = hostLink.UnitNumber;
         if (address.Length != 0)
         {
-            station = (byte)CommunicationHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
+            station = (byte)CommHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
         }
         var command = OmronFinsNetHelper.BuildReadCommand(address, hostLink.PlcType);
         if (!command.IsSuccess)
@@ -139,7 +140,7 @@ public static class OmronHostLinkHelper
 
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: true);
         if (!command.IsSuccess)
         {
@@ -161,7 +162,7 @@ public static class OmronHostLinkHelper
 
     public static async Task<OperateResult> WriteAsync(IHostLink hostLink, string address, bool[] values)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, values.Select((m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
         if (!command.IsSuccess)
         {
@@ -256,32 +257,32 @@ public static class OmronHostLinkHelper
     /// <returns>可发送PLC的完整的报文信息</returns>
     private static byte[] PackCommand(IHostLink hostLink, byte station, byte[] cmd)
     {
-        cmd = SoftBasic.BytesToAsciiBytes(cmd);
-        var array = new byte[18 + cmd.Length];
+        var cmd2 = cmd.ToAsciiBytes();
+        var array = new byte[18 + cmd2.Length];
         array[0] = 64;
-        array[1] = SoftBasic.BuildAsciiBytesFrom(station)[0];
-        array[2] = SoftBasic.BuildAsciiBytesFrom(station)[1];
+        array[1] = ByteExtensions.BuildAsciiBytesFrom(station)[0];
+        array[2] = ByteExtensions.BuildAsciiBytesFrom(station)[1];
         array[3] = 70;
         array[4] = 65;
         array[5] = hostLink.ResponseWaitTime;
-        array[6] = SoftBasic.BuildAsciiBytesFrom(hostLink.ICF)[0];
-        array[7] = SoftBasic.BuildAsciiBytesFrom(hostLink.ICF)[1];
-        array[8] = SoftBasic.BuildAsciiBytesFrom(hostLink.DA2)[0];
-        array[9] = SoftBasic.BuildAsciiBytesFrom(hostLink.DA2)[1];
-        array[10] = SoftBasic.BuildAsciiBytesFrom(hostLink.SA2)[0];
-        array[11] = SoftBasic.BuildAsciiBytesFrom(hostLink.SA2)[1];
-        array[12] = SoftBasic.BuildAsciiBytesFrom(hostLink.SID)[0];
-        array[13] = SoftBasic.BuildAsciiBytesFrom(hostLink.SID)[1];
+        array[6] = ByteExtensions.BuildAsciiBytesFrom(hostLink.ICF)[0];
+        array[7] = ByteExtensions.BuildAsciiBytesFrom(hostLink.ICF)[1];
+        array[8] = ByteExtensions.BuildAsciiBytesFrom(hostLink.DA2)[0];
+        array[9] = ByteExtensions.BuildAsciiBytesFrom(hostLink.DA2)[1];
+        array[10] = ByteExtensions.BuildAsciiBytesFrom(hostLink.SA2)[0];
+        array[11] = ByteExtensions.BuildAsciiBytesFrom(hostLink.SA2)[1];
+        array[12] = ByteExtensions.BuildAsciiBytesFrom(hostLink.SID)[0];
+        array[13] = ByteExtensions.BuildAsciiBytesFrom(hostLink.SID)[1];
         array[^2] = 42;
         array[^1] = 13;
-        cmd.CopyTo(array, 14);
+        cmd2.CopyTo(array, 14);
         int num = array[0];
         for (var i = 1; i < array.Length - 4; i++)
         {
             num ^= array[i];
         }
-        array[^4] = SoftBasic.BuildAsciiBytesFrom((byte)num)[0];
-        array[^3] = SoftBasic.BuildAsciiBytesFrom((byte)num)[1];
+        array[^4] = ByteExtensions.BuildAsciiBytesFrom((byte)num)[0];
+        array[^3] = ByteExtensions.BuildAsciiBytesFrom((byte)num)[1];
         return array;
     }
 }

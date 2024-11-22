@@ -23,14 +23,14 @@ internal static class ModbusHelper
         var array = response.ToArray();
         for (var i = 0; i < 2; i++)
         {
-            if (array[1] == 1 || array[1] == 2 || array[1] == 3 || array[1] == 4 || array[1] == 23)
+            if (array[1] is 1 or 2 or 3 or 4 or 23)
             {
                 if (array.Length > 5 + array[2])
                 {
                     array = array.SelectBegin(5 + array[2]);
                 }
             }
-            else if (array[1] == 5 || array[1] == 6 || array[1] == 15 || array[1] == 16)
+            else if (array[1] is 5 or 6 or 15 or 16)
             {
                 if (array.Length > 8)
                 {
@@ -48,7 +48,7 @@ internal static class ModbusHelper
                     array = response.RemoveBegin(1);
                     continue;
                 }
-                return new OperateResult<byte[]>(int.MinValue, StringResources.Language.ModbusCRCCheckFailed + SoftBasic.ByteToHexString(response, ' '));
+                return new OperateResult<byte[]>(int.MinValue, StringResources.Language.ModbusCRCCheckFailed + response.ToHexString(' '));
             }
             break;
         }
@@ -157,7 +157,7 @@ internal static class ModbusHelper
             {
                 return OperateResult.CreateFailedResult<bool[]>(read);
             }
-            return OperateResult.CreateSuccessResult(SoftBasic.BytesReverseByWord(read.Content!).ToBoolArray().SelectMiddle(bitIndex, length));
+            return OperateResult.CreateSuccessResult(read.Content.ReverseByWord().ToBoolArray().SelectMiddle(bitIndex, length));
         }
         var command = ModbusInfo.BuildReadModbusCommand(modbusAddress.Content, length, modbus.Station, modbus.AddressStartWithZero, function);
         if (!command.IsSuccess)
@@ -173,7 +173,8 @@ internal static class ModbusHelper
             {
                 return OperateResult.CreateFailedResult<bool[]>(read);
             }
-            resultArray.AddRange(SoftBasic.ByteToBoolArray(length: command.Content[i][4] * 256 + command.Content[i][5], inBytes: read.Content!));
+
+            resultArray.AddRange(read.Content.ToBoolArray(command.Content[i][4] * 256 + command.Content[i][5]));
         }
         return OperateResult.CreateSuccessResult(resultArray.ToArray());
     }
@@ -220,13 +221,13 @@ internal static class ModbusHelper
             return await WriteAsync(modbus, address, [value]).ConfigureAwait(continueOnCapturedContext: false);
         }
 
-        var command = ModbusInfo.BuildWriteBoolModbusCommand(modbusAddress.Content!, value, modbus.Station, modbus.AddressStartWithZero, 5);
+        var command = ModbusInfo.BuildWriteBoolModbusCommand(modbusAddress.Content, value, modbus.Station, modbus.AddressStartWithZero, 5);
         if (!command.IsSuccess)
         {
             return command;
         }
 
-        OperateResult write = await modbus.ReadFromCoreServerAsync(command.Content!).ConfigureAwait(continueOnCapturedContext: false);
+        OperateResult write = await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(continueOnCapturedContext: false);
         if (write.IsSuccess)
         {
             return write;
@@ -309,7 +310,7 @@ internal static class ModbusHelper
         newAddress = string.Empty;
         for (var i = 0; i < code.Length; i++)
         {
-            if (address.StartsWithAndNumber(code[i]))
+            if (address.StartsWithAndNextIsNumber(code[i]))
             {
                 newAddress = station + (prase(address[code[i].Length..]) + offset[i]);
                 return true;

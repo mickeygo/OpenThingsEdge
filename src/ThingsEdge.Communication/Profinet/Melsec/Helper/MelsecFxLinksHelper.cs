@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Common.Serial;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
@@ -32,13 +33,13 @@ public static class MelsecFxLinksHelper
         }
         if (plc.Format == 1)
         {
-            return SoftBasic.SpliceArray(new byte[1] { 5 }, array);
+            return CollectionUtils.SpliceArray(new byte[1] { 5 }, array);
         }
         if (plc.Format == 4)
         {
-            return SoftBasic.SpliceArray(new byte[1] { 5 }, array, "\r\n"u8.ToArray());
+            return CollectionUtils.SpliceArray(new byte[1] { 5 }, array, "\r\n"u8.ToArray());
         }
-        return SoftBasic.SpliceArray(new byte[1] { 5 }, array);
+        return CollectionUtils.SpliceArray(new byte[1] { 5 }, array);
     }
 
     /// <summary>
@@ -58,7 +59,7 @@ public static class MelsecFxLinksHelper
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
 
-        var array = SoftBasic.SplitIntegerToArray(length, isBool ? 256 : 64);
+        var array = CollectionUtils.SplitIntegerToArray(length, isBool ? 256 : 64);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
         {
@@ -239,7 +240,7 @@ public static class MelsecFxLinksHelper
             }
             if (response[0] != 2 && response[0] != 6)
             {
-                return new OperateResult<byte[]>(response[0], "Check command failed: " + SoftBasic.GetAsciiStringRender(response));
+                return new OperateResult<byte[]>(response[0], "Check command failed: " + response.ToAsciiString());
             }
             if (response[0] == 6)
             {
@@ -262,7 +263,7 @@ public static class MelsecFxLinksHelper
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("Check Plc Response failed Error: " + ex.Message + " Source: " + SoftBasic.GetAsciiStringRender(response));
+            return new OperateResult<byte[]>("Check Plc Response failed Error: " + ex.Message + " Source: " + response.ToAsciiString());
         }
     }
 
@@ -275,7 +276,7 @@ public static class MelsecFxLinksHelper
     /// <returns>读取结果信息</returns>
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteFxLinks plc, string address, ushort length)
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildReadCommand(stat, address, length, isBool: false, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -314,7 +315,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, byte[] values)
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildWriteByteCommand(stat, address, values, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -344,10 +345,10 @@ public static class MelsecFxLinksHelper
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
+            return await CommHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
         }
 
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildReadCommand(stat, address, length, isBool: true, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -380,7 +381,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, bool[] values)
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildWriteBoolCommand(stat, address, values, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -407,7 +408,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否启动成功</returns>
     public static async Task<OperateResult> StartPLCAsync(IReadWriteFxLinks plc, string parameter = "")
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref parameter, "s", plc.Station);
         var command = BuildStart(stat, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -435,7 +436,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否停止成功</returns>
     public static async Task<OperateResult> StopPLCAsync(IReadWriteFxLinks plc, string parameter = "")
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref parameter, "s", plc.Station);
         var command = BuildStop(stat, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -462,7 +463,7 @@ public static class MelsecFxLinksHelper
     /// <returns>带PLC型号的结果信息</returns>
     public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteFxLinks plc, string parameter = "")
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref parameter, "s", plc.Station);
         var command = BuildReadPlcType(stat, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -533,7 +534,7 @@ public static class MelsecFxLinksHelper
         var array = new byte[value.Length * 2];
         for (var i = 0; i < value.Length / 2; i++)
         {
-            SoftBasic.BuildAsciiBytesFrom(BitConverter.ToUInt16(value, i * 2)).CopyTo(array, 4 * i);
+            ByteExtensions.BuildAsciiBytesFrom(BitConverter.ToUInt16(value, i * 2)).CopyTo(array, 4 * i);
         }
         stringBuilder.Append(Encoding.ASCII.GetString(array));
         return OperateResult.CreateSuccessResult(Encoding.ASCII.GetBytes(stringBuilder.ToString()));

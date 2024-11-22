@@ -1,4 +1,3 @@
-using Nito.AsyncEx;
 using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
@@ -149,7 +148,7 @@ public static class SiemensPPIHelper
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
 
-        var array = SoftBasic.BoolArrayToByte(values);
+        var array = values.ToByteArray();
         var array2 = new byte[37 + array.Length];
         array2[0] = 104;
         array2[1] = BitConverter.GetBytes(array2.Length - 6)[0];
@@ -228,7 +227,7 @@ public static class SiemensPPIHelper
     {
         if (content.Length < 21)
         {
-            return new OperateResult(10000, "Failed, data too short:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult(10000, "Failed, data too short:" + content.ToHexString(' '));
         }
         if (content[17] != 0 || content[18] != 0)
         {
@@ -236,7 +235,7 @@ public static class SiemensPPIHelper
         }
         if (content.Length < 22)
         {
-            return new OperateResult(10000, "Failed, data too short:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult(10000, "Failed, data too short:" + content.ToHexString(' '));
         }
         if (content[21] != byte.MaxValue)
         {
@@ -272,9 +271,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, string address, ushort length, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, string address, ushort length, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
@@ -291,16 +290,16 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult<bool>> ReadBoolAsync(IReadWriteDevice plc, string address, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult<bool>> ReadBoolAsync(IReadWriteDevice plc, string address, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildReadCommand(station2, address, 1, isBit: true);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool>(operateResult);
         }
 
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult2 = await plc.ReadFromCoreServerAsync(operateResult.Content).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -309,7 +308,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult2.Content.Length == 0 || operateResult2.Content[0] != 229)
             {
-                return new OperateResult<bool>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+                return new OperateResult<bool>("PLC Receive Check Failed:" + operateResult2.Content.ToHexString(' '));
             }
             var operateResult3 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station2)).ConfigureAwait(false);
             if (!operateResult3.IsSuccess)
@@ -330,16 +329,16 @@ public static class SiemensPPIHelper
         }
     }
 
-    public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice plc, string address, ushort length, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice plc, string address, ushort length, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool[]>(operateResult);
         }
 
-        CommunicationHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         operateResult.Content.AddressStart = newStart;
         operateResult.Content.Length = byteLength;
         var operateResult2 = await ReadAsync(plc, operateResult.Content, operateResult.Content.Length, station2, asyncLock).ConfigureAwait(false);
@@ -350,7 +349,7 @@ public static class SiemensPPIHelper
         return OperateResult.CreateSuccessResult(operateResult2.Content.ToBoolArray().SelectMiddle(offset, length));
     }
 
-    private static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, S7AddressData address, ushort length, byte station, AsyncLock asyncLock)
+    private static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, S7AddressData address, ushort length, byte station, ICommAsyncLock asyncLock)
     {
         var operateResult = BuildReadCommand(station, address, length, isBit: false);
         if (!operateResult.IsSuccess)
@@ -358,7 +357,7 @@ public static class SiemensPPIHelper
             return operateResult;
         }
 
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult2 = await plc.ReadFromCoreServerAsync(operateResult.Content).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -367,7 +366,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult2.Content.Length == 0 || operateResult2.Content[0] != 229)
             {
-                return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+                return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult2.Content.ToHexString(' '));
             }
 
             var operateResult3 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station)).ConfigureAwait(false);
@@ -393,16 +392,16 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, byte[] value, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, byte[] value, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildWriteCommand(station2, address, value);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
         }
 
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult2 = await plc.ReadFromCoreServerAsync(operateResult.Content).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -411,7 +410,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult2.Content.Length == 0 || operateResult2.Content[0] != 229)
             {
-                return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+                return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult2.Content.ToHexString(' '));
             }
             var operateResult3 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station2)).ConfigureAwait(false);
             if (!operateResult3.IsSuccess)
@@ -436,16 +435,16 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, bool[] value, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, bool[] value, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildWriteCommand(station2, address, value);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
         }
 
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult2 = await plc.ReadFromCoreServerAsync(operateResult.Content).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -454,7 +453,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult2.Content.Length == 0 || operateResult2.Content[0] != 229)
             {
-                return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+                return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult2.Content.ToHexString(' '));
             }
             var operateResult3 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station2)).ConfigureAwait(false);
             if (!operateResult3.IsSuccess)
@@ -478,9 +477,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>是否启动成功</returns>
-    public static async Task<OperateResult> StartAsync(IReadWriteDevice plc, string parameter, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult> StartAsync(IReadWriteDevice plc, string parameter, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
         var obj = new byte[39]
         {
             104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
@@ -491,7 +490,7 @@ public static class SiemensPPIHelper
 
         obj[4] = station;
         var send = obj;
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult = await plc.ReadFromCoreServerAsync(send).ConfigureAwait(false);
             if (!operateResult.IsSuccess)
@@ -500,7 +499,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult.Content.Length == 0 || operateResult.Content[0] != 229)
             {
-                return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult.Content, ' '));
+                return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult.Content.ToHexString(' '));
             }
             var operateResult2 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station2)).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -519,9 +518,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>是否停止成功</returns>
-    public static async Task<OperateResult> StopAsync(IReadWriteDevice plc, string parameter, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult> StopAsync(IReadWriteDevice plc, string parameter, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
         var obj = new byte[35]
         {
             104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
@@ -532,7 +531,7 @@ public static class SiemensPPIHelper
 
         obj[4] = station;
         var send = obj;
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult = await plc.ReadFromCoreServerAsync(send).ConfigureAwait(false);
             if (!operateResult.IsSuccess)
@@ -541,7 +540,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult.Content.Length == 0 || operateResult.Content[0] != 229)
             {
-                return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult.Content, ' '));
+                return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult.Content.ToHexString(' '));
             }
             var operateResult2 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station2)).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -560,16 +559,16 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>包含是否成功的结果对象</returns>
-    public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteDevice plc, string parameter, byte station, AsyncLock asyncLock)
+    public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteDevice plc, string parameter, byte station, ICommAsyncLock asyncLock)
     {
-        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
         var operateResult = BuildReadCommand(station2, "SYS0", 20, isBit: false);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<string>(operateResult);
         }
 
-        using (await asyncLock.LockAsync())
+        using (await asyncLock.LockAsync().ConfigureAwait(false))
         {
             var operateResult2 = await plc.ReadFromCoreServerAsync(operateResult.Content).ConfigureAwait(false);
             if (!operateResult2.IsSuccess)
@@ -578,7 +577,7 @@ public static class SiemensPPIHelper
             }
             if (operateResult2.Content.Length == 0 || operateResult2.Content[0] != 229)
             {
-                return new OperateResult<string>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+                return new OperateResult<string>("PLC Receive Check Failed:" + operateResult2.Content.ToHexString(' '));
             }
 
             var operateResult3 = await plc.ReadFromCoreServerAsync(GetExecuteConfirm(station2)).ConfigureAwait(false);

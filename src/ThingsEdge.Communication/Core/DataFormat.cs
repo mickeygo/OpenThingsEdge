@@ -23,5 +23,5 @@ public enum DataFormat
     /// <summary>
     /// 按照倒序排序
     /// </summary>
-    DCBA
+    DCBA,
 }

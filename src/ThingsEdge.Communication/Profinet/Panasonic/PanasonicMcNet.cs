@@ -1,4 +1,4 @@
-using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Profinet.Melsec;
 

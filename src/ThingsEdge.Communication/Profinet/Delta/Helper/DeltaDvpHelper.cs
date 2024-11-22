@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.ModBus;
 
@@ -30,34 +31,34 @@ public static class DeltaDvpHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
             }
             if (modbusCode == 1 || modbusCode == 15 || modbusCode == 5)
             {
-                if (address.StartsWithAndNumber("S"))
+                if (address.StartsWithAndNextIsNumber("S"))
                 {
-                    return OperateResult.CreateSuccessResult(text + Convert.ToInt32(address.Substring(1)));
+                    return OperateResult.CreateSuccessResult(text + Convert.ToInt32(address[1..]));
                 }
-                if (address.StartsWithAndNumber("X"))
+                if (address.StartsWithAndNextIsNumber("X"))
                 {
-                    return OperateResult.CreateSuccessResult(text + "x=2;" + (Convert.ToInt32(address.Substring(1), 8) + 1024));
+                    return OperateResult.CreateSuccessResult(text + "x=2;" + (Convert.ToInt32(address[1..], 8) + 1024));
                 }
-                if (address.StartsWithAndNumber("Y"))
+                if (address.StartsWithAndNextIsNumber("Y"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1), 8) + 1280));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..], 8) + 1280));
                 }
-                if (address.StartsWithAndNumber("T"))
+                if (address.StartsWithAndNextIsNumber("T"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 1536));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 1536));
                 }
-                if (address.StartsWithAndNumber("C"))
+                if (address.StartsWithAndNextIsNumber("C"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 3584));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 3584));
                 }
-                if (address.StartsWithAndNumber("M"))
+                if (address.StartsWithAndNextIsNumber("M"))
                 {
                     var num = Convert.ToInt32(address[1..]);
                     if (num >= 1536)
@@ -73,22 +74,22 @@ public static class DeltaDvpHelper
             }
             else
             {
-                if (address.StartsWithAndNumber("D"))
+                if (address.StartsWithAndNextIsNumber("D"))
                 {
                     return OperateResult.CreateSuccessResult(text + TransDAdressToModbusAddress(address.Substring(1)));
                 }
-                if (address.StartsWithAndNumber("C"))
+                if (address.StartsWithAndNextIsNumber("C"))
                 {
-                    var num2 = Convert.ToInt32(address.Substring(1));
+                    var num2 = Convert.ToInt32(address[1..]);
                     if (num2 >= 200)
                     {
                         return OperateResult.CreateSuccessResult(text + (num2 - 200 + 3784));
                     }
                     return OperateResult.CreateSuccessResult(text + (num2 + 3584));
                 }
-                if (address.StartsWithAndNumber("T"))
+                if (address.StartsWithAndNextIsNumber("T"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 1536));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 1536));
                 }
             }
             return new OperateResult<string>(StringResources.Language.NotSupportedDataType);
@@ -109,7 +110,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(Func<string, ushort, Task<OperateResult<bool[]>>> readBoolFunc, string address, ushort length)
     {
         var station = string.Empty;
-        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";
@@ -128,7 +129,7 @@ public static class DeltaDvpHelper
             {
                 return read2;
             }
-            return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(read1.Content!, read2.Content!));
+            return OperateResult.CreateSuccessResult(CollectionUtils.SpliceArray(read1.Content!, read2.Content!));
         }
         return await readBoolFunc(address, length).ConfigureAwait(false);
     }
@@ -143,7 +144,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult> WriteAsync(Func<string, bool[], Task<OperateResult>> writeBoolFunc, string address, bool[] value)
     {
         var station = string.Empty;
-        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";
@@ -176,7 +177,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult<byte[]>> ReadAsync(Func<string, ushort, Task<OperateResult<byte[]>>> readFunc, string address, ushort length)
     {
         var station = string.Empty;
-        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";
@@ -195,7 +196,7 @@ public static class DeltaDvpHelper
             {
                 return read2;
             }
-            return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(read1.Content!, read2.Content!));
+            return OperateResult.CreateSuccessResult(CollectionUtils.SpliceArray(read1.Content, read2.Content));
         }
         return await readFunc(address, length).ConfigureAwait(false);
     }
@@ -210,7 +211,7 @@ public static class DeltaDvpHelper
     public static async Task<OperateResult> WriteAsync(Func<string, byte[], Task<OperateResult>> writeFunc, string address, byte[] value)
     {
         var station = string.Empty;
-        var stationPara = CommunicationHelper.ExtractParameter(ref address, "s");
+        var stationPara = CommHelper.ExtractParameter(ref address, "s");
         if (stationPara.IsSuccess)
         {
             station = $"s={stationPara.Content};";

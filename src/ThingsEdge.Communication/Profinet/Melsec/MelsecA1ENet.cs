@@ -8,7 +8,6 @@ namespace ThingsEdge.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱PLC通讯协议，采用A兼容1E帧协议实现，使用二进制码通讯，请根据实际型号来进行选取。
 /// </summary>
-/// <remarks>
 public class MelsecA1ENet : DeviceTcpNet
 {
     /// <summary>
@@ -75,7 +74,7 @@ public class MelsecA1ENet : DeviceTcpNet
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
+            return await CommHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
         }
         var command = BuildReadCommand(address, length, isBit: true, PLCNumber);
         if (!command.IsSuccess)
@@ -164,7 +163,7 @@ public class MelsecA1ENet : DeviceTcpNet
         }
 
         var b = !isBit ? (byte)1 : (byte)0;
-        var array = SoftBasic.SplitIntegerToArray(length, isBit ? 256 : 64);
+        var array = CollectionUtils.SplitIntegerToArray(length, isBit ? 256 : 64);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
         {

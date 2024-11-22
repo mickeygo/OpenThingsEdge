@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 
@@ -45,7 +46,7 @@ public static class FujiSPBHelper
     /// <returns>是否成功的结果对象</returns>
     public static OperateResult<byte[]> BuildReadCommand(byte station, string address, ushort length)
     {
-        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -106,7 +107,7 @@ public static class FujiSPBHelper
         stringBuilder.Append(address.Length.ToString("X2"));
         for (var i = 0; i < address.Length; i++)
         {
-            station = (byte)CommunicationHelper.ExtractParameter(ref address[i], "s", station);
+            station = (byte)CommHelper.ExtractParameter(ref address[i], "s", station);
             var operateResult = FujiSPBAddress.ParseFrom(address[i]);
             if (!operateResult.IsSuccess)
             {
@@ -131,7 +132,7 @@ public static class FujiSPBHelper
     /// <returns>是否创建成功</returns>
     public static OperateResult<byte[]> BuildWriteByteCommand(byte station, string address, byte[] value)
     {
-        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -162,7 +163,7 @@ public static class FujiSPBHelper
     /// <returns>是否创建成功</returns>
     public static OperateResult<byte[]> BuildWriteBoolCommand(byte station, string address, bool value)
     {
-        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -204,7 +205,7 @@ public static class FujiSPBHelper
         {
             if (content[0] != 58)
             {
-                return new OperateResult<byte[]>(content[0], "Read Faild:" + SoftBasic.ByteToHexString(content, ' '));
+                return new OperateResult<byte[]>(content[0], "Read Faild:" + content.ToHexString(' '));
             }
             var @string = Encoding.ASCII.GetString(content, 9, 2);
             if (@string != "00")
@@ -213,7 +214,7 @@ public static class FujiSPBHelper
             }
             if (content[^2] == 13 && content[^1] == 10)
             {
-                content = content.RemoveLast(2);
+                content = content.RemoveEnd(2);
             }
             return OperateResult.CreateSuccessResult(content.RemoveBegin(11));
         }
@@ -287,7 +288,7 @@ public static class FujiSPBHelper
     /// <returns>Bool[]的结果对象</returns>
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice device, byte station, string address, ushort length)
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", station);
         var addressAnalysis = FujiSPBAddress.ParseFrom(address);
         if (!addressAnalysis.IsSuccess)
         {

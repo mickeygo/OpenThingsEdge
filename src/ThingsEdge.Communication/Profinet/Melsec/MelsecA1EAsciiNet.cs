@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
@@ -65,7 +66,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
+            return await CommHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
         }
         var command = BuildReadCommand(address, length, isBit: true, PLCNumber);
         if (!command.IsSuccess)
@@ -147,32 +148,32 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         }
 
         var value = !isBit ? (byte)1 : (byte)0;
-        var array = SoftBasic.SplitIntegerToArray(length, isBit ? 256 : 64);
+        var array = CollectionUtils.SplitIntegerToArray(length, isBit ? 256 : 64);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
         {
             var array2 = new byte[24]
             {
-                SoftBasic.BuildAsciiBytesFrom(value)[0],
-                SoftBasic.BuildAsciiBytesFrom(value)[1],
-                SoftBasic.BuildAsciiBytesFrom(plcNumber)[0],
-                SoftBasic.BuildAsciiBytesFrom(plcNumber)[1],
+                ByteExtensions.BuildAsciiBytesFrom(value)[0],
+                ByteExtensions.BuildAsciiBytesFrom(value)[1],
+                ByteExtensions.BuildAsciiBytesFrom(plcNumber)[0],
+                ByteExtensions.BuildAsciiBytesFrom(plcNumber)[1],
                 48,
                 48,
                 48,
                 65,
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[0],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[1],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[0],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[1],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[0],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[1],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[0],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[1],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[0],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[1],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[0],
-                SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[1],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[0],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[1],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[0],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[1],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[0],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[1],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[0],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[1],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[0],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[1],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[0],
+                ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[1],
                 0,
                 0,
                 0,
@@ -183,8 +184,8 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
             {
                 num = 0;
             }
-            array2[20] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(num % 256)[0])[0];
-            array2[21] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(num % 256)[0])[1];
+            array2[20] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(num % 256)[0])[0];
+            array2[21] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(num % 256)[0])[1];
             array2[22] = 48;
             array2[23] = 48;
             list.Add(array2);
@@ -212,26 +213,26 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         var array = new byte[24 + value.Length];
         array[0] = 48;
         array[1] = 51;
-        array[2] = SoftBasic.BuildAsciiBytesFrom(plcNumber)[0];
-        array[3] = SoftBasic.BuildAsciiBytesFrom(plcNumber)[1];
+        array[2] = ByteExtensions.BuildAsciiBytesFrom(plcNumber)[0];
+        array[3] = ByteExtensions.BuildAsciiBytesFrom(plcNumber)[1];
         array[4] = 48;
         array[5] = 48;
         array[6] = 48;
         array[7] = 65;
-        array[8] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[0];
-        array[9] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[1];
-        array[10] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[0];
-        array[11] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[1];
-        array[12] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[0];
-        array[13] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[1];
-        array[14] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[0];
-        array[15] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[1];
-        array[16] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[0];
-        array[17] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[1];
-        array[18] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[0];
-        array[19] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[1];
-        array[20] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length / 4)[0])[0];
-        array[21] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length / 4)[0])[1];
+        array[8] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[0];
+        array[9] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[1];
+        array[10] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[0];
+        array[11] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[1];
+        array[12] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[0];
+        array[13] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[1];
+        array[14] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[0];
+        array[15] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[1];
+        array[16] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[0];
+        array[17] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[1];
+        array[18] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[0];
+        array[19] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[1];
+        array[20] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length / 4)[0])[0];
+        array[21] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length / 4)[0])[1];
         array[22] = 48;
         array[23] = 48;
         value.CopyTo(array, 24);
@@ -255,31 +256,31 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
         var array = value.Select((m) => (byte)(m ? 49 : 48)).ToArray();
         if (array.Length % 2 == 1)
         {
-            array = SoftBasic.SpliceArray(array, new byte[1] { 48 });
+            array = CollectionUtils.SpliceArray(array, new byte[1] { 48 });
         }
         var array2 = new byte[24 + array.Length];
         array2[0] = 48;
         array2[1] = 50;
-        array2[2] = SoftBasic.BuildAsciiBytesFrom(plcNumber)[0];
-        array2[3] = SoftBasic.BuildAsciiBytesFrom(plcNumber)[1];
+        array2[2] = ByteExtensions.BuildAsciiBytesFrom(plcNumber)[0];
+        array2[3] = ByteExtensions.BuildAsciiBytesFrom(plcNumber)[1];
         array2[4] = 48;
         array2[5] = 48;
         array2[6] = 48;
         array2[7] = 65;
-        array2[8] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[0];
-        array2[9] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[1];
-        array2[10] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[0];
-        array2[11] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[1];
-        array2[12] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[0];
-        array2[13] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[1];
-        array2[14] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[0];
-        array2[15] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[1];
-        array2[16] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[0];
-        array2[17] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[1];
-        array2[18] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[0];
-        array2[19] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[1];
-        array2[20] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length)[0])[0];
-        array2[21] = SoftBasic.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length)[0])[1];
+        array2[8] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[0];
+        array2[9] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[1])[1];
+        array2[10] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[0];
+        array2[11] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content1.DataCode)[0])[1];
+        array2[12] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[0];
+        array2[13] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[3])[1];
+        array2[14] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[0];
+        array2[15] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[2])[1];
+        array2[16] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[0];
+        array2[17] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[1])[1];
+        array2[18] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[0];
+        array2[19] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(operateResult.Content2)[0])[1];
+        array2[20] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length)[0])[0];
+        array2[21] = ByteExtensions.BuildAsciiBytesFrom(BitConverter.GetBytes(value.Length)[0])[1];
         array2[22] = 48;
         array2[23] = 48;
         array.CopyTo(array2, 24);

@@ -10,7 +10,7 @@ namespace ThingsEdge.Communication.Core.Net;
 /// </summary>
 public abstract class NetworkConnectedCip : DeviceTcpNet
 {
-    private readonly SoftIncrementCount _incrementCount = new(65535L, 3L, 2);
+    private readonly IncrementCounter _counter = new(65535L, 3L, 2);
 
     private long _openForwardId = 256L;
 
@@ -65,7 +65,11 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         for (var i = 0; i < 10; i++)
         {
             var id = Interlocked.Increment(ref _openForwardId);
-            var send = AllenBradleyHelper.PackRequestHeader(111, sessionHandle, GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)CommunicationHelper.Random.Next(7, 200)), ByteTransform.TransByte(id));
+            var send = AllenBradleyHelper.PackRequestHeader(
+                111,
+                sessionHandle,
+                GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)RandomExtensions.Random.Next(7, 200)),
+                ByteTransform.TransByte(id));
             var read2 = await ReadFromCoreServerAsync(NetworkPipe, send, true, false).ConfigureAwait(false);
             if (!read2.IsSuccess)
             {
@@ -97,7 +101,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
             }
             break;
         }
-        _incrementCount.ResetCurrentValue();
+        _counter.Reset();
         SessionHandle = sessionHandle;
         return OperateResult.CreateSuccessResult();
     }
@@ -134,7 +138,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
         memoryStream.WriteByte(0);
-        var currentValue = _incrementCount.GetCurrentValue();
+        var currentValue = _counter.OnNext();
         memoryStream.WriteByte(BitConverter.GetBytes(currentValue)[0]);
         memoryStream.WriteByte(BitConverter.GetBytes(currentValue)[1]);
         if (cip.Length == 1)

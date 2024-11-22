@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Exceptions;
 using ThingsEdge.Communication.Profinet.Melsec;
 using ThingsEdge.Communication.Profinet.Panasonic;
 

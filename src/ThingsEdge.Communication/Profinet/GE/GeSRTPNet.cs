@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
@@ -16,7 +17,7 @@ namespace ThingsEdge.Communication.Profinet.GE;
 
 public class GeSRTPNet : DeviceTcpNet
 {
-    private readonly SoftIncrementCount _incrementCount = new(65535L, 0L);
+    private readonly IncrementCounter _counter = new(65535L, 0L);
 
     /// <summary>
     /// 指定IP地址和端口号来实例化一个对象。
@@ -56,7 +57,7 @@ public class GeSRTPNet : DeviceTcpNet
     /// <returns>带有成功标识的byte[]数组</returns>
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        var build = GeHelper.BuildReadCommand(_incrementCount.GetCurrentValue(), address, length, isBit: false);
+        var build = GeHelper.BuildReadCommand(_counter.OnNext(), address, length, isBit: false);
         if (!build.IsSuccess)
         {
             return build;
@@ -101,7 +102,7 @@ public class GeSRTPNet : DeviceTcpNet
         {
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
-        var build = GeHelper.BuildReadCommand(_incrementCount.GetCurrentValue(), analysis.Content);
+        var build = GeHelper.BuildReadCommand(_counter.OnNext(), analysis.Content);
         if (!build.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool[]>(build);
@@ -121,7 +122,7 @@ public class GeSRTPNet : DeviceTcpNet
 
     public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var build = GeHelper.BuildWriteCommand(_incrementCount.GetCurrentValue(), address, data);
+        var build = GeHelper.BuildWriteCommand(_counter.OnNext(), address, data);
         if (!build.IsSuccess)
         {
             return build;
@@ -162,7 +163,7 @@ public class GeSRTPNet : DeviceTcpNet
     /// <returns>是否写入成功的结果对象</returns>
     public override async Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        var build = GeHelper.BuildWriteCommand(_incrementCount.GetCurrentValue(), address, values);
+        var build = GeHelper.BuildWriteCommand(_counter.OnNext(), address, values);
         if (!build.IsSuccess)
         {
             return build;
@@ -181,7 +182,7 @@ public class GeSRTPNet : DeviceTcpNet
     /// <returns>包含是否成功的时间信息</returns>
     public async Task<OperateResult<DateTime>> ReadPLCTimeAsync()
     {
-        var build = GeHelper.BuildReadCoreCommand(_incrementCount.GetCurrentValue(), 37, [0, 0, 0, 2, 0]);
+        var build = GeHelper.BuildReadCoreCommand(_counter.OnNext(), 37, [0, 0, 0, 2, 0]);
         if (!build.IsSuccess)
         {
             return OperateResult.CreateFailedResult<DateTime>(build);
@@ -205,7 +206,7 @@ public class GeSRTPNet : DeviceTcpNet
     /// <returns>包含是否成的程序名称信息</returns>
     public async Task<OperateResult<string>> ReadProgramNameAsync()
     {
-        var build = GeHelper.BuildReadCoreCommand(_incrementCount.GetCurrentValue(), 1, [0, 0, 0, 2, 0]);
+        var build = GeHelper.BuildReadCoreCommand(_counter.OnNext(), 1, [0, 0, 0, 2, 0]);
         if (!build.IsSuccess)
         {
             return OperateResult.CreateFailedResult<string>(build);

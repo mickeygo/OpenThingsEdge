@@ -42,7 +42,7 @@ public class FujiCommandSettingType : DeviceTcpNet
     /// <inheritdoc />
     protected override OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
     {
-        return UnpackResponseContentHelper(send, response);
+        return UnpackResponseContentHelper(response);
     }
 
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
@@ -67,7 +67,7 @@ public class FujiCommandSettingType : DeviceTcpNet
 
     public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
-        // TODO: FujiCommandSettingType -> ReadBoolAsync
+        // TODO: [NotImplemented] FujiCommandSettingType -> ReadBoolAsync
 
         throw new NotImplementedException();
     }
@@ -178,10 +178,9 @@ public class FujiCommandSettingType : DeviceTcpNet
     /// <summary>
     /// 根据PLC返回的数据，解析出实际的数据内容
     /// </summary>
-    /// <param name="send">发送给PLC的数据</param>
     /// <param name="response">PLC返回的数据</param>
     /// <returns>结果数据信息</returns>
-    private static OperateResult<byte[]> UnpackResponseContentHelper(byte[] send, byte[] response)
+    private static OperateResult<byte[]> UnpackResponseContentHelper(byte[] response)
     {
         try
         {

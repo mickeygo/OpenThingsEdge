@@ -38,7 +38,7 @@ public class AllenBradleyConnectedCipNet : OmronConnectedCipNet
         }
         if (read.Content.Length >= 6)
         {
-            return OperateResult.CreateSuccessResult(encoding.GetString(count: ByteTransform.TransInt32(read.Content, 2), bytes: read.Content, index: 6));
+            return OperateResult.CreateSuccessResult(encoding.GetString(bytes: read.Content, index: 6, count: ByteTransform.TransInt32(read.Content, 2)));
         }
         return OperateResult.CreateSuccessResult(encoding.GetString(read.Content));
     }
@@ -51,12 +51,12 @@ public class AllenBradleyConnectedCipNet : OmronConnectedCipNet
             value = string.Empty;
         }
         var data = encoding.GetBytes(value);
-        var write = await WriteAsync(address + ".LEN", data.Length).ConfigureAwait(false);
+        var write = await WriteAsync($"{address}.LEN", data.Length).ConfigureAwait(false);
         if (!write.IsSuccess)
         {
             return write;
         }
-        return await WriteTagAsync(address + ".DATA[0]", typeCode: 194, SoftBasic.ArrayExpandToLengthEven(data), data.Length).ConfigureAwait(false);
+        return await WriteTagAsync($"{address}.DATA[0]", typeCode: 194, CollectionUtils.ExpandToEvenLength(data), data.Length).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

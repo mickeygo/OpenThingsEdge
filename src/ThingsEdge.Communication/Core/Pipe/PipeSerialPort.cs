@@ -1,5 +1,4 @@
 using System.IO.Ports;
-using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.IMessage;
 
 namespace ThingsEdge.Communication.Core.Pipe;
@@ -7,7 +6,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 串口管道信息
 /// </summary>
-public class PipeSerialPort : PipeNetBase, IDisposable
+public class PipeSerialPort : NetworkPipeBase, IDisposable
 {
     private readonly SerialPort _serialPort;
 
@@ -35,13 +34,19 @@ public class PipeSerialPort : PipeNetBase, IDisposable
     public int AtLeastReceiveLength { get; set; } = 1;
 
     /// <summary>
-    /// 获取或设置连续接收空的数据次数，在数据接收完成时有效，每个单位消耗的时间为 DelayTime />。
+    /// 获取或设置连续接收空的数据次数，在数据接收完成时有效，每个单位消耗的时间为 DelayTime。
+    /// </summary>
     public int ReceiveEmptyDataCount { get; set; } = 1;
 
     /// <summary>
     /// 是否在发送数据前清空缓冲数据，默认是false。
     /// </summary>
     public bool IsClearCacheBeforeRead { get; set; }
+
+    /// <summary>
+    /// 获取或设置在正式接收对方返回数据前的时候，需要延迟的时间，当设置为0的时候，不需要延迟。
+    /// </summary>
+    public int DelayTime { get; set; }
 
     /// <summary>
     /// 实例化一个默认的对象。
@@ -166,25 +171,6 @@ public class PipeSerialPort : PipeNetBase, IDisposable
         return OperateResult.CreateSuccessResult();
     }
 
-    /// <inheritdoc />
-    private OperateResult<int> Receive(byte[] buffer, int offset, int length, int timeOut = 60000)
-    {
-        try
-        {
-            if (length > 0)
-            {
-                var value = _serialPort.Read(buffer, offset, length);
-                return OperateResult.CreateSuccessResult(value);
-            }
-            var value2 = _serialPort.Read(buffer, offset, buffer.Length - offset);
-            return OperateResult.CreateSuccessResult(value2);
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<int>(-IncrConnectErrorCount(), ex.Message);
-        }
-    }
-
     /// <summary>
     /// 从串口接收一串字节数据信息，直到没有数据为止，如果参数awaitData为false, 第一轮接收没有数据则返回。
     /// </summary>
@@ -282,7 +268,7 @@ public class PipeSerialPort : PipeNetBase, IDisposable
         {
             await ClearSerialCacheAsync().ConfigureAwait(false);
         }
-        var operateResult = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData, 0).ConfigureAwait(false);
+        var operateResult = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
         if (operateResult.IsSuccess)
         {
             ResetConnectErrorCount();

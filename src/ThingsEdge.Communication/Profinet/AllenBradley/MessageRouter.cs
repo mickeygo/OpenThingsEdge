@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Common;
-
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
 /// <summary>
@@ -115,7 +113,7 @@ public class MessageRouter
         var array = GetRouter();
         if (array.Length % 2 == 1)
         {
-            array = SoftBasic.SpliceArray(array, new byte[1]);
+            array = CollectionUtils.SpliceArray(array, new byte[1]);
         }
         var array2 = new byte[46 + array.Length];
         "54022006240105f70200 00800100fe8002001b05 28a7fd03020000008084 1e00f44380841e00f443 a305".ToHexBytes().CopyTo(array2, 0);

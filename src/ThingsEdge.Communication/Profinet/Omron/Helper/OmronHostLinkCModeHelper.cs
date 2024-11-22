@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Exceptions;
 
@@ -17,7 +18,7 @@ public class OmronHostLinkCModeHelper
     /// </remarks>
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice omron, byte unitNumber, string address, ushort length)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
         var command = BuildReadCommand(address, length);
         if (!command.IsSuccess)
         {
@@ -49,7 +50,7 @@ public class OmronHostLinkCModeHelper
     /// </remarks>
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice omron, byte unitNumber, string address, byte[] value)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
         var command = BuildWriteWordCommand(address, value);
         if (!command.IsSuccess)
         {
@@ -142,7 +143,7 @@ public class OmronHostLinkCModeHelper
     {
         var array = address.SplitDot();
         var num = Convert.ToInt32(array[0][start..], 16);
-        return OperateResult.CreateSuccessResult((isRead ? "RE" : "WE") + Encoding.ASCII.GetString(SoftBasic.BuildAsciiBytesFrom((byte)num)), (int)ushort.Parse(array[1]));
+        return OperateResult.CreateSuccessResult((isRead ? "RE" : "WE") + Encoding.ASCII.GetString(ByteExtensions.BuildAsciiBytesFrom((byte)num)), (int)ushort.Parse(array[1]));
     }
 
     /// <summary>
@@ -217,7 +218,7 @@ public class OmronHostLinkCModeHelper
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
 
-        var array = SoftBasic.SplitIntegerToArray(length, 30);
+        var array = CollectionUtils.SplitIntegerToArray(length, 30);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
         {
@@ -245,7 +246,7 @@ public class OmronHostLinkCModeHelper
             return OperateResult.CreateFailedResult<List<byte[]>>(operateResult);
         }
 
-        var list = SoftBasic.ArraySplitByLength(value, 60);
+        var list = CollectionUtils.SplitByLength(value, 60);
         var list2 = new List<byte[]>();
         for (var i = 0; i < list.Count; i++)
         {
@@ -309,8 +310,8 @@ public class OmronHostLinkCModeHelper
     {
         var array = new byte[7 + cmd.Length];
         array[0] = 64;
-        array[1] = SoftBasic.BuildAsciiBytesFrom(unitNumber)[0];
-        array[2] = SoftBasic.BuildAsciiBytesFrom(unitNumber)[1];
+        array[1] = ByteExtensions.BuildAsciiBytesFrom(unitNumber)[0];
+        array[2] = ByteExtensions.BuildAsciiBytesFrom(unitNumber)[1];
         array[^2] = 42;
         array[^1] = 13;
         cmd.CopyTo(array, 3);
@@ -319,8 +320,8 @@ public class OmronHostLinkCModeHelper
         {
             num ^= array[i];
         }
-        array[^4] = SoftBasic.BuildAsciiBytesFrom((byte)num)[0];
-        array[^3] = SoftBasic.BuildAsciiBytesFrom((byte)num)[1];
+        array[^4] = ByteExtensions.BuildAsciiBytesFrom((byte)num)[0];
+        array[^3] = ByteExtensions.BuildAsciiBytesFrom((byte)num)[1];
         return array;
     }
 

@@ -29,7 +29,6 @@ public class MelsecA3CNetOverTcp : DeviceTcpNet, IReadWriteA3C, IReadWriteDevice
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
-        DelayTime = 20;
     }
 
     public Task<OperateResult<string>> ReadPlcTypeAsync()

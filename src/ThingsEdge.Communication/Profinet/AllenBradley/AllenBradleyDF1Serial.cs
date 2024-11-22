@@ -11,7 +11,7 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// </summary>
 public class AllenBradleyDF1Serial : DeviceSerialPort
 {
-    private readonly SoftIncrementCount _incrementCount = new(65535L, 0L);
+    private readonly IncrementCounter _counter = new(65535L, 0L);
 
     /// <summary>
     /// 站号信息
@@ -51,10 +51,10 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <returns>是否读取成功的结果对象</returns>
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
-        var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
-        var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
-        var operateResult = BuildProtectedTypedLogicalReadWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, length);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", Station);
+        var dstNode = (byte)CommHelper.ExtractParameter(ref address, "dst", DstNode);
+        var srcNode = (byte)CommHelper.ExtractParameter(ref address, "src", SrcNode);
+        var operateResult = BuildProtectedTypedLogicalReadWithThreeAddressFields(dstNode, srcNode, (int)_counter.OnNext(), address, length);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -80,10 +80,10 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <returns>是否写入成功</returns>
     public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
-        var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
-        var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
-        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, data);
+        var station = (byte)CommHelper.ExtractParameter(ref address, "s", Station);
+        var dstNode = (byte)CommHelper.ExtractParameter(ref address, "dst", DstNode);
+        var srcNode = (byte)CommHelper.ExtractParameter(ref address, "src", SrcNode);
+        var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_counter.OnNext(), address, data);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -114,7 +114,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
             num++;
             return [(byte)num];
         }
-        var value = SoftBasic.SpliceArray([station], new byte[1] { 2 }, command, new byte[1] { 3 });
+        var value = CollectionUtils.SpliceArray([station], new byte[1] { 2 }, command, new byte[1] { 3 });
         return SoftCRC16.CRC16(value, 160, 1, 0, 0).SelectLast(2);
     }
 
@@ -203,7 +203,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
-        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray([dstNode, srcNode], operateResult.Content));
+        return OperateResult.CreateSuccessResult(CollectionUtils.SpliceArray([dstNode, srcNode], operateResult.Content));
     }
 
     public static OperateResult<byte[]> BuildProtectedTypedLogicalWriteWithThreeAddressFields(int tns, string address, byte[] data)
@@ -247,7 +247,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
         {
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
-        return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray([dstNode, srcNode], operateResult.Content));
+        return OperateResult.CreateSuccessResult(CollectionUtils.SpliceArray([dstNode, srcNode], operateResult.Content));
     }
 
     /// <summary>

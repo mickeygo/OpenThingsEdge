@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Exceptions;
 
@@ -335,14 +336,14 @@ public static class McBinaryHelper
             for (var i = 0; i < num; i++)
             {
                 int num3 = BitConverter.ToUInt16(content, num2 + 2);
-                list.AddRange(SoftBasic.ArraySelectMiddle(content, num2 + 4, num3));
+                list.AddRange(content.SelectMiddle(num2 + 4, num3));
                 num2 += 4 + num3;
             }
             return OperateResult.CreateSuccessResult(list.ToArray());
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>(ex.Message + " Source:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>(ex.Message + " Source:" + content.ToHexString(' '));
         }
     }
 

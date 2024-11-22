@@ -21,10 +21,10 @@ public interface IReadWriteCip : IReadWriteNet
     /// </remarks>
     /// <param name="address">节点的名称</param>
     /// <param name="typeCode">类型代码</param>
-    /// <param name="value">实际的数据值</param>
+    /// <param name="data">实际的数据值</param>
     /// <param name="length">如果节点是数组，就是数组长度</param>
     /// <returns>是否写入成功</returns>
-    Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1);
+    Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] data, int length = 1);
 
     Task<OperateResult<DateTime>> ReadDateAsync(string address);
 

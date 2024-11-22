@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Exceptions;
-
 namespace ThingsEdge.Communication.Core.Address;
 
 /// <summary>

@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Core;
 
@@ -72,21 +71,6 @@ public static class NetSupport
             }
         }
         return OperateResult.CreateSuccessResult(array.ToArray());
-    }
-
-    /// <summary>
-    /// 安全关闭指定的socket套接字对象
-    /// </summary>
-    /// <param name="socket">套接字对象</param>
-    public static void SafeCloseSocket(Socket? socket)
-    {
-        try
-        {
-            socket?.Close();
-        }
-        catch
-        {
-        }
     }
 
     /// <summary>

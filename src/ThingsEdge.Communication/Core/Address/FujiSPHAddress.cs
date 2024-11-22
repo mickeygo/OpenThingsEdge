@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Core.Address;
 
@@ -54,7 +53,7 @@ public class FujiSPHAddress : DeviceAddressDataBase
                         fujiSPHAddress.AddressStart = Convert.ToInt32(array2[1]);
                         if (array2.Length > 2)
                         {
-                            fujiSPHAddress.BitIndex = CommunicationHelper.CalculateBitStartIndex(array2[2]);
+                            fujiSPHAddress.BitIndex = CommHelper.CalculateBitStartIndex(array2[2]);
                         }
                         break;
                     }
@@ -65,7 +64,7 @@ public class FujiSPHAddress : DeviceAddressDataBase
                         fujiSPHAddress.AddressStart = Convert.ToInt32(array[0][1..]);
                         if (array.Length > 1)
                         {
-                            fujiSPHAddress.BitIndex = CommunicationHelper.CalculateBitStartIndex(array[1]);
+                            fujiSPHAddress.BitIndex = CommHelper.CalculateBitStartIndex(array[1]);
                         }
                         break;
                     }

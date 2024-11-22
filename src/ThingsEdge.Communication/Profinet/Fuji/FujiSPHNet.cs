@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
@@ -289,7 +290,7 @@ public class FujiSPHNet : DeviceTcpNet
     private static OperateResult<List<byte[]>> BuildReadCommand(byte connectionId, FujiSPHAddress address, ushort length)
     {
         var list = new List<byte[]>();
-        var array = SoftBasic.SplitIntegerToArray(length, 230);
+        var array = CollectionUtils.SplitIntegerToArray(length, 230);
         for (var i = 0; i < array.Length; i++)
         {
             list.Add(PackCommand(connectionId, 0, 0,

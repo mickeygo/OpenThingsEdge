@@ -1,4 +1,3 @@
-using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.Net;
 
 namespace ThingsEdge.Communication.Core.Device;
@@ -12,7 +11,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     private bool _disposedValue;
 
     /// <summary>
-    /// 一个字单位（word，16位）的数据表示的地址长度，西门子为2，三菱，欧姆龙，modbusTcp 为1，AB PLC无效。
+    /// 一个字单位（word，16位）的数据表示的地址长度，西门子为 2，三菱，欧姆龙，modbusTcp 为1，AB PLC 无效。
     /// </summary>
     /// <remarks>
     /// 对设备来说，一个地址的数据对应的字节数，或是1个字节或是2个字节，4个字节，通常是这四个选择，当设置为0时，则表示4字节的地址长度信息。
@@ -312,7 +311,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         var temp = ByteTransform.TransByte(value, encoding);
         if (WordLength == 1)
         {
-            temp = SoftBasic.ArrayExpandToLengthEven(temp);
+            temp = CollectionUtils.ExpandToEvenLength(temp);
         }
         return WriteAsync(address, temp);
     }
@@ -329,9 +328,9 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         var temp = ByteTransform.TransByte(value, encoding);
         if (WordLength == 1)
         {
-            temp = SoftBasic.ArrayExpandToLengthEven(temp);
+            temp = CollectionUtils.ExpandToEvenLength(temp);
         }
-        temp = SoftBasic.ArrayExpandToLength(temp, length);
+        temp = CollectionUtils.ExpandToLength(temp, length);
         return WriteAsync(address, temp);
     }
 

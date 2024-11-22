@@ -1,4 +1,4 @@
-using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 
 namespace ThingsEdge.Communication.Profinet.Omron;
 

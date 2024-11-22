@@ -238,7 +238,7 @@ public static class MelsecHelper
         var array = new byte[value.Length * 2];
         for (var i = 0; i < value.Length / 2; i++)
         {
-            SoftBasic.BuildAsciiBytesFrom(BitConverter.ToUInt16(value, i * 2)).CopyTo(array, 4 * i);
+            ByteExtensions.BuildAsciiBytesFrom(BitConverter.ToUInt16(value, i * 2)).CopyTo(array, 4 * i);
         }
         return array;
     }
@@ -268,7 +268,7 @@ public static class MelsecHelper
         {
             num += data[i];
         }
-        return SoftBasic.BuildAsciiBytesFrom((byte)num);
+        return ByteExtensions.BuildAsciiBytesFrom((byte)num);
     }
 
     /// <summary>

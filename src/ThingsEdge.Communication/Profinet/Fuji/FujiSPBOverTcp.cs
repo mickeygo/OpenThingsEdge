@@ -23,7 +23,6 @@ public class FujiSPBOverTcp : DeviceTcpNet
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
-        DelayTime = 20;
     }
 
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)

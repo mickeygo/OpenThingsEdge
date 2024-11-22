@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Exceptions;
 
@@ -201,22 +202,22 @@ public static class MelsecFxSerialHelper
         }
         if (ack[0] == 21)
         {
-            return new OperateResult(StringResources.Language.MelsecFxAckNagative + " Actual: " + SoftBasic.ByteToHexString(ack, ' '));
+            return new OperateResult(StringResources.Language.MelsecFxAckNagative + " Actual: " + ack.ToHexString(' '));
         }
         if (ack[0] != 2)
         {
-            return new OperateResult(StringResources.Language.MelsecFxAckWrong + ack[0] + " Actual: " + SoftBasic.ByteToHexString(ack, ' '));
+            return new OperateResult(StringResources.Language.MelsecFxAckWrong + ack[0] + " Actual: " + ack.ToHexString(' '));
         }
         try
         {
             if (!MelsecHelper.CheckCRC(ack))
             {
-                return new OperateResult(StringResources.Language.MelsecFxCrcCheckFailed + " Actual: " + SoftBasic.ByteToHexString(ack, ' '));
+                return new OperateResult(StringResources.Language.MelsecFxCrcCheckFailed + " Actual: " + ack.ToHexString(' '));
             }
         }
         catch (Exception ex)
         {
-            return new OperateResult(StringResources.Language.MelsecFxCrcCheckFailed + ex.Message + Environment.NewLine + "Actual: " + SoftBasic.ByteToHexString(ack, ' '));
+            return new OperateResult(StringResources.Language.MelsecFxCrcCheckFailed + ex.Message + Environment.NewLine + "Actual: " + ack.ToHexString(' '));
         }
         return OperateResult.CreateSuccessResult();
     }
@@ -234,11 +235,11 @@ public static class MelsecFxSerialHelper
         }
         if (ack[0] == 21)
         {
-            return new OperateResult(StringResources.Language.MelsecFxAckNagative + " Actual: " + SoftBasic.ByteToHexString(ack, ' '));
+            return new OperateResult(StringResources.Language.MelsecFxAckNagative + " Actual: " + ack.ToHexString(' '));
         }
         if (ack[0] != 6)
         {
-            return new OperateResult(StringResources.Language.MelsecFxAckWrong + ack[0] + " Actual: " + SoftBasic.ByteToHexString(ack, ' '));
+            return new OperateResult(StringResources.Language.MelsecFxAckWrong + ack[0] + " Actual: " + ack.ToHexString(' '));
         }
         return OperateResult.CreateSuccessResult();
     }
@@ -305,10 +306,10 @@ public static class MelsecFxSerialHelper
         {
             2,
             (byte)(value ? 55 : 56),
-            SoftBasic.BuildAsciiBytesFrom(content)[2],
-            SoftBasic.BuildAsciiBytesFrom(content)[3],
-            SoftBasic.BuildAsciiBytesFrom(content)[0],
-            SoftBasic.BuildAsciiBytesFrom(content)[1],
+            ByteExtensions.BuildAsciiBytesFrom(content)[2],
+            ByteExtensions.BuildAsciiBytesFrom(content)[3],
+            ByteExtensions.BuildAsciiBytesFrom(content)[0],
+            ByteExtensions.BuildAsciiBytesFrom(content)[1],
             3,
             0,
             0
@@ -333,7 +334,7 @@ public static class MelsecFxSerialHelper
         }
         length *= 2;
         var num = operateResult.Content;
-        var array = SoftBasic.SplitIntegerToArray(length, 254);
+        var array = CollectionUtils.SplitIntegerToArray(length, 254);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
         {
@@ -345,12 +346,12 @@ public static class MelsecFxSerialHelper
                     69,
                     48,
                     48,
-                    SoftBasic.BuildAsciiBytesFrom(num)[0],
-                    SoftBasic.BuildAsciiBytesFrom(num)[1],
-                    SoftBasic.BuildAsciiBytesFrom(num)[2],
-                    SoftBasic.BuildAsciiBytesFrom(num)[3],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[0],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[0],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[2],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[3],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[0],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[1],
                     3,
                     0,
                     0
@@ -365,12 +366,12 @@ public static class MelsecFxSerialHelper
                 {
                     2,
                     48,
-                    SoftBasic.BuildAsciiBytesFrom(num)[0],
-                    SoftBasic.BuildAsciiBytesFrom(num)[1],
-                    SoftBasic.BuildAsciiBytesFrom(num)[2],
-                    SoftBasic.BuildAsciiBytesFrom(num)[3],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[0],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[0],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[2],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[3],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[0],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[1],
                     3,
                     0,
                     0
@@ -397,9 +398,9 @@ public static class MelsecFxSerialHelper
         {
             return OperateResult.CreateFailedResult<List<byte[]>, int>(operateResult);
         }
-        var integer = (ushort)CommunicationHelper.CalculateOccupyLength(operateResult.Content2, length);
+        var integer = (ushort)CommHelper.CalculateOccupyLength(operateResult.Content2, length);
         var num = operateResult.Content1;
-        var array = SoftBasic.SplitIntegerToArray(integer, 254);
+        var array = CollectionUtils.SplitIntegerToArray(integer, 254);
         var list = new List<byte[]>();
         for (var i = 0; i < array.Length; i++)
         {
@@ -411,12 +412,12 @@ public static class MelsecFxSerialHelper
                     69,
                     48,
                     48,
-                    SoftBasic.BuildAsciiBytesFrom(num)[0],
-                    SoftBasic.BuildAsciiBytesFrom(num)[1],
-                    SoftBasic.BuildAsciiBytesFrom(num)[2],
-                    SoftBasic.BuildAsciiBytesFrom(num)[3],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[0],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[0],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[2],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[3],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[0],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[1],
                     3,
                     0,
                     0
@@ -430,12 +431,12 @@ public static class MelsecFxSerialHelper
                 {
                     2,
                     48,
-                    SoftBasic.BuildAsciiBytesFrom(num)[0],
-                    SoftBasic.BuildAsciiBytesFrom(num)[1],
-                    SoftBasic.BuildAsciiBytesFrom(num)[2],
-                    SoftBasic.BuildAsciiBytesFrom(num)[3],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[0],
-                    SoftBasic.BuildAsciiBytesFrom((byte)array[i])[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[0],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[1],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[2],
+                    ByteExtensions.BuildAsciiBytesFrom(num)[3],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[0],
+                    ByteExtensions.BuildAsciiBytesFrom((byte)array[i])[1],
                     3,
                     0,
                     0
@@ -463,7 +464,7 @@ public static class MelsecFxSerialHelper
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
 
-        value = SoftBasic.BuildAsciiBytesFrom(value);
+        value = ByteExtensions.BuildAsciiBytesFrom(value);
         var content = operateResult.Content;
         if (isNewVersion)
         {
@@ -472,12 +473,12 @@ public static class MelsecFxSerialHelper
             array[1] = 69;
             array[2] = 49;
             array[3] = 48;
-            array[4] = SoftBasic.BuildAsciiBytesFrom(content)[0];
-            array[5] = SoftBasic.BuildAsciiBytesFrom(content)[1];
-            array[6] = SoftBasic.BuildAsciiBytesFrom(content)[2];
-            array[7] = SoftBasic.BuildAsciiBytesFrom(content)[3];
-            array[8] = SoftBasic.BuildAsciiBytesFrom((byte)(value.Length / 2))[0];
-            array[9] = SoftBasic.BuildAsciiBytesFrom((byte)(value.Length / 2))[1];
+            array[4] = ByteExtensions.BuildAsciiBytesFrom(content)[0];
+            array[5] = ByteExtensions.BuildAsciiBytesFrom(content)[1];
+            array[6] = ByteExtensions.BuildAsciiBytesFrom(content)[2];
+            array[7] = ByteExtensions.BuildAsciiBytesFrom(content)[3];
+            array[8] = ByteExtensions.BuildAsciiBytesFrom((byte)(value.Length / 2))[0];
+            array[9] = ByteExtensions.BuildAsciiBytesFrom((byte)(value.Length / 2))[1];
             Array.Copy(value, 0, array, 10, value.Length);
             array[^3] = 3;
             MelsecHelper.FxCalculateCRC(array).CopyTo(array, array.Length - 2);
@@ -486,12 +487,12 @@ public static class MelsecFxSerialHelper
         var array2 = new byte[11 + value.Length];
         array2[0] = 2;
         array2[1] = 49;
-        array2[2] = SoftBasic.BuildAsciiBytesFrom(content)[0];
-        array2[3] = SoftBasic.BuildAsciiBytesFrom(content)[1];
-        array2[4] = SoftBasic.BuildAsciiBytesFrom(content)[2];
-        array2[5] = SoftBasic.BuildAsciiBytesFrom(content)[3];
-        array2[6] = SoftBasic.BuildAsciiBytesFrom((byte)(value.Length / 2))[0];
-        array2[7] = SoftBasic.BuildAsciiBytesFrom((byte)(value.Length / 2))[1];
+        array2[2] = ByteExtensions.BuildAsciiBytesFrom(content)[0];
+        array2[3] = ByteExtensions.BuildAsciiBytesFrom(content)[1];
+        array2[4] = ByteExtensions.BuildAsciiBytesFrom(content)[2];
+        array2[5] = ByteExtensions.BuildAsciiBytesFrom(content)[3];
+        array2[6] = ByteExtensions.BuildAsciiBytesFrom((byte)(value.Length / 2))[0];
+        array2[7] = ByteExtensions.BuildAsciiBytesFrom((byte)(value.Length / 2))[1];
         Array.Copy(value, 0, array2, 8, value.Length);
         array2[^3] = 3;
         MelsecHelper.FxCalculateCRC(array2).CopyTo(array2, array2.Length - 2);
@@ -521,7 +522,7 @@ public static class MelsecFxSerialHelper
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + SoftBasic.ByteToHexString(response));
+            return new OperateResult<byte[]>("Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + response.ToHexString());
         }
     }
 
@@ -542,7 +543,7 @@ public static class MelsecFxSerialHelper
         try
         {
             var array = new bool[length];
-            var array2 = SoftBasic.ByteToBoolArray(operateResult.Content, operateResult.Content.Length * 8);
+            var array2 = operateResult.Content.ToBoolArray(operateResult.Content.Length * 8);
             for (var i = 0; i < length; i++)
             {
                 array[i] = array2[i + start];
@@ -551,7 +552,7 @@ public static class MelsecFxSerialHelper
         }
         catch (Exception ex)
         {
-            return new OperateResult<bool[]>("Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + SoftBasic.ByteToHexString(response));
+            return new OperateResult<bool[]>("Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + response.ToHexString());
         }
     }
 

@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Exceptions;
 
@@ -28,7 +29,7 @@ public static class PanasonicHelper
         }
         var num = Convert.ToInt32(address[..address.IndexOf('.')]) * fromBase;
         var bit = address[(address.IndexOf('.') + 1)..];
-        return num + CommunicationHelper.CalculateBitStartIndex(bit);
+        return num + CommHelper.CalculateBitStartIndex(bit);
     }
 
     /// <summary>
@@ -208,7 +209,7 @@ public static class PanasonicHelper
     public static OperateResult<List<byte[]>> BuildReadCoils(byte station, string[] address)
     {
         var list = new List<byte[]>();
-        var list2 = SoftBasic.ArraySplitByLength(address, 8);
+        var list2 = CollectionUtils.SplitByLength(address, 8);
         for (var i = 0; i < list2.Count; i++)
         {
             var stringBuilder = new StringBuilder("#RCP");
@@ -268,8 +269,8 @@ public static class PanasonicHelper
         }
 
         var list = new List<byte[]>();
-        var list2 = SoftBasic.ArraySplitByLength(address, 8);
-        var list3 = SoftBasic.ArraySplitByLength(value, 8);
+        var list2 = CollectionUtils.SplitByLength(address, 8);
+        var list3 = CollectionUtils.SplitByLength(value, 8);
         for (var i = 0; i < list2.Count; i++)
         {
             var stringBuilder = new StringBuilder("#WCP");
@@ -313,7 +314,7 @@ public static class PanasonicHelper
         {
             length += (ushort)(operateResult.Content2 % 16);
             operateResult.Content2 -= operateResult.Content2 % 16;
-            var array = SoftBasic.SplitIntegerToArray(length, 400);
+            var array = CollectionUtils.SplitIntegerToArray(length, 400);
             foreach (var num in array)
             {
                 var stringBuilder = new StringBuilder("#");
@@ -334,7 +335,7 @@ public static class PanasonicHelper
             return OperateResult.CreateSuccessResult(list);
         }
 
-        var array2 = SoftBasic.SplitIntegerToArray(length, 500);
+        var array2 = CollectionUtils.SplitIntegerToArray(length, 500);
         foreach (var num4 in array2)
         {
             var stringBuilder2 = new StringBuilder("#");
@@ -406,7 +407,7 @@ public static class PanasonicHelper
             return OperateResult.CreateFailedResult<byte[]>(operateResult);
         }
 
-        values = SoftBasic.ArrayExpandToLengthEven(values);
+        values = CollectionUtils.ExpandToEvenLength(values);
         var num = (short)(values.Length / 2);
         var stringBuilder = new StringBuilder("#");
         if (operateResult.Content1 is "X" or "Y" or "R" or "L")
@@ -445,7 +446,7 @@ public static class PanasonicHelper
             stringBuilder.Append(operateResult.Content2.ToString("D4"));
             stringBuilder.Append((operateResult.Content2 + num - 1).ToString("D4"));
         }
-        stringBuilder.Append(SoftBasic.ByteToHexString(values));
+        stringBuilder.Append(values.ToHexString());
         return OperateResult.CreateSuccessResult(PackPanasonicCommand(station, stringBuilder.ToString(), stringBuilder.Length > 112));
     }
 
@@ -484,7 +485,7 @@ public static class PanasonicHelper
                     Array.Copy(response, 6, array, 0, array.Length);
                     if (parseData)
                     {
-                        array = SoftBasic.HexStringToBytes(Encoding.ASCII.GetString(array));
+                        array = Encoding.ASCII.GetString(array).ToHexBytes();
                     }
                 }
                 return OperateResult.CreateSuccessResult(array);
@@ -494,11 +495,11 @@ public static class PanasonicHelper
                 var err = int.Parse(Encoding.ASCII.GetString(response, 4, 2));
                 return new OperateResult<byte[]>(err, GetErrorDescription(err));
             }
-            return new OperateResult<byte[]>(StringResources.Language.UnknownError + " Source Data: " + SoftBasic.GetAsciiStringRender(response));
+            return new OperateResult<byte[]>(StringResources.Language.UnknownError + " Source Data: " + response.ToAsciiString());
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("ExtraActualData failed: " + ex.Message + Environment.NewLine + "Source: " + SoftBasic.GetAsciiStringRender(response));
+            return new OperateResult<byte[]>("ExtraActualData failed: " + ex.Message + Environment.NewLine + "Source: " + response.ToAsciiString());
         }
     }
 
@@ -511,7 +512,7 @@ public static class PanasonicHelper
     {
         if (response.Length < 9)
         {
-            return new OperateResult<bool[]>(StringResources.Language.PanasonicReceiveLengthMustLargerThan9 + " Source: " + SoftBasic.GetAsciiStringRender(response));
+            return new OperateResult<bool[]>(StringResources.Language.PanasonicReceiveLengthMustLargerThan9 + " Source: " + response.ToAsciiString());
         }
         if (response[3] == 36)
         {
@@ -523,7 +524,7 @@ public static class PanasonicHelper
             var err = int.Parse(Encoding.ASCII.GetString(response, 4, 2));
             return new OperateResult<bool[]>(err, GetErrorDescription(err));
         }
-        return new OperateResult<bool[]>(StringResources.Language.UnknownError + " Source: " + SoftBasic.GetAsciiStringRender(response));
+        return new OperateResult<bool[]>(StringResources.Language.UnknownError + " Source: " + response.ToAsciiString());
     }
 
     /// <summary>
@@ -602,6 +603,6 @@ public static class PanasonicHelper
         {
             b ^= (byte)sb[i];
         }
-        return SoftBasic.ByteToHexString([b]);
+        return ByteExtensions.ToHexString([b]);
     }
 }

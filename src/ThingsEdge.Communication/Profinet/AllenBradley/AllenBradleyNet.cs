@@ -22,7 +22,7 @@ namespace ThingsEdge.Communication.Profinet.AllenBradley;
 /// <para>
 /// 地址可以携带站号信息，只要在前面加上slot=2;即可，这就是访问站号2的数据了，
 /// 例如 slot=2;AAA，如果使用了自定义的消息路由，例如：[IP or Hostname],1,[Optional Routing Path],CPU Slot 172.20.1.109,1,[15,2,18,1],12。
-/// 在实例化之后，连接PLC之前，需要调用如下代码 plc.MessageRouter = new MessageRouter( "1.15.2.18.1.12" )
+/// 在实例化之后，连接PLC之前，需要调用如下代码 plc.MessageRouter = new MessageRouter( "1.15.2.18.1.12" )。
 /// </para>
 /// </remarks>
 public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
@@ -43,8 +43,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     public byte[]? PortSlot { get; set; }
 
     /// <summary>
-    /// 获取或设置整个交互指令的控制码，默认为0x6F，通常不需要修改<br />
-    /// Gets or sets the control code of the entire interactive instruction. The default is 0x6F, and usually does not need to be modified.
+    /// 获取或设置整个交互指令的控制码，默认为0x6F，通常不需要修改。
     /// </summary>
     public ushort CipCommand { get; set; } = 111;
 
@@ -88,6 +87,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return check;
         }
+
         if (read.Content.Length >= 8)
         {
             SessionHandle = BitConverter.ToUInt32(read.Content, 4);
@@ -139,7 +139,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
             var list = new List<byte[]>();
             for (var i = 0; i < address.Length; i++)
             {
-                b = (byte)CommunicationHelper.ExtractParameter(ref address[i], "slot", Slot);
+                b = (byte)CommHelper.ExtractParameter(ref address[i], "slot", Slot);
                 list.Add(AllenBradleyHelper.PackRequsetRead(address[i], length[i]));
             }
             var value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, b], [.. list]));
@@ -182,12 +182,12 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     {
         try
         {
-            var b = (byte)CommunicationHelper.ExtractParameter(ref address, "slot", Slot);
-            var num = CommunicationHelper.ExtractParameter(ref address, "x", -1);
+            var b = (byte)CommHelper.ExtractParameter(ref address, "slot", Slot);
+            var num = CommHelper.ExtractParameter(ref address, "x", -1);
             if (num == 83 || num == 82)
             {
                 var num2 = 0;
-                var list = SoftBasic.ArraySplitByLength(data, 474);
+                var list = CollectionUtils.SplitByLength(data, 474);
                 for (var i = 0; i < list.Count; i++)
                 {
                     var array = AllenBradleyHelper.PackRequestWriteSegment(address, typeCode, list[i], num2, length);
@@ -217,7 +217,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     {
         try
         {
-            var b = (byte)CommunicationHelper.ExtractParameter(ref address, "slot", Slot);
+            var b = (byte)CommHelper.ExtractParameter(ref address, "slot", Slot);
             var array = AllenBradleyHelper.PackRequestWrite(address, data);
             var value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, b], array));
             return OperateResult.CreateSuccessResult(value);
@@ -249,8 +249,8 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <returns>Result data with result object </returns>
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        CommunicationHelper.ExtractParameter(ref address, "type", 0);
-        var x = CommunicationHelper.ExtractParameter(ref address, "x", -1);
+        CommHelper.ExtractParameter(ref address, "type", 0);
+        var x = CommHelper.ExtractParameter(ref address, "x", -1);
         if (x == 82 || x == 83)
         {
             return await ReadSegmentAsync(address, 0, length).ConfigureAwait(false);
@@ -426,7 +426,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
             address = address.Substring(2);
             address = AllenBradleyHelper.AnalysisArrayIndex(address, out var bitIndex);
             var uintIndex = bitIndex / 32 == 0 ? "" : $"[{bitIndex / 32}]";
-            read = await ReadAsync(length: (ushort)CommunicationHelper.CalculateOccupyLength(bitIndex, length, 32), address: address + uintIndex).ConfigureAwait(false);
+            read = await ReadAsync(length: (ushort)CommHelper.CalculateOccupyLength(bitIndex, length, 32), address: address + uintIndex).ConfigureAwait(false);
             if (!read.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<bool[]>(read);
@@ -438,7 +438,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return OperateResult.CreateFailedResult<bool[]>(read);
         }
-        return OperateResult.CreateSuccessResult(SoftBasic.ByteToBoolArray(read.Content, length));
+        return OperateResult.CreateSuccessResult(read.Content.ToBoolArray(length));
     }
 
     /// <summary>
@@ -576,37 +576,49 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <inheritdoc />
     public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransInt32(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransInt32(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransUInt32(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransUInt32(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransSingle(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransSingle(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransInt64(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransInt64(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransUInt64(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransUInt64(m, 0, length));
     }
 
     /// <inheritdoc />
     public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
     {
-        return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (m) => ByteTransform.TransDouble(m, 0, length));
+        return ByteTransformHelper.GetResultFromBytes(
+            await ReadAsync(address, length).ConfigureAwait(false),
+            (m) => ByteTransform.TransDouble(m, 0, length));
     }
 
     /// <inheritdoc />
@@ -629,7 +641,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <inheritdoc />
     public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
     {
-        CommunicationHelper.ExtractParameter(ref address, "type", 0);
+        CommHelper.ExtractParameter(ref address, "type", 0);
         return AllenBradleyHelper.ExtractActualString(await ReadWithTypeAsync([address], [length]).ConfigureAwait(false), ByteTransform, encoding);
     }
 
@@ -642,21 +654,22 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// 当前写入字节数组使用数据类型 0xD1 写入，如果其他的字节类型需要调用 <see cref="WriteTagAsync" /> 方法来实现。
     /// </summary>
     /// <param name="address">地址</param>
-    /// <param name="value">值</param>
+    /// <param name="data">值</param>
     /// <returns>写入结果值</returns>
-    public override async Task<OperateResult> WriteAsync(string address, byte[] value)
+    public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return await WriteTagAsync(address, 209, value, !CommunicationHelper.IsAddressEndWithIndex(address) ? 1 : value.Length).ConfigureAwait(false);
+        return await WriteTagAsync(address, 209, data, StringExtensions.IsAddressEndWithIndex(address) ? data.Length : 1).ConfigureAwait(false);
     }
 
-    public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)
+    public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] data, int length = 1)
     {
-        typeCode = (ushort)CommunicationHelper.ExtractParameter(ref address, "type", typeCode);
-        var command = BuildWriteCommand(address, typeCode, value, length);
+        typeCode = (ushort)CommHelper.ExtractParameter(ref address, "type", typeCode);
+        var command = BuildWriteCommand(address, typeCode, data, length);
         if (!command.IsSuccess)
         {
             return command;
         }
+
         for (var i = 0; i < command.Content.Count; i++)
         {
             var read = await ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
@@ -724,12 +737,12 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             value = string.Empty;
         }
-        var typeCode = (ushort)CommunicationHelper.ExtractParameter(ref address, "type", 194);
+        var typeCode = (ushort)CommHelper.ExtractParameter(ref address, "type", 194);
         byte[] data;
         if (typeCode == 218)
         {
             data = encoding.GetBytes(value);
-            return await WriteTagAsync(address, typeCode, SoftBasic.SpliceArray([(byte)data.Length], data)).ConfigureAwait(false);
+            return await WriteTagAsync(address, typeCode, CollectionUtils.SpliceArray([(byte)data.Length], data)).ConfigureAwait(false);
         }
         data = encoding.GetBytes(value);
         var write = await WriteAsync(address + ".LEN", data.Length).ConfigureAwait(false);
@@ -737,7 +750,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return write;
         }
-        return await WriteTagAsync(address + ".DATA[0]", typeCode, SoftBasic.ArrayExpandToLengthEven(data), data.Length).ConfigureAwait(false);
+        return await WriteTagAsync(address + ".DATA[0]", typeCode, CollectionUtils.ExpandToEvenLength(data), data.Length).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -774,7 +787,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     {
         return await WriteTagAsync(address, 193,
             values.Select((m) => (byte)(m ? 1 : 0)).ToArray(),
-            !CommunicationHelper.IsAddressEndWithIndex(address) ? 1 : values.Length
+            StringExtensions.IsAddressEndWithIndex(address) ? values.Length : 1
             ).ConfigureAwait(false);
     }
 

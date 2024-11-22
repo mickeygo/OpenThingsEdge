@@ -2,7 +2,6 @@ using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Common.Serial;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
-using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.ModBus;
 
@@ -94,9 +93,7 @@ public class ModbusInfo
     }
 
     /// <summary>
-    /// 构建Modbus读取数据的核心报文，需要指定地址，长度，站号，是否起始地址0，默认的功能码应该根据bool或是字来区分<br />
-    /// To construct the core message of Modbus reading data, you need to specify the address, length, station number, 
-    /// whether the starting address is 0, and the default function code should be distinguished according to bool or word
+    /// 构建Modbus读取数据的核心报文，需要指定地址，长度，站号，是否起始地址0，默认的功能码应该根据bool或是字来区分。
     /// </summary>
     /// <param name="address">Modbus的富文本地址</param>
     /// <param name="length">读取的数据长度</param>
@@ -119,7 +116,7 @@ public class ModbusInfo
     }
 
     /// <summary>
-    /// 构建一个同时读写的命令报文，指定读取地址，读取长度，写入地址，写入的字节数据信息，然后整个命令返回读取成功的字节数据信息
+    /// 构建一个同时读写的命令报文，指定读取地址，读取长度，写入地址，写入的字节数据信息，然后整个命令返回读取成功的字节数据信息。
     /// </summary>
     /// <param name="readAddress">读取的地址信息</param>
     /// <param name="length">读取的地址长度</param>
@@ -159,9 +156,7 @@ public class ModbusInfo
     }
 
     /// <summary>
-    /// 构建Modbus读取数据的核心报文，需要指定地址，长度，站号，是否起始地址0，默认的功能码应该根据bool或是字来区分<br />
-    /// To construct the core message of Modbus reading data, you need to specify the address, length, station number, 
-    /// whether the starting address is 0, and the default function code should be distinguished according to bool or word
+    /// 构建Modbus读取数据的核心报文，需要指定地址，长度，站号，是否起始地址0，默认的功能码应该根据bool或是字来区分。
     /// </summary>
     /// <param name="mAddress">Modbus的富文本地址</param>
     /// <param name="length">读取的数据长度</param>
@@ -171,17 +166,17 @@ public class ModbusInfo
         var list = new List<byte[]>();
         if (mAddress.Function == 1 || mAddress.Function == 2 || mAddress.Function == 3 || mAddress.Function == 4)
         {
-            var operateResult = CommunicationHelper.SplitReadLength(mAddress.AddressStart, length, mAddress.Function == 1 || mAddress.Function == 2 ? 2000 : 120);
-            for (var i = 0; i < operateResult.Content1.Length; i++)
+            var (arr1, arr2) = CollectionUtils.SplitReadLength(mAddress.AddressStart, length, mAddress.Function == 1 || mAddress.Function == 2 ? 2000 : 120);
+            for (var i = 0; i < arr1.Length; i++)
             {
                 list.Add(
                 [
                     (byte)mAddress.Station,
                     (byte)mAddress.Function,
-                    BitConverter.GetBytes(operateResult.Content1[i])[1],
-                    BitConverter.GetBytes(operateResult.Content1[i])[0],
-                    BitConverter.GetBytes(operateResult.Content2[i])[1],
-                    BitConverter.GetBytes(operateResult.Content2[i])[0]
+                    BitConverter.GetBytes(arr1[i])[1],
+                    BitConverter.GetBytes(arr1[i])[0],
+                    BitConverter.GetBytes(arr2[i])[1],
+                    BitConverter.GetBytes(arr2[i])[0]
                 ]);
             }
         }
@@ -280,7 +275,7 @@ public class ModbusInfo
     {
         try
         {
-            var array = SoftBasic.BoolArrayToByte(values);
+            var array = values.ToByteArray();
             var array2 = new byte[7 + array.Length];
             array2[0] = (byte)mAddress.Station;
             if (mAddress.WriteFunction < 0)
@@ -598,7 +593,7 @@ public class ModbusInfo
             }
             if (response.Length > 3)
             {
-                return OperateResult.CreateSuccessResult(SoftBasic.ArrayRemoveBegin(response, 3));
+                return OperateResult.CreateSuccessResult(response.RemoveBegin(3));
             }
             return OperateResult.CreateSuccessResult(Array.Empty<byte>());
         }
@@ -642,7 +637,7 @@ public class ModbusInfo
     /// <returns>modbus数据报文</returns>
     public static byte[] ExplodeRtuCommandToCore(byte[] modbusRtu)
     {
-        return modbusRtu.RemoveLast(2);
+        return modbusRtu.RemoveEnd(2);
     }
 
     /// <summary>
@@ -663,8 +658,8 @@ public class ModbusInfo
     public static byte[] TransModbusCoreToAsciiPackCommand(byte[] modbus)
     {
         var inBytes = SoftLRC.LRC(modbus);
-        var array = SoftBasic.BytesToAsciiBytes(inBytes);
-        return SoftBasic.SpliceArray(":"u8.ToArray(), array, "\r\n"u8.ToArray());
+        var array = inBytes.ToAsciiBytes();
+        return CollectionUtils.SpliceArray(":"u8.ToArray(), array, "\r\n"u8.ToArray());
     }
 
     /// <summary>
@@ -683,7 +678,7 @@ public class ModbusInfo
                     Message = StringResources.Language.ModbusAsciiFormatCheckFailed + modbusAscii.ToHexString(' ')
                 };
             }
-            var array = SoftBasic.AsciiBytesToBytes(modbusAscii.RemoveDouble(1, 2));
+            var array = modbusAscii.RemoveBoth(1, 2).ToAsciiBytes();
             if (!SoftLRC.CheckLRC(array))
             {
                 return new OperateResult<byte[]>
@@ -691,45 +686,13 @@ public class ModbusInfo
                     Message = StringResources.Language.ModbusLRCCheckFailed + array.ToHexString(' ')
                 };
             }
-            return OperateResult.CreateSuccessResult(array.RemoveLast(1));
+            return OperateResult.CreateSuccessResult(array.RemoveEnd(1));
         }
         catch (Exception ex)
         {
             return new OperateResult<byte[]>
             {
                 Message = ex.Message + modbusAscii.ToHexString(' ')
-            };
-        }
-    }
-
-    /// <summary>
-    /// 分析Modbus协议的地址信息，该地址适应于tcp及rtu模式。
-    /// </summary>
-    /// <param name="address">带格式的地址，比如"100"，"x=4;100"，"s=1;100","s=1;x=4;100"</param>
-    /// <param name="defaultStation">默认的站号信息</param>
-    /// <param name="isStartWithZero">起始地址是否从0开始</param>
-    /// <param name="defaultFunction">默认的功能码信息</param>
-    /// <returns>转换后的地址信息</returns>
-    public static OperateResult<ModbusAddress> AnalysisAddress(string address, byte defaultStation, bool isStartWithZero, byte defaultFunction)
-    {
-        try
-        {
-            var modbusAddress = new ModbusAddress(address, defaultStation, defaultFunction);
-            if (!isStartWithZero)
-            {
-                if (modbusAddress.AddressStart < 1)
-                {
-                    throw new CommunicationException(StringResources.Language.ModbusAddressMustMoreThanOne);
-                }
-                modbusAddress.AddressStart -= 1;
-            }
-            return OperateResult.CreateSuccessResult(modbusAddress);
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<ModbusAddress>
-            {
-                Message = ex.Message
             };
         }
     }
@@ -834,27 +797,6 @@ public class ModbusInfo
             }
         }
         return -1;
-    }
-
-    /// <inheritdoc cref="Core.IMessage.NetMessageBase.CheckReceiveDataComplete(byte[],MemoryStream)" />
-    public static bool CheckServerRtuReceiveDataComplete(byte[] receive)
-    {
-        if (receive.Length > 2)
-        {
-            if (receive[1] is 16 or 15)
-            {
-                return receive.Length > 8 && receive.Length >= receive[6] + 7 + 2;
-            }
-            if (receive[1] is 1 or 2 or 3 or 4 or 5 or 6)
-            {
-                return receive.Length >= 8;
-            }
-            if (receive[1] == 22)
-            {
-                return receive.Length >= 10;
-            }
-        }
-        return false;
     }
 
     /// <inheritdoc cref="Core.IMessage.NetMessageBase.CheckReceiveDataComplete(byte[],MemoryStream)" />

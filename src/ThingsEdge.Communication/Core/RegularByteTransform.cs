@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Common;
-
 namespace ThingsEdge.Communication.Core;
 
 /// <summary>
@@ -81,7 +79,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public short[,] TransInt16(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransInt16(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransInt16(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -104,7 +102,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public ushort[,] TransUInt16(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransUInt16(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransUInt16(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -127,7 +125,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public int[,] TransInt32(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransInt32(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransInt32(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -150,7 +148,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public uint[,] TransUInt32(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransUInt32(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransUInt32(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -173,7 +171,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public long[,] TransInt64(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransInt64(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransInt64(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -196,7 +194,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public ulong[,] TransUInt64(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransUInt64(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransUInt64(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -219,7 +217,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public float[,] TransSingle(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
     }
 
     public virtual double TransDouble(byte[] buffer, int index)
@@ -241,7 +239,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public double[,] TransDouble(byte[] buffer, int index, int row, int col)
     {
-        return CommunicationHelper.CreateTwoArrayFromOneArray(TransDouble(buffer, index, row * col), row, col);
+        return CommHelper.CreateTwoArrayFromOneArray(TransDouble(buffer, index, row * col), row, col);
     }
 
     /// <inheritdoc />
@@ -250,7 +248,7 @@ public class RegularByteTransform : IByteTransform
         var array = TransByte(buffer, index, length);
         if (IsStringReverseByteWord)
         {
-            return encoding.GetString(SoftBasic.BytesReverseByWord(array));
+            return encoding.GetString(array.ReverseByWord());
         }
         return encoding.GetString(array);
     }
@@ -270,7 +268,7 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(bool[] values)
     {
-        return values == null ? null : SoftBasic.BoolArrayToByte(values);
+        return values.ToByteArray();
     }
 
     /// <inheritdoc />
@@ -288,10 +286,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(short[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 2];
         for (var i = 0; i < values.Length; i++)
         {
@@ -303,16 +297,12 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(ushort value)
     {
-        return TransByte(new ushort[1] { value });
+        return TransByte([value]);
     }
 
     /// <inheritdoc />
     public virtual byte[] TransByte(ushort[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 2];
         for (var i = 0; i < values.Length; i++)
         {
@@ -330,10 +320,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(int[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 4];
         for (var i = 0; i < values.Length; i++)
         {
@@ -351,10 +337,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(uint[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 4];
         for (var i = 0; i < values.Length; i++)
         {
@@ -372,10 +354,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(long[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 8];
         for (var i = 0; i < values.Length; i++)
         {
@@ -393,10 +371,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(ulong[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 8];
         for (var i = 0; i < values.Length; i++)
         {
@@ -414,10 +388,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(float[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 4];
         for (var i = 0; i < values.Length; i++)
         {
@@ -435,10 +405,6 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(double[] values)
     {
-        if (values == null)
-        {
-            return null;
-        }
         var array = new byte[values.Length * 8];
         for (var i = 0; i < values.Length; i++)
         {
@@ -450,25 +416,17 @@ public class RegularByteTransform : IByteTransform
     /// <inheritdoc />
     public virtual byte[] TransByte(string value, Encoding encoding)
     {
-        if (value == null)
-        {
-            return null;
-        }
         var bytes = encoding.GetBytes(value);
-        return IsStringReverseByteWord ? SoftBasic.BytesReverseByWord(bytes) : bytes;
+        return IsStringReverseByteWord ? bytes.ReverseByWord() : bytes;
     }
 
     /// <inheritdoc />
     public virtual byte[] TransByte(string value, int length, Encoding encoding)
     {
-        if (value == null)
-        {
-            return null;
-        }
         var bytes = encoding.GetBytes(value);
         return IsStringReverseByteWord
-            ? SoftBasic.ArrayExpandToLength(SoftBasic.BytesReverseByWord(bytes), length)
-            : SoftBasic.ArrayExpandToLength(bytes, length);
+            ? CollectionUtils.ExpandToLength(bytes.ReverseByWord(), length)
+            : CollectionUtils.ExpandToLength(bytes, length);
     }
 
     /// <summary>

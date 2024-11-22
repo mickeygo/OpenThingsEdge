@@ -20,7 +20,7 @@ public static class SoftLRC
         num %= 256;
         num = 256 - num;
         var array = new byte[1] { (byte)num };
-        return SoftBasic.SpliceArray(value, array);
+        return CollectionUtils.SpliceArray(value, array);
     }
 
     /// <summary>
@@ -132,8 +132,8 @@ public static class SoftLRC
         }
         return
         [
-            SoftBasic.BuildAsciiBytesFrom((byte)num)[0],
-            SoftBasic.BuildAsciiBytesFrom((byte)num)[1]
+            ByteExtensions.BuildAsciiBytesFrom((byte)num)[0],
+            ByteExtensions.BuildAsciiBytesFrom((byte)num)[1]
         ];
     }
 }

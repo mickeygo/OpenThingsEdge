@@ -57,7 +57,7 @@ public static class InovanceHelper
         }
         if (modbus.IsStringReverse)
         {
-            read.Content = SoftBasic.BytesReverseByWord(read.Content);
+            read.Content = read.Content.ReverseByWord();
         }
         read.Content = read.Content.RemoveBegin(1);
         return OperateResult.CreateSuccessResult(encoding.GetString(read.Content));
@@ -92,7 +92,7 @@ public static class InovanceHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
@@ -196,7 +196,7 @@ public static class InovanceHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
@@ -254,7 +254,7 @@ public static class InovanceHelper
         try
         {
             var station = string.Empty;
-            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 station = $"s={operateResult.Content};";

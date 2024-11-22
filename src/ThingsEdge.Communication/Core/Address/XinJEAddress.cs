@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Exceptions;
 
 namespace ThingsEdge.Communication.Core.Address;
 
@@ -66,7 +65,7 @@ public class XinJEAddress : DeviceAddressDataBase
     {
         try
         {
-            var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", defaultStation);
+            var station = (byte)CommHelper.ExtractParameter(ref address, "s", defaultStation);
             if (address.StartsWith("HSCD"))
             {
                 return OperateResult.CreateSuccessResult(new XinJEAddress(139, int.Parse(address[4..]), int.MaxValue, station));

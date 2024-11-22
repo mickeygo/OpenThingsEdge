@@ -125,7 +125,7 @@ public static class McHelper
     {
         if (supportWordAdd && address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(mc, address, length).ConfigureAwait(false);
+            return await CommHelper.ReadBoolAsync(mc, address, length).ConfigureAwait(false);
         }
         var addressResult = mc.McAnalysisAddress(address, length, isBit: true);
         if (!addressResult.IsSuccess)

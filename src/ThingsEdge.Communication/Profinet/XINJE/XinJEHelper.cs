@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.ModBus;
@@ -21,13 +22,13 @@ public static class XinJEHelper
     public static OperateResult<string> PraseXinJEAddress(XinJESeries series, string address, byte modbusCode)
     {
         var text = string.Empty;
-        var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
+        var operateResult = CommHelper.ExtractParameter(ref address, "s");
         if (operateResult.IsSuccess)
         {
             text = $"s={operateResult.Content};";
         }
         var text2 = string.Empty;
-        var operateResult2 = CommunicationHelper.ExtractParameter(ref address, "x");
+        var operateResult2 = CommHelper.ExtractParameter(ref address, "x");
         if (operateResult2.IsSuccess)
         {
             text2 = $"x={operateResult2.Content};";
@@ -95,7 +96,7 @@ public static class XinJEHelper
                 {
                     return OperateResult.CreateSuccessResult(newAddress2);
                 }
-                if (address.StartsWithAndNumber("M"))
+                if (address.StartsWithAndNextIsNumber("M"))
                 {
                     var num = Convert.ToInt32(address[1..]);
                     if (num >= 8000)
@@ -111,11 +112,11 @@ public static class XinJEHelper
             }
             else
             {
-                if (address.StartsWithAndNumber("D"))
+                if (address.StartsWithAndNextIsNumber("D"))
                 {
                     return OperateResult.CreateSuccessResult(station + CalculateXC_D(address.Substring(1)));
                 }
-                if (address.StartsWithAndNumber("F"))
+                if (address.StartsWithAndNextIsNumber("F"))
                 {
                     var num2 = Convert.ToInt32(address.Substring(1));
                     if (num2 >= 8000)
@@ -272,7 +273,7 @@ public static class XinJEHelper
     internal static OperateResult<List<byte[]>> BuildReadCommand(XinJEAddress address, ushort length, bool isBit)
     {
         var list = new List<byte[]>();
-        var array = SoftBasic.SplitIntegerToArray(length, isBit ? 1920 : 120);
+        var array = CollectionUtils.SplitIntegerToArray(length, isBit ? 1920 : 120);
         for (var i = 0; i < array.Length; i++)
         {
             var item = new byte[8]

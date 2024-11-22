@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Core;
-
 namespace ThingsEdge.Communication.Languages;
 
 /// <summary>
@@ -81,7 +79,7 @@ public class DefaultLanguage
 
     public virtual string UserCancelOperate => "用户取消了当前的操作";
 
-    public virtual string TooManyLock => $"当前发生了太多的读写操作，导致锁大量累计({CommunicationHelper.LockLimit})，所以本次读写失败，请稍候重试。";
+    public virtual string TooManyLock => $"当前发生了太多的读写操作，导致锁大量累计(1000)，所以本次读写失败，请稍候重试。";
 
     public virtual string AddressOffsetEven => "地址偏移量必须为偶数";
 

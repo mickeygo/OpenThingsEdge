@@ -9,17 +9,7 @@ namespace ThingsEdge.Communication.Core.Device;
 public abstract class DeviceTcpNet : DeviceCommunication
 {
     private readonly PipeTcpNet _pipeTcpNet;
-
     private readonly Lazy<Ping> _ping = new(() => new Ping());
-
-    /// <summary>
-    /// 连接服务器超时时间。
-    /// </summary>
-    public int ConnectTimeout
-    {
-        get => _pipeTcpNet.ConnectTimeOut;
-        set => _pipeTcpNet.ConnectTimeOut = value;
-    }
 
     /// <summary>
     /// 获取地址
@@ -30,6 +20,24 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// 获取端口
     /// </summary>
     public int Port => _pipeTcpNet.Port;
+
+    /// <summary>
+    /// 连接服务器超时时间。
+    /// </summary>
+    public int ConnectTimeout
+    {
+        get => _pipeTcpNet.ConnectTimeout;
+        set => _pipeTcpNet.ConnectTimeout = value;
+    }
+
+    /// <summary>
+    /// 获取或设置 Socket 保活时长，只有在大于 0 时才启用，单位 ms。
+    /// </summary>
+    public int KeepAliveTime
+    {
+        get => _pipeTcpNet.KeepAliveTime;
+        set => _pipeTcpNet.KeepAliveTime = value;
+    }
 
     /// <summary>
     /// 指定IP地址以及端口号信息来初始化对象。
@@ -87,7 +95,6 @@ public abstract class DeviceTcpNet : DeviceCommunication
     public OperateResult CloseConnect()
     {
         OnExtraOnDisconnect?.Invoke(ConnectionId);
-
         return NetworkPipe.CloseCommunication();
     }
 

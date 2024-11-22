@@ -8,9 +8,6 @@ public sealed class AbStructHandle
     /// <summary>
     /// 返回项数
     /// </summary>
-    /// <remarks>
-    /// Count of Items returned
-    /// </remarks>
     public ushort ReturnCount { get; set; }
 
     /// <summary>
@@ -32,13 +29,6 @@ public sealed class AbStructHandle
     /// 结构体的handle
     /// </summary>
     public ushort StructureHandle { get; set; }
-
-    /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public AbStructHandle()
-    {
-    }
 
     /// <summary>
     /// 使用原始字节的数据，索引信息来实例化一个对象。

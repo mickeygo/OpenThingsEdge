@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Net;
@@ -20,7 +21,7 @@ public static class OmronFinsNetHelper
     public static OperateResult<List<byte[]>> BuildReadCommand(string[] address, OmronPlcType plcType)
     {
         var list = new List<byte[]>();
-        var list2 = SoftBasic.ArraySplitByLength(address, 89);
+        var list2 = CollectionUtils.SplitByLength(address, 89);
         for (var i = 0; i < list2.Count; i++)
         {
             var array = list2[i];
@@ -62,7 +63,7 @@ public static class OmronFinsNetHelper
         }
 
         var list = new List<byte[]>();
-        var array = SoftBasic.SplitIntegerToArray(length, isBit ? 1998 : splitLength);
+        var array = CollectionUtils.SplitIntegerToArray(length, isBit ? 1998 : splitLength);
         for (var i = 0; i < array.Length; i++)
         {
             list.Add(BuildReadCommand(operateResult.Content, (ushort)array[i], isBit));
@@ -201,7 +202,7 @@ public static class OmronFinsNetHelper
                         operateResult.IsSuccess = false;
                     }
                     operateResult.ErrorCode = num;
-                    operateResult.Message = GetStatusDescription(num) + " Received:" + SoftBasic.ByteToHexString(response, ' ');
+                    operateResult.Message = GetStatusDescription(num) + " Received:" + response.ToHexString(' ');
                     if (response[10] == 1 & response[11] == 4)
                     {
                         var array2 = array.Length != 0 ? new byte[array.Length * 2 / 3] : [];
@@ -221,7 +222,7 @@ public static class OmronFinsNetHelper
             }
             var operateResult2 = OperateResult.CreateSuccessResult(Array.Empty<byte>());
             operateResult2.ErrorCode = num;
-            operateResult2.Message = GetStatusDescription(num) + " Received:" + SoftBasic.ByteToHexString(response, ' ');
+            operateResult2.Message = GetStatusDescription(num) + " Received:" + response.ToHexString(' ');
             return operateResult2;
         }
         return new OperateResult<byte[]>(StringResources.Language.OmronReceiveDataError);
@@ -497,7 +498,7 @@ public static class OmronFinsNetHelper
     /// <returns>返回写入结果</returns>
     public static async Task<OperateResult> WriteAsync(IOmronFins omron, string address, bool[] values)
     {
-        if (omron.PlcType == OmronPlcType.CV && (address.StartsWithAndNumber("CIO") || address.StartsWithAndNumber("C")))
+        if (omron.PlcType == OmronPlcType.CV && (address.StartsWithAndNextIsNumber("CIO") || address.StartsWithAndNextIsNumber("C")))
         {
             return await ReadWriteNetHelper.WriteBoolWithWordAsync(omron, address, values, 16, reverseWord: true).ConfigureAwait(continueOnCapturedContext: false);
         }

@@ -172,10 +172,10 @@ public static class AllenBradleyHelper
     private static byte[] BuildRequestPathCommand(string address, bool isConnectedAddress = false)
     {
         using var memoryStream = new MemoryStream();
-        var num = CommunicationHelper.ExtractParameter(ref address, "class", -1);
+        var num = CommHelper.ExtractParameter(ref address, "class", -1);
         if (num != -1)
         {
-            var num2 = address.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? Convert.ToInt32(address.Substring(2), 16) : Convert.ToInt32(address);
+            var num2 = address.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? Convert.ToInt32(address[2..], 16) : Convert.ToInt32(address);
             if (num < 256)
             {
                 memoryStream.WriteByte(32);
@@ -889,7 +889,7 @@ public static class AllenBradleyHelper
         {
             return [0, 0, 4, 0, 0, 0];
         }
-        return SoftBasic.SpliceArray(new byte[6]
+        return CollectionUtils.SpliceArray(new byte[6]
         {
             (byte)(isRead ? 204u : 205u),
             0,

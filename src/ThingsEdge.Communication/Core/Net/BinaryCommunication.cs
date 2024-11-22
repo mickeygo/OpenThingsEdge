@@ -1,4 +1,3 @@
-using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Core.Pipe;
 
@@ -15,11 +14,11 @@ public abstract class BinaryCommunication
     public string ConnectionId { get; }
 
     /// <summary>
-    /// 获取当前的管道信息，管道类型为 <see cref="PipeNetBase" /> 的继承类，
+    /// 获取当前的管道信息，管道类型为 <see cref="NetworkPipeBase" /> 的继承类，
     /// 内置 <see cref="PipeTcpNet" /> 管道和 <see cref="PipeSerialPort" /> 管道。
     /// </summary>
     [NotNull]
-    protected PipeNetBase? NetworkPipe { get; init; }
+    protected NetworkPipeBase? NetworkPipe { get; init; }
 
     /// <summary>
     /// 组件的日志工具。
@@ -36,20 +35,11 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
-    /// 获取或设置在正式接收对方返回数据前的时候，需要延迟的时间，当设置为0的时候，不需要延迟。
-    /// </summary>
-    public int DelayTime
-    {
-        get => NetworkPipe.DelayTime;
-        set => NetworkPipe.DelayTime = value;
-    }
-
-    /// <summary>
     /// 默认的无参构造函数。
     /// </summary>
     public BinaryCommunication()
     {
-        ConnectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
+        ConnectionId = Guid.NewGuid().ToString("N");
     }
 
     /// <summary>
@@ -148,40 +138,31 @@ public abstract class BinaryCommunication
     /// <returns>接收的完整的报文信息</returns>
     protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        var enter = NetworkPipe.CommunicationLock.EnterLock(NetworkPipe.ReceiveTimeout);
-        if (!enter.IsSuccess)
-        {
-            return OperateResult.CreateFailedResult<byte[]>(enter);
-        }
-
-        var read = new OperateResult<byte[]>();
         try
         {
-            var pipe = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
-            if (!pipe.IsSuccess)
+            using (await NetworkPipe.Lock.LockAsync(NetworkPipe.ReceiveTimeout).ConfigureAwait(false))
             {
-                read.CopyErrorFromOther(pipe);
-                return read;
-            }
-            if (pipe.Content)
-            {
-                var ini = await InitializationOnConnectAsync().ConfigureAwait(false);
-                if (!ini.IsSuccess)
+                var pipe = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
+                if (!pipe.IsSuccess)
                 {
-                    return OperateResult.CreateFailedResult<byte[]>(ini);
+                    return OperateResult.CreateFailedResult<byte[]>(pipe);
                 }
+
+                if (pipe.Content)
+                {
+                    var ini = await InitializationOnConnectAsync().ConfigureAwait(false);
+                    if (!ini.IsSuccess)
+                    {
+                        return OperateResult.CreateFailedResult<byte[]>(ini);
+                    }
+                }
+                return await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
             }
-            read = await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         }
         catch
         {
             throw;
         }
-        finally
-        {
-            NetworkPipe.CommunicationLock.LeaveLock();
-        }
-        return read;
     }
 
     /// <summary>
@@ -192,7 +173,7 @@ public abstract class BinaryCommunication
     /// <param name="hasResponseData">是否有等待的数据返回</param>
     /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写 <see cref="PackCommandWithHeader" /> 方法后才会有影响</param>
     /// <returns>是否成功的结果对象</returns>
-    protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(PipeNetBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         // TODO: 此方法逻辑可以移至上述方法并移除
 

@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Net;
@@ -35,8 +36,8 @@ public static class MelsecA3CNetHelper
         }
         memoryStream.WriteByte(70);
         memoryStream.WriteByte(57);
-        memoryStream.WriteByte(SoftBasic.BuildAsciiBytesFrom(station)[0]);
-        memoryStream.WriteByte(SoftBasic.BuildAsciiBytesFrom(station)[1]);
+        memoryStream.WriteByte(ByteExtensions.BuildAsciiBytesFrom(station)[0]);
+        memoryStream.WriteByte(ByteExtensions.BuildAsciiBytesFrom(station)[1]);
         memoryStream.WriteByte(48);
         memoryStream.WriteByte(48);
         memoryStream.WriteByte(70);
@@ -56,8 +57,8 @@ public static class MelsecA3CNetHelper
             {
                 num += array[i];
             }
-            memoryStream.WriteByte(SoftBasic.BuildAsciiBytesFrom((byte)num)[0]);
-            memoryStream.WriteByte(SoftBasic.BuildAsciiBytesFrom((byte)num)[1]);
+            memoryStream.WriteByte(ByteExtensions.BuildAsciiBytesFrom((byte)num)[0]);
+            memoryStream.WriteByte(ByteExtensions.BuildAsciiBytesFrom((byte)num)[1]);
         }
         if (plc.Format == 4)
         {
@@ -110,7 +111,7 @@ public static class MelsecA3CNetHelper
                 }
                 if (response[0] != 2)
                 {
-                    return new OperateResult<byte[]>(response[0], "Read Faild:" + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>(response[0], "Read Faild:" + response.ToAsciiString());
                 }
             }
             else if (plc.Format == 3)
@@ -123,7 +124,7 @@ public static class MelsecA3CNetHelper
                 }
                 if (@string != "QACK")
                 {
-                    return new OperateResult<byte[]>(response[0], "Read Faild:" + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>(response[0], "Read Faild:" + response.ToAsciiString());
                 }
             }
             var num3 = -1;
@@ -161,14 +162,14 @@ public static class MelsecA3CNetHelper
                 }
                 if (response[0] != 6)
                 {
-                    return new OperateResult<byte[]>(response[0], "Write Faild:" + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>(response[0], "Write Faild:" + response.ToAsciiString());
                 }
             }
             else if (plc.Format == 3)
             {
                 if (response[0] != 2)
                 {
-                    return new OperateResult<byte[]>(response[0], "Write Faild:" + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>(response[0], "Write Faild:" + response.ToAsciiString());
                 }
                 var @string = Encoding.ASCII.GetString(response, 11, 4);
                 if (@string == "QNAK")
@@ -178,7 +179,7 @@ public static class MelsecA3CNetHelper
                 }
                 if (@string != "QACK")
                 {
-                    return new OperateResult<byte[]>(response[0], "Write Faild:" + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>(response[0], "Write Faild:" + response.ToAsciiString());
                 }
             }
             else if (plc.Format == 4)
@@ -190,14 +191,14 @@ public static class MelsecA3CNetHelper
                 }
                 if (response[0] != 6)
                 {
-                    return new OperateResult<byte[]>(response[0], "Write Faild:" + SoftBasic.GetAsciiStringRender(response));
+                    return new OperateResult<byte[]>(response[0], "Write Faild:" + response.ToAsciiString());
                 }
             }
             return OperateResult.CreateSuccessResult();
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("CheckWriteResponse failed: " + ex.Message + Environment.NewLine + "Content: " + SoftBasic.GetAsciiStringRender(response));
+            return new OperateResult<byte[]>("CheckWriteResponse failed: " + ex.Message + Environment.NewLine + "Content: " + response.ToAsciiString());
         }
     }
 
@@ -210,7 +211,7 @@ public static class MelsecA3CNetHelper
     /// <returns>读取结果信息</returns>
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteA3C plc, string address, ushort length)
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, length, isBit: false);
         if (!addressResult.IsSuccess)
         {
@@ -257,7 +258,7 @@ public static class MelsecA3CNetHelper
     /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteA3C plc, string address, byte[] value)
     {
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, 0, isBit: false);
         if (!addressResult.IsSuccess)
         {
@@ -283,9 +284,9 @@ public static class MelsecA3CNetHelper
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommunicationHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
+            return await CommHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
         }
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, length, isBit: true);
         if (!addressResult.IsSuccess)
         {
@@ -322,7 +323,7 @@ public static class MelsecA3CNetHelper
         {
             return await ReadWriteNetHelper.WriteBoolWithWordAsync(plc, address, value).ConfigureAwait(continueOnCapturedContext: false);
         }
-        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
         var addressResult = McAddressData.ParseMelsecFrom(address, 0, isBit: true);
         if (!addressResult.IsSuccess)
         {

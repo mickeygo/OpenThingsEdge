@@ -3,8 +3,8 @@ using ThingsEdge.Communication.Core;
 namespace ThingsEdge.Communication.ModBus;
 
 /// <summary>
-/// Modbus设备的接口，用来表示Modbus相关的设备对象，<see cref="ModbusTcpNet" />, <see cref="ModbusRtu" />,
-/// <see cref="ModbusAscii" />, <see cref="ModbusRtuOverTcp" /> 均实现了该接口信息。
+/// Modbus设备的接口，用来表示Modbus相关的设备对象，其中 <see cref="ModbusTcpNet" />、<see cref="ModbusRtu" />、
+/// <see cref="ModbusAscii" /> 和 <see cref="ModbusRtuOverTcp" /> 均实现了该接口信息。
 /// </summary>
 public interface IModbus : IReadWriteDevice, IReadWriteNet
 {
@@ -50,7 +50,7 @@ public interface IModbus : IReadWriteDevice, IReadWriteNet
     /// <param name="readAddress">读取的地址信息</param>
     /// <param name="length">读取的长度信息</param>
     /// <param name="writeAddress">写入的地址信息</param>
-    /// <param name="value">写入的字节数据信息</param>
+    /// <param name="data">写入的字节数据信息</param>
     /// <returns>读取的结果对象</returns>
-    Task<OperateResult<byte[]>> ReadWriteAsync(string readAddress, ushort length, string writeAddress, byte[] value);
+    Task<OperateResult<byte[]>> ReadWriteAsync(string readAddress, ushort length, string writeAddress, byte[] data);
 }

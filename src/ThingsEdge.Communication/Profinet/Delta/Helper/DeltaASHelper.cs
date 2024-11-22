@@ -13,7 +13,7 @@ public static class DeltaASHelper
         var num = address.IndexOf('.');
         if (num > 0)
         {
-            return Convert.ToInt32(address[..num]) * 16 + CommunicationHelper.CalculateBitStartIndex(address[(num + 1)..]);
+            return Convert.ToInt32(address[..num]) * 16 + CommHelper.CalculateBitStartIndex(address[(num + 1)..]);
         }
         return Convert.ToInt32(address) * 16;
     }
@@ -29,7 +29,7 @@ public static class DeltaASHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";
@@ -38,35 +38,35 @@ public static class DeltaASHelper
             {
                 if (address.StartsWith("SM") || address.StartsWith("sm"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(2)) + 16384));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[2..]) + 16384));
                 }
                 if (address.StartsWith("HC") || address.StartsWith("hc"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(2)) + 64512));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[2..]) + 64512));
                 }
                 if (address.StartsWith('S') || address.StartsWith('s'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 20480));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 20480));
                 }
                 if (address.StartsWith('X') || address.StartsWith('x'))
                 {
-                    return OperateResult.CreateSuccessResult(text + "x=2;" + (ParseDeltaBitAddress(address.Substring(1)) + 24576));
+                    return OperateResult.CreateSuccessResult(text + "x=2;" + (ParseDeltaBitAddress(address[1..]) + 24576));
                 }
                 if (address.StartsWith('Y') || address.StartsWith('y'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (ParseDeltaBitAddress(address.Substring(1)) + 40960));
+                    return OperateResult.CreateSuccessResult(text + (ParseDeltaBitAddress(address[1..]) + 40960));
                 }
                 if (address.StartsWith('T') || address.StartsWith('t'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 57344));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 57344));
                 }
                 if (address.StartsWith('C') || address.StartsWith('c'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 61440));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 61440));
                 }
                 if (address.StartsWith('M') || address.StartsWith('m'))
                 {
-                    return OperateResult.CreateSuccessResult(text + Convert.ToInt32(address.Substring(1)));
+                    return OperateResult.CreateSuccessResult(text + Convert.ToInt32(address[1..]));
                 }
                 if (address.StartsWith('D') && address.Contains('.'))
                 {
@@ -77,35 +77,35 @@ public static class DeltaASHelper
             {
                 if (address.StartsWith("SR") || address.StartsWith("sr"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(2)) + 49152));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[2..]) + 49152));
                 }
                 if (address.StartsWith("HC") || address.StartsWith("hc"))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(2)) + 64512));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[2..]) + 64512));
                 }
                 if (address.StartsWith('D') || address.StartsWith('d'))
                 {
-                    return OperateResult.CreateSuccessResult(text + Convert.ToInt32(address.Substring(1)));
+                    return OperateResult.CreateSuccessResult(text + Convert.ToInt32(address[1..]));
                 }
                 if (address.StartsWith('X') || address.StartsWith('x'))
                 {
-                    return OperateResult.CreateSuccessResult(text + "x=4;" + (Convert.ToInt32(address.Substring(1)) + 32768));
+                    return OperateResult.CreateSuccessResult(text + "x=4;" + (Convert.ToInt32(address[1..]) + 32768));
                 }
                 if (address.StartsWith('Y') || address.StartsWith('y'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 40960));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 40960));
                 }
                 if (address.StartsWith('C') || address.StartsWith('c'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 61440));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 61440));
                 }
                 if (address.StartsWith('T') || address.StartsWith('t'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 57344));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 57344));
                 }
                 if (address.StartsWith('E') || address.StartsWith('e'))
                 {
-                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address.Substring(1)) + 65024));
+                    return OperateResult.CreateSuccessResult(text + (Convert.ToInt32(address[1..]) + 65024));
                 }
             }
             return new OperateResult<string>(StringResources.Language.NotSupportedDataType);

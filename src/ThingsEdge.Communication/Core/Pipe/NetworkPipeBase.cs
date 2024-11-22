@@ -6,7 +6,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 基于网络的通信管道基类。
 /// </summary>
-public abstract class PipeNetBase : IDisposable
+public abstract class NetworkPipeBase : IDisposable
 {
     private bool _disposedValue;
     private int _connectErrorCount;
@@ -17,14 +17,9 @@ public abstract class PipeNetBase : IDisposable
     public int ReceiveTimeout { get; set; } = 5_000;
 
     /// <summary>
-    /// 获取或设置在正式接收对方返回数据前的时候，需要延迟的时间，当设置为0的时候，不需要延迟。
+    /// 获取当前实例的异步锁对象。
     /// </summary>
-    public int DelayTime { get; set; }
-
-    /// <summary>
-    /// 获取或设置当前管道的线程锁对象，默认是简单的一个互斥锁。
-    /// </summary>
-    public ICommunicationLock CommunicationLock => new CommunicationLockSimple();
+    public ICommAsyncLock Lock { get; } = new CommAsyncLock();
 
     /// <summary>
     /// 接收固定长度的字节数组，允许指定超时时间，默认为60秒，当length大于0时，接收固定长度的数据内容，当length小于0时，buffer长度的缓存数据。
@@ -41,7 +36,7 @@ public abstract class PipeNetBase : IDisposable
 
     public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
-        var read = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData, DelayTime).ConfigureAwait(false);
+        var read = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;
@@ -176,9 +171,9 @@ public abstract class PipeNetBase : IDisposable
     /// 从管道里，接收指定长度的报文数据信息，如果长度指定为-1，表示接收不超过2048字节的动态长度。
     /// </summary>
     /// <param name="length">接收的长度信息</param>
-    /// <param name="timeOut">指定的超时时间</param>
+    /// <param name="timeout">指定的超时时间</param>
     /// <returns>是否接收成功的结果对象</returns>
-    public virtual async Task<OperateResult<byte[]>> ReceiveAsync(int length, int timeOut)
+    public virtual async Task<OperateResult<byte[]>> ReceiveAsync(int length, int timeout)
     {
         if (length == 0)
         {
@@ -187,7 +182,7 @@ public abstract class PipeNetBase : IDisposable
 
         var num = length > 0 ? length : 2048;
         var buffer = new byte[num];
-        var receive = await ReceiveAsync(buffer, 0, length, timeOut).ConfigureAwait(false);
+        var receive = await ReceiveAsync(buffer, 0, length, timeout).ConfigureAwait(false);
         if (!receive.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(receive);
@@ -288,7 +283,7 @@ public abstract class PipeNetBase : IDisposable
         return read;
     }
 
-    protected async Task<OperateResult<byte[]>> ReadFromCoreServerHelperAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData, int sleep)
+    protected async Task<OperateResult<byte[]>> ReadFromCoreServerHelperAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
         if (netMessage != null)
         {
@@ -308,10 +303,6 @@ public abstract class PipeNetBase : IDisposable
         {
             return OperateResult.CreateSuccessResult(Array.Empty<byte>());
         }
-        if (sleep > 0)
-        {
-            await Task.Delay(sleep).ConfigureAwait(false);
-        }
 
         var start = DateTime.Now;
         var times = 0;
@@ -330,7 +321,12 @@ public abstract class PipeNetBase : IDisposable
                 switch (netMessage.CheckMessageMatch(sendValue, resultReceive.Content))
                 {
                     case 0:
-                        return new OperateResult<byte[]>("INetMessage.CheckMessageMatch failed" + Environment.NewLine + StringResources.Language.Send + ": " + SoftBasic.ByteToHexString(sendValue, ' ') + Environment.NewLine + StringResources.Language.Receive + ": " + SoftBasic.ByteToHexString(resultReceive.Content, ' '));
+                        return new OperateResult<byte[]>("INetMessage.CheckMessageMatch failed" + Environment.NewLine
+                            + StringResources.Language.Send
+                            + ": " + sendValue.RemoveBegin(' ')
+                            + Environment.NewLine
+                            + StringResources.Language.Receive
+                            + ": " + resultReceive.Content.ToHexString(' '));
                     case 1:
                         break;
                     default:
@@ -350,7 +346,9 @@ public abstract class PipeNetBase : IDisposable
         }
         if (netMessage != null && !netMessage.CheckHeadBytesLegal())
         {
-            return new OperateResult<byte[]>(StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine + StringResources.Language.Send + ": " + SoftBasic.ByteToHexString(sendValue, ' ') + Environment.NewLine + StringResources.Language.Receive + ": " + SoftBasic.ByteToHexString(resultReceive.Content, ' '));
+            return new OperateResult<byte[]>(StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine
+                + StringResources.Language.Send + ": " + sendValue.RemoveBegin(' ') + Environment.NewLine
+                + StringResources.Language.Receive + ": " + resultReceive.Content.ToHexString(' '));
         }
         return OperateResult.CreateSuccessResult(resultReceive.Content);
     }
@@ -434,7 +432,7 @@ public abstract class PipeNetBase : IDisposable
                 {
                     return endResult;
                 }
-                return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(receive.Content, endResult.Content));
+                return OperateResult.CreateSuccessResult(CollectionUtils.SpliceArray(receive.Content, endResult.Content));
             }
             return receive;
         }
@@ -468,7 +466,7 @@ public abstract class PipeNetBase : IDisposable
             {
                 return head2Result;
             }
-            headResult.Content = SoftBasic.SpliceArray(headResult.Content!.RemoveBegin(start), head2Result.Content);
+            headResult.Content = CollectionUtils.SpliceArray(headResult.Content.RemoveBegin(start), head2Result.Content);
         }
 
         netMessage.HeadBytes = headResult.Content;
@@ -490,10 +488,6 @@ public abstract class PipeNetBase : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (disposing)
-        {
-            CommunicationLock?.Dispose();
-        }
     }
 
     public void Dispose()

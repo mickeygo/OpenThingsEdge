@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Common;
+using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 
@@ -45,7 +46,7 @@ internal static class SiemensS7Helper
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("AnalysisReadBit failed: " + ex.Message + Environment.NewLine + " Msg:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>("AnalysisReadBit failed: " + ex.Message + Environment.NewLine + " Msg:" + content.ToHexString(' '));
         }
     }
 
@@ -155,11 +156,11 @@ internal static class SiemensS7Helper
                 }
                 return OperateResult.CreateSuccessResult(list.ToArray());
             }
-            return new OperateResult<byte[]>(StringResources.Language.SiemensDataLengthCheckFailed + " Msg: " + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>(StringResources.Language.SiemensDataLengthCheckFailed + " Msg: " + content.ToHexString(' '));
         }
         catch (Exception ex)
         {
-            return new OperateResult<byte[]>("AnalysisReadByte failed: " + ex.Message + Environment.NewLine + " Msg:" + SoftBasic.ByteToHexString(content, ' '));
+            return new OperateResult<byte[]>("AnalysisReadByte failed: " + ex.Message + Environment.NewLine + " Msg:" + content.ToHexString(' '));
         }
     }
 
@@ -219,7 +220,7 @@ internal static class SiemensS7Helper
         var buffer = encoding.GetBytes(value);
         if (encoding == Encoding.Unicode)
         {
-            buffer = SoftBasic.BytesReverseByWord(buffer);
+            buffer = buffer.ReverseByWord();
         }
         if (currentPlc != SiemensPLCS.S200Smart)
         {
@@ -240,13 +241,13 @@ internal static class SiemensS7Helper
             {
                 return new OperateResult<string>("String length is too long than plc defined");
             }
-            return await plc.WriteAsync(address, SoftBasic.SpliceArray(
+            return await plc.WriteAsync(address, CollectionUtils.SpliceArray(
             [
                 readLength.Content[0],
                 (byte)buffer.Length
             ], buffer)).ConfigureAwait(false);
         }
-        return await plc.WriteAsync(address, SoftBasic.SpliceArray([(byte)buffer.Length], buffer)).ConfigureAwait(false);
+        return await plc.WriteAsync(address, CollectionUtils.SpliceArray([(byte)buffer.Length], buffer)).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -270,7 +271,7 @@ internal static class SiemensS7Helper
             {
                 return OperateResult.CreateFailedResult<string>(readString1);
             }
-            return OperateResult.CreateSuccessResult(Encoding.Unicode.GetString(SoftBasic.BytesReverseByWord(readString1.Content.RemoveBegin(4))));
+            return OperateResult.CreateSuccessResult(Encoding.Unicode.GetString(readString1.Content.RemoveBegin(4).ReverseByWord()));
         }
 
         var read2 = await plc.ReadAsync(address, 1).ConfigureAwait(false);
@@ -299,7 +300,7 @@ internal static class SiemensS7Helper
         if (currentPlc != SiemensPLCS.S200Smart)
         {
             var buffer = Encoding.Unicode.GetBytes(value);
-            buffer = SoftBasic.BytesReverseByWord(buffer);
+            buffer = buffer.ReverseByWord();
             var readLength = await plc.ReadAsync(address, 4).ConfigureAwait(false);
             if (!readLength.IsSuccess)
             {
