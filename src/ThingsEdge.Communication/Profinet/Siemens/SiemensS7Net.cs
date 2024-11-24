@@ -4,9 +4,7 @@ using ThingsEdge.Communication.Core.Pipe;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Profinet.Siemens.Helper;
-using ThingsEdge.Communication.Exceptions;
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Common.Extensions;
 
 namespace ThingsEdge.Communication.Profinet.Siemens;
 
@@ -22,8 +20,6 @@ namespace ThingsEdge.Communication.Profinet.Siemens;
 /// </remarks>
 public sealed class SiemensS7Net : DeviceTcpNet
 {
-    private readonly SiemensPLCS _currentPlc = SiemensPLCS.S1200;
-
     /// <summary>
     /// 第一次初始化指令交互报文
     /// </summary>
@@ -113,6 +109,11 @@ public sealed class SiemensS7Net : DeviceTcpNet
     private IncrementCounter _incrementCount = new(65535L, 1L);
 
     /// <summary>
+    /// 获取当前的 PLC 型号
+    /// </summary>
+    public SiemensPLCS CurrentPlc { get; }
+
+    /// <summary>
     /// PLC的槽号，针对S7-400的PLC设置的。
     /// </summary>
     public byte Slot
@@ -121,7 +122,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         set
         {
             _plc_slot = value;
-            if (_currentPlc != SiemensPLCS.S200 && _currentPlc != SiemensPLCS.S200Smart)
+            if (CurrentPlc is not SiemensPLCS.S200 and not SiemensPLCS.S200Smart)
             {
                 _plcHead1[21] = (byte)(_plc_rack * 32 + _plc_slot);
             }
@@ -137,7 +138,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         set
         {
             _plc_rack = value;
-            if (_currentPlc != SiemensPLCS.S200 && _currentPlc != SiemensPLCS.S200Smart)
+            if (CurrentPlc is not SiemensPLCS.S200 and not SiemensPLCS.S200Smart)
             {
                 _plcHead1[21] = (byte)(_plc_rack * 32 + _plc_slot);
             }
@@ -152,7 +153,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         get => _plcHead1[20];
         set
         {
-            if (_currentPlc is not SiemensPLCS.S200 and not SiemensPLCS.S200Smart)
+            if (CurrentPlc is not SiemensPLCS.S200 and not SiemensPLCS.S200Smart)
             {
                 _plcHead1[20] = value;
             }
@@ -166,7 +167,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     {
         get
         {
-            if (_currentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
+            if (CurrentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
             {
                 return _plcHead1[13] * 256 + _plcHead1[14];
             }
@@ -174,7 +175,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         }
         set
         {
-            if (_currentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
+            if (CurrentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
             {
                 _plcHead1[13] = BitConverter.GetBytes(value)[1];
                 _plcHead1[14] = BitConverter.GetBytes(value)[0];
@@ -194,7 +195,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     {
         get
         {
-            if (_currentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
+            if (CurrentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
             {
                 return _plcHead1[17] * 256 + _plcHead1[18];
             }
@@ -202,7 +203,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         }
         set
         {
-            if (_currentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
+            if (CurrentPlc is SiemensPLCS.S200 or SiemensPLCS.S200Smart)
             {
                 _plcHead1[17] = BitConverter.GetBytes(value)[1];
                 _plcHead1[18] = BitConverter.GetBytes(value)[0];
@@ -230,7 +231,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     {
         WordLength = 2;
         ByteTransform = new ReverseBytesTransform();
-        _currentPlc = siemens;
+        CurrentPlc = siemens;
 
         Initialization(siemens);
     }
@@ -537,7 +538,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// <returns>带有成功标识的string数据</returns>
     public async Task<OperateResult<string>> ReadStringAsync(string address, Encoding encoding)
     {
-        return await SiemensS7Helper.ReadStringAsync(this, _currentPlc, address, encoding).ConfigureAwait(false);
+        return await SiemensS7Helper.ReadStringAsync(this, CurrentPlc, address, encoding).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -547,7 +548,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// <returns>带有成功标识的string数据</returns>
     public async Task<OperateResult<string>> ReadWStringAsync(string address)
     {
-        return await SiemensS7Helper.ReadWStringAsync(this, _currentPlc, address).ConfigureAwait(false);
+        return await SiemensS7Helper.ReadWStringAsync(this, CurrentPlc, address).ConfigureAwait(false);
     }
 
     public async Task<OperateResult<DateTime>> ReadDateAsync(string address)
@@ -609,7 +610,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     public override async Task<OperateResult> WriteAsync(string address, string value, Encoding encoding)
     {
-        return await SiemensS7Helper.WriteAsync(this, _currentPlc, address, value, encoding).ConfigureAwait(false);
+        return await SiemensS7Helper.WriteAsync(this, CurrentPlc, address, value, encoding).ConfigureAwait(false);
     }
 
     public async Task<OperateResult> WriteAsync(string[] addresses, List<byte[]> data)
@@ -640,7 +641,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     public async Task<OperateResult> WriteWStringAsync(string address, string value)
     {
-        return await SiemensS7Helper.WriteWStringAsync(this, _currentPlc, address, value).ConfigureAwait(false);
+        return await SiemensS7Helper.WriteWStringAsync(this, CurrentPlc, address, value).ConfigureAwait(false);
     }
 
     public async Task<OperateResult> WriteAsync(string address, DateTime dateTime)
@@ -742,7 +743,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     public override string ToString()
     {
-        return $"SiemensS7Net {_currentPlc}[{IpAddress}:{Port}]";
+        return $"SiemensS7Net {CurrentPlc}[{IpAddress}:{Port}]";
     }
 
     /// <summary>

@@ -5,7 +5,7 @@ using ThingsEdge.Communication.ModBus;
 namespace ThingsEdge.Communication.Profinet.Inovance;
 
 /// <summary>
-/// 汇川的网口通信协议，A适用于AM400、 AM400_800、 AC800、H3U, XP, H5U 等系列底层走的是MODBUS-TCP协议，地址说明参见标记。
+/// 汇川的网口通信协议，适用于AM400、 AM400_800、 AC800、H3U, XP, H5U 等系列底层走的是MODBUS-TCP协议，地址说明参见标记。
 /// </summary>
 /// <remarks>
 /// AM400_800 的元件有 Q 区，I 区，M 区这三种，分别都可以按位，按字节，按字和按双字进行访问，在本组件的条件下，仅支持按照位，字访问。

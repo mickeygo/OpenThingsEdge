@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Profinet.AllenBradley;
 

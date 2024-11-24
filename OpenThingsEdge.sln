@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.App", "playground\ThingsEdge.App\ThingsEdge.App.csproj", "{F00979D9-DECF-43D9-85E8-AA67AAF777F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThingsEdge.ConsoleApp", "playground\ThingsEdge.ConsoleApp\ThingsEdge.ConsoleApp.csproj", "{F00979D9-DECF-43D9-85E8-AA67AAF777F5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A01ED689-90FD-4970-BFA0-2359DD499651}"
 EndProject
@@ -22,6 +22,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Communication", "src\ThingsEdge.Communication\ThingsEdge.Communication.csproj", "{95669AB9-9E77-4CC8-80A2-2E1557A4DFFD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Communication.Tests", "tests\ThingsEdge.Communication.Tests\ThingsEdge.Communication.Tests.csproj", "{62F34D12-7ED1-4664-B992-056ABAEDF929}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Exchange.Tests", "tests\ThingsEdge.Exchange.Tests\ThingsEdge.Exchange.Tests.csproj", "{46215999-75D1-4D5F-A928-2AF3AF51124D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Exchange.Contracts", "src\ThingsEdge.Exchange.Contracts\ThingsEdge.Exchange.Contracts.csproj", "{F42F0D62-37AA-44C7-97E0-3843A7712269}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThingsEdge.Exchange", "src\ThingsEdge.Exchange\ThingsEdge.Exchange.csproj", "{E0D55CAA-96D3-4D27-952C-92D0FB45D7E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +47,18 @@ Global
 		{62F34D12-7ED1-4664-B992-056ABAEDF929}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F34D12-7ED1-4664-B992-056ABAEDF929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F34D12-7ED1-4664-B992-056ABAEDF929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46215999-75D1-4D5F-A928-2AF3AF51124D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46215999-75D1-4D5F-A928-2AF3AF51124D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46215999-75D1-4D5F-A928-2AF3AF51124D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46215999-75D1-4D5F-A928-2AF3AF51124D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F42F0D62-37AA-44C7-97E0-3843A7712269}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F42F0D62-37AA-44C7-97E0-3843A7712269}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F42F0D62-37AA-44C7-97E0-3843A7712269}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F42F0D62-37AA-44C7-97E0-3843A7712269}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0D55CAA-96D3-4D27-952C-92D0FB45D7E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0D55CAA-96D3-4D27-952C-92D0FB45D7E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0D55CAA-96D3-4D27-952C-92D0FB45D7E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0D55CAA-96D3-4D27-952C-92D0FB45D7E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +67,9 @@ Global
 		{F00979D9-DECF-43D9-85E8-AA67AAF777F5} = {AE35E00C-10EE-49F4-9F3A-A9406D37922A}
 		{95669AB9-9E77-4CC8-80A2-2E1557A4DFFD} = {FEA753D4-058C-4585-A707-35542348FC5B}
 		{62F34D12-7ED1-4664-B992-056ABAEDF929} = {A01ED689-90FD-4970-BFA0-2359DD499651}
+		{46215999-75D1-4D5F-A928-2AF3AF51124D} = {A01ED689-90FD-4970-BFA0-2359DD499651}
+		{F42F0D62-37AA-44C7-97E0-3843A7712269} = {FEA753D4-058C-4585-A707-35542348FC5B}
+		{E0D55CAA-96D3-4D27-952C-92D0FB45D7E6} = {FEA753D4-058C-4585-A707-35542348FC5B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77243E50-0F8A-45CE-B0DD-6CE24BDE6D8B}

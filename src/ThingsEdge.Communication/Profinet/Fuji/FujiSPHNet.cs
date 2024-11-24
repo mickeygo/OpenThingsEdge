@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;

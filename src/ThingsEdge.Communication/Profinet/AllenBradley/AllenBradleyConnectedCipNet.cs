@@ -1,4 +1,3 @@
-using ThingsEdge.Communication.Common;
 using ThingsEdge.Communication.Profinet.Omron;
 
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
