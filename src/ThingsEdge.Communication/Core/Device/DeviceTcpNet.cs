@@ -52,12 +52,13 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <summary>
     /// 对当前设备的IP地址进行 PING 的操作，若返回 <see cref="IPStatus.Success" /> 表示成功，其他或异常为失败。
     /// </summary>
+    /// <param name="timeout">超时时间</param>
     /// <returns>返回PING的结果</returns>
-    public bool PingSuccessful()
+    public async Task<bool> PingSuccessfulAsync(int timeout)
     {
         try
         {
-            return _ping.Value.Send(IpAddress).Status == IPStatus.Success;
+            return (await _ping.Value.SendPingAsync(IpAddress, timeout).ConfigureAwait(false)).Status == IPStatus.Success;
         }
         catch
         {
@@ -83,19 +84,6 @@ public abstract class DeviceTcpNet : DeviceCommunication
             return await InitializationOnConnectAsync().ConfigureAwait(false);
         }
         return OperateResult.CreateSuccessResult();
-    }
-
-    /// <summary>
-    /// 手动断开与远程服务器的连接，如果当前是长连接模式，那么就会切换到短连接模式。
-    /// </summary>
-    /// <returns>关闭连接，不需要查看IsSuccess属性查看</returns>
-    /// <example>
-    /// 直接关闭连接即可，基本上是不需要进行成功的判定。
-    /// </example>
-    public OperateResult CloseConnect()
-    {
-        OnExtraOnDisconnect?.Invoke(ConnectionId);
-        return NetworkPipe.CloseCommunication();
     }
 
     /// <inheritdoc />

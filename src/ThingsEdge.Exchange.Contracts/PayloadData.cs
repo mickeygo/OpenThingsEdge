@@ -63,12 +63,6 @@ public sealed class PayloadData
     public string? Group { get; init; }
 
     /// <summary>
-    /// 标记值的用途标识
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagValueUsage ValueUsage { get; init; }
-
-    /// <summary>
     /// 数据创建时间，可用于诊断。
     /// </summary>
     public DateTime CreatedTime { get; init; } = DateTime.Now;
@@ -101,7 +95,6 @@ public sealed class PayloadData
             DisplayName = tag.DisplayName,
             Identity = tag.Identity,
             Group = tag.Group,
-            ValueUsage = tag.ValueUsage,
         };
     }
 }

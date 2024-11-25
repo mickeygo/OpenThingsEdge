@@ -1,9 +1,9 @@
-﻿using Serilog;
-using ThingsEdge.App;
+using Serilog;
+using ThingsEdge.ConsoleApp;
 
 var host = Host.CreateDefaultBuilder();
 
-host.ConfigureServices(services => { 
+host.ConfigureServices(services => {
     services.AddMemoryCache();
 })
 .UseSerilog((hostingContext, loggerConfiguration) => 

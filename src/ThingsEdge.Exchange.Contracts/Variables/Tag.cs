@@ -70,12 +70,6 @@ public partial class Tag
     public TagIdentity Identity { get; init; } = TagIdentity.Master;
 
     /// <summary>
-    /// 曲线用途分类。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagCurveUsage CurveUsage { get; init; } = TagCurveUsage.None;
-
-    /// <summary>
     /// 标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。
     /// </summary>
     /// <remarks>注：分组中的数据类型要保持一致，如果是数组，组内各标记数据类型也应都为数组，且长度一致。</remarks>
@@ -83,15 +77,8 @@ public partial class Tag
     public string? Group { get; init; } = string.Empty;
 
     /// <summary>
-    /// 标记值的用途标识。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagValueUsage ValueUsage { get; init; } = TagValueUsage.Numerical;
-
-    /// <summary>
     /// <see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Notice"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
     /// </summary>
-    /// <remarks><see cref="TagFlag.Switch"/> 类型标记，在开关为 On 状态也会筛选数据并一起推送。</remarks>
     [NotNull]
     public List<Tag>? NormalTags { get; init; } = [];
 

@@ -228,16 +228,6 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         }
     }
 
-    private OperateResult CheckResponse(byte[] response)
-    {
-        var operateResult = AllenBradleyHelper.CheckResponse(response);
-        if (!operateResult.IsSuccess && operateResult.ErrorCode == 100)
-        {
-            NetworkPipe.RaisePipeError();
-        }
-        return operateResult;
-    }
-
     /// <summary>
     /// 读取指定地址的二进制数据内容，长度为地址长度，一般都是1，除非读取数组时，如果需要强制使用 片段读取功能码，则地址里携带 x=0x52; 或是 x=82; 则强制使用片段读取。
     /// </summary>
@@ -310,7 +300,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return OperateResult.CreateFailedResult<byte[], ushort, bool>(read);
         }
-        var check = CheckResponse(read.Content);
+        var check = AllenBradleyHelper.CheckResponse(read.Content);
         if (!check.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[], ushort, bool>(check);
@@ -369,7 +359,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return read;
         }
-        var check = CheckResponse(read.Content);
+        var check = AllenBradleyHelper.CheckResponse(read.Content);
         if (!check.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(check);
@@ -390,7 +380,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
         {
             return read;
         }
-        var check = CheckResponse(read.Content);
+        var check = AllenBradleyHelper.CheckResponse(read.Content);
         if (!check.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(check);
@@ -677,7 +667,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
             {
                 return read;
             }
-            var check = CheckResponse(read.Content);
+            var check = AllenBradleyHelper.CheckResponse(read.Content);
             if (!check.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<byte[]>(check);
@@ -773,7 +763,7 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
             {
                 return read;
             }
-            var check = CheckResponse(read.Content);
+            var check = AllenBradleyHelper.CheckResponse(read.Content);
             if (!check.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<byte[]>(check);

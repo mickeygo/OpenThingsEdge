@@ -1,4 +1,3 @@
-using ThingsEdge.Exchange.Contracts.Utils;
 using ThingsEdge.Exchange.Contracts.Variables;
 
 namespace ThingsEdge.Exchange.Contracts;
@@ -123,7 +122,7 @@ public static partial class PayloadDataExtensions
     {
         if (payload.IsArray() && payload.DataType == TagDataType.Bit)
         {
-            value = ConvertUtil.ToBooleanArray(payload.Value);
+            value = ConvertUtils.ToBooleanArray(payload.Value);
             return true;
         }
 
@@ -148,7 +147,7 @@ public static partial class PayloadDataExtensions
                 or TagDataType.Byte or TagDataType.Word
                 or TagDataType.Int or TagDataType.DInt)
             {
-                value = ConvertUtil.ToArray(payload.Value, Convert.ToInt32);
+                value = ConvertUtils.ToArray(payload.Value, Convert.ToInt32);
                 return true;
             }
         }
@@ -175,7 +174,7 @@ public static partial class PayloadDataExtensions
                 or TagDataType.Int or TagDataType.DInt
                 or TagDataType.Real or TagDataType.LReal)
             {
-                value = ConvertUtil.ToArray(payload.Value, Convert.ToDouble);
+                value = ConvertUtils.ToArray(payload.Value, Convert.ToDouble);
                 return true;
             }
         }

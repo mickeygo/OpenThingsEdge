@@ -1,4 +1,3 @@
-using ThingsEdge.Exchange.Contracts.Utils;
 using ThingsEdge.Exchange.Contracts.Variables;
 
 namespace ThingsEdge.Exchange.Contracts;
@@ -21,14 +20,14 @@ public static class TagFormater
             // 原始数据。
             object? obj2 = tag.DataType switch
             {
-                TagDataType.Bit => tag.Length <= 1 ? Convert.ToBoolean(obj) : ConvertUtil.ToBooleanArray(obj),
-                TagDataType.Byte => tag.Length <= 1 ? Convert.ToByte(obj) : ConvertUtil.ToByteArray(obj),
-                TagDataType.Word => tag.Length <= 1 ? Convert.ToUInt16(obj) : ConvertUtil.ToUInt16Array(obj),
-                TagDataType.DWord => tag.Length <= 1 ? Convert.ToUInt32(obj) : ConvertUtil.ToUInt32Array(obj),
-                TagDataType.Int => tag.Length <= 1 ? Convert.ToInt16(obj) : ConvertUtil.ToInt16Array(obj),
-                TagDataType.DInt => tag.Length <= 1 ? Convert.ToInt32(obj) : ConvertUtil.ToInt32Array(obj),
-                TagDataType.Real => tag.Length <= 1 ? Convert.ToSingle(obj) : ConvertUtil.ToSingleArray(obj),
-                TagDataType.LReal => tag.Length <= 1 ? Convert.ToDouble(obj) : ConvertUtil.ToDoubleArray(obj),
+                TagDataType.Bit => tag.Length <= 1 ? Convert.ToBoolean(obj) : ConvertUtils.ToBooleanArray(obj),
+                TagDataType.Byte => tag.Length <= 1 ? Convert.ToByte(obj) : ConvertUtils.ToByteArray(obj),
+                TagDataType.Word => tag.Length <= 1 ? Convert.ToUInt16(obj) : ConvertUtils.ToUInt16Array(obj),
+                TagDataType.DWord => tag.Length <= 1 ? Convert.ToUInt32(obj) : ConvertUtils.ToUInt32Array(obj),
+                TagDataType.Int => tag.Length <= 1 ? Convert.ToInt16(obj) : ConvertUtils.ToInt16Array(obj),
+                TagDataType.DInt => tag.Length <= 1 ? Convert.ToInt32(obj) : ConvertUtils.ToInt32Array(obj),
+                TagDataType.Real => tag.Length <= 1 ? Convert.ToSingle(obj) : ConvertUtils.ToSingleArray(obj),
+                TagDataType.LReal => tag.Length <= 1 ? Convert.ToDouble(obj) : ConvertUtils.ToDoubleArray(obj),
                 TagDataType.String or TagDataType.S7String or TagDataType.S7WString => Convert.ToString(obj),
                 _ => throw new NotImplementedException(),
             };

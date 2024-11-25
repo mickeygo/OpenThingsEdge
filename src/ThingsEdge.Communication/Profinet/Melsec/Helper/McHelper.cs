@@ -258,7 +258,7 @@ public static class McHelper
     {
         if (length.Length != address.Length)
         {
-            return new OperateResult<byte[]>(StringResources.Language.TwoParametersLengthIsNotSame);
+            return new OperateResult<byte[]>((int)CommErrorCode.TwoParametersLengthIsNotSame, StringResources.Language.TwoParametersLengthIsNotSame);
         }
         var mcAddressDatas = new McAddressData[address.Length];
         for (var i = 0; i < address.Length; i++)

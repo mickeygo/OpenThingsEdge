@@ -1,13 +1,13 @@
 using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Engine;
-using ThingsEdge.Exchange.Engine.Monitors;
+using ThingsEdge.Exchange.Engine.Connectors;
+using ThingsEdge.Exchange.Engine.Handler;
 using ThingsEdge.Exchange.Engine.Snapshot;
-using ThingsEdge.Exchange.Events;
+using ThingsEdge.Exchange.Engine.Workers;
 using ThingsEdge.Exchange.Forwarders;
-using ThingsEdge.Exchange.Infrastructure.EventBus;
+using ThingsEdge.Exchange.Infrastructure.Brokers;
 using ThingsEdge.Exchange.Interfaces;
 using ThingsEdge.Exchange.Interfaces.Impls;
-using ThingsEdge.Exchange.Internal;
 using ThingsEdge.Exchange.Management;
 
 namespace ThingsEdge.Exchange;
@@ -26,42 +26,45 @@ public static class ExchangeServiceCollectionExtensions
     public static IHostBuilder AddThingsEdgeExchange(this IHostBuilder builder, Action<IExchangeBuilder> builderAction)
     {
         // 注册监控器
-        MonitorLoop.Register<HeartbeatMonitor>();
-        MonitorLoop.Register<NoticeMonitor>();
-        MonitorLoop.Register<TriggerMonitor>();
-        MonitorLoop.Register<SwitchMonitor>();
+        EngineExecutor.Register<HeartbeatWorker>();
+        EngineExecutor.Register<NoticeWorker>();
+        EngineExecutor.Register<TriggerWorker>();
 
         // 注册服务
         builder.ConfigureServices((hostBuilder, services) =>
         {
-            // 缓存
+            // 注册缓存
             services.AddMemoryCache();
 
-            // 注册基于 MediatR 的事件总线。
-            services.AddSingleton<IEventPublisher, EventPublisher>();
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ExchangeServiceCollectionExtensions).Assembly));
+            // 注册消息队列服务
+            services.AddSingleton(typeof(IMessageBroker<>), typeof(SingleMessageBroker<>));
 
             // 注册内置服务。
-            services.AddTransient<HeartbeatMonitor>();
-            services.AddTransient<MonitorLoop>();
-            services.AddTransient<NoticeMonitor>();
-            services.AddTransient<TriggerMonitor>();
-            services.AddTransient<SwitchMonitor>();
+            services.AddTransient<EngineExecutor>();
+            services.AddSingleton<HeartbeatWorker>();
+            services.AddSingleton<NoticeWorker>();
+            services.AddSingleton<TriggerWorker>();
+
+            services.AddTransient<IHeartbeatMessageHandler, HeartbeatMessageHandler>();
+            services.AddTransient<INoticeMessageHandler, NoticeMessageHandler>();
+            services.AddTransient<ITriggerMessageHandler, TriggerMessageHandler>();
 
             services.AddSingleton<DriverConnectorManager>();
-            services.AddSingleton<EngineExchange>();
-            services.AddSingleton<EventDispatcher>();
-            services.AddSingleton<EventLoop>();
-            services.AddSingleton<InternalEventBroker>();
-            services.AddSingleton<IProducer, InternalProducer>();
-            services.AddSingleton<INotificationForwarderWrapper, NotificationForwarderWrapper>();
-            services.AddSingleton<IRequestForwarderProvider,  RequestForwarderProvider>();
-            services.AddSingleton<ITagReaderWriter, TagReaderWriterImpl>();
+            services.AddSingleton<IExchange, EngineExchange>();
+            services.AddTransient<ITagReaderWriter, TagReaderWriterImpl>();
+
             services.AddSingleton<ITagDataSnapshot, TagDataSnapshotImpl>();
+            services.AddSingleton<IMessageLoop, MessageLoop>();
+            services.AddTransient<ITagReaderWriter, TagReaderWriterImpl>();
+
+            services.AddTransient<IHeartbeatForwarderProxy, HeartbeatForwarderProxy>();
+            services.AddTransient<INoticeForwarderProxy, NoticeForwarderProxy>();
+            services.AddTransient<ITriggerForwarderProxy, TriggerForwarderProxy>();
+
         });
 
         var builder2 = new ExchangeBuilder(builder);
-        builderAction(builder2);
+        builderAction.Invoke(builder2);
 
         return builder;
     }
@@ -86,29 +89,6 @@ public static class ExchangeServiceCollectionExtensions
 
             services.AddHostedService<StartupHostedService>();
         });
-
-        // 选项配置
-        ExchangeOptions options = new();
-        optionsAction?.Invoke(options);
-
-        GlobalSettings.HeartbeatShouldAckZero = options.HeartbeatShouldAckZero;
-
-        if (options.TagTriggerConditionValue > 0)
-        {
-            GlobalSettings.TagTriggerConditionValue = options.TagTriggerConditionValue;
-        }
-        if (options.Siemens_PDUSizeS1500 > 0)
-        {
-            GlobalSettings.SiemensS7NetOptions.S1500_PDUSize = options.Siemens_PDUSizeS1500;
-        }
-        if (options.Siemens_PDUSizeS1200 > 0)
-        {
-            GlobalSettings.SiemensS7NetOptions.S1200_PDUSize = options.Siemens_PDUSizeS1200;
-        }
-        if (options.Siemens_PDUSizeS300 > 0)
-        {
-            GlobalSettings.SiemensS7NetOptions.S300_PDUSize = options.Siemens_PDUSizeS300;
-        }
 
         return builder;
     }

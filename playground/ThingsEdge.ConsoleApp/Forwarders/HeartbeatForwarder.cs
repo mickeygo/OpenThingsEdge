@@ -1,13 +1,13 @@
-﻿using ThingsEdge.Exchange.Forwarders;
+using ThingsEdge.Exchange.Forwarders;
 
-namespace ThingsEdge.App.Forwarders;
+namespace ThingsEdge.ConsoleApp.Forwarders;
 
 /// <summary>
 /// 设备心跳信息处理。
 /// </summary>
-internal sealed class HeartbeatForwarder(ILogger<HeartbeatForwarder> logger) : INativeHeartbeatForwarder
+internal sealed class HeartbeatForwarder(ILogger<HeartbeatForwarder> logger) : IHeartbeatForwarder
 {
-    public Task ChangeAsync(HeartbeatForwarderContext context, CancellationToken cancellationToken)
+    public Task ChangeAsync(HeartbeatContext context, CancellationToken cancellationToken)
     {
         logger.LogInformation("心跳监控，设备名称：{DeviceName}，状态：{State}", context.Device.Name, context.IsOnline ? "on" : "off");
 

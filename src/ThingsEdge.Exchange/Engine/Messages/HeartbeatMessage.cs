@@ -13,7 +13,7 @@ namespace ThingsEdge.Exchange.Engine.Messages;
 /// <param name="Self">读取的标记值</param>
 /// <param name="IsConnected">是否处于连接状态</param>
 /// <param name="IsOnlySign">是否仅仅为信号</param>
-internal record HeartbeatMessage(
+internal sealed record HeartbeatMessage(
     string ChannelName,
     Device Device,
     Tag Tag,

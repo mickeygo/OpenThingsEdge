@@ -6,19 +6,19 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 用于TCP/IP协议的传输管道信息。
 /// </summary>
-public class PipeTcpNet : NetworkPipeBase
+public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
 {
     private Socket? _netSocket;
 
     /// <summary>
     /// 获取远程服务器的IP地址。
     /// </summary>
-    public string IpAddress { get; }
+    public string IpAddress { get; } = ipAddress;
 
     /// <summary>
     /// 获取端口。
     /// </summary>
-    public int Port { get; }
+    public int Port { get; } = port;
 
     /// <summary>
     /// 连接超时时间，默认 10s。
@@ -30,28 +30,11 @@ public class PipeTcpNet : NetworkPipeBase
     /// </summary>
     public int KeepAliveTime { get; set; } = -1;
 
-    public PipeTcpNet(string ipAddress, int port)
-    {
-        IpAddress = ipAddress;
-        Port = port;
-    }
-
-    /// <inheritdoc />
-    public override bool IsConnectError()
-    {
-        if (_netSocket == null)
-        {
-            return true;
-        }
-        return base.IsConnectError();
-    }
-
     /// <inheritdoc />
     public override async Task<OperateResult<bool>> OpenCommunicationAsync()
     {
-        if (IsConnectError())
+        if (_netSocket == null)
         {
-            _netSocket.SafeClose();
             var endPoint = new IPEndPoint(IPAddress.Parse(IpAddress), Port);
             var connect = await NetSupport.CreateSocketAndConnectAsync(endPoint, ConnectTimeout).ConfigureAwait(false);
             if (connect.IsSuccess)
@@ -59,14 +42,13 @@ public class PipeTcpNet : NetworkPipeBase
                 Debug.WriteLine("已成功创建 Socket 并连接上服务器");
 
                 _netSocket = connect.Content;
-                ResetConnectErrorCount();
                 if (KeepAliveTime > 0)
                 {
                     _netSocket.SetKeepAlive(KeepAliveTime, KeepAliveTime);
                 }
                 return OperateResult.CreateSuccessResult(true);
             }
-            return new OperateResult<bool>(-IncrConnectErrorCount(), connect.Message);
+            return new OperateResult<bool>(connect.ErrorCode, connect.Message);
         }
         Debug.WriteLine("复用已有的 Socket");
         return OperateResult.CreateSuccessResult(false);
@@ -76,14 +58,14 @@ public class PipeTcpNet : NetworkPipeBase
     {
         if (_netSocket == null)
         {
-            throw new NullReferenceException();
+            throw new UnconnectedException();
         }
 
         var send = await NetSupport.SocketSendAsync(_netSocket, data).ConfigureAwait(false);
         if (!send.IsSuccess && send.ErrorCode == NetSupport.SocketErrorCode)
         {
             CloseCommunication();
-            return new OperateResult<byte[]>(-IncrConnectErrorCount(), send.Message);
+            return new OperateResult<byte[]>((int)CommErrorCode.SocketException, send.Message);
         }
         return send;
     }
@@ -93,14 +75,14 @@ public class PipeTcpNet : NetworkPipeBase
     {
         if (_netSocket == null)
         {
-            throw new NullReferenceException();
+            throw new UnconnectedException();
         }
 
         var receive = await NetSupport.SocketReceiveAsync(_netSocket, buffer, offset, length, timeOut).ConfigureAwait(false);
         if (!receive.IsSuccess && receive.ErrorCode == NetSupport.SocketErrorCode)
         {
             CloseCommunication();
-            return new OperateResult<int>(-IncrConnectErrorCount(), "Socket Exception -> " + receive.Message);
+            return new OperateResult<int>((int)CommErrorCode.SocketException, "Socket Exception -> " + receive.Message);
         }
         return receive;
     }

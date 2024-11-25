@@ -1,28 +1,18 @@
 using ThingsEdge.Exchange.Addresses;
 using ThingsEdge.Exchange.Contracts;
 using ThingsEdge.Exchange.Contracts.Variables;
-using ThingsEdge.Exchange.Engine;
+using ThingsEdge.Exchange.Engine.Connectors;
 using ThingsEdge.Exchange.Engine.Snapshot;
 
 namespace ThingsEdge.Exchange.Interfaces.Impls;
 
-internal sealed class TagReaderWriterImpl : ITagReaderWriter
+internal sealed class TagReaderWriterImpl(ITagDataSnapshot tagDataSnapshot,
+    IAddressFactory deviceFactory,
+    DriverConnectorManager driverConnectorManager) : ITagReaderWriter
 {
-    private readonly ITagDataSnapshot _tagDataSnapshot;
-    private readonly IAddressFactory _deviceFactory;
-    private readonly DriverConnectorManager _driverConnectorManager;
-
-
-    public TagReaderWriterImpl(ITagDataSnapshot tagDataSnapshot, IAddressFactory deviceFactory, DriverConnectorManager driverConnectorManager)
-    {
-        _tagDataSnapshot = tagDataSnapshot;
-        _deviceFactory = deviceFactory;
-        _driverConnectorManager = driverConnectorManager;
-    }
-
     public async Task<(bool ok, PayloadData? data, string? err)> ReadAsync(string deviceId, Tag tag)
     {
-        var driver = _driverConnectorManager.GetConnector(deviceId);
+        var driver = driverConnectorManager.GetConnector(deviceId);
         if (driver == null)
         {
             return (false, default, "没有找到指定设备的连接驱动");
@@ -45,7 +35,7 @@ internal sealed class TagReaderWriterImpl : ITagReaderWriter
     public async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(string deviceId, IEnumerable<Tag> tags, bool mulitple)
     {
         // 无法判断快照中是否是最新的数据，因此会直接从设备中读取。
-        var driver = _driverConnectorManager.GetConnector(deviceId);
+        var driver = driverConnectorManager.GetConnector(deviceId);
         if (driver == null)
         {
             return (false, default, "没有找到指定设备的连接驱动");
@@ -84,7 +74,7 @@ internal sealed class TagReaderWriterImpl : ITagReaderWriter
 
     public async Task<(bool ok, string? err)> WriteAsync(string deviceId, Tag tag, object data)
     {
-        var driver = _driverConnectorManager.GetConnector(deviceId);
+        var driver = driverConnectorManager.GetConnector(deviceId);
         if (driver == null)
         {
             return (false, "没有找到指定设备的连接驱动");
@@ -94,7 +84,7 @@ internal sealed class TagReaderWriterImpl : ITagReaderWriter
         if (ok)
         {
             // 更新快照
-            _tagDataSnapshot.Change(tag, data2!);
+            tagDataSnapshot.Change(tag, data2!);
         }
 
         return (ok, err);
@@ -113,7 +103,7 @@ internal sealed class TagReaderWriterImpl : ITagReaderWriter
 
     private (Tag? tag, string? deviceId) GetTagAndDevice(string tagId)
     {
-        foreach (var device in _deviceFactory.GetDevices())
+        foreach (var device in deviceFactory.GetDevices())
         {
             var tag = device.Tags.SingleOrDefault(t => t.TagId == tagId);
             if (tag != null)

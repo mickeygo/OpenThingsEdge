@@ -1,10 +1,19 @@
-﻿using ThingsEdge.Contracts;
-using ThingsEdge.Exchange.Common.DependencyInjection;
+using ThingsEdge.Exchange.Contracts;
 
-namespace ThingsEdge.App.Handlers;
+namespace ThingsEdge.ConsoleApp.Handlers;
 
-public sealed class ArchiveHandler(ILogger<ArchiveHandler> logger) : AbstractHandler, ITransientDependency
+/// <summary>
+/// 
+/// </summary>
+/// <param name="logger"></param>
+public sealed class ArchiveHandler(ILogger<ArchiveHandler> logger) : AbstractHandler
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public override Task<HandleResult> HandleAsync(RequestMessage message, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("数据存档处理，数据：{@Value}", message.Values.Select(s => new { s.Address, s.Value }));

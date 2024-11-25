@@ -1,6 +1,6 @@
 using ThingsEdge.Exchange.Addresses;
-using ThingsEdge.Exchange.Engine.Monitors;
-using ThingsEdge.Exchange.Events;
+using ThingsEdge.Exchange.Engine.Connectors;
+using ThingsEdge.Exchange.Engine.Snapshot;
 using ThingsEdge.Exchange.Interfaces;
 
 namespace ThingsEdge.Exchange.Engine;
@@ -8,28 +8,13 @@ namespace ThingsEdge.Exchange.Engine;
 /// <summary>
 /// 数据交换引擎。
 /// </summary>
-internal sealed class EngineExchange : IExchange
+internal sealed class EngineExchange(IAddressFactory addressFactory,
+    ITagDataSnapshot tagDataSnapshot,
+    DriverConnectorManager driverConnectorManager,
+    EngineExecutor engineExcutor,
+    ILogger<EngineExchange> logger) : IExchange
 {
     private CancellationTokenSource? _cts;
-
-    private readonly IProducer _producer;
-    private readonly IAddressFactory _deviceFactory;
-    private readonly DriverConnectorManager _driverConnectorManager;
-    private readonly MonitorLoop _monitorLoop;
-    private readonly ILogger _logger;
-
-    public EngineExchange(IProducer producer,
-        IAddressFactory deviceFactory,
-        DriverConnectorManager driverConnectorManager,
-        MonitorLoop monitorLoop,
-        ILogger<EngineExchange> logger)
-    {
-        _producer = producer;
-        _deviceFactory = deviceFactory;
-        _driverConnectorManager = driverConnectorManager;
-        _monitorLoop = monitorLoop;
-        _logger = logger;
-    }
 
     public bool IsRunning { get; private set; }
 
@@ -41,20 +26,18 @@ internal sealed class EngineExchange : IExchange
         }
         IsRunning = true;
 
-        _logger.LogInformation("[Engine] 引擎启动");
-        await _producer.ProduceAsync(new ExchangeChangedEvent(RunningState.Startup)).ConfigureAwait(false);
+        logger.LogInformation("[EngineExchange] 引擎启动");
 
-        _cts = new();
-
-        var devices = _deviceFactory.ReloadDevices();
-        _driverConnectorManager.Load(devices);
-        await _driverConnectorManager.ConnectAsync().ConfigureAwait(false);
+        _cts ??= new();
+        var addresses = addressFactory.ReloadAddress();
+        driverConnectorManager.Load(addresses);
+        await driverConnectorManager.ConnectAsync().ConfigureAwait(false);
 
         // 获取所有驱动，并监控设备数据
-        foreach (var connector in _driverConnectorManager.GetAllDriver())
+        foreach (var connector in driverConnectorManager.GetAllDriver())
         {
-            var (channelName, device) = _deviceFactory.GetDevice2(connector.Id);
-            _monitorLoop.Monitor(connector, channelName!, device!, _cts.Token);
+            var (channelName, device) = addressFactory.GetDevice2(connector.Id);
+            await engineExcutor.ExecuteAsync(connector, channelName!, device!, _cts.Token).ConfigureAwait(false);
         }
     }
 
@@ -65,6 +48,10 @@ internal sealed class EngineExchange : IExchange
             return;
         }
         IsRunning = false;
+
+        // 清空缓存与快照
+        TagDataCache.Clear();
+        tagDataSnapshot.Clear();
 
         var cts = _cts;
         if (_cts != null)
@@ -77,10 +64,9 @@ internal sealed class EngineExchange : IExchange
         await Task.Delay(1000).ConfigureAwait(false);
 
         //cts?.Dispose(); // Dispose 会导致部分问题
-        _driverConnectorManager.Close();
+        driverConnectorManager.Close();
 
-        _logger.LogInformation("[Engine] 引擎已停止");
-        await _producer.ProduceAsync(new ExchangeChangedEvent(RunningState.Stop)).ConfigureAwait(false);
+        logger.LogInformation("[EngineExchange] 引擎已停止");
     }
 
     public async ValueTask DisposeAsync()

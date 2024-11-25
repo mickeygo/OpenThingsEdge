@@ -58,14 +58,34 @@ public enum DriverModel
     Melsec_MCR,
 
     /// <summary>
-    /// 欧姆龙系列。
+    /// 三菱协议，采用A兼容1E帧协议实现，使用二进制码通讯
+    /// </summary>
+    Melsec_A1E,
+
+    /// <summary>
+    /// 三菱 PLC EIP 协议
+    /// </summary>
+    Melsec_CIP,
+
+    /// <summary>
+    /// 欧姆龙 Fins-Tcp 通信协议。
     /// </summary>
     Omron_FinsTcp,
 
     /// <summary>
-    /// 欧姆龙 Fins-Tcp 通信协议，支持 NJ、NX、NY 系列
+    /// 欧姆龙 CIP 协议，支持 NJ、NX、NY 系列。
     /// </summary>
-    Omron_Cip,
+    Omron_CIP,
+
+    /// <summary>
+    /// 欧姆龙的 HostLink 协议，基于Tcp实现。
+    /// </summary>
+    Omron_HostLinkOverTcp,
+
+    /// <summary>
+    /// 欧姆龙 HostLink 协议的 C-Mode 实现。
+    /// </summary>
+    Omron_HostLinkCModeOverTcp,
 
     /// <summary>
     /// 罗克韦尔 CIP 协议，支持  1756，1769 等型号

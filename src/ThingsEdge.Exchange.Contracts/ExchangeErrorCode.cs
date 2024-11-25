@@ -5,7 +5,7 @@ namespace ThingsEdge.Exchange.Contracts;
 /// </summary>
 /// <remarks>
 /// <para>0 成功</para>
-/// <para>401~499 内部详细错误</para>
+/// <para>701~799 内部详细错误</para>
 /// </remarks>
 public enum ExchangeErrorCode
 {
@@ -16,10 +16,16 @@ public enum ExchangeErrorCode
     Success = 0,
 
     /// <summary>
+    /// 数据推送接口未注册
+    /// </summary>
+    [Description("数据推送接口未注册")]
+    ForwarderUnregister = 701,
+
+    /// <summary>
     /// 调用 HTTP 错误。
     /// </summary>
     [Description("调用 HTTP 错误")]
-    HttpError = 401,
+    HttpError,
 
     /// <summary>
     /// HTTP 请求错误。
@@ -61,7 +67,7 @@ public enum ExchangeErrorCode
     /// 批量读取子数据错误。
     /// </summary>
     [Description("批量读取子数据错误")]
-    MultiReadItemError = 471,
+    MultiReadItemError,
 
     /// <summary>
     /// 回写数据项错误。

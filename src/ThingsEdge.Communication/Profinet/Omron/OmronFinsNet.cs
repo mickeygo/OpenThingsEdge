@@ -23,7 +23,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
 
-    private readonly IncrementCounter _conter = new(255L, 0L);
+    private readonly IncrementCounter _counter = new(255L, 0L);
 
     /// <summary>
     /// 信息控制字段，默认0x80。
@@ -153,7 +153,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         array[22] = SNA;
         array[23] = SA1;
         array[24] = SA2;
-        array[25] = (byte)_conter.OnNext();
+        array[25] = (byte)_counter.OnNext();
         cmd.CopyTo(array, 26);
         SID = array[25];
         return array;
@@ -186,7 +186,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
         {
             DA1 = read.Content[23];
         }
-        _conter.Reset();
+        _counter.Reset();
         return OperateResult.CreateSuccessResult();
     }
 

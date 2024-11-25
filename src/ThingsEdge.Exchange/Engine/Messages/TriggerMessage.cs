@@ -1,6 +1,7 @@
 using ThingsEdge.Exchange.Contracts.Variables;
 using ThingsEdge.Exchange.Contracts;
 using ThingsEdge.Exchange.Infrastructure.Brokers;
+using ThingsEdge.Exchange.Engine.Connectors;
 
 namespace ThingsEdge.Exchange.Engine.Messages;
 
@@ -12,7 +13,7 @@ namespace ThingsEdge.Exchange.Engine.Messages;
 /// <param name="Device">设备信息</param>
 /// <param name="Tag">标记</param>
 /// <param name="Self">读取的标记值</param>
-internal record TriggerMessage(
+internal sealed record TriggerMessage(
     IDriverConnector Connector,
     string ChannelName,
     Device Device,

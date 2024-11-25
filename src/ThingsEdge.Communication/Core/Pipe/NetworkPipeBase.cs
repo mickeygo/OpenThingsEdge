@@ -9,7 +9,6 @@ namespace ThingsEdge.Communication.Core.Pipe;
 public abstract class NetworkPipeBase : IDisposable
 {
     private bool _disposedValue;
-    private int _connectErrorCount;
 
     /// <summary>
     /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈，默认 5s。
@@ -36,13 +35,7 @@ public abstract class NetworkPipeBase : IDisposable
 
     public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
-        var read = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
-        if (!read.IsSuccess)
-        {
-            return read;
-        }
-        ResetConnectErrorCount();
-        return read;
+        return await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -118,46 +111,6 @@ public abstract class NetworkPipeBase : IDisposable
             return true;
         }
         return false;
-    }
-
-    /// <summary>
-    /// 重置当前的连续错误计数为0，并且返回重置前时候的值
-    /// </summary>
-    /// <returns>重置前的值</returns>
-    public int ResetConnectErrorCount()
-    {
-        return Interlocked.Exchange(ref _connectErrorCount, 0);
-    }
-
-    /// <summary>
-    /// 自增当前的连续错误计数，并且获取自增后的值信息，最大到10亿为止，无法继续增加了。
-    /// </summary>
-    /// <returns>自增后的值信息</returns>
-    protected int IncrConnectErrorCount()
-    {
-        var num = Interlocked.Increment(ref _connectErrorCount);
-        if (num > 1000000000)
-        {
-            Interlocked.Exchange(ref _connectErrorCount, 1000000000);
-        }
-        return num;
-    }
-
-    /// <summary>
-    /// 主动引发一个管道错误，从而让管道可以重新打开。
-    /// </summary>
-    public void RaisePipeError()
-    {
-        Interlocked.CompareExchange(ref _connectErrorCount, 1, 0);
-    }
-
-    /// <summary>
-    /// 当前的管道连接对象是否发生了错误。
-    /// </summary>
-    /// <returns>是否发生了通道的异常</returns>
-    public virtual bool IsConnectError()
-    {
-        return _connectErrorCount > 0;
     }
 
     /// <summary>
@@ -346,7 +299,7 @@ public abstract class NetworkPipeBase : IDisposable
         }
         if (netMessage != null && !netMessage.CheckHeadBytesLegal())
         {
-            return new OperateResult<byte[]>(StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine
+            return new OperateResult<byte[]>((int)CommErrorCode.CommandHeadCodeCheckFailed, StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine
                 + StringResources.Language.Send + ": " + sendValue.RemoveBegin(' ') + Environment.NewLine
                 + StringResources.Language.Receive + ": " + resultReceive.Content.ToHexString(' '));
         }

@@ -1,13 +1,17 @@
 using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Contracts;
+using ThingsEdge.Exchange.Engine.Connectors;
 using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Engine.Snapshot;
 using ThingsEdge.Exchange.Forwarders;
 
 namespace ThingsEdge.Exchange.Engine.Handler;
 
+/// <summary>
+/// 通知消息处理器。
+/// </summary>
 internal sealed class NoticeMessageHandler(
-    INotificationForwarder forwarder,
+    INoticeForwarder forwarderProxy,
     ITagDataSnapshot tagDataSnapshot,
     IOptions<ExchangeOptions> options,
     ILogger<NoticeMessageHandler> logger) : INoticeMessageHandler
@@ -49,6 +53,6 @@ internal sealed class NoticeMessageHandler(
         tagDataSnapshot.Change(reqMessage.Values);
 
         // 发送消息
-        await forwarder.PublishAsync(reqMessage, lastPayload, cancellationToken).ConfigureAwait(false);
+        await forwarderProxy.PublishAsync(new NoticeContext(reqMessage, lastPayload), cancellationToken).ConfigureAwait(false);
     }
 }

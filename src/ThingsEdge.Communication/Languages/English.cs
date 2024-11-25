@@ -5,18 +5,6 @@ namespace ThingsEdge.Communication.Languages;
 /// </summary>
 public class English : DefaultLanguage
 {
-    public override string TimeDescriptionSecond => " Second";
-
-    public override string TimeDescriptionMinute => " Minute";
-
-    public override string TimeDescriptionHour => " Hour";
-
-    public override string TimeDescriptionDay => " Day";
-
-    public override string ConnectedFailed => "Connected Failed: ";
-
-    public override string ConnectedSuccess => "Connect Success!";
-
     public override string ConnectTimeout => "Connected {0} Timeout, timeout is {1}";
 
     public override string UnknownError => "Unknown Error";
@@ -24,18 +12,6 @@ public class English : DefaultLanguage
     public override string ErrorCode => "Error Code: ";
 
     public override string TextDescription => "Description: ";
-
-    public override string ExceptionMessage => "Exception Info: ";
-
-    public override string ExceptionSource => "Exception Source：";
-
-    public override string ExceptionType => "Exception Type：";
-
-    public override string ExceptionStackTrace => "Exception Stack: ";
-
-    public override string ExceptionTargetSite => "Exception Method: ";
-
-    public override string ExceptionCustomer => "Error in user-defined method: ";
 
     public override string SuccessText => "Success";
 
@@ -52,18 +28,6 @@ public class English : DefaultLanguage
     public override string ReceiveDataLengthTooShort => "Receive length is too short: ";
 
     public override string MessageTip => "Message prompt:";
-
-    public override string Close => "Close";
-
-    public override string Time => "Time:";
-
-    public override string SoftWare => "Software:";
-
-    public override string BugSubmit => "Bug submit";
-
-    public override string MailServerCenter => "Mail Center System";
-
-    public override string MailSendTail => "Mail Service system issued automatically, do not reply";
 
     public override string IpAddressError => "IP address input exception, format is incorrect";
 
@@ -82,10 +46,6 @@ public class English : DefaultLanguage
     public override string TooManyLock => $"Too many read and write operations have occurred, resulting in a large accumulation of locks (1000), so this read and write fails, please try again later.";
 
     public override string AddressOffsetEven => "The address offset must be even";
-
-    public override string SystemInstallOperater => "Install new software: ip address is";
-
-    public override string SystemUpdateOperater => "Update software: ip address is";
 
     public override string SocketIOException => "Socket transport error: ";
 
@@ -111,40 +71,6 @@ public class English : DefaultLanguage
 
     public override string SocketRemoteCloseException => "An existing connection was forcibly closed by the remote host";
 
-    public override string FileDownloadSuccess => "File Download Successful";
-
-    public override string FileDownloadFailed => "File Download exception";
-
-    public override string FileUploadFailed => "File Upload exception";
-
-    public override string FileUploadSuccess => "File Upload Successful";
-
-    public override string FileDeleteFailed => "File Delete exception";
-
-    public override string FileDeleteSuccess => "File deletion succeeded";
-
-    public override string FileReceiveFailed => "Confirm File Receive exception";
-
-    public override string FileNotExist => "File does not exist";
-
-    public override string FileSaveFailed => "File Store failed";
-
-    public override string FileLoadFailed => "File load failed";
-
-    public override string FileSendClientFailed => "An exception occurred when the file was sent";
-
-    public override string FileWriteToNetFailed => "File Write Network exception";
-
-    public override string FileReadFromNetFailed => "Read file exceptions from the network";
-
-    public override string FilePathCreateFailed => "Folder path creation failed: ";
-
-    public override string FileRemoteNotExist => "The other file does not exist, cannot receive!";
-
-    public override string TokenCheckFailed => "Receive authentication token inconsistency";
-
-    public override string TokenCheckTimeout => "Receive authentication timeout: ";
-
     public override string CommandHeadCodeCheckFailed => "Command header check failed";
 
     public override string CommandLengthCheckFailed => "Command length check failed";
@@ -157,10 +83,6 @@ public class English : DefaultLanguage
 
     public override string NetClientAccountTimeout => "Wait for account check timeout：";
 
-    public override string NetClientOnline => "Online";
-
-    public override string NetClientOffline => "Offline";
-
     public override string NetClientBreak => "Abnormal offline";
 
     public override string NetClientFull => "The server hosts the upper limit and receives an exceeded request connection.";
@@ -169,33 +91,13 @@ public class English : DefaultLanguage
 
     public override string NetHeartCheckFailed => "Heartbeat Validation exception: ";
 
-    public override string NetHeartCheckTimeout => "Heartbeat verification timeout, force offline: ";
-
     public override string DataSourceFormatError => "Data source format is incorrect";
 
     public override string ServerFileCheckFailed => "Server confirmed file failed, please re-upload";
 
-    public override string ClientOnlineInfo => "Client <{0}> Online";
-
-    public override string ClientOfflineInfo => "Client <{0}> Offline";
-
-    public override string ClientDisableLogin => "Client <{0}> is not trusted, login forbidden";
-
     public override string ReConnectServerSuccess => "Re-connect server succeeded";
 
     public override string ReConnectServerAfterTenSeconds => "Reconnect the server after 10 seconds";
-
-    public override string KeyIsNotAllowedNull => "The keyword is not allowed to be empty";
-
-    public override string KeyIsExistAlready => "The current keyword already exists";
-
-    public override string KeyIsNotExist => "The keyword for the current subscription does not exist";
-
-    public override string ConnectingServer => "Connecting to Server...";
-
-    public override string ConnectFailedAndWait => "Connection disconnected, wait {0} seconds to reconnect";
-
-    public override string AttemptConnectServer => "Attempting to connect server {0} times";
 
     public override string ConnectServerSuccess => "Connection Server succeeded";
 
@@ -203,47 +105,9 @@ public class English : DefaultLanguage
 
     public override string ConnectionIsNotAvailable => "The current connection is not available";
 
-    public override string DeviceCurrentIsLoginRepeat => "ID of the current device duplicate login";
-
-    public override string DeviceCurrentIsLoginForbidden => "The ID of the current device prohibits login";
-
-    public override string PasswordCheckFailed => "Password validation failed";
-
     public override string DataTransformError => "Data conversion failed, source data: ";
 
     public override string RemoteClosedConnection => "Remote shutdown of connection";
-
-    public override string LogNetDebug => "Debug";
-
-    public override string LogNetInfo => "Info";
-
-    public override string LogNetWarn => "Warn";
-
-    public override string LogNetError => "Error";
-
-    public override string LogNetFatal => "Fatal";
-
-    public override string LogNetAbandon => "Abandon";
-
-    public override string LogNetAll => "All";
-
-    public override string LogNetTimeSelect => "Time Set:";
-
-    public override string LogNetUseExpress => "Use Regular Expressions";
-
-    public override string LogNetDataView => "DataView";
-
-    public override string LogNetDistributedView => "DistributedView";
-
-    public override string LogNetSource => "Source Log";
-
-    public override string LogNetFilePath => "File path:";
-
-    public override string LogNetFileSelect => "Select";
-
-    public override string LogNetViewer => "Log Viewer";
-
-    public override string LogNetFilter => "Log File(*.txt)|*.txt";
 
     public override string ModbusTcpFunctionCodeNotSupport => "Unsupported function code";
 
@@ -563,170 +427,6 @@ public class English : DefaultLanguage
 
     public override string FujiSpbStatus0C => "Inconsistent password";
 
-    public override string MQTTDataTooLong => "The current data length exceeds the limit of the agreement";
-
-    public override string MQTTStatus01 => "unacceptable protocol version";
-
-    public override string MQTTStatus02 => "identifier rejected";
-
-    public override string MQTTStatus03 => "server unavailable";
-
-    public override string MQTTStatus04 => "bad user name or password";
-
-    public override string MQTTStatus05 => "not authorized";
-
-    public override string SAMReceiveLengthMustLargerThan8 => "Received data length is less than 8, must be greater than 8";
-
-    public override string SAMHeadCheckFailed => "Data frame header check failed for SAM。";
-
-    public override string SAMLengthCheckFailed => "Data length header check failed for SAM。";
-
-    public override string SAMSumCheckFailed => "SAM's data checksum check failed.";
-
-    public override string SAMAddressStartWrong => "SAM string address identification error.";
-
-    public override string SAMStatus90 => "Successful operation";
-
-    public override string SAMStatus91 => "No content in the card";
-
-    public override string SAMStatus9F => "Find card success";
-
-    public override string SAMStatus10 => "Received data checksum error";
-
-    public override string SAMStatus11 => "Received data length error";
-
-    public override string SAMStatus21 => "Receive data command error";
-
-    public override string SAMStatus23 => "Unauthorized operation";
-
-    public override string SAMStatus24 => "Unrecognized error";
-
-    public override string SAMStatus31 => "Card authentication SAM failed";
-
-    public override string SAMStatus32 => "SAM certificate / card failed";
-
-    public override string SAMStatus33 => "Information validation error";
-
-    public override string SAMStatus40 => "Unrecognized card type";
-
-    public override string SAMStatus41 => "ID / card operation failed";
-
-    public override string SAMStatus47 => "Random number failed";
-
-    public override string SAMStatus60 => "SAM Self-test failed";
-
-    public override string SAMStatus66 => "SAM unauthorized";
-
-    public override string SAMStatus80 => "Failed to find card";
-
-    public override string SAMStatus81 => "Select card failed";
-
-    public override string DLTAddressCannotNull => "Address information cannot be empty or have a length of 0";
-
-    public override string DLTAddressCannotMoreThan12 => "Address information length cannot be greater than 12";
-
-    public override string DLTAddressMatchFailed => "Address format failed to match, please check whether it is less than 12 words, and are all addresses composed of 0-9 or A digits";
-
-    public override string DLTErrorInfoBit0 => "Other errors";
-
-    public override string DLTErrorInfoBit1 => "No data requested";
-
-    public override string DLTErrorInfoBit2 => "Incorrect password / unauthorized";
-
-    public override string DLTErrorInfoBit3 => "The communication rate cannot be changed";
-
-    public override string DLTErrorInfoBit4 => "Annual time zone exceeded";
-
-    public override string DLTErrorInfoBit5 => "Day time slot exceeded";
-
-    public override string DLTErrorInfoBit6 => "Rates exceeded";
-
-    public override string DLTErrorInfoBit7 => "Reserve";
-
-    public override string DLTErrorWriteReadCheckFailed => "Verify that the data after writing is consistent with the previous data fails";
-
-    public override string DLT1997ErrorInfoBit0 => "Illegal data";
-
-    public override string DLT1997ErrorInfoBit1 => "Data identification error";
-
-    public override string DLT1997ErrorInfoBit2 => "The password is wrong";
-
-    public override string DLT1997ErrorInfoBit4 => "The number of annual time zones is out of range";
-
-    public override string DLT1997ErrorInfoBit5 => "The number of daily hours is out of range";
-
-    public override string DLT1997ErrorInfoBit6 => "The number of rates is out of range";
-
-    public override string DLT698Error01 => "hardware failure";
-
-    public override string DLT698Error02 => "temporarily invalid";
-
-    public override string DLT698Error03 => "refuse to read and write";
-
-    public override string DLT698Error04 => "object is undefined";
-
-    public override string DLT698Error05 => "Object interface class does not conform to";
-
-    public override string DLT698Error06 => "object does not exist";
-
-    public override string DLT698Error07 => "Type mismatch";
-
-    public override string DLT698Error08 => "out of bounds";
-
-    public override string DLT698Error09 => "data block not available";
-
-    public override string DLT698Error10 => "Framing transfer canceled";
-
-    public override string DLT698Error11 => "Not in framed transmission state";
-
-    public override string DLT698Error12 => "Block write cancel";
-
-    public override string DLT698Error13 => "No block write state exists";
-
-    public override string DLT698Error14 => "Invalid data block sequence number";
-
-    public override string DLT698Error15 => "wrong password/unauthorized";
-
-    public override string DLT698Error16 => "Communication rate cannot be changed";
-
-    public override string DLT698Error17 => "Year time zone exceeded";
-
-    public override string DLT698Error18 => "The number of time slots exceeds";
-
-    public override string DLT698Error19 => "Exceeded rate";
-
-    public override string DLT698Error20 => "Security authentication mismatch";
-
-    public override string DLT698Error21 => "Repeat recharge";
-
-    public override string DLT698Error22 => "ESAM verification failed";
-
-    public override string DLT698Error23 => "Security authentication failed";
-
-    public override string DLT698Error24 => "Customer ID does not match";
-
-    public override string DLT698Error25 => "Wrong number of recharges";
-
-    public override string DLT698Error26 => "Super hoarding of electricity";
-
-    public override string DLT698Error27 => "abnormal address";
-
-    public override string DLT698Error28 => "Symmetric decryption error";
-
-    public override string DLT698Error29 => "Asymmetric decryption error";
-
-    public override string DLT698Error30 => "Signature error";
-
-    public override string DLT698Error31 => "Energy meter hangs";
-
-    public override string DLT698Error32 => "Invalid time tag";
-
-    public override string DLT698Error33 => "Request timed out";
-
-    public override string DLT698Error34 => "Incorrect P1P2 for ESAM";
-
-    public override string DLT698Error35 => "LC errors for ESAM";
-
     public override string KeyenceSR2000Error00 => "Receive undefined command";
 
     public override string KeyenceSR2000Error01 => "The command format does not match. (The number of parameters is wrong)";
@@ -771,36 +471,6 @@ public class English : DefaultLanguage
 
     public override string KeyenceNanoE6 => "Read from the device selected by the \"RDC\" instruction.";
 
-    public override string YokogawaLinkError01 => " The CPU number is outside the range of 1 to 4";
-
-    public override string YokogawaLinkError02 => "The command does not exist or the command is not executable.";
-
-    public override string YokogawaLinkError03 => "The device name does not exist or A relay device is incorrectly specified for read/write access in word units.";
-
-    public override string YokogawaLinkError04 => "Value outside the setting range: 1. Characters other than 0 and 1 are used for bit setting. 2. Word setting is out of the valid range of 0000 to FFFF. 3. The specified starting position in a command, such as Load/Save, is out of the valid address range.";
-
-    public override string YokogawaLinkError05 => "Data count out of range: 1. The specified bit count, word count, etc. exceeded the specifications range. 2. The specified data count and the device parameter count, etc. do not match.";
-
-    public override string YokogawaLinkError06 => "Attempted to execute monitoring without having specified a monitor command( BRS, WRS)";
-
-    public override string YokogawaLinkError07 => "Not a BASIC CPU";
-
-    public override string YokogawaLinkError08 => "A parameter is invalid for a reason other than those given above.";
-
-    public override string YokogawaLinkError41 => "An error has occurred during communication";
-
-    public override string YokogawaLinkError42 => "Value of checksum differs. (Bit omitted or changed characters)";
-
-    public override string YokogawaLinkError43 => "The amount of data received exceeded stipulated value.";
-
-    public override string YokogawaLinkError44 => "Timeout while receiving characters: 1. No End character or ETX was received. 2. Timeout duration is 5 seconds";
-
-    public override string YokogawaLinkError51 => "Timeout error: 1. No end-of-process response is returned from the CPU for reasons such as CPU power failure.(timeout) 2. Sequence CPU hardware failure. 3. Sequence CPU is not accepting commands. 4. Insufficient sequence CPU service time";
-
-    public override string YokogawaLinkError52 => "The CPU has detected an error during processing. ";
-
-    public override string YokogawaLinkErrorF1 => "Internal error: 1. A Cancel (PLC) command was issued during execution of a command other than a Load( PLD) or Save( PSV) command. 2. An internal error was detected.";
-
     public override string GeSRTPNotSupportBitReadWrite => "The current address data does not support read and write operations in bit units";
 
     public override string GeSRTPAddressCannotBeZero => "The starting address of the current address cannot be 0, it needs to start from 1";
@@ -808,226 +478,4 @@ public class English : DefaultLanguage
     public override string GeSRTPNotSupportByteReadWrite => "The current address data does not support read and write operations in byte units, and can only be read and written in word units";
 
     public override string GeSRTPWriteLengthMustBeEven => "The length of the data written to the current address must be an even number";
-
-    public override string YamatakeDigitronCPL40 => "Command format error";
-
-    public override string YamatakeDigitronCPL41 => "The number of data exceeds 16 (including the number of data for RS commands)";
-
-    public override string YamatakeDigitronCPL42 => "The address is out of range, all messages are discarded";
-
-    public override string YamatakeDigitronCPL43 => "The value in the data section is abnormal, and all messages are discarded";
-
-    public override string YamatakeDigitronCPL44 => "The value of the data part exceeds the range, and continue processing except for the current address";
-
-    public override string YamatakeDigitronCPL45 => "Can not write according to the machine status, write to prohibited addresses";
-
-    public override string YamatakeDigitronCPL46 => "CPL communication writing permission/prohibition (function setting item C27) is writing prohibition. When writing via communication, please set it as writing permission";
-
-    public override string YamatakeDigitronCPL47 => "Cannot switch the mode (other items with high priority are valid and cannot be changed through communication)";
-
-    public override string YamatakeDigitronCPL48 => "In the programming operation of the programmer, please send the command again after the programmer has finished writing and the machine returns to the basic display screen";
-
-    public override string YamatakeDigitronCPL99 => "Undecided order";
-
-    public override string LsisCnet0003 => "Number of blocks exceeds 16 at Individual Read/Write Request";
-
-    public override string LsisCnet0004 => "Variable Length exceeds the max. size of 16";
-
-    public override string LsisCnet0007 => "Other data type than X,B,W,D,L received";
-
-    public override string LsisCnet0011 => "1.Data length area information incorrect\r\n2.n case % is unavailable to start with\r\n3.Variable’s area value wrong\r\n4.Other value is written for Bit Write than 00 or 01";
-
-    public override string LsisCnet0090 => "Unregistered monitor execution requested";
-
-    public override string LsisCnet0190 => "Reg. No. range exceeded";
-
-    public override string LsisCnet0290 => "Reg. No. range exceeded";
-
-    public override string LsisCnet1132 => "Other letter than applicable device is input";
-
-    public override string LsisCnet1232 => "Request exceeds the max range of 60 Words to read or write at a time";
-
-    public override string LsisCnet1234 => "Unnecessary details exist as added.";
-
-    public override string LsisCnet1332 => "All the blocks shall be requested of the identical data type in the case of Individual Read/Write";
-
-    public override string LsisCnet1432 => "Data value unavailable to convert to Hex";
-
-    public override string LsisCnet7132 => "Request exceeds the area each device supports.";
-
-    public override string YRC1010 => "Command exception";
-
-    public override string YRC1011 => "Command operand abnormal";
-
-    public override string YRC1012 => "Command operand value is out of range";
-
-    public override string YRC1013 => "Command operand length is abnormal";
-
-    public override string YRC1020 => "Too many device files";
-
-    public override string YRC2010 => "Robot in action";
-
-    public override string YRC2020 => "Teaching programmer HOLD is stopping";
-
-    public override string YRC2030 => "Box HOLD is stopped";
-
-    public override string YRC2040 => "External HOLD";
-
-    public override string YRC2050 => "Command HOLD";
-
-    public override string YRC2060 => "False alarm is occurring";
-
-    public override string YRC2070 => "Servo ON";
-
-    public override string YRC2080 => "Different modes";
-
-    public override string YRC2090 => "He accesses the file through other functions";
-
-    public override string YRC2100 => "The remote command is not set";
-
-    public override string YRC2110 => "This data cannot be accessed";
-
-    public override string YRC2120 => "This data cannot be read";
-
-    public override string YRC2130 => "Edit";
-
-    public override string YRC2150 => "Coordinate transformation function is executing";
-
-    public override string YRC3010 => "Please connect to the servo power";
-
-    public override string YRC3040 => "Please check the origin position";
-
-    public override string YRC3050 => "Please confirm location";
-
-    public override string YRC3070 => "No current value generated";
-
-    public override string YRC3220 => "Panel lock mode / cycle inhibit signal received information";
-
-    public override string YRC3230 => "Panel lock, start to prohibit signal to receive information";
-
-    public override string YRC3350 => "User coordinates cannot be taught";
-
-    public override string YRC3360 => "The user coordinate file is corrupted";
-
-    public override string YRC3370 => "Different control axis groups";
-
-    public override string YRC3380 => "Different base axis data";
-
-    public override string YRC3390 => "Relative JOB cannot be changed (when CVTRJ)";
-
-    public override string YRC3400 => "Prohibit calling the main program (parameter)";
-
-    public override string YRC3410 => "Prohibit calling the main program (lights up during operation)";
-
-    public override string YRC3420 => "Prohibit calling the main program (teaching)";
-
-    public override string YRC3430 => "The verification between robots cannot be defined";
-
-    public override string YRC3450 => "Servo power cannot be switched on";
-
-    public override string YRC3460 => "Cannot set coordinate system";
-
-    public override string YRC4010 => "Insufficient storage capacity (program login storage)";
-
-    public override string YRC4012 => "Insufficient storage capacity (positioner login storage)";
-
-    public override string YRC4020 => "Prohibit program editing";
-
-    public override string YRC4030 => "A program with the same name exists";
-
-    public override string YRC4040 => "No program specified";
-
-    public override string YRC4060 => "Please set the execution program";
-
-    public override string YRC4120 => "Corrupted location data";
-
-    public override string YRC4130 => "No location data";
-
-    public override string YRC4140 => "Different types of location variables";
-
-    public override string YRC4150 => "Program END command of non-main program";
-
-    public override string YRC4170 => "Command data is corrupted";
-
-    public override string YRC4190 => "Inappropriate text in the program name";
-
-    public override string YRC4200 => "Inappropriate text in the label name";
-
-    public override string YRC4230 => "There are commands that cannot be used in this system";
-
-    public override string YRC4420 => "The transformation procedure has steps";
-
-    public override string YRC4430 => "This program has been changed";
-
-    public override string YRC4480 => "Please teach user coordinates";
-
-    public override string YRC4490 => "Relative JOB/Independent control function is not licensed";
-
-    public override string YRC5110 => "Syntax error (syntax of command)";
-
-    public override string YRC5120 => "Positioner data is abnormal";
-
-    public override string YRC5130 => "No NOP or END command";
-
-    public override string YRC5170 => "Format error (contrary to writing)";
-
-    public override string YRC5180 => "Inappropriate number of data";
-
-    public override string YRC5200 => "Out of data range";
-
-    public override string YRC5310 => "Syntax error (other than command)";
-
-    public override string YRC5340 => "The simulation command is specified incorrectly";
-
-    public override string YRC5370 => "Condition data record has errors";
-
-    public override string YRC5390 => "There is an error in the program data record";
-
-    public override string YRC5430 => "System inconsistency";
-
-    public override string YRC5480 => "Different types of welding functions";
-
-    public override string Vigor02 => "Communication SUM Check Error";
-
-    public override string Vigor04 => "The number of data bytes or components is 0";
-
-    public override string Vigor06 => "Data address is out of range";
-
-    public override string Vigor08 => "ASCII conversion error";
-
-    public override string Vigor31 => "No such command";
-
-    public override string Memobus01 => "SFC exception";
-
-    public override string Memobus02 => "The reference number is abnormal";
-
-    public override string Memobus03 => "The number of data is abnormal";
-
-    public override string Memobus40 => "The register type is incorrect";
-
-    public override string Memobus41 => "The data type is wrong";
-
-    public override string Memobus42 => "The register type of this site is incorrect";
-
-    public override string ToyoPuc11 => "Because it is a hardware exception of the CPU module, it cannot be handled";
-
-    public override string ToyoPuc20 => "The fixed data (ENQ) in the relay command is not 05";
-
-    public override string ToyoPuc21 => "The number of transfers is abnormal and there is an error in the number of bytes transferred";
-
-    public override string ToyoPuc23 => "The command code is illegal";
-
-    public override string ToyoPuc24 => "The subcommand code is illegal";
-
-    public override string ToyoPuc25 => "The data bytes in command format are illegal";
-
-    public override string ToyoPuc34 => "Access is prohibited by setting the access prohibition";
-
-    public override string ToyoPuc3E => "The command could not be executed because a reset was in progress";
-
-    public override string ToyoPuc3F => "The command cannot be executed because it is in a stopped state";
-
-    public override string ToyoPuc40 => "The address is not in the range due to reading or writing the command, or the address + data quantity of the command deviates from the address range";
-
-    public override string ToyoPuc41 => "The number of words or bytes is out of range";
 }

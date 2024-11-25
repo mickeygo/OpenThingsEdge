@@ -93,7 +93,7 @@ public static class FujiSPBHelper
         }
         if (address.Length != length.Length)
         {
-            return new OperateResult<byte[]>(StringResources.Language.TwoParametersLengthIsNotSame);
+            return new OperateResult<byte[]>((int)CommErrorCode.TwoParametersLengthIsNotSame, StringResources.Language.TwoParametersLengthIsNotSame);
         }
 
         var stringBuilder = new StringBuilder();

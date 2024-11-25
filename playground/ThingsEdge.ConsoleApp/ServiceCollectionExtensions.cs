@@ -1,48 +1,42 @@
-﻿using ThingsEdge.App.Configuration;
-using ThingsEdge.App.Forwarders;
-using ThingsEdge.App.HostedServices;
-using ThingsEdge.Exchange.Common.DependencyInjection;
-using ThingsEdge.Router;
+using ThingsEdge.ConsoleApp.Configuration;
+using ThingsEdge.ConsoleApp.Forwarders;
+using ThingsEdge.ConsoleApp.Handlers;
+using ThingsEdge.ConsoleApp.HostedServices;
+using ThingsEdge.Exchange;
 
-namespace ThingsEdge.App;
+namespace ThingsEdge.ConsoleApp;
 
+/// <summary>
+/// 
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// 注册 Scada 服务。
     /// </summary>
     /// <param name="hostBuilder"></param>
-    /// <param name="assemblies">注册 EventBus 的程序集</param>
     public static void AddScada(this IHostBuilder hostBuilder)
     {
-        hostBuilder.AddThingsEdgeRouter(builder =>
+        hostBuilder.AddThingsEdgeExchange(builder =>
         {
             builder.UseDeviceFileProvider()
                 .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
-                .UseNativeRequestForwarderHandler<ScadaRequestForwaderHandler>()
-                .UseNativeNoticeForwarder<ScadaNotificationForwarder>()
-                .UseOpsProvider(option =>
+                .UseNativeNoticeForwarder<NoticeForwarder>()
+                .UseNativeTriggerForwarder<TriggerForwader>()
+                .UseOptions(option =>
                 {
-                    option.Siemens_PDUSizeS1500 = 396; // S7 PDU 长度
+                    option.PDUSize = 396; // S7 PDU 长度
                 });
         });
 
         hostBuilder.ConfigureServices((context, services) =>
         {
-            services.AddScadaServices(context.Configuration);
+            services.Configure<ScadaConfig>(context.Configuration.GetSection("Scada"));
+
+            services.AddTransient<ArchiveHandler>();
+
+            // 启动项
+            services.AddHostedService<AppStartupHostedService>();
         });
-    }
-
-    private static IServiceCollection AddScadaServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<ScadaConfig>(configuration.GetSection("Scada"));
-
-        // 注册标记的服务
-        services.AddAutoDependencyInjection(typeof(ServiceCollectionExtensions).Assembly);
-
-        // 启动项
-        services.AddHostedService<AppStartupHostedService>();
-
-        return services;
     }
 }

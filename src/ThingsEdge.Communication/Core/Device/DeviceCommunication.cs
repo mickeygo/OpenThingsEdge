@@ -337,7 +337,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     #endregion
 
     /// <summary>
-    /// 关闭连接。
+    /// 手动断开与远程服务器的连接。
     /// </summary>
     public virtual void Close()
     {
@@ -345,7 +345,6 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         {
             NetworkPipe.CloseCommunication();
             NetworkPipe.Dispose();
-            OnExtraOnDisconnect?.Invoke(ConnectionId);
 
             _isClosed = true;
         }

@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.App;
+namespace ThingsEdge.ConsoleApp;
 
 /// <summary>
 /// 数据处理结果

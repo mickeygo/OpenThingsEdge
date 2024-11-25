@@ -24,10 +24,10 @@ public class OperateResult
     /// 具体的错误代码。
     /// </summary>
     /// <remarks>
-    /// 默认的错误码值为 10000，此时需要看 <see cref="Message" /> 的消息来查看错误信息，如果由于网络问题导致的错误，错误码小于 0，
+    /// 默认的错误码值为 999，此时需要看 <see cref="Message" /> 的消息来查看错误信息，如果由于网络问题导致的错误，错误码小于 0，
     /// 其他情况的错误都是对应协议的错误码，有些错误码的描述信息可以看 <see cref="Message" />，如果消息也是未知的话，此时需要根据错误码找对应协议的手册来确认错误消息。
     /// </remarks>
-    public int ErrorCode { get; set; } = 10000;
+    public int ErrorCode { get; set; } = 999;
 
     /// <summary>
     /// 实例化一个默认的结果对象

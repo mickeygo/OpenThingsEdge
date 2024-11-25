@@ -143,6 +143,41 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
         return _serialPort;
     }
 
+    public override async Task<OperateResult<bool>> OpenCommunicationAsync()
+    {
+        await Task.CompletedTask.ConfigureAwait(false);
+
+        try
+        {
+            if (!_serialPort.IsOpen)
+            {
+                _serialPort.Open();
+                return OperateResult.CreateSuccessResult(true);
+            }
+            return OperateResult.CreateSuccessResult(false);
+        }
+        catch (Exception ex)
+        {
+            return new OperateResult<bool>((int)CommErrorCode.OpenSerialPortException, "OpenCommunication failed: " + ex.Message);
+        }
+    }
+
+    public override OperateResult CloseCommunication()
+    {
+        if (_serialPort.IsOpen)
+        {
+            try
+            {
+                _serialPort.Close();
+            }
+            catch (Exception ex)
+            {
+                return new OperateResult(ex.Message);
+            }
+        }
+        return OperateResult.CreateSuccessResult();
+    }
+
     /// <summary>
     /// 清除串口缓冲区的数据，并返回该数据，如果缓冲区没有数据，返回的字节数组长度为0。
     /// </summary>
@@ -165,7 +200,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
             }
             catch (Exception ex)
             {
-                return new OperateResult(-IncrConnectErrorCount(), ex.Message);
+                return new OperateResult((int)CommErrorCode.SerialPortSendException, ex.Message);
             }
         }
         return OperateResult.CreateSuccessResult();
@@ -215,7 +250,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
                     }
                     if ((DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
                     {
-                        return new OperateResult<byte[]>(-IncrConnectErrorCount(), $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
+                        return new OperateResult<byte[]>((int)CommErrorCode.SerialPortReceiveException, $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
                     }
                     if (memoryStream.Length >= AtLeastReceiveLength)
                     {
@@ -244,16 +279,15 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
                 }
                 if (ReceiveTimeout > 0 && (DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
                 {
-                    return new OperateResult<byte[]>(-IncrConnectErrorCount(), $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
+                    return new OperateResult<byte[]>((int)CommErrorCode.SerialPortReceiveException, $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
                 }
                 continue;
             }
             catch (Exception ex2)
             {
-                return new OperateResult<byte[]>(-IncrConnectErrorCount(), ex2.Message);
+                return new OperateResult<byte[]>((int)CommErrorCode.SerialPortReceiveException, ex2.Message);
             }
         }
-        ResetConnectErrorCount();
         return OperateResult.CreateSuccessResult(memoryStream.ToArray());
     }
 
@@ -268,12 +302,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
         {
             await ClearSerialCacheAsync().ConfigureAwait(false);
         }
-        var operateResult = await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
-        if (operateResult.IsSuccess)
-        {
-            ResetConnectErrorCount();
-        }
-        return operateResult;
+        return await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

@@ -48,28 +48,11 @@ public static class IExchangeBuilderExtensions
     /// <param name="builder"></param>
     /// <returns></returns>
     public static IExchangeBuilder UseDeviceHeartbeatForwarder<TForwarder>(this IExchangeBuilder builder)
-        where TForwarder : INativeHeartbeatForwarder
+        where TForwarder : IHeartbeatForwarder
     {
         builder.Builder.ConfigureServices((_, services) =>
         {
-            services.Add(ServiceDescriptor.Describe(typeof(INativeHeartbeatForwarder), typeof(TForwarder), ServiceLifetime.Transient));
-        });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 使用本地的转发处理服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
-    /// </summary>
-    /// <typeparam name="TForwarder"></typeparam>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static IExchangeBuilder UseNativeRequestForwarder<TForwarder>(this IExchangeBuilder builder)
-        where TForwarder : IRequestForwarder
-    {
-        builder.Builder.ConfigureServices((_, services) =>
-        {
-            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarder), typeof(TForwarder), ServiceLifetime.Transient));
+            services.AddTransient(typeof(IHeartbeatForwarder), typeof(TForwarder));
         });
 
         return builder;
@@ -82,47 +65,28 @@ public static class IExchangeBuilderExtensions
     /// <param name="builder"></param>
     /// <returns></returns>
     public static IExchangeBuilder UseNativeNoticeForwarder<TForwarder>(this IExchangeBuilder builder)
-        where TForwarder : INotificationForwarder
+        where TForwarder : INoticeForwarder
     {
         builder.Builder.ConfigureServices((_, services) =>
         {
-            ForwarderRegisterHub.Default.Register("Native");
-            services.Add(ServiceDescriptor.DescribeKeyed(typeof(INotificationForwarder), "Native", typeof(TForwarder), ServiceLifetime.Transient));
+            services.AddTransient(typeof(INoticeForwarder), typeof(TForwarder));
         });
 
         return builder;
     }
 
     /// <summary>
-    /// 使用曲线文件信息处理服务，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// 使用本地的请求处理服务，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
     /// </summary>
     /// <typeparam name="TForwarder"></typeparam>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IExchangeBuilder UseCurveFileForwarder<TForwarder>(this IExchangeBuilder builder)
-       where TForwarder : INativeCurveFileForwarder
+    public static IExchangeBuilder UseNativeTriggerForwarder<TForwarder>(this IExchangeBuilder builder)
+        where TForwarder : ITriggerForwarder
     {
         builder.Builder.ConfigureServices((_, services) =>
         {
-            services.Add(ServiceDescriptor.Describe(typeof(INativeCurveFileForwarder), typeof(TForwarder), ServiceLifetime.Transient));
-        });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 使用本地的转发处理器，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
-    /// </summary>
-    /// <typeparam name="TForwarderHandler"></typeparam>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static IExchangeBuilder UseNativeRequestForwarderHandler<TForwarderHandler>(this IExchangeBuilder builder)
-        where TForwarderHandler : IRequestForwarderHandler
-    {
-        builder.Builder.ConfigureServices((_, services) =>
-        {
-            services.Add(ServiceDescriptor.Describe(typeof(IRequestForwarderHandler), typeof(TForwarderHandler), ServiceLifetime.Transient));
-            services.AddSingleton<IRequestForwarder, RequestForwarderProxy>();
+            services.AddTransient(typeof(ITriggerForwarder), typeof(TForwarder));
         });
 
         return builder;

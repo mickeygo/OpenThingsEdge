@@ -1,8 +1,8 @@
 using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Contracts.Variables;
+using ThingsEdge.Exchange.Engine.Connectors;
 using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Infrastructure.Brokers;
-using ThingsEdge.Exchange.Internal;
 
 namespace ThingsEdge.Exchange.Engine.Workers;
 

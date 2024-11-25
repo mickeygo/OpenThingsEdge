@@ -1,7 +1,7 @@
-﻿using ThingsEdge.App.Configuration;
-using ThingsEdge.Router.Interfaces;
+using ThingsEdge.ConsoleApp.Configuration;
+using ThingsEdge.Exchange.Interfaces;
 
-namespace ThingsEdge.App.HostedServices;
+namespace ThingsEdge.ConsoleApp.HostedServices;
 
 /// <summary>
 /// 程序启动后台服务
@@ -28,18 +28,18 @@ internal sealed class AppStartupHostedService : IHostedService
 
         try
         {
-            await Task.Delay(3000, cancellationToken); // 延迟启动
+            await Task.Delay(3000, cancellationToken).ConfigureAwait(false); // 延迟启动
 
             if (!_exchange.IsRunning)
             {
                 _logger.LogInformation("SCADA 自动服务启动中。。。");
 
-                await _exchange.StartAsync();
+                await _exchange.StartAsync().ConfigureAwait(false);
 
                 _logger.LogInformation("SCADA 服务已启动");
             }
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             _logger.LogError(ex, "[AppStartupHostedService] SCADA 服务启动失败。");
         }
@@ -49,7 +49,7 @@ internal sealed class AppStartupHostedService : IHostedService
     {
         if (_config.IsAutoStartup && _exchange.IsRunning)
         {
-            await _exchange.ShutdownAsync();
+            await _exchange.ShutdownAsync().ConfigureAwait(false);
 
             _logger.LogInformation("SCADA 服务已关闭");
         }

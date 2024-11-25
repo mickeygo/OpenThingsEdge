@@ -15,7 +15,7 @@ public static class NetSupport
     /// <summary>
     /// 表示Socket发生异常的错误码。
     /// </summary>
-    public static int SocketErrorCode { get; } = -1;
+    public static int SocketErrorCode { get; } = (int)CommErrorCode.ReceiveDataTimeout;
 
     /// <summary>
     /// 创建一个新的socket对象并连接到远程的地址，需要指定远程终结点，超时时间（单位是毫秒）。
@@ -33,7 +33,7 @@ public static class NetSupport
         }
         catch (Exception ex)
         {
-            return new OperateResult<Socket>("Socket Create Exception -> " + ex.Message);
+            return new OperateResult<Socket>((int)CommErrorCode.SocketException, "Socket Create Exception -> " + ex.Message);
         }
       
         try
@@ -44,12 +44,12 @@ public static class NetSupport
         }
         catch (OperationCanceledException)
         {
-            return new OperateResult<Socket>(string.Format(StringResources.Language.ConnectTimeout, endPoint, timeOut) + " ms");
+            return new OperateResult<Socket>((int)CommErrorCode.ConnectTimeout, string.Format(StringResources.Language.ConnectTimeout, endPoint, timeOut) + " ms");
         }
         catch (Exception ex2)
         {
             socket?.Close();
-            return new OperateResult<Socket>("Socket Exception -> " + ex2.Message);
+            return new OperateResult<Socket>((int)CommErrorCode.SocketException, "Socket Exception -> " + ex2.Message);
         }
     }
 

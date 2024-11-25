@@ -1,5 +1,3 @@
-using ThingsEdge.Exchange.Utils;
-
 namespace ThingsEdge.Exchange.Engine;
 
 /// <summary>
@@ -41,7 +39,7 @@ internal static class TagDataCache
         }
 
         // 新旧值比较相等
-        if (ObjectEqualUtils.IsEqual(newValue, data.Value))
+        if (ObjectComparator.IsEqual(newValue, data.Value))
         {
             data.Version++;
 
@@ -85,7 +83,7 @@ internal static class TagDataCache
     /// </summary>
     public static void Clear() => s_dataMap.Clear();
 
-    class InternalData
+    sealed class InternalData
     {
         [NotNull]
         public object? Value { get; set; }

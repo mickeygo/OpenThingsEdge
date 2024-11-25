@@ -1,5 +1,6 @@
 using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Contracts;
+using ThingsEdge.Exchange.Engine.Connectors;
 using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Engine.Snapshot;
 using ThingsEdge.Exchange.Forwarders;
@@ -9,8 +10,9 @@ namespace ThingsEdge.Exchange.Engine.Handler;
 /// <summary>
 /// 触发消息处理器。
 /// </summary>
-internal sealed class TriggerMessageHandler(ITagDataSnapshot tagDataSnapshot,
-    IRequestForwarderProvider requestForwarderProvider,
+internal sealed class TriggerMessageHandler(
+    ITriggerForwarderProxy forwarderProxy,
+    ITagDataSnapshot tagDataSnapshot,
     IOptions<ExchangeOptions> options,
     ILogger<TriggerMessageHandler> logger) : ITriggerMessageHandler
 {
@@ -63,17 +65,16 @@ internal sealed class TriggerMessageHandler(ITagDataSnapshot tagDataSnapshot,
             return;
         }
 
-        // 获取注册的发送请求对象，没有注册则后续不处理。
-        var requestForwarder = requestForwarderProvider.GetForwarder();
-        if (requestForwarder == null)
-        {
-            return;
-        }
-
         // 发送消息。
-        var result = await requestForwarder.SendAsync(reqMessage, cancellationToken).ConfigureAwait(false);
+        var result = await forwarderProxy.SendAsync(reqMessage, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess())
         {
+            // 没有注册则后续不处理。
+            if (result.Code == (int)ExchangeErrorCode.ForwarderUnregister)
+            {
+                return;
+            }
+
             logger.LogError("[TriggerMessageHandler] 推送消息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 message.Device.Name, message.Tag.Name, message.Tag.Address, result.ErrorMessage);
 

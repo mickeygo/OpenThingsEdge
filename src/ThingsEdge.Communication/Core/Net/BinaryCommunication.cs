@@ -52,16 +52,6 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
-    /// 连接上服务器的事件。
-    /// </summary>
-    public Action<string>? OnExtraOnConnect { get; set; }
-
-    /// <summary>
-    /// 与服务器断开后的事件。
-    /// </summary>
-    public Action<string>? OnExtraOnDisconnect { get; set; }
-
-    /// <summary>
     /// 根据实际的协议选择是否重写本方法，有些协议在创建连接之后，需要进行一些初始化的信号握手，才能最终建立网络通道。
     /// </summary>
     /// <returns>是否初始化成功，依据具体的协议进行重写</returns>
@@ -147,15 +137,6 @@ public abstract class BinaryCommunication
                 {
                     return OperateResult.CreateFailedResult<byte[]>(pipe);
                 }
-
-                if (pipe.Content)
-                {
-                    var ini = await InitializationOnConnectAsync().ConfigureAwait(false);
-                    if (!ini.IsSuccess)
-                    {
-                        return OperateResult.CreateFailedResult<byte[]>(ini);
-                    }
-                }
                 return await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
             }
         }
@@ -194,7 +175,7 @@ public abstract class BinaryCommunication
         var unpack = UnpackResponseContent(send, read.Content);
         if (!unpack.IsSuccess && unpack.ErrorCode == int.MinValue)
         {
-            unpack.ErrorCode = 10000;
+            unpack.ErrorCode = 999;
         }
         return unpack;
     }

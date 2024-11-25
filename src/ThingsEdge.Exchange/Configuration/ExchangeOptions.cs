@@ -31,7 +31,17 @@ public sealed class ExchangeOptions
     public bool AllowReadMulti { get; init; } = true;
 
     /// <summary>
-    /// 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
+    /// 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。
+    /// <para>
+    /// SIEMENS TIA 选项，信息系统->对 PLC 进行编程->指令->通信->S7 通信->数据一致性:
+    /// </para>
+    /// <para>
+    ///  1. 对于 S7 通信指令“PUT”/“GET”，在编程和组态过程中必须考虑到一致性数据区域的大小。这是因为在目标设备（服务器）的用户程序中没有可以用于与用户程序进行通信数据同步的通信块。
+    ///  2. 对于 S7-300 和 C7-300（除CPU 318-2 DP 之外），在操作系统的循环控制点，在保持数据一致性的情况下将通信数据逐块（一块为 32 字节）复制到用户存储器中。
+    ///      对于大型数据区域，无法确保数据的一致性。如果要求达到规定的数据一致性，则用户程序中的通信数据不应超过 32 个字节（最多为 8 个字节，视具体版本而定）。
+    ///  3. 另一方面，在 S7-400 和 S7-1500 中，大小为 462(480-18)字节的块中的通信数据不在循环控制点处理，而是在程序循环期间的固定时间片内完成。
+    ///      变量的一致性则由系统保证。因此，使用指令 "PUT"/"GET" 或者在读/写变量（例如，由 OP 或 OS 读/写）时可以在保持一致性的情况下访问这些通信区。
+    /// </para>
     /// </summary>
     public int PDUSize { get; set; }
 
@@ -42,19 +52,4 @@ public sealed class ExchangeOptions
     /// 触发标志位重置值，可以防止 PLC 值与 Tag 缓存值一致导致跳过处理逻辑；若设置后，后台结束数据需要做幂等处理。
     /// </remarks>
     public int AckRetryMaxCount { get; init; } = 3;
-
-    /// <summary>
-    /// 针对于S7协议，1500 系列一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
-    /// </summary>
-    public int Siemens_PDUSizeS1500 { get; set; }
-
-    /// <summary>
-    /// 针对于S7协议，1200 系列一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
-    /// </summary>
-    public int Siemens_PDUSizeS1200 { get; set; }
-
-    /// <summary>
-    /// 针对于S7协议，300 系列一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。  
-    /// </summary>
-    public int Siemens_PDUSizeS300 { get; set; }
 }

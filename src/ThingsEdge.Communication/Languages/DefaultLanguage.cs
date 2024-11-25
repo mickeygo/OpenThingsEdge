@@ -5,18 +5,6 @@ namespace ThingsEdge.Communication.Languages;
 /// </summary>
 public class DefaultLanguage
 {
-    public virtual string TimeDescriptionSecond => " 秒";
-
-    public virtual string TimeDescriptionMinute => " 分钟";
-
-    public virtual string TimeDescriptionHour => " 小时";
-
-    public virtual string TimeDescriptionDay => " 天";
-
-    public virtual string ConnectedFailed => "连接失败：";
-
-    public virtual string ConnectedSuccess => "连接成功！";
-
     public virtual string ConnectTimeout => "连接 {0} 失败，超时时间为 {1}";
 
     public virtual string UnknownError => "未知错误";
@@ -24,18 +12,6 @@ public class DefaultLanguage
     public virtual string ErrorCode => "错误代号";
 
     public virtual string TextDescription => "文本描述";
-
-    public virtual string ExceptionMessage => "错误信息：";
-
-    public virtual string ExceptionSource => "错误源：";
-
-    public virtual string ExceptionType => "错误类型：";
-
-    public virtual string ExceptionStackTrace => "错误堆栈：";
-
-    public virtual string ExceptionTargetSite => "错误方法：";
-
-    public virtual string ExceptionCustomer => "用户自定义方法出错：";
 
     public virtual string SuccessText => "成功";
 
@@ -52,18 +28,6 @@ public class DefaultLanguage
     public virtual string ReceiveDataLengthTooShort => "接收的数据长度太短：";
 
     public virtual string MessageTip => "消息提示：";
-
-    public virtual string Close => "关闭";
-
-    public virtual string Time => "时间：";
-
-    public virtual string SoftWare => "软件：";
-
-    public virtual string BugSubmit => "Bug提交";
-
-    public virtual string MailServerCenter => "邮件发送系统";
-
-    public virtual string MailSendTail => "邮件服务系统自动发出，请勿回复！";
 
     public virtual string IpAddressError => "Ip地址输入异常，格式不正确";
 
@@ -82,10 +46,6 @@ public class DefaultLanguage
     public virtual string TooManyLock => $"当前发生了太多的读写操作，导致锁大量累计(1000)，所以本次读写失败，请稍候重试。";
 
     public virtual string AddressOffsetEven => "地址偏移量必须为偶数";
-
-    public virtual string SystemInstallOperater => "安装新系统：IP为";
-
-    public virtual string SystemUpdateOperater => "更新新系统：IP为";
 
     public virtual string SocketIOException => "套接字传送数据异常：";
 
@@ -111,40 +71,6 @@ public class DefaultLanguage
 
     public virtual string SocketRemoteCloseException => "远程主机强迫关闭了一个现有的连接";
 
-    public virtual string FileDownloadSuccess => "文件下载成功";
-
-    public virtual string FileDownloadFailed => "文件下载异常";
-
-    public virtual string FileUploadFailed => "文件上传异常";
-
-    public virtual string FileUploadSuccess => "文件上传成功";
-
-    public virtual string FileDeleteFailed => "文件删除异常";
-
-    public virtual string FileDeleteSuccess => "文件删除成功";
-
-    public virtual string FileReceiveFailed => "确认文件接收异常";
-
-    public virtual string FileNotExist => "文件不存在";
-
-    public virtual string FileSaveFailed => "文件存储失败";
-
-    public virtual string FileLoadFailed => "文件加载失败";
-
-    public virtual string FileSendClientFailed => "文件发送的时候发生了异常";
-
-    public virtual string FileWriteToNetFailed => "文件写入网络异常";
-
-    public virtual string FileReadFromNetFailed => "从网络读取文件异常";
-
-    public virtual string FilePathCreateFailed => "文件夹路径创建失败：";
-
-    public virtual string FileRemoteNotExist => "对方文件不存在，无法接收！";
-
-    public virtual string TokenCheckFailed => "接收验证令牌不一致";
-
-    public virtual string TokenCheckTimeout => "接收验证超时:";
-
     public virtual string CommandHeadCodeCheckFailed => "命令头校验失败";
 
     public virtual string CommandLengthCheckFailed => "命令长度检查失败";
@@ -157,10 +83,6 @@ public class DefaultLanguage
 
     public virtual string NetEngineClose => "关闭引擎";
 
-    public virtual string NetClientOnline => "上线";
-
-    public virtual string NetClientOffline => "下线";
-
     public virtual string NetClientBreak => "异常掉线";
 
     public virtual string NetClientFull => "服务器承载上限，收到超出的请求连接。";
@@ -169,33 +91,15 @@ public class DefaultLanguage
 
     public virtual string NetHeartCheckFailed => "心跳验证异常：";
 
-    public virtual string NetHeartCheckTimeout => "心跳验证超时，强制下线：";
-
     public virtual string DataSourceFormatError => "数据源格式不正确";
 
     public virtual string ServerFileCheckFailed => "服务器确认文件失败，请重新上传";
-
-    public virtual string ClientOnlineInfo => "客户端 <{0}> 上线";
-
-    public virtual string ClientOfflineInfo => "客户端 <{0}> 下线";
-
-    public virtual string ClientDisableLogin => "客户端 <{0}> 不被信任，禁止登录";
 
     public virtual string ReConnectServerSuccess => "重连服务器成功";
 
     public virtual string ReConnectServerAfterTenSeconds => "在10秒后重新连接服务器";
 
-    public virtual string KeyIsNotAllowedNull => "关键字不允许为空";
-
-    public virtual string KeyIsExistAlready => "当前的关键字已经存在";
-
-    public virtual string KeyIsNotExist => "当前订阅的关键字不存在";
-
     public virtual string ConnectingServer => "正在连接服务器...";
-
-    public virtual string ConnectFailedAndWait => "连接断开，等待{0}秒后重新连接";
-
-    public virtual string AttemptConnectServer => "正在尝试第{0}次连接服务器";
 
     public virtual string ConnectServerSuccess => "连接服务器成功";
 
@@ -203,47 +107,9 @@ public class DefaultLanguage
 
     public virtual string ConnectionIsNotAvailable => "当前的连接不可用";
 
-    public virtual string DeviceCurrentIsLoginRepeat => "当前设备的id重复登录";
-
-    public virtual string DeviceCurrentIsLoginForbidden => "当前设备的id禁止登录";
-
-    public virtual string PasswordCheckFailed => "密码验证失败";
-
     public virtual string DataTransformError => "数据转换失败，源数据：";
 
     public virtual string RemoteClosedConnection => "远程关闭了连接";
-
-    public virtual string LogNetDebug => "调试";
-
-    public virtual string LogNetInfo => "信息";
-
-    public virtual string LogNetWarn => "警告";
-
-    public virtual string LogNetError => "错误";
-
-    public virtual string LogNetFatal => "致命";
-
-    public virtual string LogNetAbandon => "放弃";
-
-    public virtual string LogNetAll => "全部";
-
-    public virtual string LogNetTimeSelect => "时间选择:";
-
-    public virtual string LogNetUseExpress => "使用正则表达式";
-
-    public virtual string LogNetDataView => "数据视图";
-
-    public virtual string LogNetDistributedView => "分布视图";
-
-    public virtual string LogNetSource => "源日志";
-
-    public virtual string LogNetFilePath => "文件路径:";
-
-    public virtual string LogNetFileSelect => "文件选择";
-
-    public virtual string LogNetViewer => "日志查看器";
-
-    public virtual string LogNetFilter => "日志文件(*.txt)|*.txt";
 
     public virtual string ModbusTcpFunctionCodeNotSupport => "不支持的功能码";
 
@@ -563,170 +429,6 @@ public class DefaultLanguage
 
     public virtual string FujiSpbStatus0C => "密码不一致";
 
-    public virtual string MQTTDataTooLong => "当前的数据长度超出了协议的限制";
-
-    public virtual string MQTTStatus01 => "不可请求的协议版本";
-
-    public virtual string MQTTStatus02 => "当前的Id被拒绝";
-
-    public virtual string MQTTStatus03 => "服务器不可用";
-
-    public virtual string MQTTStatus04 => "错误的用户名或是密码";
-
-    public virtual string MQTTStatus05 => "当前无授权";
-
-    public virtual string SAMReceiveLengthMustLargerThan8 => "接收数据长度小于8，必须大于8";
-
-    public virtual string SAMHeadCheckFailed => "SAM的数据帧头检查失败。";
-
-    public virtual string SAMLengthCheckFailed => "SAM的数据长度检查失败。";
-
-    public virtual string SAMSumCheckFailed => "SAM的数据校验和检查失败。";
-
-    public virtual string SAMAddressStartWrong => "SAM的字符串地址标识错误。";
-
-    public virtual string SAMStatus90 => "操作成功";
-
-    public virtual string SAMStatus91 => "证/卡中此项无内容";
-
-    public virtual string SAMStatus9F => "寻找证/卡成功";
-
-    public virtual string SAMStatus10 => "接收数据校验和错";
-
-    public virtual string SAMStatus11 => "接收数据长度错";
-
-    public virtual string SAMStatus21 => "接收数据命令错";
-
-    public virtual string SAMStatus23 => "越权操作";
-
-    public virtual string SAMStatus24 => "无法识别的错误";
-
-    public virtual string SAMStatus31 => "证/卡认证 SAM 失败";
-
-    public virtual string SAMStatus32 => "SAM 认证证/卡失败";
-
-    public virtual string SAMStatus33 => "信息验证错误";
-
-    public virtual string SAMStatus40 => "无法识别的卡类型";
-
-    public virtual string SAMStatus41 => "读证/卡操作失败";
-
-    public virtual string SAMStatus47 => "取随机数失败";
-
-    public virtual string SAMStatus60 => "SAM 自检失败";
-
-    public virtual string SAMStatus66 => "SAM 未经授权";
-
-    public virtual string SAMStatus80 => "寻找证/卡失败";
-
-    public virtual string SAMStatus81 => "选取证/卡失败";
-
-    public virtual string DLTAddressCannotNull => "地址信息不能为空或是长度为0";
-
-    public virtual string DLTAddressCannotMoreThan12 => "地址信息长度不能大于12";
-
-    public virtual string DLTAddressMatchFailed => "地址格式配对失败，请检查是否是少于12个字，且都是0-9或A的数字组成的地址";
-
-    public virtual string DLTErrorInfoBit0 => "其他错误";
-
-    public virtual string DLTErrorInfoBit1 => "无请求数据";
-
-    public virtual string DLTErrorInfoBit2 => "密码错/未授权";
-
-    public virtual string DLTErrorInfoBit3 => "通信速率不能更改";
-
-    public virtual string DLTErrorInfoBit4 => "年时区数超";
-
-    public virtual string DLTErrorInfoBit5 => "日时段数超";
-
-    public virtual string DLTErrorInfoBit6 => "费率数超";
-
-    public virtual string DLTErrorInfoBit7 => "保留";
-
-    public virtual string DLTErrorWriteReadCheckFailed => "校验写入之后和之前的数据是否一致失败";
-
-    public virtual string DLT1997ErrorInfoBit0 => "非法数据";
-
-    public virtual string DLT1997ErrorInfoBit1 => "数据标识错误";
-
-    public virtual string DLT1997ErrorInfoBit2 => "密码错";
-
-    public virtual string DLT1997ErrorInfoBit4 => "年时区数超出范围";
-
-    public virtual string DLT1997ErrorInfoBit5 => "日时段数超出范围";
-
-    public virtual string DLT1997ErrorInfoBit6 => "费率数超范围";
-
-    public virtual string DLT698Error01 => "硬件失效";
-
-    public virtual string DLT698Error02 => "暂时失效";
-
-    public virtual string DLT698Error03 => "拒绝读写";
-
-    public virtual string DLT698Error04 => "对象未定义";
-
-    public virtual string DLT698Error05 => "对象接口类不符合";
-
-    public virtual string DLT698Error06 => "对象不存在";
-
-    public virtual string DLT698Error07 => "类型不匹配";
-
-    public virtual string DLT698Error08 => "越界";
-
-    public virtual string DLT698Error09 => "数据块不可用";
-
-    public virtual string DLT698Error10 => "分帧传输已取消";
-
-    public virtual string DLT698Error11 => "不处于分帧传输状态";
-
-    public virtual string DLT698Error12 => "块写取消";
-
-    public virtual string DLT698Error13 => "不存在块写状态";
-
-    public virtual string DLT698Error14 => "数据块序号无效";
-
-    public virtual string DLT698Error15 => "密码错/未授权";
-
-    public virtual string DLT698Error16 => "通信速率不能更改";
-
-    public virtual string DLT698Error17 => "年时区数超";
-
-    public virtual string DLT698Error18 => "日时段数超";
-
-    public virtual string DLT698Error19 => "费率数超";
-
-    public virtual string DLT698Error20 => "安全认证不匹配";
-
-    public virtual string DLT698Error21 => "重复充值";
-
-    public virtual string DLT698Error22 => "ESAM 验证失败";
-
-    public virtual string DLT698Error23 => "安全认证失败";
-
-    public virtual string DLT698Error24 => "客户编号不匹配";
-
-    public virtual string DLT698Error25 => "充值次数错误";
-
-    public virtual string DLT698Error26 => "购电超囤积";
-
-    public virtual string DLT698Error27 => "地址异常";
-
-    public virtual string DLT698Error28 => "对称解密错误";
-
-    public virtual string DLT698Error29 => "非对称解密错误";
-
-    public virtual string DLT698Error30 => "签名错误";
-
-    public virtual string DLT698Error31 => "电能表挂起";
-
-    public virtual string DLT698Error32 => "时间标签无效";
-
-    public virtual string DLT698Error33 => "请求超时";
-
-    public virtual string DLT698Error34 => "ESAM 的 P1P2 不正确";
-
-    public virtual string DLT698Error35 => "ESAM 的 LC 错误";
-
     public virtual string KeyenceSR2000Error00 => "接收未定义的命令";
 
     public virtual string KeyenceSR2000Error01 => "命令格式不匹配。（参数的数量有误）";
@@ -771,36 +473,6 @@ public class DefaultLanguage
 
     public virtual string KeyenceNanoE6 => "读取“RDC”指令选定的软元件中。";
 
-    public virtual string YokogawaLinkError01 => "CPU编号超出1到4的范围";
-
-    public virtual string YokogawaLinkError02 => "该命令不存在或该命令不可执行。";
-
-    public virtual string YokogawaLinkError03 => "设备地址不存在，或以字为单位错误地指定了继电器进行读写访问。";
-
-    public virtual string YokogawaLinkError04 => "超出设置范围的值：1. 0和1以外的字符用于位设置。 2.字设置超出了有效范围0000至FFFF。 3.命令中指定的起始位置（例如“加载/保存”）超出有效地址范围。";
-
-    public virtual string YokogawaLinkError05 => "数据计数超出范围：1.指定的位数，字数等超出了规格范围。 2.指定的数据计数和设备参数计数等不匹配。";
-
-    public virtual string YokogawaLinkError06 => "尝试执行监视而未指定监视命令（BRS，WRS）";
-
-    public virtual string YokogawaLinkError07 => "不是BASIC CPU";
-
-    public virtual string YokogawaLinkError08 => "由于上述原因以外的其他原因，参数无效。";
-
-    public virtual string YokogawaLinkError41 => "通讯过程中发生错误";
-
-    public virtual string YokogawaLinkError42 => "校验和的值不同。 （位省略或更改字符）";
-
-    public virtual string YokogawaLinkError43 => "接收到的数据量超过规定值。";
-
-    public virtual string YokogawaLinkError44 => "接收字符时超时：1.未接收到结束字符或ETX。 2.超时时间为5秒";
-
-    public virtual string YokogawaLinkError51 => "超时错误：1.由于诸如CPU电源故障之类的原因，没有从CPU返回过程结束响应。（超时）2.顺序CPU硬件故障。 3.顺序CPU不接受命令。 4.顺序CPU服务时间不足";
-
-    public virtual string YokogawaLinkError52 => "CPU在处理期间检测到错误。";
-
-    public virtual string YokogawaLinkErrorF1 => "内部错误：1.在执行Load（PLD）或Save（PSV）命令以外的命令期间，发出了Cancel（PLC）命令。 2.检测到内部错误。";
-
     public virtual string GeSRTPNotSupportBitReadWrite => "当前的地址数据不支持位单位的读写操作";
 
     public virtual string GeSRTPAddressCannotBeZero => "当前的地址起始地址不能为0，需要从1开始";
@@ -808,226 +480,4 @@ public class DefaultLanguage
     public virtual string GeSRTPNotSupportByteReadWrite => "当前的地址数据不支持字节单位的读写操作，只能使用字单位读写";
 
     public virtual string GeSRTPWriteLengthMustBeEven => "当前的地址写入的数据长度必须是偶数";
-
-    public virtual string YamatakeDigitronCPL40 => "命令形式错误";
-
-    public virtual string YamatakeDigitronCPL41 => "数据的个数超过16个（也包括RS命令的数据个数）";
-
-    public virtual string YamatakeDigitronCPL42 => "地址超过范围，废弃所有电文";
-
-    public virtual string YamatakeDigitronCPL43 => "数据部的数值异常，废弃所有电文";
-
-    public virtual string YamatakeDigitronCPL44 => "数据部的数值超过范围，除当前地址以外继续处理";
-
-    public virtual string YamatakeDigitronCPL45 => "根据机器状态不能进行写入，写入禁止的地址";
-
-    public virtual string YamatakeDigitronCPL46 => "CPL通信写入许可/禁止（功能设置项目 C27）为禁止写入，请通过通讯进行写入的场合，请设定为写入许可";
-
-    public virtual string YamatakeDigitronCPL47 => "不能切换模式（其他优先度高的项目有效，通过通讯不能变更）";
-
-    public virtual string YamatakeDigitronCPL48 => "编程器写入操作中，请在编程器写入结束，本机返回基本显示画面后再次发送命令";
-
-    public virtual string YamatakeDigitronCPL99 => "未定的命令";
-
-    public virtual string LsisCnet0003 => "读/写 请求块数目超出 16 个字符";
-
-    public virtual string LsisCnet0004 => "变量长度超出了最大值 16";
-
-    public virtual string LsisCnet0007 => "接收的数据类型不是 X,B,W,D,L";
-
-    public virtual string LsisCnet0011 => "1.错误的数据长度区域\r\n2.缺小 % 开头\r\n3.变量值区域错误\r\n4.写其它值而不是 00 和 01";
-
-    public virtual string LsisCnet0090 => "没有注册的监控请求操作";
-
-    public virtual string LsisCnet0190 => "注册号超出范围";
-
-    public virtual string LsisCnet0290 => "注册号超出范围";
-
-    public virtual string LsisCnet1132 => "错误的指定了设备存储器";
-
-    public virtual string LsisCnet1232 => "读或写时请求执行的数据数目超出 60 个字";
-
-    public virtual string LsisCnet1234 => "附加了不必要的数据.";
-
-    public virtual string LsisCnet1332 => "读/写的数据数据类型不匹配";
-
-    public virtual string LsisCnet1432 => "数据值不能转换为 Hex";
-
-    public virtual string LsisCnet7132 => "请求值超出了设备支持区域";
-
-    public virtual string YRC1010 => "命令异常";
-
-    public virtual string YRC1011 => "命令操作数异常";
-
-    public virtual string YRC1012 => "命令操作数值超出范围";
-
-    public virtual string YRC1013 => "命令操作数长度异常";
-
-    public virtual string YRC1020 => "设备文件数过多";
-
-    public virtual string YRC2010 => "机器人动作中";
-
-    public virtual string YRC2020 => "示教编程器 HOLD停止中";
-
-    public virtual string YRC2030 => "再线盒 HOLD停止中";
-
-    public virtual string YRC2040 => "外部HOLD中";
-
-    public virtual string YRC2050 => "命令HOLD中";
-
-    public virtual string YRC2060 => "错误报警发生中";
-
-    public virtual string YRC2070 => "伺服ON中";
-
-    public virtual string YRC2080 => "模式不同";
-
-    public virtual string YRC2090 => "通过其他功能他访问文件中";
-
-    public virtual string YRC2100 => "远程命令没有设定";
-
-    public virtual string YRC2110 => "此数据不能访问";
-
-    public virtual string YRC2120 => "此数据无法读取";
-
-    public virtual string YRC2130 => "编辑中";
-
-    public virtual string YRC2150 => "坐标变换功能执行中";
-
-    public virtual string YRC3010 => "请接入伺服电源";
-
-    public virtual string YRC3040 => "请核对原点位置";
-
-    public virtual string YRC3050 => "请进行位置确认";
-
-    public virtual string YRC3070 => "未生成当前值";
-
-    public virtual string YRC3220 => "面板锁 模式 ／循环禁止信号收到信息";
-
-    public virtual string YRC3230 => "面板锁，开始禁止信号收到信息";
-
-    public virtual string YRC3350 => "用户坐标无法示教";
-
-    public virtual string YRC3360 => "用户坐标文件被破坏";
-
-    public virtual string YRC3370 => "控制轴组不同";
-
-    public virtual string YRC3380 => "基座轴数据不同";
-
-    public virtual string YRC3390 => "相对JOB不可变换（ CVTRJ 时）";
-
-    public virtual string YRC3400 => "禁止调用主程序（ 参数）";
-
-    public virtual string YRC3410 => "禁止调用主程序（动作中亮灯）";
-
-    public virtual string YRC3420 => "禁止调用主程序（示教）";
-
-    public virtual string YRC3430 => "机器人间的校验不能定义";
-
-    public virtual string YRC3450 => "伺服电源不能接通";
-
-    public virtual string YRC3460 => "不能设定坐标系";
-
-    public virtual string YRC4010 => "存储容量不足（程序登录存储）";
-
-    public virtual string YRC4012 => "存储容量不足（变位机登录存储）";
-
-    public virtual string YRC4020 => "禁止程序编辑";
-
-    public virtual string YRC4030 => "存在相同名称的程序";
-
-    public virtual string YRC4040 => "没有指定的程序";
-
-    public virtual string YRC4060 => "请设定执行程序";
-
-    public virtual string YRC4120 => "位置数据被破坏";
-
-    public virtual string YRC4130 => "不存在位置数据";
-
-    public virtual string YRC4140 => "位置变量类型不同";
-
-    public virtual string YRC4150 => "非主程序的程序END 命令";
-
-    public virtual string YRC4170 => "命令数据被破坏";
-
-    public virtual string YRC4190 => "程序名中有不合适的文字";
-
-    public virtual string YRC4200 => "标签名中有不合适的文字";
-
-    public virtual string YRC4230 => "本系统中有不能使用的命令";
-
-    public virtual string YRC4420 => "变换的程序有步骤";
-
-    public virtual string YRC4430 => "此程序已变换过";
-
-    public virtual string YRC4480 => "请示教用户坐标";
-
-    public virtual string YRC4490 => "相対JOB／独立控制功能未获得许可";
-
-    public virtual string YRC5110 => "语法错误（ 命令的语法）";
-
-    public virtual string YRC5120 => "变位机数据异常";
-
-    public virtual string YRC5130 => "没有NOP 或者END 命令";
-
-    public virtual string YRC5170 => "格式错误（与写法相反）";
-
-    public virtual string YRC5180 => "数据数不合适";
-
-    public virtual string YRC5200 => "超出数据范围";
-
-    public virtual string YRC5310 => "语法错误（命令以外）";
-
-    public virtual string YRC5340 => "模拟命令指定有错误";
-
-    public virtual string YRC5370 => "条件数据记录有错误";
-
-    public virtual string YRC5390 => "程序数据记录有错误";
-
-    public virtual string YRC5430 => "系统不一致";
-
-    public virtual string YRC5480 => "焊接功能类型不一样";
-
-    public virtual string Vigor02 => "通訊 SUM Check Error";
-
-    public virtual string Vigor04 => "資料 Byte 數或元件數目為 0";
-
-    public virtual string Vigor06 => "資料位址超出範圍";
-
-    public virtual string Vigor08 => "ASCII 轉換錯誤";
-
-    public virtual string Vigor31 => "無此命令";
-
-    public virtual string Memobus01 => "SFC异常";
-
-    public virtual string Memobus02 => "引用编号异常";
-
-    public virtual string Memobus03 => "数据数异常";
-
-    public virtual string Memobus40 => "寄存器种类错误";
-
-    public virtual string Memobus41 => "数据类型错误";
-
-    public virtual string Memobus42 => "本站寄存器种类错误";
-
-    public virtual string ToyoPuc11 => "因为是CPU模块的硬件异常，所以不可处理";
-
-    public virtual string ToyoPuc20 => "中继命令中的固定数据（ENQ）不是 05";
-
-    public virtual string ToyoPuc21 => "传输数量异常，传输字节数有错误";
-
-    public virtual string ToyoPuc23 => "命令代码为非法";
-
-    public virtual string ToyoPuc24 => "子命令代码为非法";
-
-    public virtual string ToyoPuc25 => "命令格式的数据字节为非法";
-
-    public virtual string ToyoPuc34 => "通过访问禁止设定，禁止进行访问";
-
-    public virtual string ToyoPuc3E => "由于正在进行重置，所以命令无法执行";
-
-    public virtual string ToyoPuc3F => "由于处于停止状态，所以命令无法执行";
-
-    public virtual string ToyoPuc40 => "因读出，写入命令，而导致地址不在范围内，或命令的地址+数据数量偏离地址范围";
-
-    public virtual string ToyoPuc41 => "字数量或字节数量超出范围";
 }

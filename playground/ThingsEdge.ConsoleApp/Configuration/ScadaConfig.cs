@@ -1,4 +1,4 @@
-﻿namespace ThingsEdge.App.Configuration;
+namespace ThingsEdge.ConsoleApp.Configuration;
 
 /// <summary>
 /// Scada 配置信息。
@@ -8,5 +8,5 @@ public sealed class ScadaConfig
     /// <summary>
     /// 是否自动启动
     /// </summary>
-    public bool IsAutoStartup {  get; set; }
+    public bool IsAutoStartup { get; set; }
 }

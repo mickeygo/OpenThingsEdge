@@ -4,7 +4,10 @@ using ThingsEdge.Exchange.Forwarders;
 
 namespace ThingsEdge.Exchange.Engine.Handler;
 
-internal sealed class HeartbeatMessageHandler(INativeHeartbeatForwarder forwarder, ITagDataSnapshot tagDataSnapshot) : IMessageHandler<HeartbeatMessage>
+/// <summary>
+/// 心跳消息处理器。
+/// </summary>
+internal sealed class HeartbeatMessageHandler(IHeartbeatForwarderProxy forwarderProxy, ITagDataSnapshot tagDataSnapshot) : IHeartbeatMessageHandler
 {
     public async Task HandleAsync(HeartbeatMessage message, CancellationToken cancellationToken)
     {
@@ -17,14 +20,6 @@ internal sealed class HeartbeatMessageHandler(INativeHeartbeatForwarder forwarde
             return;
         }
 
-        HeartbeatForwarderContext context = new()
-        {
-            ChannelName = message.ChannelName,
-            Device = message.Device,
-            Tag = message.Tag,
-            IsOnline = message.IsConnected,
-        };
-
-        await forwarder.ChangeAsync(context, cancellationToken).ConfigureAwait(false);
+        await forwarderProxy.ChangeAsync(new(message.ChannelName, message.Device, message.Tag, message.IsConnected), cancellationToken).ConfigureAwait(false);
     }
 }

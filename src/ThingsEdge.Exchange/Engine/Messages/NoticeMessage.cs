@@ -1,6 +1,7 @@
 using ThingsEdge.Exchange.Contracts.Variables;
 using ThingsEdge.Exchange.Contracts;
 using ThingsEdge.Exchange.Infrastructure.Brokers;
+using ThingsEdge.Exchange.Engine.Connectors;
 
 namespace ThingsEdge.Exchange.Engine.Messages;
 

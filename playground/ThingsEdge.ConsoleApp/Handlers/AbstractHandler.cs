@@ -1,6 +1,6 @@
-﻿using ThingsEdge.Contracts;
+using ThingsEdge.Exchange.Contracts;
 
-namespace ThingsEdge.App.Handlers;
+namespace ThingsEdge.ConsoleApp.Handlers;
 
 /// <summary>
 /// Handler 基类。
