@@ -61,7 +61,7 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
         {
             // 先切换到波特率 9600 进行处理。
             pipeSerialPort.GetPipe().BaudRate = 9600;
-            OperateResult operateResult = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
+            OperateResult operateResult = await NetworkPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
             if (!operateResult.IsSuccess)
             {
                 return operateResult;
@@ -100,7 +100,7 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
             {
                 return new OperateResult("check 0x06 back after send data failed!");
             }
-            NetworkPipe.CloseCommunication();
+            NetworkPipe.ClosePipe();
 
             // 处理后关闭连接，再切换到原有的波特率。
             pipeSerialPort.GetPipe().BaudRate = baudRate;

@@ -88,16 +88,12 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public virtual async Task<OperateResult> OpenAsync()
     {
-        var operateResult = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
+        var operateResult = await NetworkPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
         }
-        if (operateResult.Content)
-        {
-            return await InitializationOnConnectAsync().ConfigureAwait(false);
-        }
-        return OperateResult.CreateSuccessResult();
+        return await InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
     /// <summary>

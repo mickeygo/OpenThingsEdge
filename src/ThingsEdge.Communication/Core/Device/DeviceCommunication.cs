@@ -343,7 +343,7 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     {
         if (!_isClosed)
         {
-            NetworkPipe.CloseCommunication();
+            NetworkPipe.ClosePipe();
             NetworkPipe.Dispose();
 
             _isClosed = true;

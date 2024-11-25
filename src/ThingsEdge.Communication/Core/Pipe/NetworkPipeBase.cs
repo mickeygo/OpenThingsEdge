@@ -26,9 +26,9 @@ public abstract class NetworkPipeBase : IDisposable
     /// <param name="buffer">等待接收的数据缓存信息</param>
     /// <param name="offset">开始接收数据的偏移地址</param>
     /// <param name="length">准备接收的数据长度，当length大于0时，接收固定长度的数据内容，当length小于0时，接收不大于2048长度的随机数据信息</param>
-    /// <param name="timeOut">单位：毫秒，超时时间，默认为60秒，如果设置小于0，则不检查超时时间</param>
+    /// <param name="timeout">超时时间，单位：毫秒</param>
     /// <returns>包含了字节数据的结果类</returns>
-    public virtual async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeOut = 60_000)
+    public virtual async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeout)
     {
         return await Task.FromResult(new OperateResult<int>(StringResources.Language.NotSupportedFunction)).ConfigureAwait(false);
     }
@@ -144,13 +144,10 @@ public abstract class NetworkPipeBase : IDisposable
     }
 
     /// <summary>
-    /// 打开当前的管道信息，返回是否成功打开的结果对象，并通过属性 Content 指示当前是否为新创建的连接对象，如果是，则该值为 true。
+    /// 创建并连接（打开）一个新的管道连接对象。
     /// </summary>
-    /// <remarks>
-    /// 并切换长连接操作
-    /// </remarks>
     /// <returns>是否打开成功的结果对象</returns>
-    public virtual Task<OperateResult<bool>> OpenCommunicationAsync()
+    public virtual Task<OperateResult<bool>> CreateAndConnectPipeAsync()
     {
         return Task.FromResult(new OperateResult<bool>(StringResources.Language.NotSupportedFunction));
     }
@@ -159,7 +156,7 @@ public abstract class NetworkPipeBase : IDisposable
     /// 关闭当前的管道信息，返回是否关闭成功的结果对象。
     /// </summary>
     /// <returns>是否关闭成功</returns>
-    public virtual OperateResult CloseCommunication()
+    public virtual OperateResult ClosePipe()
     {
         return new OperateResult(StringResources.Language.NotSupportedFunction);
     }
@@ -344,14 +341,14 @@ public abstract class NetworkPipeBase : IDisposable
     /// <summary>
     /// 接收一条完整的 <seealso cref="INetMessage" /> 数据内容，需要指定超时时间，单位为毫秒。
     /// </summary>
-    /// <param name="timeOut">超时时间，单位：毫秒</param>
+    /// <param name="timeout">超时时间，单位：毫秒</param>
     /// <param name="netMessage">消息的格式定义</param>
     /// <returns>带有是否成功的byte数组对象</returns>
-    private async Task<OperateResult<byte[]>> ReceiveByMessageAsync(int timeOut, INetMessage? netMessage)
+    private async Task<OperateResult<byte[]>> ReceiveByMessageAsync(int timeout, INetMessage? netMessage)
     {
         if (netMessage == null)
         {
-            return await ReceiveAsync(-1, timeOut).ConfigureAwait(false);
+            return await ReceiveAsync(-1, timeout).ConfigureAwait(false);
         }
 
         if (netMessage.ProtocolHeadBytesLength < 0)
@@ -360,8 +357,8 @@ public abstract class NetworkPipeBase : IDisposable
             var codeLength = headCode[3] & 0xF;
             var receive = codeLength switch
             {
-                1 => await ReceiveCommandLineFromPipeAsync(headCode[1], timeOut).ConfigureAwait(false),
-                2 => await ReceiveCommandLineFromPipeAsync(headCode[1], headCode[0], timeOut).ConfigureAwait(false),
+                1 => await ReceiveCommandLineFromPipeAsync(headCode[1], timeout).ConfigureAwait(false),
+                2 => await ReceiveCommandLineFromPipeAsync(headCode[1], headCode[0], timeout).ConfigureAwait(false),
                 _ => null,
             };
             if (receive == null)
@@ -380,7 +377,7 @@ public abstract class NetworkPipeBase : IDisposable
                 {
                     return receive;
                 }
-                var endResult = await ReceiveAsync(message.EndLength, timeOut).ConfigureAwait(false);
+                var endResult = await ReceiveAsync(message.EndLength, timeout).ConfigureAwait(false);
                 if (!endResult.IsSuccess)
                 {
                     return endResult;
@@ -390,7 +387,7 @@ public abstract class NetworkPipeBase : IDisposable
             return receive;
         }
 
-        var headResult = await ReceiveAsync(netMessage.ProtocolHeadBytesLength, timeOut).ConfigureAwait(false);
+        var headResult = await ReceiveAsync(netMessage.ProtocolHeadBytesLength, timeout).ConfigureAwait(false);
         if (!headResult.IsSuccess)
         {
             return headResult;
@@ -400,7 +397,7 @@ public abstract class NetworkPipeBase : IDisposable
         var cycleCount = 0;
         while (start >= netMessage.ProtocolHeadBytesLength)
         {
-            headResult = await ReceiveAsync(netMessage.ProtocolHeadBytesLength, timeOut).ConfigureAwait(false);
+            headResult = await ReceiveAsync(netMessage.ProtocolHeadBytesLength, timeout).ConfigureAwait(false);
             if (!headResult.IsSuccess)
             {
                 return headResult;
@@ -414,7 +411,7 @@ public abstract class NetworkPipeBase : IDisposable
         }
         if (start > 0)
         {
-            var head2Result = await ReceiveAsync(start, timeOut).ConfigureAwait(false);
+            var head2Result = await ReceiveAsync(start, timeout).ConfigureAwait(false);
             if (!head2Result.IsSuccess)
             {
                 return head2Result;
@@ -431,7 +428,7 @@ public abstract class NetworkPipeBase : IDisposable
 
         var result = new byte[netMessage.HeadBytes.Length + contentLength];
         netMessage.HeadBytes.CopyTo(result, 0);
-        OperateResult contentResult = await ReceiveAsync(result, netMessage.HeadBytes.Length, contentLength, timeOut).ConfigureAwait(false);
+        OperateResult contentResult = await ReceiveAsync(result, netMessage.HeadBytes.Length, contentLength, timeout).ConfigureAwait(false);
         if (!contentResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<byte[]>(contentResult);

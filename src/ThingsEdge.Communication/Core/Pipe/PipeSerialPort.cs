@@ -143,7 +143,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
         return _serialPort;
     }
 
-    public override async Task<OperateResult<bool>> OpenCommunicationAsync()
+    public override async Task<OperateResult<bool>> CreateAndConnectPipeAsync()
     {
         await Task.CompletedTask.ConfigureAwait(false);
 
@@ -162,7 +162,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
         }
     }
 
-    public override OperateResult CloseCommunication()
+    public override OperateResult ClosePipe()
     {
         if (_serialPort.IsOpen)
         {
