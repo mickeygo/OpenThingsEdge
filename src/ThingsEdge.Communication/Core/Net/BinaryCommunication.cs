@@ -35,6 +35,11 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool IsSocketError { get; }
+
+    /// <summary>
     /// 默认的无参构造函数。
     /// </summary>
     public BinaryCommunication()
@@ -132,11 +137,6 @@ public abstract class BinaryCommunication
         {
             using (await NetworkPipe.Lock.LockAsync(NetworkPipe.ReceiveTimeout).ConfigureAwait(false))
             {
-                var pipe = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
-                if (!pipe.IsSuccess)
-                {
-                    return OperateResult.CreateFailedResult<byte[]>(pipe);
-                }
                 return await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
             }
         }

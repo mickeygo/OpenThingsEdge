@@ -31,27 +31,22 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
     public int KeepAliveTime { get; set; } = -1;
 
     /// <inheritdoc />
-    public override async Task<OperateResult<bool>> OpenCommunicationAsync()
+    public override async Task<OperateResult<bool>> CreateAndConnectPipeAsync()
     {
-        if (_netSocket == null)
+        var endPoint = new IPEndPoint(IPAddress.Parse(IpAddress), Port);
+        var connect = await NetSupport.CreateSocketAndConnectAsync(endPoint, ConnectTimeout).ConfigureAwait(false);
+        if (connect.IsSuccess)
         {
-            var endPoint = new IPEndPoint(IPAddress.Parse(IpAddress), Port);
-            var connect = await NetSupport.CreateSocketAndConnectAsync(endPoint, ConnectTimeout).ConfigureAwait(false);
-            if (connect.IsSuccess)
-            {
-                Debug.WriteLine("已成功创建 Socket 并连接上服务器");
+            Debug.WriteLine("已成功创建 Socket 并连接上服务器");
 
-                _netSocket = connect.Content;
-                if (KeepAliveTime > 0)
-                {
-                    _netSocket.SetKeepAlive(KeepAliveTime, KeepAliveTime);
-                }
-                return OperateResult.CreateSuccessResult(true);
+            _netSocket = connect.Content;
+            if (KeepAliveTime > 0)
+            {
+                _netSocket.SetKeepAlive(KeepAliveTime, KeepAliveTime);
             }
-            return new OperateResult<bool>(connect.ErrorCode, connect.Message);
+            return OperateResult.CreateSuccessResult(true);
         }
-        Debug.WriteLine("复用已有的 Socket");
-        return OperateResult.CreateSuccessResult(false);
+        return new OperateResult<bool>(connect.ErrorCode, connect.Message);
     }
 
     public override async Task<OperateResult> SendAsync(byte[] data)
@@ -64,30 +59,30 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
         var send = await NetSupport.SocketSendAsync(_netSocket, data).ConfigureAwait(false);
         if (!send.IsSuccess && send.ErrorCode == NetSupport.SocketErrorCode)
         {
-            CloseCommunication();
+            ClosePipe();
             return new OperateResult<byte[]>((int)CommErrorCode.SocketException, send.Message);
         }
         return send;
     }
 
     /// <inheritdoc />
-    public override async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeOut = 60000)
+    public override async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeout)
     {
         if (_netSocket == null)
         {
             throw new UnconnectedException();
         }
 
-        var receive = await NetSupport.SocketReceiveAsync(_netSocket, buffer, offset, length, timeOut).ConfigureAwait(false);
+        var receive = await NetSupport.SocketReceiveAsync(_netSocket, buffer, offset, length, timeout).ConfigureAwait(false);
         if (!receive.IsSuccess && receive.ErrorCode == NetSupport.SocketErrorCode)
         {
-            CloseCommunication();
+            ClosePipe();
             return new OperateResult<int>((int)CommErrorCode.SocketException, "Socket Exception -> " + receive.Message);
         }
         return receive;
     }
 
-    public override OperateResult CloseCommunication()
+    public override OperateResult ClosePipe()
     {
         _netSocket.SafeClose();
         _netSocket = null;

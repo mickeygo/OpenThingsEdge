@@ -67,23 +67,20 @@ public abstract class DeviceTcpNet : DeviceCommunication
     }
 
     /// <summary>
-    /// 尝试连接远程的服务器，如果连接成功，就切换短连接模式到长连接模式，后面的每次请求都共享一个通道，使得通讯速度更快速。
+    /// 尝试连接远程的服务器，后面的每次请求都共享一个通道，使得通讯速度更快速。
     /// </summary>
+    /// <remarks>注意：每次执行连接都会创建一个新的管道信息。</remarks>
     /// <returns>返回连接结果，如果失败的话（也即IsSuccess为False），包含失败信息</returns>
     public async Task<OperateResult> ConnectServerAsync()
     {
-        NetworkPipe.CloseCommunication();
-        var open = await NetworkPipe.OpenCommunicationAsync().ConfigureAwait(false);
+        NetworkPipe.ClosePipe();
+        var open = await NetworkPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
         if (!open.IsSuccess)
         {
             return open;
         }
 
-        if (open.Content)
-        {
-            return await InitializationOnConnectAsync().ConfigureAwait(false);
-        }
-        return OperateResult.CreateSuccessResult();
+        return await InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
     /// <inheritdoc />
