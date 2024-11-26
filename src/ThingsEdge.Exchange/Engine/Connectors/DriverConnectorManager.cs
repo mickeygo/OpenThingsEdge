@@ -22,7 +22,6 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
     private readonly Dictionary<string, IDriverConnector> _connectors = []; // Key 为设备编号
 
     private bool _hasTryConnectServer;
-    private bool _fristConnectSuccessful;
     private PeriodicTimer? _periodicTimer;
 
     private object SyncLock => _connectors;
@@ -141,13 +140,14 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
                         {
                             connector.Available = true;
                             var ret = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
-                            if (!ret.IsSuccess)
+                            if (ret.IsSuccess)
+                            {
+                                connector.ConnectedStatus = ConnectionStatus.Connected;
+                            }
+                            else
                             {
                                 logger.LogWarning("尝试连接服务失败，错误：{Message}，主机：{Host}，端口：{Port}", ret.Message, connector.Host, connector.Port);
                             }
-
-                            connector.ConnectedStatus = ConnectionStatus.Connected;
-                            _fristConnectSuccessful = ret.IsSuccess;
                         }
                         else
                         {
@@ -208,7 +208,7 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
                             if (connector.Available && connector.ConnectedStatus == ConnectionStatus.Disconnected)
                             {
                                 // 内部 Socket 异常，或是第一次尝试连接过服务器失败
-                                if (networkDevice.IsSocketError || !_fristConnectSuccessful)
+                                if (networkDevice.IsSocketError)
                                 {
                                     var result = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                                     if (result.IsSuccess)

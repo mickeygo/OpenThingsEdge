@@ -47,7 +47,11 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <summary>
     /// Socket 异常关闭时的委托对象，其中参数为错误状态码。
     /// </summary>
-    public Action<int>? SocketErrorClosedDelegate { get; set; }
+    public Action<int>? SocketErrorClosedDelegate
+    {
+        get => _pipeTcpNet.SocketErrorClosedDelegate;
+        set => _pipeTcpNet.SocketErrorClosedDelegate = value;
+    }
 
     /// <summary>
     /// 指定IP地址以及端口号信息来初始化对象。
