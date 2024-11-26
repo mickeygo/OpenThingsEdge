@@ -40,6 +40,16 @@ public abstract class DeviceTcpNet : DeviceCommunication
     }
 
     /// <summary>
+    /// 是否为 Socket 的异常，出现该异常时 Socket 会被关闭。
+    /// </summary>
+    public bool IsSocketError => _pipeTcpNet?.IsSocketError ?? false;
+
+    /// <summary>
+    /// Socket 异常关闭时的委托对象，其中参数为错误状态码。
+    /// </summary>
+    public Action<int>? SocketErrorClosedDelegate { get; set; }
+
+    /// <summary>
     /// 指定IP地址以及端口号信息来初始化对象。
     /// </summary>
     /// <param name="ipAddress">IP地址信息，可以是IPv4, IPv6, 也可以是域名</param>
@@ -67,10 +77,10 @@ public abstract class DeviceTcpNet : DeviceCommunication
     }
 
     /// <summary>
-    /// 尝试连接远程的服务器，后面的每次请求都共享一个通道，使得通讯速度更快速。
+    /// 尝试连接远程的服务器，连接成功后会进行初始化工作（若协议有重写数据化方法）。
     /// </summary>
     /// <remarks>注意：每次执行连接都会创建一个新的管道信息。</remarks>
-    /// <returns>返回连接结果，如果失败的话（也即IsSuccess为False），包含失败信息</returns>
+    /// <returns>返回连接是否和初始化成功</returns>
     public async Task<OperateResult> ConnectServerAsync()
     {
         NetworkPipe.ClosePipe();
@@ -81,6 +91,16 @@ public abstract class DeviceTcpNet : DeviceCommunication
         }
 
         return await InitializationOnConnectAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 关闭连接，关闭前会先执行断开连接前与服务器的处理事项。
+    /// </summary>
+    /// <returns></returns>
+    public async Task CloseAsync()
+    {
+        await ExtraOnDisconnectAsync().ConfigureAwait(false);
+        Close();
     }
 
     /// <inheritdoc />

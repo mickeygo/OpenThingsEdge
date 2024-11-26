@@ -21,32 +21,45 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
     public int Port { get; } = port;
 
     /// <summary>
-    /// 连接超时时间，默认 10s。
+    /// 连接超时时间，默认 5s。
     /// </summary>
-    public int ConnectTimeout { get; set; } = 10_000;
+    public int ConnectTimeout { get; set; } = 5_000;
 
     /// <summary>
     /// 获取或设置 Socket 保活时长，单位 ms。
     /// </summary>
     public int KeepAliveTime { get; set; } = -1;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 是否为 Socket 的异常
+    /// </summary>
+    public bool IsSocketError { get; internal set; }
+
+    /// <summary>
+    /// Socket 异常关闭时的委托对象，其中参数为错误状态码。
+    /// </summary>
+    public Action<int>? SocketErrorClosedDelegate { get; set; }
+
     public override async Task<OperateResult<bool>> CreateAndConnectPipeAsync()
     {
         var endPoint = new IPEndPoint(IPAddress.Parse(IpAddress), Port);
         var connect = await NetSupport.CreateSocketAndConnectAsync(endPoint, ConnectTimeout).ConfigureAwait(false);
-        if (connect.IsSuccess)
+        if (!connect.IsSuccess)
         {
-            Debug.WriteLine("已成功创建 Socket 并连接上服务器");
-
-            _netSocket = connect.Content;
-            if (KeepAliveTime > 0)
-            {
-                _netSocket.SetKeepAlive(KeepAliveTime, KeepAliveTime);
-            }
-            return OperateResult.CreateSuccessResult(true);
+            // 参考 NetSupport.CreateSocketAndConnectAsync 错误代码
+            IsSocketError = connect.ErrorCode is (int)CommErrorCode.SocketConnectTimeoutException or (int)CommErrorCode.SocketConnectException;
+            SocketErrorClosedDelegate?.Invoke(connect.ErrorCode);
+            return new OperateResult<bool>(connect.ErrorCode, connect.Message);
         }
-        return new OperateResult<bool>(connect.ErrorCode, connect.Message);
+
+        Debug.WriteLine("已成功创建 Socket 并连接上服务器");
+
+        _netSocket = connect.Content;
+        if (KeepAliveTime > 0)
+        {
+            _netSocket.SetKeepAlive(KeepAliveTime, KeepAliveTime);
+        }
+        return OperateResult.CreateSuccessResult(true);
     }
 
     public override async Task<OperateResult> SendAsync(byte[] data)
@@ -56,16 +69,17 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
             throw new UnconnectedException();
         }
 
-        var send = await NetSupport.SocketSendAsync(_netSocket, data).ConfigureAwait(false);
-        if (!send.IsSuccess && send.ErrorCode == NetSupport.SocketErrorCode)
+        var result = await NetSupport.SocketSendAsync(_netSocket, data).ConfigureAwait(false);
+        if (!result.IsSuccess)
         {
-            ClosePipe();
-            return new OperateResult<byte[]>((int)CommErrorCode.SocketException, send.Message);
+            // 参考 NetSupport.SocketSendAsync 错误代码
+            IsSocketError = result.ErrorCode is (int)CommErrorCode.SocketSendException;
+            SocketErrorClosedDelegate?.Invoke(result.ErrorCode);
         }
-        return send;
+
+        return result;
     }
 
-    /// <inheritdoc />
     public override async Task<OperateResult<int>> ReceiveAsync(byte[] buffer, int offset, int length, int timeout)
     {
         if (_netSocket == null)
@@ -73,13 +87,14 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
             throw new UnconnectedException();
         }
 
-        var receive = await NetSupport.SocketReceiveAsync(_netSocket, buffer, offset, length, timeout).ConfigureAwait(false);
-        if (!receive.IsSuccess && receive.ErrorCode == NetSupport.SocketErrorCode)
+        var result = await NetSupport.SocketReceiveAsync(_netSocket, buffer, offset, length, timeout).ConfigureAwait(false);
+        if (!result.IsSuccess)
         {
-            ClosePipe();
-            return new OperateResult<int>((int)CommErrorCode.SocketException, "Socket Exception -> " + receive.Message);
+            // 参考 NetSupport.SocketReceiveAsync 错误代码
+            IsSocketError = result.ErrorCode is (int)CommErrorCode.RemoteClosedConnection or (int)CommErrorCode.ReceiveDataTimeout or (int)CommErrorCode.SocketException;
+            SocketErrorClosedDelegate?.Invoke(result.ErrorCode);
         }
-        return receive;
+        return result;
     }
 
     public override OperateResult ClosePipe()

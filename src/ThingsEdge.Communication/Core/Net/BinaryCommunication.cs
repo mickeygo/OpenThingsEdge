@@ -35,11 +35,6 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    public bool IsSocketError { get; }
-
-    /// <summary>
     /// 默认的无参构造函数。
     /// </summary>
     public BinaryCommunication()
@@ -57,7 +52,7 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
-    /// 根据实际的协议选择是否重写本方法，有些协议在创建连接之后，需要进行一些初始化的信号握手，才能最终建立网络通道。
+    /// 在连接成功后进行初始化操作，根据实际的协议选择是否重写本方法，有些协议在创建连接之后，需要进行一些初始化的信号握手才能最终建立网络通道。
     /// </summary>
     /// <returns>是否初始化成功，依据具体的协议进行重写</returns>
     protected virtual async Task<OperateResult> InitializationOnConnectAsync()
@@ -66,7 +61,7 @@ public abstract class BinaryCommunication
     }
 
     /// <summary>
-    /// 根据实际的协议选择是否重写本方法，有些协议在断开连接之前，需要发送一些报文来关闭当前的网络通道。
+    /// 断开连接前要处理的事项，根据实际的协议选择是否重写本方法，有些协议在断开连接之前需要发送一些报文来关闭当前的网络通道。
     /// </summary>
     /// <returns>当断开连接时额外的操作结果</returns>
     protected virtual async Task<OperateResult> ExtraOnDisconnectAsync()
@@ -156,7 +151,7 @@ public abstract class BinaryCommunication
     /// <returns>是否成功的结果对象</returns>
     protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        // TODO: 此方法逻辑可以移至上述方法并移除
+        // HACK: 优化，此方法逻辑可以移至上述方法并移除
 
         if (usePackAndUnpack)
         {
@@ -172,6 +167,7 @@ public abstract class BinaryCommunication
         {
             return read;
         }
+
         var unpack = UnpackResponseContent(send, read.Content);
         if (!unpack.IsSuccess && unpack.ErrorCode == int.MinValue)
         {

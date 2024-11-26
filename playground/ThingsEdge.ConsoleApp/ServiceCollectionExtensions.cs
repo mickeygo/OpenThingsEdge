@@ -1,3 +1,4 @@
+using ThingsEdge.ConsoleApp.Addresses;
 using ThingsEdge.ConsoleApp.Configuration;
 using ThingsEdge.ConsoleApp.Forwarders;
 using ThingsEdge.ConsoleApp.Handlers;
@@ -19,14 +20,10 @@ public static class ServiceCollectionExtensions
     {
         hostBuilder.AddThingsEdgeExchange(builder =>
         {
-            builder.UseDeviceFileProvider()
+            builder.UseDeviceCustomProvider<ModbusTcpAddressProvider>()
                 .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
                 .UseNativeNoticeForwarder<NoticeForwarder>()
-                .UseNativeTriggerForwarder<TriggerForwader>()
-                .UseOptions(options =>
-                {
-                    options.PDUSize = 396; // S7 PDU 长度
-                });
+                .UseNativeTriggerForwarder<TriggerForwader>();
         });
 
         hostBuilder.ConfigureServices((context, services) =>

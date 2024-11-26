@@ -33,8 +33,14 @@ public static class ExchangeServiceCollectionExtensions
         // 注册服务
         builder.ConfigureServices((hostBuilder, services) =>
         {
+            // 注册配置选项
+            services.Configure<ExchangeOptions>(hostBuilder.Configuration.GetSection("Exchange"));
+
             // 注册缓存
             services.AddMemoryCache();
+
+            // 注册后台启动项
+            services.AddHostedService<StartupHostedService>();
 
             // 注册消息队列服务
             services.AddSingleton(typeof(IMessageBroker<>), typeof(SingleMessageBroker<>));
@@ -74,20 +80,15 @@ public static class ExchangeServiceCollectionExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="optionsAction">参数选项设置</param>
-    /// <param name="configName">配置节点名称，默认为 "Exchange"。</param>
     /// <returns></returns>
-    public static IExchangeBuilder UseOptions(this IExchangeBuilder builder, Action<ExchangeOptions>? optionsAction = null, string configName = "Exchange")
+    public static IExchangeBuilder UseOptions(this IExchangeBuilder builder, Action<ExchangeOptions>? optionsAction = null)
     {
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
-            services.Configure<ExchangeConfig>(hostBuilder.Configuration.GetSection(configName));
-
             if (optionsAction != null)
             {
                 services.PostConfigure(optionsAction);
             }
-
-            services.AddHostedService<StartupHostedService>();
         });
 
         return builder;

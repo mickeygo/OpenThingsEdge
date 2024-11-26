@@ -10,13 +10,8 @@ namespace ThingsEdge.Communication.Core;
 /// <remarks>
 /// 在接收指定数量的字节数据的时候，如果一直接收不到，就会发生假死的状态。接收的数据时保存在内存里的，不适合大数据块的接收。
 /// </remarks>
-public static class NetSupport
+internal static class NetSupport
 {
-    /// <summary>
-    /// 表示Socket发生异常的错误码。
-    /// </summary>
-    public static int SocketErrorCode { get; } = (int)CommErrorCode.ReceiveDataTimeout;
-
     /// <summary>
     /// 创建一个新的 socket 对象并连接到远程的地址，需要指定远程终结点，超时时间（单位：毫秒）。
     /// </summary>
@@ -89,7 +84,7 @@ public static class NetSupport
     }
 
     /// <summary>
-    /// 接收固定长度的字节数组，允许指定超时时间，默认为60秒，当length大于0时，接收固定长度的数据内容，当length小于0时，buffer长度的缓存数据。
+    /// 接收固定长度的字节数组，当length大于0时，接收固定长度的数据内容，当length小于0时，buffer长度的缓存数据。
     /// </summary>
     /// <param name="socket">网络通讯的套接字</param>
     /// <param name="buffer">等待接收的数据缓存信息</param>
@@ -128,6 +123,7 @@ public static class NetSupport
             var count = await socket.ReceiveAsync(buffer, cts.Token).ConfigureAwait(false);
             if (count == 0)
             {
+                socket.SafeClose();
                 return new OperateResult<int>((int)CommErrorCode.RemoteClosedConnection, StringResources.Language.RemoteClosedConnection);
             }
             return OperateResult.CreateSuccessResult(count);
@@ -135,14 +131,14 @@ public static class NetSupport
         catch (OperationCanceledException)
         {
             Debug.WriteLine("超时取消，关闭 Socket");
-            socket?.SafeClose();
-            return new OperateResult<int>(SocketErrorCode, StringResources.Language.ReceiveDataTimeout + timeout);
+            socket.SafeClose();
+            return new OperateResult<int>((int)CommErrorCode.ReceiveDataTimeout, StringResources.Language.ReceiveDataTimeout + timeout);
         }
         catch (SocketException ex)
         {
             Debug.WriteLine($"Socket异常，关闭 Socket，{ex.Message}");
-            socket?.SafeClose();
-            return new OperateResult<int>(SocketErrorCode, "Socket Exception -> " + ex.Message);
+            socket.SafeClose();
+            return new OperateResult<int>((int)CommErrorCode.SocketException, "Socket Exception -> " + ex.Message);
         }
     }
 }

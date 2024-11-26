@@ -1,7 +1,7 @@
 namespace ThingsEdge.Communication.Exceptions;
 
 /// <summary>
-/// Communication 异常对象，框架中的其他异常都会继承此类。
+/// Communication 异常对象，其他异常都会继承此类。
 /// </summary>
 public class CommunicationException : Exception
 {

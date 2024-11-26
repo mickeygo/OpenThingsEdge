@@ -8,29 +8,84 @@ namespace ThingsEdge.Exchange.Engine;
 /// 消息轮询器。
 /// </summary>
 /// <param name="serviceProvider"></param>
-internal sealed class MessageLoop(IServiceProvider serviceProvider) : IMessageLoop
+/// <param name="logger">消息日志</param>
+internal sealed class MessageLoop(IServiceProvider serviceProvider, ILogger<MessageLoop> logger) : IMessageLoop
 {
-    private readonly Dictionary<Type, Type> _handlers = new()
+    public async Task LoopAsync(CancellationToken cancellationToken)
     {
-        { typeof(IHeartbeatMessageHandler), typeof(IMessageBroker<HeartbeatMessage>) },
-    };
+        await LoopHeartbeatAsync(cancellationToken).ConfigureAwait(false);
+        await LoopNoticeAsync(cancellationToken).ConfigureAwait(false);
+        await LoopTriggerAsync(cancellationToken).ConfigureAwait(false);
+    }
 
-    public Task LoopAsync(CancellationToken cancellationToken)
+    private Task LoopHeartbeatAsync(CancellationToken cancellationToken)
     {
-        foreach (var (key, value) in _handlers)
+        _ = Task.Run(async () =>
         {
-            _ = Task.Run(async () =>
-            {
-                var handler = (IMessageHandler<IMessage>)serviceProvider.GetRequiredService(key);
-                var broker = (IMessageBroker<IMessage>)serviceProvider.GetRequiredService(value);
+            var broker = serviceProvider.GetRequiredService<IMessageBroker<HeartbeatMessage>>();
+            var handler = serviceProvider.GetRequiredService<IHeartbeatMessageHandler>();
 
-                while (!cancellationToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
                 {
                     var message = await broker.PullAsync(cancellationToken).ConfigureAwait(false);
                     await handler.HandleAsync(message, cancellationToken).ConfigureAwait(false);
                 }
-            }, default);
-        }
+                catch (Exception ex)
+                {
+                    logger.LogError("[MessageLoop] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                }
+            }
+        }, default);
+
+        return Task.CompletedTask;
+    }
+
+    private Task LoopNoticeAsync(CancellationToken cancellationToken)
+    {
+        _ = Task.Run(async () =>
+        {
+            var broker = serviceProvider.GetRequiredService<IMessageBroker<NoticeMessage>>();
+            var handler = serviceProvider.GetRequiredService<INoticeMessageHandler>();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var message = await broker.PullAsync(cancellationToken).ConfigureAwait(false);
+                    await handler.HandleAsync(message, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("[MessageLoop] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                }
+            }
+        }, default);
+
+        return Task.CompletedTask;
+    }
+
+    private Task LoopTriggerAsync(CancellationToken cancellationToken)
+    {
+        _ = Task.Run(async () =>
+        {
+            var broker = serviceProvider.GetRequiredService<IMessageBroker<TriggerMessage>>();
+            var handler = serviceProvider.GetRequiredService<ITriggerMessageHandler>();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var message = await broker.PullAsync(cancellationToken).ConfigureAwait(false);
+                    await handler.HandleAsync(message, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("[MessageLoop] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                }
+            }
+        }, default);
 
         return Task.CompletedTask;
     }

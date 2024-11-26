@@ -5,4 +5,7 @@ namespace ThingsEdge.Communication.Exceptions;
 /// </summary>
 public sealed class ReceiveTimeoutException : CommunicationException
 {
+    public ReceiveTimeoutException() : base("接收数据超时")
+    {
+    }
 }

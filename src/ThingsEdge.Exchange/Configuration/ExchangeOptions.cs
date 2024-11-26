@@ -16,9 +16,9 @@ public sealed class ExchangeOptions
     public bool HeartbeatShouldAckZero { get; set; } = true;
 
     /// <summary>
-    /// 默认的标记扫描速率，配置中不设定会使用此设置, 默认为 100ms。
+    /// 默认的标记扫描速率，配置中不设定会使用此设置, 默认为 500ms。
     /// </summary>
-    public int DefaultScanRate { get; init; } = 100;
+    public int DefaultScanRate { get; init; } = 500;
 
     /// <summary>
     /// 是否尝试批量读取，默认为 true。

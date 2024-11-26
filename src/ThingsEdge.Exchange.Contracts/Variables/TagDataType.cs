@@ -11,37 +11,45 @@ public enum TagDataType
     Bit = 1,
 
     /// <summary>
-    /// 字节 <see cref="byte"/>
+    /// 字节（8 位）<see cref="byte"/>
     /// </summary>
     Byte,
 
     /// <summary>
-    /// 字 <see cref="ushort"/>
+    /// 字（无符号 16 位）<see cref="ushort"/>
     /// </summary>
     Word,
 
     /// <summary>
-    /// 双字 <see cref="uint"/>
-    /// </summary>
-    DWord,
-
-    /// <summary>
-    /// 短整型 <see cref="short"/>
+    /// 短整型（带符号 16 位）<see cref="short"/>
     /// </summary>
     Int,
 
     /// <summary>
-    /// 长整型 <see cref="int"/>
+    /// 双字（无符号 32 位）<see cref="uint"/>
+    /// </summary>
+    DWord,
+
+    /// <summary>
+    /// 双整型（带符号 32 位）<see cref="int"/>
     /// </summary>
     DInt,
 
     /// <summary>
-    /// 单精度浮点型 <see cref="float"/>
+    /// 单精度浮点型（32 位）<see cref="float"/>
     /// </summary>
     Real,
 
     /// <summary>
-    /// 双精度浮点型 <see cref="double"/>
+    /// 长整型（带符号 64 位）<see cref="long"/>
+    /// </summary>
+    /// <remarks>
+    /// Siemens 中没有此类型，在 Omron 等系列中有此类型。
+    /// </remarks>
+    LInt,
+
+    /// <summary>
+    /// 双精度浮点型（64 位）<see cref="double"/>
     /// </summary>
     LReal,
 

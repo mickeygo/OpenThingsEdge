@@ -7,14 +7,9 @@ namespace ThingsEdge.Exchange.Management;
 /// </summary>
 internal sealed class StartupHostedService(IMessageLoop messageLoop) : IHostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _ = Task.Run(async () =>
-        {
-            await messageLoop.LoopAsync(cancellationToken).ConfigureAwait(false);
-        }, cancellationToken);
-
-        return Task.CompletedTask;
+        await messageLoop.LoopAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

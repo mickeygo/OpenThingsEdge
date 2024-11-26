@@ -285,6 +285,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             return read_second;
         }
+
         PDULength = ByteTransform.TransUInt16(read_second.Content.SelectLast(2), 0) - 28;
         if (PDULength < 200)
         {

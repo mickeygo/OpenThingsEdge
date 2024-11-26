@@ -5,4 +5,7 @@ namespace ThingsEdge.Communication.Exceptions;
 /// </summary>
 public sealed class ConnectionTimeoutException : CommunicationException
 {
+    public ConnectionTimeoutException() : base("远程连接超时")
+    {
+    }
 }

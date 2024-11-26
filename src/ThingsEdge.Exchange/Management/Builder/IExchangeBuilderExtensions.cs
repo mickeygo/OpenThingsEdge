@@ -10,7 +10,7 @@ namespace ThingsEdge.Exchange;
 public static class IExchangeBuilderExtensions
 {
     /// <summary>
-    /// 使用设备基于本地文件的提供者。
+    /// 使用设备基于本地文件的提供者，默认执行路径为 "[执行目录]/config/tags.conf"。
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
@@ -25,7 +25,7 @@ public static class IExchangeBuilderExtensions
     }
 
     /// <summary>
-    /// 使用自定义设备提供者。
+    /// 使用自定义设备提供者，自定义对象需实现 <see cref="IAddressProvider"/> 接口。
     /// </summary>
     /// <typeparam name="TDeviceProvider"></typeparam>
     /// <param name="builder"></param>

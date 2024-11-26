@@ -6,9 +6,9 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 基于网络的通信管道基类。
 /// </summary>
-public abstract class NetworkPipeBase : IDisposable
+ public abstract class NetworkPipeBase : IDisposable
 {
-    private bool _disposedValue;
+    private bool _disposed;
 
     /// <summary>
     /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈，默认 5s。
@@ -36,81 +36,6 @@ public abstract class NetworkPipeBase : IDisposable
     public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
         return await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// 根据给定的消息，发送的数据，接收到数据来判断是否接收完成报文。
-    /// </summary>
-    /// <param name="netMessage">消息类对象</param>
-    /// <param name="sendValue">发送的数据内容</param>
-    /// <param name="ms">接收数据的流</param>
-    /// <returns>是否接收完成数据</returns>
-    protected bool CheckMessageComplete(INetMessage? netMessage, byte[] sendValue, ref MemoryStream ms)
-    {
-        if (netMessage == null)
-        {
-            return true;
-        }
-
-        if (netMessage is SpecifiedCharacterMessage specifiedCharacterMessage)
-        {
-            var array = ms.ToArray();
-            var bytes = BitConverter.GetBytes(specifiedCharacterMessage.ProtocolHeadBytesLength);
-            switch (bytes[3] & 0xF)
-            {
-                case 1:
-                    if (array.Length > specifiedCharacterMessage.EndLength
-                        && array[array.Length - 1 - specifiedCharacterMessage.EndLength] == bytes[1])
-                    {
-                        return true;
-                    }
-                    break;
-                case 2:
-                    if (array.Length > specifiedCharacterMessage.EndLength + 1
-                        && array[array.Length - 2 - specifiedCharacterMessage.EndLength] == bytes[1]
-                        && array[array.Length - 1 - specifiedCharacterMessage.EndLength] == bytes[0])
-                    {
-                        return true;
-                    }
-                    break;
-            }
-        }
-        else if (netMessage.ProtocolHeadBytesLength > 0)
-        {
-            // TODO: 需要清理逻辑并优化代码
-            var array2 = ms.ToArray();
-            if (array2.Length >= netMessage.ProtocolHeadBytesLength)
-            {
-                var num = netMessage.PependedUselesByteLength(array2);
-                if (num > 0)
-                {
-                    array2 = array2.RemoveBegin(num);
-                    ms = new MemoryStream();
-                    ms.Write(array2);
-                    if (array2.Length < netMessage.ProtocolHeadBytesLength)
-                    {
-                        return false;
-                    }
-                }
-                netMessage.HeadBytes = array2.SelectBegin(netMessage.ProtocolHeadBytesLength);
-                netMessage.SendBytes = sendValue;
-                var contentLengthByHeadBytes = netMessage.GetContentLengthByHeadBytes();
-                if (array2.Length >= netMessage.ProtocolHeadBytesLength + contentLengthByHeadBytes)
-                {
-                    if (netMessage.ProtocolHeadBytesLength > netMessage.HeadBytes.Length)
-                    {
-                        ms = new MemoryStream();
-                        ms.Write(array2.RemoveBegin(netMessage.ProtocolHeadBytesLength - netMessage.HeadBytes.Length));
-                    }
-                    return true;
-                }
-            }
-        }
-        else if (netMessage.CheckReceiveDataComplete(sendValue, ms))
-        {
-            return true;
-        }
-        return false;
     }
 
     /// <summary>
@@ -163,6 +88,7 @@ public abstract class NetworkPipeBase : IDisposable
 
     private async Task<OperateResult<byte[]>> ReceiveCommandLineFromPipeAsync(byte endCode, int timeout = 60000)
     {
+        // HACK: 此代码需要优化
         try
         {
             var bufferArray = new List<byte>(128);
@@ -195,8 +121,10 @@ public abstract class NetworkPipeBase : IDisposable
         }
     }
 
-    public virtual async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage? netMessage, byte[] sendValue, bool useActivePush = true)
+    public virtual async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage? netMessage, byte[] sendValue)
     {
+        // HACK: 代码优化
+
         OperateResult<byte[]> read;
         if (netMessage == null || netMessage.ProtocolHeadBytesLength == -1)
         {
@@ -204,6 +132,7 @@ public abstract class NetworkPipeBase : IDisposable
             {
                 netMessage.SendBytes = sendValue;
             }
+
             var startTime = DateTime.Now;
             var ms = new MemoryStream();
             do
@@ -259,7 +188,7 @@ public abstract class NetworkPipeBase : IDisposable
         OperateResult<byte[]> resultReceive;
         while (true)
         {
-            resultReceive = await ReceiveMessageAsync(netMessage, sendValue, true).ConfigureAwait(false);
+            resultReceive = await ReceiveMessageAsync(netMessage, sendValue).ConfigureAwait(false);
             if (!resultReceive.IsSuccess)
             {
                 return resultReceive;
@@ -363,7 +292,7 @@ public abstract class NetworkPipeBase : IDisposable
             };
             if (receive == null)
             {
-                return new OperateResult<byte[]>("Receive by specified code failed, length check failed");
+                return new OperateResult<byte[]>((int)CommErrorCode.CommandLengthCheckFailed, "Receive by specified code failed, length check failed");
             }
             if (!receive.IsSuccess)
             {
@@ -442,11 +371,11 @@ public abstract class NetworkPipeBase : IDisposable
 
     public void Dispose()
     {
-        if (!_disposedValue)
+        if (!_disposed)
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-            _disposedValue = true;
+            _disposed = true;
         }
     }
 }

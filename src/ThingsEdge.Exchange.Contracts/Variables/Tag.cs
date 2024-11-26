@@ -46,7 +46,7 @@ public partial class Tag
     /// </summary>
     /// <remarks>只有作为触发型号时才有效。</remarks>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagFlag Flag { get; init; }
+    public TagFlag Flag { get; init; } = TagFlag.Normal;
 
     /// <summary>
     /// 是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 <see cref="PublishMode.OnlyDataChanged"/>。

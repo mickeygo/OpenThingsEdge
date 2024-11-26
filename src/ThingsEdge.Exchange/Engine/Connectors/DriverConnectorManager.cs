@@ -1,3 +1,4 @@
+using ThingsEdge.Communication;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.ModBus;
 using ThingsEdge.Communication.Profinet.AllenBradley;
@@ -113,20 +114,22 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
                     connector.ConnectedStatus = ConnectionStatus.Disconnected; // 初始化
 
                     // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
-                    networkDevice.SocketReadErrorClosedDelegate = code =>
+                    networkDevice.SocketErrorClosedDelegate = code =>
                     {
                         // 根据错误代码来判断是否断开连接
                         if (networkDevice.IsSocketError)
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
 
-                            if (code is (int)ConnErrorCode.SocketConnectionAborted
-                                    or (int)ConnErrorCode.RemoteClosedConnection
-                                    or (int)ConnErrorCode.ReceiveDataTimeout
-                                    or (int)ConnErrorCode.SocketSendException
-                                    or (int)ConnErrorCode.SocketReceiveException)
+                            if (code is (int)CommErrorCode.SocketConnectException
+                                    or (int)CommErrorCode.SocketConnectTimeoutException
+                                    or (int)CommErrorCode.RemoteClosedConnection
+                                    or (int)CommErrorCode.ReceiveDataTimeout
+                                    or (int)CommErrorCode.SocketSendException
+                                    or (int)CommErrorCode.SocketReceiveException
+                                    or (int)CommErrorCode.SocketException)
                             {
-                                _logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
+                                logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
                             }
                         }
                     };
@@ -143,6 +146,7 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
                                 logger.LogWarning("尝试连接服务失败，错误：{Message}，主机：{Host}，端口：{Port}", ret.Message, connector.Host, connector.Port);
                             }
 
+                            connector.ConnectedStatus = ConnectionStatus.Connected;
                             _fristConnectSuccessful = ret.IsSuccess;
                         }
                         else

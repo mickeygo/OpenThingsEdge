@@ -214,20 +214,12 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
     /// <param name="sendValue">等待发送的数据对象</param>
     /// <param name="awaitData">是否必须要等待数据返回</param>
     /// <returns>结果数据对象</returns>
-    private async Task<OperateResult<byte[]>> SerialPortReceivedAsync(SerialPort serialPort, INetMessage? netMessage, byte[] sendValue, bool awaitData)
+    private async Task<OperateResult<byte[]>> SerialPortReceivedAsync(SerialPort serialPort, INetMessage? netMessage, byte[]? sendValue, bool awaitData)
     {
-        // TODO: 此代码需要优化
-        byte[] array;
-        MemoryStream memoryStream;
-        try
-        {
-            array = new byte[1024];
-            memoryStream = new MemoryStream();
-        }
-        catch (Exception ex)
-        {
-            return new OperateResult<byte[]>(ex.Message);
-        }
+        // HACK: 此代码需要优化
+
+        var array = new byte[1024];
+        MemoryStream memoryStream = new();
 
         var now = DateTime.Now;
         var num = 0;
@@ -291,9 +283,9 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
         return OperateResult.CreateSuccessResult(memoryStream.ToArray());
     }
 
-    public override async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage? netMessage, byte[] sendValue, bool useActivePush = true)
+    public override async Task<OperateResult<byte[]>> ReceiveMessageAsync(INetMessage? netMessage, byte[] sendValue)
     {
-        return await SerialPortReceivedAsync(_serialPort, netMessage, sendValue, awaitData: true).ConfigureAwait(continueOnCapturedContext: false);
+        return await SerialPortReceivedAsync(_serialPort, netMessage, sendValue, true).ConfigureAwait(continueOnCapturedContext: false);
     }
 
     public override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
@@ -303,6 +295,82 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
             await ClearSerialCacheAsync().ConfigureAwait(false);
         }
         return await ReadFromCoreServerHelperAsync(netMessage, sendValue, hasResponseData).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 根据给定的消息，发送的数据，接收到数据来判断是否接收完成报文。
+    /// </summary>
+    /// <param name="netMessage">消息类对象</param>
+    /// <param name="sendValue">发送的数据内容</param>
+    /// <param name="ms">接收数据的流</param>
+    /// <returns>是否接收完成数据</returns>
+    private static bool CheckMessageComplete(INetMessage? netMessage, byte[] sendValue, ref MemoryStream ms)
+    {
+        // HACK: 需要清理逻辑，并优化代码
+
+        if (netMessage == null)
+        {
+            return true;
+        }
+
+        if (netMessage is SpecifiedCharacterMessage specifiedCharacterMessage)
+        {
+            var array = ms.ToArray();
+            var bytes = BitConverter.GetBytes(specifiedCharacterMessage.ProtocolHeadBytesLength);
+            switch (bytes[3] & 0xF)
+            {
+                case 1:
+                    if (array.Length > specifiedCharacterMessage.EndLength
+                        && array[array.Length - 1 - specifiedCharacterMessage.EndLength] == bytes[1])
+                    {
+                        return true;
+                    }
+                    break;
+                case 2:
+                    if (array.Length > specifiedCharacterMessage.EndLength + 1
+                        && array[array.Length - 2 - specifiedCharacterMessage.EndLength] == bytes[1]
+                        && array[array.Length - 1 - specifiedCharacterMessage.EndLength] == bytes[0])
+                    {
+                        return true;
+                    }
+                    break;
+            }
+        }
+        else if (netMessage.ProtocolHeadBytesLength > 0)
+        {
+            var array2 = ms.ToArray();
+            if (array2.Length >= netMessage.ProtocolHeadBytesLength)
+            {
+                var num = netMessage.PependedUselesByteLength(array2);
+                if (num > 0)
+                {
+                    array2 = array2.RemoveBegin(num);
+                    ms = new MemoryStream();
+                    ms.Write(array2);
+                    if (array2.Length < netMessage.ProtocolHeadBytesLength)
+                    {
+                        return false;
+                    }
+                }
+                netMessage.HeadBytes = array2.SelectBegin(netMessage.ProtocolHeadBytesLength);
+                netMessage.SendBytes = sendValue;
+                var contentLengthByHeadBytes = netMessage.GetContentLengthByHeadBytes();
+                if (array2.Length >= netMessage.ProtocolHeadBytesLength + contentLengthByHeadBytes)
+                {
+                    if (netMessage.ProtocolHeadBytesLength > netMessage.HeadBytes.Length)
+                    {
+                        ms = new MemoryStream();
+                        ms.Write(array2.RemoveBegin(netMessage.ProtocolHeadBytesLength - netMessage.HeadBytes.Length));
+                    }
+                    return true;
+                }
+            }
+        }
+        else if (netMessage.CheckReceiveDataComplete(sendValue, ms))
+        {
+            return true;
+        }
+        return false;
     }
 
     /// <inheritdoc />
