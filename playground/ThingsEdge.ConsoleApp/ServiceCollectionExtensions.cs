@@ -23,9 +23,9 @@ public static class ServiceCollectionExtensions
                 .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
                 .UseNativeNoticeForwarder<NoticeForwarder>()
                 .UseNativeTriggerForwarder<TriggerForwader>()
-                .UseOptions(option =>
+                .UseOptions(options =>
                 {
-                    option.PDUSize = 396; // S7 PDU 长度
+                    options.PDUSize = 396; // S7 PDU 长度
                 });
         });
 
