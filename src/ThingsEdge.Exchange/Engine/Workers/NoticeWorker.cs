@@ -53,14 +53,13 @@ internal sealed class NoticeWorker(IMessageBroker<NoticeMessage> broker,
                             continue;
                         }
 
-                        // 在仅数据变更才会发送模式下，会校验数据是否有跳变。
-                        if (tag.PublishMode == PublishMode.OnlyDataChanged && TagDataCache.CompareAndSwap(tag.TagId, data!.Value))
+                        // EveryScan 模式下时每次都会发送， OnlyDataChanged 模式下在仅数据有跳变时才会发送。
+                        if (tag.PublishMode is PublishMode.EveryScan
+                            || (tag.PublishMode is PublishMode.OnlyDataChanged && TagHoldDataCache.CompareExchange(tag.TagId, data!.Value)))
                         {
-                            continue;
+                            // 发布通知事件
+                            await broker.PushAsync(new NoticeMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
                         }
-
-                        // 发布通知事件
-                        await broker.PushAsync(new NoticeMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

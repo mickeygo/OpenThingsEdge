@@ -9,7 +9,7 @@ namespace ThingsEdge.Exchange.Engine.Connectors;
 /// <summary>
 /// 驱动数据读取帮助类。
 /// </summary>
-internal static class DriverReadWriteUtil
+internal static class DriverReadWriteUtils
 {
     /// <summary>
     /// 读取数据。
@@ -67,7 +67,7 @@ internal static class DriverReadWriteUtil
             {
                 result2.Code = 2;
                 result2.ErrorCode = result.ErrorCode;
-                result2.ErrorMessage = result.Message;
+                result2.Message = result.Message;
             }
 
             return result2;

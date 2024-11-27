@@ -197,6 +197,16 @@ public class OperateResult
         return IsSuccess ? func() : CreateFailedResult<T1, T2, T3>(this);
     }
 
+    /// <summary>
+    /// 创建错误的操作结果，使用默认的错误码和消息。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static OperateResult<T> CreateFailedResult<T>()
+    {
+        return new OperateResult<T>();
+    }
+
     /// <inheritdoc />
     public static OperateResult<T> CreateFailedResult<T>(OperateResult result)
     {

@@ -115,7 +115,7 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
             return [(byte)num];
         }
         var value = CollectionUtils.SpliceArray([station], new byte[1] { 2 }, command, new byte[1] { 3 });
-        return SoftCRC16.CRC16(value, 160, 1, 0, 0).SelectLast(2);
+        return CollectionUtils.CopyLast(SoftCRC16.CRC16(value, 160, 1, 0, 0), 2);
     }
 
     /// <summary>

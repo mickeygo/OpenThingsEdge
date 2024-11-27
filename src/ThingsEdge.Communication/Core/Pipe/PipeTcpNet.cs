@@ -36,9 +36,9 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
     public bool IsSocketError { get; internal set; }
 
     /// <summary>
-    /// Socket 异常关闭时的委托对象，其中参数为错误状态码。
+    /// Socket 在异常时关闭的委托对象，其中参数为错误状态码。
     /// </summary>
-    public Action<int>? SocketErrorClosedDelegate { get; set; }
+    public Action<int>? SocketErrorAndClosedDelegate { get; set; }
 
     public override async Task<OperateResult<bool>> CreateAndConnectPipeAsync()
     {
@@ -48,7 +48,7 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
         {
             // 参考 NetSupport.CreateSocketAndConnectAsync 错误代码
             IsSocketError = connect.ErrorCode is (int)CommErrorCode.SocketConnectTimeoutException or (int)CommErrorCode.SocketConnectException;
-            SocketErrorClosedDelegate?.Invoke(connect.ErrorCode);
+            SocketErrorAndClosedDelegate?.Invoke(connect.ErrorCode);
             return new OperateResult<bool>(connect.ErrorCode, connect.Message);
         }
 
@@ -74,7 +74,7 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
         {
             // 参考 NetSupport.SocketSendAsync 错误代码
             IsSocketError = result.ErrorCode is (int)CommErrorCode.SocketSendException;
-            SocketErrorClosedDelegate?.Invoke(result.ErrorCode);
+            SocketErrorAndClosedDelegate?.Invoke(result.ErrorCode);
         }
 
         return result;
@@ -92,7 +92,7 @@ public class PipeTcpNet(string ipAddress, int port) : NetworkPipeBase
         {
             // 参考 NetSupport.SocketReceiveAsync 错误代码
             IsSocketError = result.ErrorCode is (int)CommErrorCode.RemoteClosedConnection or (int)CommErrorCode.ReceiveDataTimeout or (int)CommErrorCode.SocketException;
-            SocketErrorClosedDelegate?.Invoke(result.ErrorCode);
+            SocketErrorAndClosedDelegate?.Invoke(result.ErrorCode);
         }
         return result;
     }

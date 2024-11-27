@@ -1,7 +1,41 @@
 namespace ThingsEdge.Communication.Common.Extensions;
 
+/// <summary>
+/// 集合帮助类。
+/// </summary>
 internal static class CollectionUtils
 {
+    /// <summary>
+    /// 拷贝当前的实例数组，是基于引用层的浅拷贝，如果类型为值类型，那就是深度拷贝，如果类型为引用类型，就是浅拷贝。
+    /// </summary>
+    /// <typeparam name="T">类型对象</typeparam>
+    /// <param name="value">数组对象</param>
+    /// <returns>拷贝的结果内容</returns>
+    public static T[] CopyArray<T>(T[] value)
+    {
+        var array = new T[value.Length];
+        Array.Copy(value, array, value.Length);
+        return array;
+    }
+
+    /// <summary>
+    /// 选择一个数组的后面的几个数据信息。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="length">数据的长度</param>
+    /// <returns>新的数组信息</returns>
+    public static T[] CopyLast<T>(T[] value, int length)
+    {
+        if (length == 0)
+        {
+            return [];
+        }
+        
+        var array = new T[Math.Min(value.Length, length)];
+        Array.Copy(value, value.Length - length, array, 0, array.Length);
+        return array;
+    }
+
     /// <summary>
     /// 将一个数组进行扩充到指定长度，或是缩短到指定长度。
     /// </summary>
@@ -160,4 +194,105 @@ internal static class CollectionUtils
         }
         return array;
     }
+
+    /// <summary>
+    /// 将一个数组的前后移除指定位数，返回新的一个数组。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="leftLength">前面的位数</param>
+    /// <param name="rightLength">后面的位数</param>
+    /// <returns>新的数组</returns>
+    public static T[] RemoveBoth<T>(this T[] value, int leftLength, int rightLength)
+    {
+        if (value.Length <= leftLength + rightLength)
+        {
+            return [];
+        }
+
+        var array = new T[value.Length - leftLength - rightLength];
+        Array.Copy(value, leftLength, array, 0, array.Length);
+        return array;
+    }
+
+    /// <summary>
+    /// 将一个数组的前面指定位数移除，返回新的一个数组。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="length">等待移除的长度</param>
+    /// <returns>新的数组</returns>
+    public static T[] RemoveBegin<T>(this T[] value, int length)
+    {
+        return ArrayRemoveBoth(value, length, 0);
+    }
+
+    /// <summary>
+    /// 将一个数组的后面指定位数移除，返回新的一个数组。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="length">等待移除的长度</param>
+    /// <returns>新的数组</returns>
+    public static T[] RemoveEnd<T>(this T[] value, int length)
+    {
+        return ArrayRemoveBoth(value, 0, length);
+    }
+
+    /// <summary>
+    /// 将一个数组的前后移除指定位数，返回新的一个数组。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="leftLength">前面的位数</param>
+    /// <param name="rightLength">后面的位数</param>
+    /// <returns>新的数组</returns>
+    private static T[] ArrayRemoveBoth<T>(T[] value, int leftLength, int rightLength)
+    {
+        if (value.Length <= leftLength + rightLength)
+        {
+            return [];
+        }
+
+        var array = new T[value.Length - leftLength - rightLength];
+        Array.Copy(value, leftLength, array, 0, array.Length);
+        return array;
+    }
+
+    /// <summary>
+    /// 获取到数组里面的中间指定长度的数组。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="index">起始索引</param>
+    /// <param name="length">数据的长度</param>
+    /// <returns>新的数组值</returns>
+    public static T[] SelectMiddle<T>(this T[] value, int index, int length)
+    {
+        if (length == 0)
+        {
+            return [];
+        }
+
+        var array = new T[Math.Min(value.Length, length)];
+        Array.Copy(value, index, array, 0, array.Length);
+        return array;
+    }
+
+    /// <summary>
+    /// 选择一个数组的前面的几个数据信息。
+    /// </summary>
+    /// <param name="value">数组</param>
+    /// <param name="length">数据的长度</param>
+    /// <returns>新的数组</returns>
+    public static T[] SelectBegin<T>(this T[] value, int length)
+    {
+        if (length == 0)
+        {
+            return [];
+        }
+
+        var array = new T[Math.Min(value.Length, length)];
+        if (array.Length != 0)
+        {
+            Array.Copy(value, 0, array, 0, array.Length);
+        }
+        return array;
+    }
+
 }

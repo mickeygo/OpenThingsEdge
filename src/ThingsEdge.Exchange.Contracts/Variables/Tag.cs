@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 namespace ThingsEdge.Exchange.Contracts.Variables;
 
 /// <summary>
@@ -38,7 +40,7 @@ public partial class Tag
     /// <summary>
     /// 扫描速率（毫秒），默认100ms。
     /// </summary>
-    /// <remarks>只有作为触发型号时才有效。</remarks>
+    /// <remarks>只有作为触发信号时才有效。</remarks>
     public int ScanRate { get; init; } = 100;
 
     /// <summary>
@@ -58,29 +60,19 @@ public partial class Tag
     public PublishMode PublishMode { get; init; } = PublishMode.OnlyDataChanged;
 
     /// <summary>
-    /// 标记显示名称。
-    /// </summary>
-    [NotNull]
-    public string? DisplayName { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 标记身份标识，默认为 "Master"。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagIdentity Identity { get; init; } = TagIdentity.Master;
-
-    /// <summary>
-    /// 标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。
-    /// </summary>
-    /// <remarks>注：分组中的数据类型要保持一致，如果是数组，组内各标记数据类型也应都为数组，且长度一致。</remarks>
-    [NotNull]
-    public string? Group { get; init; } = string.Empty;
-
-    /// <summary>
     /// <see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Notice"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
     /// </summary>
     [NotNull]
     public List<Tag>? NormalTags { get; init; } = [];
+
+    /// <summary>
+    /// 扩展数据。
+    /// </summary>
+    /// <remarks>
+    /// Tag 中只定义了必要属性，JSON 中其他属性在反序列化时会包含在扩展数据中，其中名称区分大小写。
+    /// </remarks>
+    [JsonExtensionData]
+    public JsonObject? ExtraData { get; init; }
 
     /// <summary>
     /// 标记是否为数组对象。

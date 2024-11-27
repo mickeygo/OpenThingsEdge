@@ -45,12 +45,12 @@ public abstract class DeviceTcpNet : DeviceCommunication
     public bool IsSocketError => _pipeTcpNet?.IsSocketError ?? false;
 
     /// <summary>
-    /// Socket 异常关闭时的委托对象，其中参数为错误状态码。
+    /// Socket 在异常时关闭的委托对象，其中参数为错误状态码。
     /// </summary>
-    public Action<int>? SocketErrorClosedDelegate
+    public Action<int>? SocketErrorAndClosedDelegate
     {
-        get => _pipeTcpNet.SocketErrorClosedDelegate;
-        set => _pipeTcpNet.SocketErrorClosedDelegate = value;
+        get => _pipeTcpNet.SocketErrorAndClosedDelegate;
+        set => _pipeTcpNet.SocketErrorAndClosedDelegate = value;
     }
 
     /// <summary>

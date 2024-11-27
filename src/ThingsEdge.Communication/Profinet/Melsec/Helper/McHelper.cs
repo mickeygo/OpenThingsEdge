@@ -340,7 +340,7 @@ public static class McHelper
     {
         var coreResult = mc.McType == McType.McBinary
             ? McBinaryHelper.BuildReadMemoryCommand(address, length)
-            : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadMemoryCommand(address, length) : null;
+            : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadMemoryCommand(address, length) : OperateResult.CreateFailedResult<byte[]>();
         if (!coreResult.IsSuccess)
         {
             return coreResult;
@@ -366,7 +366,7 @@ public static class McHelper
     {
         var coreResult = mc.McType == McType.McBinary
             ? McBinaryHelper.BuildReadSmartModule(module, address, length)
-            : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadSmartModule(module, address, length) : null;
+            : mc.McType == McType.MCAscii ? McAsciiHelper.BuildAsciiReadSmartModule(module, address, length) : OperateResult.CreateFailedResult<byte[]>();
         if (!coreResult.IsSuccess)
         {
             return coreResult;

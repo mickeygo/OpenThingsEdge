@@ -31,7 +31,7 @@ public sealed class Device
     /// <summary>
     /// 端口。
     /// </summary>
-    /// <remarks>不为 0 时表示使用该端口。</remarks>
+    /// <remarks>为 0 时表示使用驱动默认的端口。</remarks>
     public int Port { get; init; }
 
     /// <summary>

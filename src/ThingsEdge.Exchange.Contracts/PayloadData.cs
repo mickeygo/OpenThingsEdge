@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using ThingsEdge.Exchange.Contracts.Variables;
 
 namespace ThingsEdge.Exchange.Contracts;
@@ -44,28 +45,9 @@ public sealed class PayloadData
     public TagDataType DataType { get; init; }
 
     /// <summary>
-    /// 标记显示名称。
+    /// Tag 的扩展数据。
     /// </summary>
-    [NotNull]
-    public string? DisplayName { get; init; }
-
-    /// <summary>
-    /// 数据身份标记。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagIdentity Identity { get; init; }
-
-    /// <summary>
-    /// 标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。
-    /// </summary>
-    /// <remarks>注：分组中的数据类型要保持一致，如果是数组，组内各标记数据类型也应都为数组，且长度一致。</remarks>
-    [NotNull]
-    public string? Group { get; init; }
-
-    /// <summary>
-    /// 数据创建时间，可用于诊断。
-    /// </summary>
-    public DateTime CreatedTime { get; init; } = DateTime.Now;
+    public JsonObject? ExtraData { get; init; }
 
     /// <summary>
     /// 标记是否为数组对象。
@@ -76,6 +58,31 @@ public sealed class PayloadData
     {
         return Length > 0
            && DataType is not (TagDataType.String or TagDataType.S7String or TagDataType.S7WString);
+    }
+
+    /// <summary>
+    /// 提取扩展数据的值，不存在时则返回指定的默认值。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="propertyName"></param>
+    /// <param name="defaultValue">默认值</param>
+    /// <returns></returns>
+    public T GetExtraValue<T>(string propertyName, T defaultValue)
+    {
+        return GetExtraValue<T>(propertyName) ?? defaultValue;
+    }
+
+    /// <summary>
+    /// 提取扩展数据的值，不存在时返回 default。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="propertyName"></param>
+    /// <returns></returns>
+    public T? GetExtraValue<T>(string propertyName)
+    {
+        return ExtraData != null && ExtraData.TryGetPropertyValue(propertyName, out var value) && value is not null
+            ? value.GetValue<T>()
+            : default;
     }
 
     /// <summary>
@@ -92,9 +99,7 @@ public sealed class PayloadData
             Address = tag.Address,
             DataType = tag.DataType,
             Length = tag.Length,
-            DisplayName = tag.DisplayName,
-            Identity = tag.Identity,
-            Group = tag.Group,
+            ExtraData = tag.ExtraData,
         };
     }
 }

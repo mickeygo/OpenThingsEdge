@@ -35,10 +35,12 @@ internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
                         // 第二次检测
                         if (cancellationToken.IsCancellationRequested)
                         {
-                            if (!TagDataCache.CompareAndSwap(tag.TagId, false))
+                            if (TagHoldDataCache.CompareExchange(tag.TagId, false))
                             {
                                 // 任务取消时，发布设备心跳断开事件。
-                                await broker.PushAsync(new HeartbeatMessage(channelName!, device, tag, WorkerUtils.SetOff(tag), false), cancellationToken).ConfigureAwait(false);
+                                await broker.PushAsync(
+                                    new HeartbeatMessage(channelName!, device, tag, WorkerUtils.CreateHeartbeatPayloadOff(tag, options.Value.HeartbeatListenUseHighLevel), false),
+                                    cancellationToken).ConfigureAwait(false);
                             }
 
                             break;
@@ -46,10 +48,12 @@ internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
 
                         if (!connector.CanConnect)
                         {
-                            if (!TagDataCache.CompareAndSwap(tag.TagId, false))
+                            if (TagHoldDataCache.CompareExchange(tag.TagId, false))
                             {
                                 // 连接断开时，发布设备心跳断开事件。
-                                await broker.PushAsync(new HeartbeatMessage(channelName!, device, tag, WorkerUtils.SetOff(tag), false), cancellationToken).ConfigureAwait(false);
+                                await broker.PushAsync(
+                                    new HeartbeatMessage(channelName!, device, tag, WorkerUtils.CreateHeartbeatPayloadOff(tag, options.Value.HeartbeatListenUseHighLevel), false),
+                                    cancellationToken).ConfigureAwait(false);
                             }
 
                             continue;
@@ -65,15 +69,15 @@ internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
                         }
 
                         // 心跳标记数据类型必须为 bool 或 int16
-                        if (WorkerUtils.CheckOn(data!))
+                        if (WorkerUtils.CheckHeartbeatOn(data!, options.Value.HeartbeatListenUseHighLevel))
                         {
                             if (options.Value.HeartbeatShouldAckZero)
                             {
                                 // 数据回写失败不影响，下一次轮询继续处理
-                                await connector.WriteAsync(tag, WorkerUtils.SetOff2(tag)).ConfigureAwait(false);
+                                await connector.WriteAsync(tag, WorkerUtils.SetHeartbeatOff(tag, options.Value.HeartbeatListenUseHighLevel)).ConfigureAwait(false);
                             }
 
-                            if (!TagDataCache.CompareAndSwap(tag.TagId, true))
+                            if (TagHoldDataCache.CompareExchange(tag.TagId, true))
                             {
                                 // 发布心跳正常事件。
                                 await broker.PushAsync(new HeartbeatMessage(channelName!, device, tag, data!, true), cancellationToken).ConfigureAwait(false);

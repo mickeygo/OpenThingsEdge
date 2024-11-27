@@ -22,8 +22,8 @@ internal static class DriverConnectorExtensions
             return (false, default, "已与设备断开连接");
         }
 
-        var result = await DriverReadWriteUtil.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
-        return (result.IsSuccess(), result.Data, result.ErrorMessage);
+        var result = await DriverReadWriteUtils.ReadAsync(connector.Driver, tag).ConfigureAwait(false);
+        return (result.IsSuccess(), result.Data, result.Message);
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ internal static class DriverConnectorExtensions
                 }
             }
 
-            var (ok2, err2) = await DriverReadWriteUtil.WriteAsync(connector.Driver, tag, data2!).ConfigureAwait(false);
+            var (ok2, err2) = await DriverReadWriteUtils.WriteAsync(connector.Driver, tag, data2!).ConfigureAwait(false);
             return (ok2, data2!, err2);
         }
         catch (Exception ex)

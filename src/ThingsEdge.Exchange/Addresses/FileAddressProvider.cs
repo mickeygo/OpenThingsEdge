@@ -1,4 +1,5 @@
 using ThingsEdge.Exchange.Contracts.Variables;
+using ThingsEdge.Exchange.Utils;
 
 namespace ThingsEdge.Exchange.Addresses;
 
@@ -42,7 +43,7 @@ internal sealed class FileAddressProvider : IAddressProvider
     private List<Channel> GetChannelsFromSingleFile()
     {
         var text = File.ReadAllText(Path.GetFullPath(_tagsPath));
-        return JsonDeserialize<List<Channel>>(text) ?? [];
+        return JsonUtils.Deserialize<List<Channel>>(text) ?? [];
     }
 
     /// <summary>
@@ -86,7 +87,7 @@ internal sealed class FileAddressProvider : IAddressProvider
 
             // 解析 channelConf
             var text1 = ReadAllText(channelConf);
-            var channel = JsonDeserialize<Channel>(text1);
+            var channel = JsonUtils.Deserialize<Channel>(text1);
             if (channel is null)
             {
                 continue;
@@ -106,7 +107,7 @@ internal sealed class FileAddressProvider : IAddressProvider
 
                 // 解析 device.conf
                 var text2 = ReadAllText(deviceConf);
-                var device = JsonDeserialize<Device>(text2);
+                var device = JsonUtils.Deserialize<Device>(text2);
                 if (device is null)
                 {
                     continue;
@@ -118,7 +119,7 @@ internal sealed class FileAddressProvider : IAddressProvider
                 {
                     // 解析 group.conf
                     var text3 = ReadAllText(groupConf);
-                    var tagGroup = JsonDeserialize<TagGroup>(text3);
+                    var tagGroup = JsonUtils.Deserialize<TagGroup>(text3);
                     if (tagGroup is null)
                     {
                         continue;
@@ -130,16 +131,6 @@ internal sealed class FileAddressProvider : IAddressProvider
         }
 
         return channels;
-    }
-
-    private static T? JsonDeserialize<T>(string json)
-    {
-        return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
-        {
-            ReadCommentHandling = JsonCommentHandling.Skip, // 允许注释
-            AllowTrailingCommas = true, // 允许尾随逗号
-            PropertyNameCaseInsensitive = true, // 属性名称匹配不区分大小写
-        });
     }
 
     private static string ReadAllText(FileInfo fileInfo)

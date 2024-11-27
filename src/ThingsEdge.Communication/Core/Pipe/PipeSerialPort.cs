@@ -304,7 +304,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
     /// <param name="sendValue">发送的数据内容</param>
     /// <param name="ms">接收数据的流</param>
     /// <returns>是否接收完成数据</returns>
-    private static bool CheckMessageComplete(INetMessage? netMessage, byte[] sendValue, ref MemoryStream ms)
+    private static bool CheckMessageComplete(INetMessage? netMessage, byte[]? sendValue, ref MemoryStream ms)
     {
         // HACK: 需要清理逻辑，并优化代码
 
@@ -366,7 +366,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
                 }
             }
         }
-        else if (netMessage.CheckReceiveDataComplete(sendValue, ms))
+        else if (netMessage.CheckReceiveDataComplete(sendValue!, ms))
         {
             return true;
         }

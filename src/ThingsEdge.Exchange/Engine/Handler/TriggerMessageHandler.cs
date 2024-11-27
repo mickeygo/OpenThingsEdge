@@ -46,8 +46,6 @@ internal sealed class TriggerMessageHandler(
                 {
                     logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         message.Device.Name, message.Tag.Name, message.Tag.Address, err5);
-
-                    AckTagSet(message.Tag.TagId);
                 }
             }
         }
@@ -76,7 +74,7 @@ internal sealed class TriggerMessageHandler(
             }
 
             logger.LogError("[TriggerMessageHandler] 推送消息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
-                message.Device.Name, message.Tag.Name, message.Tag.Address, result.ErrorMessage);
+                message.Device.Name, message.Tag.Name, message.Tag.Address, result.Message);
 
             // 将错误代码写入到设备
             if (message.Connector.CanConnect)
@@ -86,7 +84,6 @@ internal sealed class TriggerMessageHandler(
                 {
                     logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                         message.Device.Name, message.Tag.Name, message.Tag.Address, err4);
-                    AckTagSet(message.Tag.TagId);
                 }
             }
 
@@ -140,28 +137,10 @@ internal sealed class TriggerMessageHandler(
         {
             logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 message.Device.Name, message.Tag.Name, message.Tag.Address, err3);
-
-            AckTagSet(message.Tag.TagId);
         }
 
         // 设置回写的标记状态快照。
         tagDataSnapshot.Change(message.Tag, formatedData3!);
-    }
-
-    /// <summary>
-    /// 若标志值回写失败，标志位值不会发生跳变（PLC值和TagSet值都为1），这样导致该标志位后续的处理逻辑直接被跳过。
-    /// </summary>
-    /// <remarks>
-    /// 这里处理方式是：在回写失败时，设置回执（Trigger 监控器中必须启动回执比较）。注：接收数据后的逻辑需要做幂等处理（对已处理的数据直接返回 OK 状态）。
-    /// </remarks>
-    /// <param name="tagId"></param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void AckTagSet(string tagId)
-    {
-        if (options.Value.AckRetryMaxCount > 0)
-        {
-            TagDataCache.Ack(tagId, options.Value.AckRetryMaxCount);
-        }
     }
 
     /// <summary>
@@ -172,6 +151,6 @@ internal sealed class TriggerMessageHandler(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int ChangeWhenEqTriggerCondValue(int tagCode)
     {
-        return tagCode == options.Value.TagTriggerConditionValue ? 0 : tagCode;
+        return tagCode == options.Value.TriggerConditionValue ? options.Value.TriggerAckCodeWhenEqual : tagCode;
     }
 }

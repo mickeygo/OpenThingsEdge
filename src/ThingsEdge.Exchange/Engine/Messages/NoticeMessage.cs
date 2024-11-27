@@ -13,7 +13,7 @@ namespace ThingsEdge.Exchange.Engine.Messages;
 /// <param name="Device">设备信息</param>
 /// <param name="Tag">标记</param>
 /// <param name="Self">读取的标记值</param>
-internal record NoticeMessage(
+internal sealed record NoticeMessage(
     IDriverConnector Connector,
     string ChannelName,
     Device Device,

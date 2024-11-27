@@ -2,11 +2,13 @@
   <PropertyGroup>
     <!-- Style Settings -->
     <LangVersion>preview</LangVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!--<UsePublicApiAnalyzers>true</UsePublicApiAnalyzers>-->
+    <UsePublicApiAnalyzers>true</UsePublicApiAnalyzers>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
+    <PackageProjectUrl>https://github.com/mickeygo/OpenThingsEdge</PackageProjectUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!--<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>-->
     
     <!-- Build Settings -->
@@ -26,9 +28,8 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <!-- Version Settings -->
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>0.10.0</PackageVersion>
     <Version>$(PackageVersion)</Version>
-	  <Authors>Gang.Yang</Authors>
-	  <Company>ThingsEdge</Company>
+	  <Authors>mickeygo</Authors>
   </PropertyGroup>
 </Project>

@@ -28,7 +28,9 @@ internal static class SocketExtensions
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
+#pragma warning disable CA1416 // Validate platform compatibility
                 socket.IOControl(IOControlCode.KeepAliveValues, optionInValue, null);
+#pragma warning restore CA1416 // Validate platform compatibility
             }
             else if (Environment.OSVersion.Platform == PlatformID.Unix)
             {

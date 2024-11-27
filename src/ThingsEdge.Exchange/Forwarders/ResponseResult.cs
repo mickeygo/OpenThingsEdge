@@ -19,11 +19,11 @@ public sealed class ResponseResult : AbstractResult<ResponseMessage>
 
     public static ResponseResult FromError(int code, string errMessage)
     {
-        return new ResponseResult() { Code = code, ErrorMessage = errMessage };
+        return new ResponseResult() { Code = code, Message = errMessage };
     }
 
     public static ResponseResult FromError(ExchangeErrorCode code, string errMessage)
     {
-        return new ResponseResult() { Code = (int)code, ErrorMessage = errMessage };
+        return new ResponseResult() { Code = (int)code, Message = errMessage };
     }
 }

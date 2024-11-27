@@ -55,13 +55,12 @@ public static class ExchangeServiceCollectionExtensions
             services.AddTransient<INoticeMessageHandler, NoticeMessageHandler>();
             services.AddTransient<ITriggerMessageHandler, TriggerMessageHandler>();
 
-            services.AddSingleton<DriverConnectorManager>();
+            services.AddSingleton<IDriverConnectorManager, DriverConnectorManager>();
             services.AddSingleton<IExchange, EngineExchange>();
             services.AddTransient<ITagReaderWriter, TagReaderWriterImpl>();
 
             services.AddSingleton<ITagDataSnapshot, TagDataSnapshotImpl>();
             services.AddSingleton<IMessageLoop, MessageLoop>();
-            services.AddTransient<ITagReaderWriter, TagReaderWriterImpl>();
 
             services.AddTransient<IHeartbeatForwarderProxy, HeartbeatForwarderProxy>();
             services.AddTransient<INoticeForwarderProxy, NoticeForwarderProxy>();
@@ -83,12 +82,14 @@ public static class ExchangeServiceCollectionExtensions
     /// <returns></returns>
     public static IExchangeBuilder UseOptions(this IExchangeBuilder builder, Action<ExchangeOptions>? optionsAction = null)
     {
+        if (optionsAction == null)
+        {
+            return builder;
+        }
+
         builder.Builder.ConfigureServices((hostBuilder, services) =>
         {
-            if (optionsAction != null)
-            {
-                services.PostConfigure(optionsAction);
-            }
+            services.PostConfigure(optionsAction);
         });
 
         return builder;

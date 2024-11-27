@@ -6,16 +6,6 @@ namespace ThingsEdge.Exchange.Configuration;
 public sealed class ExchangeOptions
 {
     /// <summary>
-    /// 触发标记的触发条件值，值大于 0 才有效，默认为 1。
-    /// </summary>
-    public short TagTriggerConditionValue { get; set; } = 1;
-
-    /// <summary>
-    /// Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
-    /// </summary>
-    public bool HeartbeatShouldAckZero { get; set; } = true;
-
-    /// <summary>
     /// 默认的标记扫描速率，配置中不设定会使用此设置, 默认为 500ms。
     /// </summary>
     public int DefaultScanRate { get; init; } = 500;
@@ -31,6 +21,29 @@ public sealed class ExchangeOptions
     public bool AllowReadMulti { get; init; } = true;
 
     /// <summary>
+    /// Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
+    /// </summary>
+    /// <remarks>部分情况下上位机设置心跳但是不需要回写，可设置为 false。</remarks>
+    public bool HeartbeatShouldAckZero { get; set; } = true;
+
+    /// <summary>
+    /// 监听心跳数据是否采用高电平值，默认为 true。
+    /// </summary>
+    /// <remarks>使用高电平值时，在监听值为 True 或 1 时会触发，然后回写给设备低电平值（如 False、0 等），不采用则相反。</remarks>
+    public bool HeartbeatListenUseHighLevel { get; set; } = true;
+
+    /// <summary>
+    /// 触发标记的触发条件值，值大于 0 才有效，默认为 1。
+    /// </summary>
+    /// <remarks>当 Tag 为 Trigger 类型时，只有在值为该指定值时才会触发。</remarks>
+    public short TriggerConditionValue { get; set; } = 1;
+
+    /// <summary>
+    /// 在返回值与触发值相等时，写回给设备的状态码，默认为 -1。
+    /// </summary>
+    public short TriggerAckCodeWhenEqual { get; set; } = -1;
+
+    /// <summary>
     /// 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。
     /// <para>
     /// SIEMENS TIA 选项，信息系统->对 PLC 进行编程->指令->通信->S7 通信->数据一致性:
@@ -43,13 +56,16 @@ public sealed class ExchangeOptions
     ///      变量的一致性则由系统保证。因此，使用指令 "PUT"/"GET" 或者在读/写变量（例如，由 OP 或 OS 读/写）时可以在保持一致性的情况下访问这些通信区。
     /// </para>
     /// </summary>
-    public int PDUSize { get; set; }
+    /// <remarks>优先使用对应配置文件中的设置，若没设置才会使用此设置。</remarks>
+    public int MaxPDUSize { get; set; }
 
     /// <summary>
-    /// 在触发标志位值回写失败时，允许触发回执的最大次数，当大于 0 是有效，默认为 3。
+    /// Socket 保活时长，只有在大于 0 时才启用，单位 ms，默认 60s。
     /// </summary>
-    /// <remarks>
-    /// 触发标志位重置值，可以防止 PLC 值与 Tag 缓存值一致导致跳过处理逻辑；若设置后，后台结束数据需要做幂等处理。
-    /// </remarks>
-    public int AckRetryMaxCount { get; init; } = 3;
+    public int NetworkKeepAliveTime { get; set; } = 60_000;
+
+    /// <summary>
+    /// 是否使用连接池（暂时还未实现连接池）。
+    /// </summary>
+    public bool UseConnectorPool { get; set; }
 }

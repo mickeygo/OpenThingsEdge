@@ -5,7 +5,7 @@ namespace ThingsEdge.Exchange.Infrastructure.Brokers;
 /// <summary>
 /// 消息队列服务。
 /// </summary>
-internal class MessageQueueBroker<TMessage> where TMessage : IMessage
+internal sealed class MessageQueueBroker<TMessage> where TMessage : IMessage
 {
     private readonly Channel<TMessage> _queue;
 

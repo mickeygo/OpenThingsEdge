@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace ThingsEdge.Communication.Profinet.AllenBradley;
 
 /// <summary>
@@ -13,10 +11,10 @@ public class AbTagItem
     public uint InstanceID { get; set; }
 
     /// <summary>
-    /// 当前标签的名字<br />
-    /// the name of the current label
+    /// 当前标签的名字。
     /// </summary>
-    public string Name { get; set; }
+    [NotNull]
+    public string? Name { get; set; }
 
     /// <summary>
     /// 当前标签的类型代号，例如 0x0C1 表示bool类型，如果当前的标签的<see cref="IsStruct" />为 <c>True</c>，那么本属性表示结构体的实例ID。
@@ -36,19 +34,7 @@ public class AbTagItem
     /// <summary>
     /// 当前如果是数组，表示数组的长度，仅在读取结构体的变量信息时有效，为-1则是无效。
     /// </summary>
-    public int[] ArrayLength { get; set; }
-
-    /// <summary>
-    /// 如果当前的标签是结构体的标签，则表示为结构体的成员信息
-    /// </summary>
-    [JsonIgnore]
-    public AbTagItem[] Members { get; set; }
-
-    /// <summary>
-    /// 用户自定义的额外的对象
-    /// </summary>
-    [JsonIgnore]
-    public object Tag { get; set; }
+    public int[] ArrayLength { get; set; } = [-1, -1, -1];
 
     /// <summary>
     /// 获取或设置本属性实际数据在结构体中的偏移位置信息。
@@ -56,36 +42,24 @@ public class AbTagItem
     public int ByteOffset { get; set; }
 
     /// <summary>
-    /// 实例化一个默认的对象。
-    /// </summary>
-    public AbTagItem()
-    {
-        ArrayLength = [-1, -1, -1];
-    }
-
-    /// <summary>
     /// 获取类型的文本描述信息
     /// </summary>
     /// <returns>文本信息</returns>
     public string GetTypeText()
     {
-        var text = string.Empty;
-        if (ArrayDimension == 1)
+        var text = ArrayDimension switch
         {
-            text = ArrayLength[0] >= 0 ? $"[{ArrayLength[0]}]" : "[]";
-        }
-        else if (ArrayDimension == 2)
-        {
-            text = $"[{ArrayLength[0]},{ArrayLength[1]}]";
-        }
-        else if (ArrayDimension == 3)
-        {
-            text = $"[{ArrayLength[0]},{ArrayLength[1]},{ArrayLength[2]}]";
-        }
+            1 => ArrayLength[0] >= 0 ? $"[{ArrayLength[0]}]" : "[]",
+            2 => $"[{ArrayLength[0]},{ArrayLength[1]}]",
+            3 => $"[{ArrayLength[0]},{ArrayLength[1]},{ArrayLength[2]}]",
+            _ => string.Empty
+        };
+
         if (IsStruct)
         {
             return "struct" + text;
         }
+
         if (SymbolType == 8)
         {
             return "date" + text;
@@ -192,43 +166,6 @@ public class AbTagItem
         ArrayDimension = (value & 0x4000) == 16384 ? 2 : (value & 0x2000) == 8192 ? 1 : 0;
         IsStruct = (value & 0x8000) == 32768;
         SymbolType = (ushort)(value & 0xFFFu);
-    }
-
-    /// <summary>
-    /// 克隆单个的标签数据信息
-    /// </summary>
-    /// <param name="abTagItem">标签信息</param>
-    /// <returns>新的实例的标签</returns>
-    public static AbTagItem CloneBy(AbTagItem abTagItem)
-    {
-        var abTagItem2 = new AbTagItem
-        {
-            InstanceID = abTagItem.InstanceID,
-            Name = abTagItem.Name,
-            ByteOffset = abTagItem.ByteOffset,
-            SymbolType = abTagItem.SymbolType,
-            ArrayDimension = abTagItem.ArrayDimension
-        };
-        abTagItem2.ArrayLength[0] = abTagItem.ArrayLength[0];
-        abTagItem2.ArrayLength[1] = abTagItem.ArrayLength[1];
-        abTagItem2.ArrayLength[2] = abTagItem.ArrayLength[2];
-        abTagItem2.IsStruct = abTagItem.IsStruct;
-        return abTagItem2;
-    }
-
-    /// <summary>
-    /// 克隆整个的标签数组信息
-    /// </summary>
-    /// <param name="abTagItems">标签数组信息</param>
-    /// <returns>标签数组</returns>
-    public static AbTagItem[] CloneBy(AbTagItem[] abTagItems)
-    {
-        var array = new AbTagItem[abTagItems.Length];
-        for (var i = 0; i < abTagItems.Length; i++)
-        {
-            array[i] = CloneBy(abTagItems[i]);
-        }
-        return array;
     }
 
     /// <summary>

@@ -26,12 +26,13 @@ host.ConfigureServices((context, services) =>
     services.AddHostedService<AppStartupHostedService>();
 });
 
-host.AddThingsEdgeExchange(builder =>
+host.AddThingsEdgeExchange(static builder =>
 {
     builder.UseDeviceCustomProvider<ModbusTcpAddressProvider>()
         .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
         .UseNativeNoticeForwarder<NoticeForwarder>()
-        .UseNativeTriggerForwarder<TriggerForwader>();
+        .UseNativeTriggerForwarder<TriggerForwader>()
+        .UseOptions();
 });
 
 await host.RunConsoleAsync().ConfigureAwait(false);

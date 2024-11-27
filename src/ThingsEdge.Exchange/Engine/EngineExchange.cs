@@ -10,7 +10,7 @@ namespace ThingsEdge.Exchange.Engine;
 /// </summary>
 internal sealed class EngineExchange(IAddressFactory addressFactory,
     ITagDataSnapshot tagDataSnapshot,
-    DriverConnectorManager driverConnectorManager,
+    IDriverConnectorManager driverConnectorManager,
     EngineExecutor engineExcutor,
     ILogger<EngineExchange> logger) : IExchange
 {
@@ -50,7 +50,7 @@ internal sealed class EngineExchange(IAddressFactory addressFactory,
         IsRunning = false;
 
         // 清空缓存与快照
-        TagDataCache.Clear();
+        TagHoldDataCache.Clear();
         tagDataSnapshot.Clear();
 
         var cts = _cts;

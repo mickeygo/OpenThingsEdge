@@ -21,7 +21,7 @@ public interface INetMessage
     /// <summary>
     /// 发送的字节信息。
     /// </summary>
-    byte[] SendBytes { get; set; }
+    byte[]? SendBytes { get; set; }
 
     /// <summary>
     /// 从当前的头子节文件中提取出接下来需要接收的数据长度。

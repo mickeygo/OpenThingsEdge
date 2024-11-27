@@ -10,6 +10,7 @@ using ThingsEdge.Communication.Profinet.Omron;
 using ThingsEdge.Communication.Profinet.Panasonic;
 using ThingsEdge.Communication.Profinet.Siemens;
 using ThingsEdge.Communication.Profinet.XINJE;
+using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Contracts.Variables;
 
 namespace ThingsEdge.Exchange.Engine.Connectors;
@@ -17,7 +18,7 @@ namespace ThingsEdge.Exchange.Engine.Connectors;
 /// <summary>
 /// 驱动连接器管理者。
 /// </summary>
-internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> logger) : IDisposable
+internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, ILogger<DriverConnectorManager> logger) : IDriverConnectorManager
 {
     private readonly Dictionary<string, IDriverConnector> _connectors = []; // Key 为设备编号
 
@@ -25,13 +26,6 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
     private PeriodicTimer? _periodicTimer;
 
     private object SyncLock => _connectors;
-
-    /// <summary>
-    /// 获取指定的连接驱动
-    /// </summary>
-    /// <param name="deviceId">设备Id</param>
-    /// <returns></returns>
-    public IDriverConnector this[string deviceId] => _connectors[deviceId];
 
     /// <summary>
     /// 获取指定的连接驱动
@@ -89,12 +83,13 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
                 DriverModel.Fuji_SPH => new FujiSPHNet(deviceInfo.Host),
                 DriverModel.Panasonic_Mc => new PanasonicMcNet(deviceInfo.Host, deviceInfo.Port),
                 DriverModel.XinJE_Tcp => new XinJETcpNet(deviceInfo.Host),
-                _ => throw new NotImplementedException(),
+                _ => throw new NotImplementedException("设备驱动不在指定的范围中"),
             };
 
             // 设置 SocketKeepAliveTime 心跳时间
-            driverNet.KeepAliveTime = 60_000;
-            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, deviceInfo.Port, driverNet, deviceInfo.MaxPDUSize));
+            driverNet.KeepAliveTime = options.Value.NetworkKeepAliveTime;
+            var maxPDUSize = deviceInfo.MaxPDUSize > 0 ? deviceInfo.MaxPDUSize : options.Value.MaxPDUSize;
+            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, driverNet.Port, driverNet, maxPDUSize));
         }
     }
 
@@ -113,7 +108,7 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
                     connector.ConnectedStatus = ConnectionStatus.Disconnected; // 初始化
 
                     // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
-                    networkDevice.SocketErrorClosedDelegate = code =>
+                    networkDevice.SocketErrorAndClosedDelegate = code =>
                     {
                         // 根据错误代码来判断是否断开连接
                         if (networkDevice.IsSocketError)
@@ -240,7 +235,7 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
     }
 
     /// <summary>
-    /// 驱动连接挂起
+    /// 驱动连接挂起。
     /// </summary>
     public void Suspend()
     {
@@ -257,9 +252,9 @@ internal sealed class DriverConnectorManager(ILogger<DriverConnectorManager> log
     }
 
     /// <summary>
-    /// 重启驱动状态。
+    /// 恢复正常运行状态。
     /// </summary>
-    public void Restart()
+    public void Recovery()
     {
         lock (SyncLock)
         {

@@ -1,5 +1,4 @@
 using ThingsEdge.Exchange.Configuration;
-using ThingsEdge.Exchange.Contracts;
 using ThingsEdge.Exchange.Contracts.Variables;
 using ThingsEdge.Exchange.Engine.Connectors;
 using ThingsEdge.Exchange.Engine.Messages;
@@ -54,16 +53,11 @@ internal sealed class TriggerWorker(IMessageBroker<TriggerMessage> broker,
                             continue;
                         }
 
-                        // 校验触发标记（必须为 byte 或 short 类型）。
-                        var state = data!.DataType switch
-                        {
-                            TagDataType.Byte => data.GetByte(),
-                            TagDataType.Int => data.GetInt(),
-                            _ => throw new InvalidOperationException(),
-                        };
+                        // 获取触发标记值。
+                        var state = WorkerUtils.GetTriggerState(data!);
 
                         // 必须先检测并更新标记状态值（开启回执校验），若值有变动且达到触发标记条件时则推送数据。
-                        if (!TagDataCache.CompareAndSwap(tag.TagId, state, true) && state == options.Value.TagTriggerConditionValue)
+                        if (TagHoldDataCache.CompareExchange(tag.TagId, state) && state == options.Value.TriggerConditionValue)
                         {
                             // 发布触发事件
                             await broker.PushAsync(new TriggerMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
