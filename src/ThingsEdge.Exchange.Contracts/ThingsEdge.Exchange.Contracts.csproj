@@ -1,12 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  <NoWarn>CA1305,CS1591</NoWarn>
-	  <LangVersion>latest</LangVersion>
-	  <GenerateDocumentationFile>true</GenerateDocumentationFile>	  
+    <RootNamespace>ThingsEdge.Exchange.Contracts</RootNamespace>
+    <AssemblyName>ThingsEdge.Exchange.Contracts</AssemblyName>
   </PropertyGroup>
-
+  
 </Project>

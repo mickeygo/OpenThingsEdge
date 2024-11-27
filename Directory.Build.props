@@ -1,10 +1,12 @@
 <Project>
   <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
     <!-- Style Settings -->
     <LangVersion>preview</LangVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>CA2254;CS1591,CA1305</NoWarn>
     <UsePublicApiAnalyzers>true</UsePublicApiAnalyzers>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageProjectUrl>https://github.com/mickeygo/OpenThingsEdge</PackageProjectUrl>
