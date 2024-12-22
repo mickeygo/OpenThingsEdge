@@ -517,6 +517,6 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
 
     public override string ToString()
     {
-        return $"OmronConnectedCipNet[{IpAddress}:{Port}]";
+        return $"OmronConnectedCipNet[{Host}:{Port}]";
     }
 }

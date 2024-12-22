@@ -96,6 +96,14 @@ public abstract class DeviceSerialPort : DeviceCommunication
         return await InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    {
+        using (await pipe.Lock.LockAsync(ReceiveTimeout).ConfigureAwait(false))
+        {
+            return await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
+        }
+    }
+
     /// <summary>
     /// 获取一个值，指示串口是否处于打开状态。
     /// </summary>

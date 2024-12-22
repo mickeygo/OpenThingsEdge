@@ -61,6 +61,6 @@ public class AllenBradleyConnectedCipNet : OmronConnectedCipNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"AllenBradleyConnectedCipNet[{IpAddress}:{Port}]";
+        return $"AllenBradleyConnectedCipNet[{Host}:{Port}]";
     }
 }

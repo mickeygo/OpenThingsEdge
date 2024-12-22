@@ -47,7 +47,8 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
-    public MelsecFxSerialOverTcp(string ipAddress, int port) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public MelsecFxSerialOverTcp(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform()
@@ -88,10 +89,10 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
             array[49] = 1;
             array[50] = BitConverter.GetBytes(Port)[1];
             array[51] = BitConverter.GetBytes(Port)[0];
-            array[52] = IPAddress.Parse(IpAddress).GetAddressBytes()[0];
-            array[53] = IPAddress.Parse(IpAddress).GetAddressBytes()[1];
-            array[54] = IPAddress.Parse(IpAddress).GetAddressBytes()[2];
-            array[55] = IPAddress.Parse(IpAddress).GetAddressBytes()[3];
+            array[52] = IPAddress.Parse(Host).GetAddressBytes()[0];
+            array[53] = IPAddress.Parse(Host).GetAddressBytes()[1];
+            array[54] = IPAddress.Parse(Host).GetAddressBytes()[2];
+            array[55] = IPAddress.Parse(Host).GetAddressBytes()[3];
             array[56] = 1;
             array[57] = 2;
             BitConverter.GetBytes((int)_counter.OnNext()).CopyTo(array, 58);
@@ -256,6 +257,6 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
 
     public override string ToString()
     {
-        return $"MelsecFxSerialOverTcp[{IpAddress}:{Port}]";
+        return $"MelsecFxSerialOverTcp[{Host}:{Port}]";
     }
 }

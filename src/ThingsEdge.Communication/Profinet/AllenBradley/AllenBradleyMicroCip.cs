@@ -19,6 +19,6 @@ public sealed class AllenBradleyMicroCip : AllenBradleyNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"AllenBradleyMicroCip[{IpAddress}:{Port}]";
+        return $"AllenBradleyMicroCip[{Host}:{Port}]";
     }
 }

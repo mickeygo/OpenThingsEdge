@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Core.Address;
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Profinet.Melsec;
 
 namespace ThingsEdge.Communication.Profinet.Panasonic;
@@ -13,8 +14,9 @@ public class PanasonicMcNet : MelsecMcNet
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public PanasonicMcNet(string ipAddress, int port)
-        : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public PanasonicMcNet(string ipAddress, int port, DeviceTcpNetOptions? options = null)
+        : base(ipAddress, port, options)
     {
     }
 
@@ -35,6 +37,6 @@ public class PanasonicMcNet : MelsecMcNet
 
     public override string ToString()
     {
-        return $"PanasonicMcNet[{IpAddress}:{Port}]";
+        return $"PanasonicMcNet[{Host}:{Port}]";
     }
 }

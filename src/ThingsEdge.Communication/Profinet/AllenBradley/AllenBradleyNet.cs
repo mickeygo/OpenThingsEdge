@@ -57,7 +57,8 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// </summary>
     /// <param name="ipAddress">PLC IpAddress</param>
     /// <param name="port">PLC Port</param>
-    public AllenBradleyNet(string ipAddress, int port = 44818) : base(ipAddress, port)
+    /// <param name="options">Socket Options</param>
+    public AllenBradleyNet(string ipAddress, int port = 44818, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 2;
         ByteTransform = new RegularByteTransform();
@@ -845,6 +846,6 @@ public class AllenBradleyNet : DeviceTcpNet, IReadWriteCip, IReadWriteNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"AllenBradleyNet[{IpAddress}:{Port}]";
+        return $"AllenBradleyNet[{Host}:{Port}]";
     }
 }

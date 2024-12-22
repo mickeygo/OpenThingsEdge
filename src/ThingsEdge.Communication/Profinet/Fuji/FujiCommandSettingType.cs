@@ -25,7 +25,8 @@ public class FujiCommandSettingType : DeviceTcpNet
     /// <param name="ipAddress">IP地址信息</param>
     /// <param name="port">端口号信息</param>
     /// <param name="dataSwap">当前的对象是否进行数据交换操作，将根据PLC的实际值来设定</param>
-    public FujiCommandSettingType(string ipAddress, int port, bool dataSwap = false) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public FujiCommandSettingType(string ipAddress, int port, bool dataSwap = false, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         DataSwap = dataSwap;
 
@@ -207,6 +208,6 @@ public class FujiCommandSettingType : DeviceTcpNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"FujiCommandSettingType[{IpAddress}:{Port}]";
+        return $"FujiCommandSettingType[{Host}:{Port}]";
     }
 }

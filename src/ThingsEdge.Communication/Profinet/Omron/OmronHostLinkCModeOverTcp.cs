@@ -18,7 +18,7 @@ public sealed class OmronHostLinkCModeOverTcp : DeviceTcpNet, IHostLinkCMode, IR
     /// </summary>
     public byte UnitNumber { get; set; }
 
-    public OmronHostLinkCModeOverTcp(string ipAddress, int port) : base(ipAddress, port)
+    public OmronHostLinkCModeOverTcp(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform(DataFormat.CDAB)
@@ -87,6 +87,6 @@ public sealed class OmronHostLinkCModeOverTcp : DeviceTcpNet, IHostLinkCMode, IR
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"OmronHostLinkCModeOverTcp[{IpAddress}:{Port}]";
+        return $"OmronHostLinkCModeOverTcp[{Host}:{Port}]";
     }
 }

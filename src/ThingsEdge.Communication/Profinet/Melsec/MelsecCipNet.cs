@@ -1,3 +1,4 @@
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Profinet.AllenBradley;
 
 namespace ThingsEdge.Communication.Profinet.Melsec;
@@ -7,8 +8,8 @@ namespace ThingsEdge.Communication.Profinet.Melsec;
 /// </summary>
 public class MelsecCipNet : AllenBradleyNet
 {
-    public MelsecCipNet(string ipAddress, int port = 44818)
-        : base(ipAddress, port)
+    public MelsecCipNet(string ipAddress, int port = 44818, DeviceTcpNetOptions? options = null)
+        : base(ipAddress, port, options)
     {
     }
 

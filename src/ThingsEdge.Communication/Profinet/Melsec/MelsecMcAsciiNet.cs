@@ -1,5 +1,5 @@
-using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
 using ThingsEdge.Communication.Profinet.Melsec.Helper;
 
@@ -12,7 +12,7 @@ public class MelsecMcAsciiNet : MelsecMcNet
 {
     public override McType McType => McType.MCAscii;
 
-    public MelsecMcAsciiNet(string ipAddress, int port) : base(ipAddress, port)
+    public MelsecMcAsciiNet(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
@@ -45,6 +45,6 @@ public class MelsecMcAsciiNet : MelsecMcNet
 
     public override string ToString()
     {
-        return $"MelsecMcAsciiNet[{IpAddress}:{Port}]";
+        return $"MelsecMcAsciiNet[{Host}:{Port}]";
     }
 }

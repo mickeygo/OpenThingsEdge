@@ -49,6 +49,6 @@ public sealed class DeltaSerialAsciiOverTcp : ModbusAsciiOverTcp, IDelta, IReadW
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeltaSerialAsciiOverTcp[{IpAddress}:{Port}]";
+        return $"DeltaSerialAsciiOverTcp[{Host}:{Port}]";
     }
 }

@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Profinet.AllenBradley;
 
 namespace ThingsEdge.Communication.Profinet.Omron;
@@ -13,8 +14,9 @@ public class OmronCipNet : AllenBradleyNet
     /// </summary>
     /// <param name="ipAddress">PLC IpAddress</param>
     /// <param name="port">PLC Port</param>
-    public OmronCipNet(string ipAddress, int port = 44818)
-        : base(ipAddress, port)
+    /// <param name="options">Options</param>
+    public OmronCipNet(string ipAddress, int port = 44818, DeviceTcpNetOptions? options = null)
+        : base(ipAddress, port, options)
     {
     }
 
@@ -145,6 +147,6 @@ public class OmronCipNet : AllenBradleyNet
 
     public override string ToString()
     {
-        return $"OmronCipNet[{IpAddress}:{Port}]";
+        return $"OmronCipNet[{Host}:{Port}]";
     }
 }

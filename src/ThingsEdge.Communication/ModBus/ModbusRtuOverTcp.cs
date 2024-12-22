@@ -36,7 +36,7 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
 
     public int BroadcastStation { get; set; } = -1;
 
-    public ModbusRtuOverTcp(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
+    public ModbusRtuOverTcp(string ipAddress, int port = 502, byte station = 1, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         Station = station;
         ByteTransform = new RegularByteTransform(DataFormat.CDAB);
@@ -244,7 +244,7 @@ public class ModbusRtuOverTcp : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWr
 
     public override string ToString()
     {
-        return $"ModbusRtuOverTcp[{IpAddress}:{Port}]";
+        return $"ModbusRtuOverTcp[{Host}:{Port}]";
     }
 
     internal OperateResult<string> ReadString(string address, ushort length, Encoding encoding)

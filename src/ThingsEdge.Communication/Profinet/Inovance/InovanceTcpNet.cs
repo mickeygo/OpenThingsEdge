@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.Inovance;
@@ -26,8 +27,9 @@ public class InovanceTcpNet : ModbusTcpNet
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
     /// <param name="station">站号信息</param>
-    public InovanceTcpNet(string ipAddress, int port = 502, byte station = 1)
-        : base(ipAddress, port, station)
+    /// <param name="options">配置选项</param>
+    public InovanceTcpNet(string ipAddress, int port = 502, byte station = 1, DeviceTcpNetOptions? options = null)
+        : base(ipAddress, port, station, options)
     {
         Series = InovanceSeries.AM;
         DataFormat = DataFormat.CDAB;
@@ -68,6 +70,6 @@ public class InovanceTcpNet : ModbusTcpNet
 
     public override string ToString()
     {
-        return $"InovanceTcpNet<{Series}>[{IpAddress}:{Port}]";
+        return $"InovanceTcpNet<{Series}>[{Host}:{Port}]";
     }
 }

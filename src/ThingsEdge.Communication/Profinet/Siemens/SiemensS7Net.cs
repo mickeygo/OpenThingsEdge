@@ -227,7 +227,8 @@ public sealed class SiemensS7Net : DeviceTcpNet
     /// <param name="siemens">指定西门子的型号</param>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号，默认 102</param>
-    public SiemensS7Net(SiemensPLCS siemens, string ipAddress, int port = 102) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public SiemensS7Net(SiemensPLCS siemens, string ipAddress, int port = 102, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 2;
         ByteTransform = new ReverseBytesTransform();
@@ -744,7 +745,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     public override string ToString()
     {
-        return $"SiemensS7Net {CurrentPlc}[{IpAddress}:{Port}]";
+        return $"SiemensS7Net {CurrentPlc}[{Host}:{Port}]";
     }
 
     /// <summary>

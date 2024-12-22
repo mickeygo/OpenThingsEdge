@@ -32,7 +32,10 @@ host.AddThingsEdgeExchange(static builder =>
         .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
         .UseNativeNoticeForwarder<NoticeForwarder>()
         .UseNativeTriggerForwarder<TriggerForwader>()
-        .UseOptions();
+        .UseOptions(options =>
+        {
+            options.SocketPoolSize = 5;
+        });
 });
 
 await host.RunConsoleAsync().ConfigureAwait(false);

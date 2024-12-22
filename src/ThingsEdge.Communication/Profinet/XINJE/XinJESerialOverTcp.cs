@@ -49,6 +49,6 @@ public class XinJESerialOverTcp : ModbusRtuOverTcp
 
     public override string ToString()
     {
-        return $"XinJESerialOverTcp<{Series}>[{IpAddress}:{Port}]";
+        return $"XinJESerialOverTcp<{Series}>[{Host}:{Port}]";
     }
 }

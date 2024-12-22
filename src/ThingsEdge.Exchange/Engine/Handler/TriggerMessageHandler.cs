@@ -32,7 +32,7 @@ internal sealed class TriggerMessageHandler(
         reqMessage.Values.Add(message.Self);
 
         // 读取触发标记下的子数据。
-        var (ok, normalPaydatas, err) = await message.Connector.ReadMultiAsync(message.Tag.NormalTags, options.Value.AllowReadMulti).ConfigureAwait(false);
+        var (ok, normalPaydatas, err) = await message.Connector.ReadMultiAsync(message.Tag.NormalTags, options.Value.AllowReadMultiple).ConfigureAwait(false);
         if (!ok)
         {
             logger.LogError("[TriggerMessageHandler] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",

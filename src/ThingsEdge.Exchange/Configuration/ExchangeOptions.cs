@@ -18,7 +18,7 @@ public sealed class ExchangeOptions
     /// <para>三菱MC协议驱动目前支持连续批量读取，只适用于连续地址，非连续地址需设置为 false；</para>
     /// <para>其他协议驱动目前还不支持批量读取，内部会采取逐一方式进行读取。</para>
     /// </remarks>
-    public bool AllowReadMulti { get; init; } = true;
+    public bool AllowReadMultiple { get; init; } = true;
 
     /// <summary>
     /// Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
@@ -60,12 +60,21 @@ public sealed class ExchangeOptions
     public int MaxPDUSize { get; set; }
 
     /// <summary>
+    /// Socket 连接池最大数量，默认为 1。
+    /// </summary>
+    /// <remarks>
+    /// 针对于 S7、ModubusTcp 等底层采用 TCP 通信协议的驱动可设置连接线程池最大数量。
+    /// 注意：三菱 MC 协议同一端口不允许有多个连接。
+    /// </remarks>
+    public int SocketPoolSize { get; set; } = 1;
+
+    /// <summary>
+    /// 网络连接超时时长，默认 3s。
+    /// </summary>
+    public int NetworkConnectTimeout { get; set; } = 3_000;
+
+    /// <summary>
     /// Socket 保活时长，只有在大于 0 时才启用，单位 ms，默认 60s。
     /// </summary>
     public int NetworkKeepAliveTime { get; set; } = 60_000;
-
-    /// <summary>
-    /// 是否使用连接池（暂时还未实现连接池）。
-    /// </summary>
-    public bool UseConnectorPool { get; set; }
 }

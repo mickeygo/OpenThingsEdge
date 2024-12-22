@@ -1,6 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Common.Extensions;
-using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
@@ -109,7 +107,8 @@ public class AllenBradleySLCNet : DeviceTcpNet
     /// </summary>
     /// <param name="ipAddress">PLC IpAddress</param>
     /// <param name="port">PLC Port</param>
-    public AllenBradleySLCNet(string ipAddress, int port = 44818) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public AllenBradleySLCNet(string ipAddress, int port = 44818, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
     }
 

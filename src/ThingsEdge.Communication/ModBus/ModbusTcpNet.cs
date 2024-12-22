@@ -161,7 +161,8 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     /// <param name="ipAddress">服务器的Ip地址</param>
     /// <param name="port">服务器的端口号</param>
     /// <param name="station">客户端自身的站号</param>
-    public ModbusTcpNet(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public ModbusTcpNet(string ipAddress, int port = 502, byte station = 1, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         Station = station;
 
@@ -427,6 +428,6 @@ public class ModbusTcpNet : DeviceTcpNet, IModbus, IReadWriteDevice, IReadWriteN
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"ModbusTcpNet[{IpAddress}:{Port}]";
+        return $"ModbusTcpNet[{Host}:{Port}]";
     }
 }

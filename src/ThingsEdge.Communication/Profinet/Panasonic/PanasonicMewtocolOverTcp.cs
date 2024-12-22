@@ -24,7 +24,8 @@ public class PanasonicMewtocolOverTcp : DeviceTcpNet
     /// <param name="ipAddress">Ip地址数据</param>
     /// <param name="port">端口号</param>
     /// <param name="station">站号信息，默认为0xEE</param>
-    public PanasonicMewtocolOverTcp(string ipAddress, int port, byte station = 238) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public PanasonicMewtocolOverTcp(string ipAddress, int port, byte station = 238, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         ByteTransform = new RegularByteTransform
         {
@@ -87,6 +88,6 @@ public class PanasonicMewtocolOverTcp : DeviceTcpNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"PanasonicMewtocolOverTcp[{IpAddress}:{Port}]";
+        return $"PanasonicMewtocolOverTcp[{Host}:{Port}]";
     }
 }

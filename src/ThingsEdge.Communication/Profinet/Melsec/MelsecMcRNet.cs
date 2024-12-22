@@ -28,7 +28,8 @@ public class MelsecMcRNet : DeviceTcpNet, IReadWriteMc, IReadWriteDevice, IReadW
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public MelsecMcRNet(string ipAddress, int port) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public MelsecMcRNet(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
@@ -134,6 +135,6 @@ public class MelsecMcRNet : DeviceTcpNet, IReadWriteMc, IReadWriteDevice, IReadW
 
     public override string ToString()
     {
-        return $"MelsecMcRNet[{IpAddress}:{Port}]";
+        return $"MelsecMcRNet[{Host}:{Port}]";
     }
 }

@@ -20,7 +20,8 @@ public class SiemensPPIOverTcp : DeviceTcpNet, ISiemensPPI, IReadWriteNet
     /// </summary>
     /// <param name="ipAddress">Ip地址信息</param>
     /// <param name="port">端口号信息</param>
-    public SiemensPPIOverTcp(string ipAddress, int port) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public SiemensPPIOverTcp(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 2;
         ByteTransform = new ReverseBytesTransform();
@@ -84,6 +85,6 @@ public class SiemensPPIOverTcp : DeviceTcpNet, ISiemensPPI, IReadWriteNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"SiemensPPIOverTcp[{IpAddress}:{Port}]";
+        return $"SiemensPPIOverTcp[{Host}:{Port}]";
     }
 }

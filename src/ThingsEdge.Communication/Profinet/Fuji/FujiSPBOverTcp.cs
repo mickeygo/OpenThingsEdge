@@ -19,7 +19,8 @@ public class FujiSPBOverTcp : DeviceTcpNet
     /// </summary>
     /// <param name="ipAddress">设备的Ip地址</param>
     /// <param name="port">设备的端口号</param>
-    public FujiSPBOverTcp(string ipAddress, int port) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public FujiSPBOverTcp(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
@@ -60,6 +61,6 @@ public class FujiSPBOverTcp : DeviceTcpNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"FujiSPBOverTcp[{IpAddress}:{Port}]";
+        return $"FujiSPBOverTcp[{Host}:{Port}]";
     }
 }

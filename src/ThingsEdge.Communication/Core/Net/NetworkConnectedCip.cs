@@ -28,7 +28,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// </summary>
     public uint TOConnectionId { get; set; }
 
-    protected NetworkConnectedCip(string ipAddress, int port) : base(ipAddress, port)
+    protected NetworkConnectedCip(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
     }
 

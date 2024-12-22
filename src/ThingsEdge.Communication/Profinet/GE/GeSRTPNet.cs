@@ -24,7 +24,8 @@ public class GeSRTPNet : DeviceTcpNet
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
-    public GeSRTPNet(string ipAddress, int port = 18245) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public GeSRTPNet(string ipAddress, int port = 18245, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         ByteTransform = new RegularByteTransform();
         WordLength = 2;
@@ -227,6 +228,6 @@ public class GeSRTPNet : DeviceTcpNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"GeSRTPNet[{IpAddress}:{Port}]";
+        return $"GeSRTPNet[{Host}:{Port}]";
     }
 }

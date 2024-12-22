@@ -1,3 +1,4 @@
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.ModBus;
 
 namespace ThingsEdge.Communication.Profinet.XINJE;
@@ -23,8 +24,9 @@ public class XinJETcpNet : ModbusTcpNet
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
     /// <param name="station">站号信息</param>
-    public XinJETcpNet(string ipAddress, int port = 502, byte station = 1)
-        : base(ipAddress, port, station)
+    /// <param name="options">配置选项</param>
+    public XinJETcpNet(string ipAddress, int port = 502, byte station = 1, DeviceTcpNetOptions? options = null)
+        : base(ipAddress, port, station, options)
     {
         Series = XinJESeries.XC;
     }
@@ -85,6 +87,6 @@ public class XinJETcpNet : ModbusTcpNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"XinJETcpNet<{Series}>[{IpAddress}:{Port}]";
+        return $"XinJETcpNet<{Series}>[{Host}:{Port}]";
     }
 }

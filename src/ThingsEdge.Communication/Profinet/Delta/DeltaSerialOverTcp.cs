@@ -48,6 +48,6 @@ public class DeltaSerialOverTcp : ModbusRtuOverTcp, IDelta, IReadWriteDevice, IR
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeltaSerialOverTcp[{IpAddress}:{Port}]";
+        return $"DeltaSerialOverTcp[{Host}:{Port}]";
     }
 }

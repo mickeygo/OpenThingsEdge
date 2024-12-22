@@ -1,4 +1,5 @@
 using ThingsEdge.Communication.Core;
+using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.ModBus;
 using ThingsEdge.Communication.Profinet.Delta.Helper;
 
@@ -14,8 +15,8 @@ public class DeltaTcpNet : ModbusTcpNet, IDelta, IReadWriteDevice, IReadWriteNet
 {
     public DeltaSeries Series { get; set; } = DeltaSeries.Dvp;
 
-    public DeltaTcpNet(string ipAddress, int port = 502, byte station = 1)
-        : base(ipAddress, port, station)
+    public DeltaTcpNet(string ipAddress, int port = 502, byte station = 1, DeviceTcpNetOptions? options = null)
+        : base(ipAddress, port, station, options)
     {
         ByteTransform.DataFormat = DataFormat.CDAB;
     }
@@ -49,6 +50,6 @@ public class DeltaTcpNet : ModbusTcpNet, IDelta, IReadWriteDevice, IReadWriteNet
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeltaTcpNet[{IpAddress}:{Port}]";
+        return $"DeltaTcpNet[{Host}:{Port}]";
     }
 }

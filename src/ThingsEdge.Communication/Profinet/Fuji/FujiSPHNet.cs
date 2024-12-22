@@ -24,7 +24,8 @@ public class FujiSPHNet : DeviceTcpNet
     /// </summary>
     /// <param name="ipAddress">Ip地址</param>
     /// <param name="port">端口号</param>
-    public FujiSPHNet(string ipAddress, int port = 18245) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public FujiSPHNet(string ipAddress, int port = 18245, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         ByteTransform = new RegularByteTransform();
         WordLength = 1;
@@ -391,6 +392,6 @@ public class FujiSPHNet : DeviceTcpNet
 
     public override string ToString()
     {
-        return $"FujiSPHNet[{IpAddress}:{Port}]";
+        return $"FujiSPHNet[{Host}:{Port}]";
     }
 }

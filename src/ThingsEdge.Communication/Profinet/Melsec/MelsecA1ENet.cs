@@ -20,7 +20,8 @@ public class MelsecA1ENet : DeviceTcpNet
     /// </summary>
     /// <param name="ipAddress">PLC的Ip地址</param>
     /// <param name="port">PLC的端口</param>
-    public MelsecA1ENet(string ipAddress, int port) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public MelsecA1ENet(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
@@ -309,6 +310,6 @@ public class MelsecA1ENet : DeviceTcpNet
 
     public override string ToString()
     {
-        return $"MelsecA1ENet[{IpAddress}:{Port}]";
+        return $"MelsecA1ENet[{Host}:{Port}]";
     }
 }

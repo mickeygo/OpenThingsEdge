@@ -128,17 +128,7 @@ public abstract class BinaryCommunication
     /// <returns>接收的完整的报文信息</returns>
     protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        try
-        {
-            using (await NetworkPipe.Lock.LockAsync(NetworkPipe.ReceiveTimeout).ConfigureAwait(false))
-            {
-                return await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
-            }
-        }
-        catch
-        {
-            throw;
-        }
+        return await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -33,6 +33,6 @@ public class ModbusAsciiOverTcp : ModbusRtuOverTcp
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"ModbusAsciiOverTcp[{IpAddress}:{Port}]";
+        return $"ModbusAsciiOverTcp[{Host}:{Port}]";
     }
 }

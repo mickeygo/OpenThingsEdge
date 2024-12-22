@@ -219,6 +219,6 @@ public class AllenBradleyPcccNet : NetworkConnectedCip
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"AllenBradleyPcccNet[{IpAddress}:{Port}]";
+        return $"AllenBradleyPcccNet[{Host}:{Port}]";
     }
 }

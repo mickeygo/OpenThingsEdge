@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Sockets;
 using ThingsEdge.Communication.Common;
 
@@ -12,38 +11,6 @@ namespace ThingsEdge.Communication.Core;
 /// </remarks>
 internal static class NetSupport
 {
-    /// <summary>
-    /// 创建一个新的 socket 对象并连接到远程的地址，需要指定远程终结点，超时时间（单位：毫秒）。
-    /// </summary>
-    /// <param name="endPoint">连接的目标终结点</param>
-    /// <param name="timeout">连接的超时时间</param>
-    /// <returns>返回套接字的封装结果对象</returns>
-    internal static async Task<OperateResult<Socket>> CreateSocketAndConnectAsync(IPEndPoint endPoint, int timeout)
-    {
-        Socket socket = default!;
-        try
-        {
-            socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-
-            // 设置超时
-            using CancellationTokenSource cts = new(timeout);
-            await socket.ConnectAsync(endPoint, cts.Token).ConfigureAwait(false);
-            return OperateResult.CreateSuccessResult(socket);
-        }
-        catch (OperationCanceledException)
-        {
-            socket.SafeClose();
-            return new OperateResult<Socket>((int)CommErrorCode.SocketConnectTimeoutException, string.Format(StringResources.Language.ConnectTimeout, endPoint, timeout) + " ms");
-        }
-        catch (SocketException ex)
-        {
-            socket.SafeClose();
-            return new OperateResult<Socket>((int)CommErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
-        }
-    }
-
-    /// <inheritdoc />
     public static async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send, Func<byte[], Task<OperateResult<byte[]>>> funcRead)
     {
         var array = new List<byte>();
@@ -69,7 +36,7 @@ internal static class NetSupport
     /// <param name="socket">网络套接字</param>
     /// <param name="data">要发送的字节数据</param>
     /// <returns>发送是否成功的结果</returns>
-    public static async Task<OperateResult> SocketSendAsync(Socket socket, byte[] data)
+    public static async Task<OperateResult> SocketSendAsync(SocketWrapper socket, byte[] data)
     {
         try
         {
@@ -78,7 +45,7 @@ internal static class NetSupport
         }
         catch (SocketException ex)
         {
-            socket.SafeClose();
+            socket.Close();
             return new OperateResult<byte[]>((int)CommErrorCode.SocketSendException, ex.Message);
         }
     }
@@ -92,7 +59,7 @@ internal static class NetSupport
     /// <param name="length">准备接收的数据长度，当length大于0时，接收固定长度的数据内容，当length小于0时，接收不大于1024长度的随机数据信息</param>
     /// <param name="timeout">超时时间，单位：毫秒，超时时间</param>
     /// <returns>包含了字节数据的结果类</returns>
-    public static async Task<OperateResult<int>> SocketReceiveAsync(Socket socket, byte[] buffer, int offset, int length, int timeout)
+    public static async Task<OperateResult<int>> SocketReceiveAsync(SocketWrapper socket, byte[] buffer, int offset, int length, int timeout)
     {
         if (length == 0)
         {
@@ -115,7 +82,7 @@ internal static class NetSupport
     /// <param name="buffer">等待接收的数据缓存信息</param>
     /// <param name="timeout">超时时间，单位：毫秒</param>
     /// <returns>包含了字节数据的结果类</returns>
-    public static async Task<OperateResult<int>> SocketReceiveAsync(Socket socket, ArraySegment<byte> buffer, int timeout)
+    public static async Task<OperateResult<int>> SocketReceiveAsync(SocketWrapper socket, ArraySegment<byte> buffer, int timeout)
     {
         try
         {
@@ -123,7 +90,7 @@ internal static class NetSupport
             var count = await socket.ReceiveAsync(buffer, cts.Token).ConfigureAwait(false);
             if (count == 0)
             {
-                socket.SafeClose();
+                socket.Close();
                 return new OperateResult<int>((int)CommErrorCode.RemoteClosedConnection, StringResources.Language.RemoteClosedConnection);
             }
             return OperateResult.CreateSuccessResult(count);
@@ -131,13 +98,13 @@ internal static class NetSupport
         catch (OperationCanceledException)
         {
             Debug.WriteLine("超时取消，关闭 Socket");
-            socket.SafeClose();
+            socket.Close();
             return new OperateResult<int>((int)CommErrorCode.ReceiveDataTimeout, StringResources.Language.ReceiveDataTimeout + timeout);
         }
         catch (SocketException ex)
         {
             Debug.WriteLine($"Socket异常，关闭 Socket，{ex.Message}");
-            socket.SafeClose();
+            socket.Close();
             return new OperateResult<int>((int)CommErrorCode.SocketException, "Socket Exception -> " + ex.Message);
         }
     }

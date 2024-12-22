@@ -59,35 +59,39 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
     {
         foreach (var deviceInfo in deviceInfos)
         {
+            DeviceTcpNetOptions netOptions = new()
+            {
+                SocketPoolSize = options.Value.SocketPoolSize,
+                ConnectTimeout = options.Value.NetworkConnectTimeout,
+                KeepAliveTime = options.Value.NetworkKeepAliveTime,
+            };
             DeviceTcpNet driverNet = deviceInfo.Model switch
             {
-                DriverModel.ModbusTcp => new ModbusTcpNet(deviceInfo.Host),
-                DriverModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host),
-                DriverModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host),
-                DriverModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host),
-                DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host),
-                DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host),
-                DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host),
-                DriverModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Melsec_MCAscii => new MelsecMcAsciiNet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Melsec_A1E => new MelsecA1ENet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Melsec_CIP => new MelsecCipNet(deviceInfo.Host),
-                DriverModel.Omron_FinsTcp => new OmronFinsNet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Omron_CIP => new OmronCipNet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Omron_HostLinkOverTcp => new OmronHostLinkOverTcp(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.Omron_HostLinkCModeOverTcp => new OmronHostLinkCModeOverTcp(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.AllenBradley_CIP => new AllenBradleyNet(deviceInfo.Host),
-                DriverModel.Inovance_Tcp => new InovanceTcpNet(deviceInfo.Host),
-                DriverModel.Delta_Tcp => new DeltaTcpNet(deviceInfo.Host),
-                DriverModel.Fuji_SPH => new FujiSPHNet(deviceInfo.Host),
-                DriverModel.Panasonic_Mc => new PanasonicMcNet(deviceInfo.Host, deviceInfo.Port),
-                DriverModel.XinJE_Tcp => new XinJETcpNet(deviceInfo.Host),
-                _ => throw new NotImplementedException("设备驱动不在指定的范围中"),
+                DriverModel.ModbusTcp => new ModbusTcpNet(deviceInfo.Host, options: netOptions),
+                DriverModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host, options: netOptions),
+                DriverModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host, options: netOptions),
+                DriverModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host, options: netOptions),
+                DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host, options: netOptions),
+                DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host, options: netOptions),
+                DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host, options: netOptions),
+                DriverModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Melsec_MCAscii => new MelsecMcAsciiNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Melsec_A1E => new MelsecA1ENet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Melsec_CIP => new MelsecCipNet(deviceInfo.Host, options: netOptions),
+                DriverModel.Omron_FinsTcp => new OmronFinsNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Omron_CIP => new OmronCipNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Omron_HostLinkOverTcp => new OmronHostLinkOverTcp(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.Omron_HostLinkCModeOverTcp => new OmronHostLinkCModeOverTcp(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.AllenBradley_CIP => new AllenBradleyNet(deviceInfo.Host, options: netOptions),
+                DriverModel.Inovance_Tcp => new InovanceTcpNet(deviceInfo.Host, options: netOptions),
+                DriverModel.Delta_Tcp => new DeltaTcpNet(deviceInfo.Host, options: netOptions),
+                DriverModel.Fuji_SPH => new FujiSPHNet(deviceInfo.Host, options: netOptions),
+                DriverModel.Panasonic_Mc => new PanasonicMcNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
+                DriverModel.XinJE_Tcp => new XinJETcpNet(deviceInfo.Host, options: netOptions),
+                _ => throw new NotImplementedException("没有找到指定的设备驱动"),
             };
 
-            // 设置 SocketKeepAliveTime 心跳时间
-            driverNet.KeepAliveTime = options.Value.NetworkKeepAliveTime;
             var maxPDUSize = deviceInfo.MaxPDUSize > 0 ? deviceInfo.MaxPDUSize : options.Value.MaxPDUSize;
             _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, driverNet.Port, driverNet, maxPDUSize));
         }
@@ -141,7 +145,7 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
                             }
                             else
                             {
-                                logger.LogWarning("尝试连接服务失败，错误：{Message}，主机：{Host}，端口：{Port}", ret.Message, connector.Host, connector.Port);
+                                logger.LogWarning("尝试连接服务失败，错误：{Message}，主机：{Host}:{Port}", ret.Message, connector.Host, connector.Port);
                             }
                         }
                         else
@@ -151,7 +155,7 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "尝试连接服务异常，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
+                        logger.LogError(ex, "尝试连接服务异常，主机：{Host}:{Port}", connector.Host, connector.Port);
                     }
                 }
             }
@@ -173,7 +177,7 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
             HashSet<string> pingSuccessHosts = []; // 存放已 Ping 成功的主机信息。
 
             // PeriodicTimer 定时器，可以让任务不堆积，不会因上一个任务阻塞在下个任务开始时导致多个任务同时进行。
-            _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+            _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
             while (await _periodicTimer.WaitForNextTickAsync().ConfigureAwait(false))
             {
                 foreach (var connector in _connectors.Values)

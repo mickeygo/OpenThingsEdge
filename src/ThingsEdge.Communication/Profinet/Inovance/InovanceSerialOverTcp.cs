@@ -69,6 +69,6 @@ public class InovanceSerialOverTcp : ModbusRtuOverTcp
 
     public override string ToString()
     {
-        return $"InovanceSerialOverTcp<{Series}>[{IpAddress}:{Port}]";
+        return $"InovanceSerialOverTcp<{Series}>[{Host}:{Port}]";
     }
 }

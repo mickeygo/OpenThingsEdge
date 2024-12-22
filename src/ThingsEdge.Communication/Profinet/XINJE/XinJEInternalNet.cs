@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Device;
 using ThingsEdge.Communication.Core.IMessage;
@@ -51,7 +50,8 @@ public class XinJEInternalNet : DeviceTcpNet
     /// <param name="ipAddress">服务器的Ip地址</param>
     /// <param name="port">服务器的端口号</param>
     /// <param name="station">客户端自身的站号</param>
-    public XinJEInternalNet(string ipAddress, int port = 502, byte station = 1) : base(ipAddress, port)
+    /// <param name="options">选项</param>
+    public XinJEInternalNet(string ipAddress, int port = 502, byte station = 1, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform(DataFormat.CDAB);
@@ -120,6 +120,6 @@ public class XinJEInternalNet : DeviceTcpNet
 
     public override string ToString()
     {
-        return $"XinJEInternalNet[{IpAddress}:{Port}]";
+        return $"XinJEInternalNet[{Host}:{Port}]";
     }
 }

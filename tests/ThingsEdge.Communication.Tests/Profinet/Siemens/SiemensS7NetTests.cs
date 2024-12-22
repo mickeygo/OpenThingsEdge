@@ -123,7 +123,6 @@ public class SiemensS7NetTests
         //var ret07_2 = (ret07 & 0x02) == 0x02; // 0000_0010
         //var ret07_3 = (ret07 & 0x04) == 0x04; // 0000_0100
 
-
         Assert.True(ret2.IsSuccess);
     }
 }

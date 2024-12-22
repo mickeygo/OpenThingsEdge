@@ -25,7 +25,8 @@ public class MelsecA3CNetOverTcp : DeviceTcpNet, IReadWriteA3C, IReadWriteDevice
     /// </summary>
     /// <param name="ipAddress">Ip地址信息</param>
     /// <param name="port">端口号信息</param>
-    public MelsecA3CNetOverTcp(string ipAddress, int port) : base(ipAddress, port)
+    /// <param name="options">配置选项</param>
+    public MelsecA3CNetOverTcp(string ipAddress, int port, DeviceTcpNetOptions? options = null) : base(ipAddress, port, options)
     {
         WordLength = 1;
         ByteTransform = new RegularByteTransform();
@@ -89,6 +90,6 @@ public class MelsecA3CNetOverTcp : DeviceTcpNet, IReadWriteA3C, IReadWriteDevice
 
     public override string ToString()
     {
-        return $"MelsecA3CNetOverTcp[{IpAddress}:{Port}]";
+        return $"MelsecA3CNetOverTcp[{Host}:{Port}]";
     }
 }
