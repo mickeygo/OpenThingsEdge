@@ -7,20 +7,20 @@ namespace ThingsEdge.Exchange.Storages.Curve;
 /// <summary>
 /// 曲线保存为 JSON 文件的写入器。
 /// </summary>
-internal sealed class JsonCurveWriter : ICurveWriter
+internal sealed class JsonCurveWriter(string path) : ICurveWriter
 {
+    static readonly JsonSerializerOptions s_jsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.CjkUnifiedIdeographs), // 中日韩统一表意文字（CJK Unified Ideographs）
+    };
+
     private readonly InternalCurveData _curveData = new();
 
     public bool IsClosed { get; private set; }
 
     public long WrittenCount { get; private set; }
 
-    public string FilePath { get; init; } = null!;
-
-    public JsonCurveWriter(string path)
-    {
-        FilePath = path;
-    }
+    public string FilePath => path;
 
     public void WriteHeader(IEnumerable<string> header)
     {
@@ -56,22 +56,18 @@ internal sealed class JsonCurveWriter : ICurveWriter
         //   "name2": [v1, v2],
         // }
 
-        Dictionary<string, string[]> dict = new(_curveData.Header.Count);
+        Dictionary<string, double[]> dict = new(_curveData.Header.Count);
         foreach (var header in _curveData.Header)
         {
             var items = _curveData.Body
                 .SelectMany(s => s)
                 .Where(s => s.GetExtraValue<string>("DisplayName") == header)
-                .SelectMany(s => s.GetStringArray()).ToArray();
+                .Select(GetDoubleArray).ToArray();
 
             dict[header] = items;
         }
 
-        var content = JsonSerializer.Serialize(dict, new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.CjkUnifiedIdeographs), // 中日韩统一表意文字（CJK Unified Ideographs）
-        });
-
+        var content = JsonSerializer.Serialize(dict, s_jsonOptions);
         using StreamWriter sw = new(FilePath);
         await sw.WriteAsync(content).ConfigureAwait(false);
     }
@@ -82,6 +78,16 @@ internal sealed class JsonCurveWriter : ICurveWriter
         {
             IsClosed = true;
         }
+    }
+
+    private static double GetDoubleArray(PayloadData payload)
+    {
+        if (payload.TryGetAsDouble(out var value))
+        {
+            return value.Value;
+        }
+
+        return 0;
     }
 
     sealed class InternalCurveData

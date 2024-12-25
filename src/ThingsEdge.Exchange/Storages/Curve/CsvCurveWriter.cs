@@ -14,7 +14,7 @@ internal sealed class CsvCurveWriter(string path) : ICurveWriter
 
     public long WrittenCount { get; private set; }
 
-    public string FilePath { get; init; } = path;
+    public string FilePath => path;
 
     public void WriteHeader(IEnumerable<string> header)
     {

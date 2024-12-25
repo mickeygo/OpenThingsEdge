@@ -52,6 +52,7 @@ public static class ExchangeServiceCollectionExtensions
             services.AddSingleton<HeartbeatWorker>();
             services.AddSingleton<NoticeWorker>();
             services.AddSingleton<TriggerWorker>();
+            services.AddSingleton<SwitchWorker>();
 
             services.AddTransient<IHeartbeatMessageHandler, HeartbeatMessageHandler>();
             services.AddTransient<INoticeMessageHandler, NoticeMessageHandler>();

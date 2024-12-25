@@ -5,7 +5,7 @@ namespace ThingsEdge.Exchange.Storages.Curve;
 /// </summary>
 /// <param name="rootPath">文件根目录</param>
 /// <param name="retainedDayLimit">要保留的天数限制</param>
-internal sealed class RollingFile(string rootPath, long retainedDayLimit)
+internal sealed class RollingFile(string rootPath, int retainedDayLimit)
 {
     private DateTime? _firstWriteTime;
 
@@ -45,7 +45,7 @@ internal sealed class RollingFile(string rootPath, long retainedDayLimit)
                         }
                         else if (_firstWriteTime is null || _firstWriteTime > lastWriteDate)
                         {
-                            // 现有文件中，找到最先前的文件，更新写入时间
+                            // 现有文件中，找到最早保存的文件，更新写入时间
                             _firstWriteTime = lastWriteDate;
                         }
                     }

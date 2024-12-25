@@ -7,7 +7,11 @@ using ThingsEdge.Exchange.Infrastructure.Brokers;
 
 namespace ThingsEdge.Exchange.Engine.Workers;
 
-internal sealed class SwitchWorker(IMessageBroker<SwitchMessage> broker,
+/// <summary>
+/// 监控开关的工作者。
+/// </summary>
+internal sealed class SwitchWorker(
+    IMessageBroker<SwitchMessage> broker,
     IOptions<ExchangeOptions> options,
     ILogger<SwitchWorker> logger) : IWorker
 {
@@ -132,8 +136,7 @@ internal sealed class SwitchWorker(IMessageBroker<SwitchMessage> broker,
                                 tag,
                                 WorkerUtils.CreateSwitchPayloadOffOff(tag),
                                 SwitchState.Off,
-                                true
-                                ), cancellationToken).ConfigureAwait(false);
+                                true), cancellationToken).ConfigureAwait(false);
 
                             // 读取失败或开关关闭时，重置信号，让子任务阻塞。
                             isOn = false;

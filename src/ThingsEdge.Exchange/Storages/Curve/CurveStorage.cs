@@ -1,4 +1,5 @@
 using ThingsEdge.Exchange.Configuration;
+using ThingsEdge.Exchange.Contracts;
 using ThingsEdge.Exchange.Utils;
 
 namespace ThingsEdge.Exchange.Storages.Curve;
@@ -8,8 +9,6 @@ namespace ThingsEdge.Exchange.Storages.Curve;
 /// </summary>
 internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<ExchangeOptions> options)
 {
-    private static readonly string s_defaultCurveRootDirectory = Path.Combine(AppContext.BaseDirectory, "curves");
-
     private readonly Lazy<RollingFile> _rollingFile = new(CreateRollingFile(options.Value.Curve.LocalRootDirectory, options.Value.Curve.RetainedDayLimit));
 
     /// <summary>
@@ -41,7 +40,7 @@ internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<Excha
     public ICurveWriter GetOrCreate(string tagId, CurveModel model)
     {
         var curveFilePath = BuildCurveFilePath(model);
-        return curveContainer.GetOrCreate(tagId, curveFilePath, model, options.Value.CurveFileExt);
+        return curveContainer.GetOrCreate(tagId, curveFilePath, model, options.Value.Curve.FileType);
     }
 
     /// <summary>
@@ -73,13 +72,14 @@ internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<Excha
     /// 保存文件，并拷贝文件到远端（若配置）
     /// </summary>
     /// <param name="tagId">标记 Id</param>
-    public (bool ok, CurveModel? model, string? path) Save(string tagId)
+    public async Task<(bool ok, CurveModel? model, string? path)> SaveAsync(string tagId)
     {
-        if (curveContainer.TrySaveAndRemove(tagId, out var state))
+        var (ok, state) = await curveContainer.SaveAndRemoveAsync(tagId).ConfigureAwait(false);
+        if (ok)
         {
             if (options.Value.Curve.AllowCopy && !string.IsNullOrWhiteSpace(options.Value.Curve.RemoteRootDirectory))
             {
-                CopyTo(state.Writer.FilePath, options.Value.Curve.RemoteRootDirectory);
+                CopyTo(state!.Writer.FilePath, options.Value.Curve.RemoteRootDirectory);
             }
 
             // 在设定目录最大容量后，超出容量将进行删除
@@ -88,7 +88,7 @@ internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<Excha
                 _rollingFile.Value.Increment();
             }
 
-            return (true, state.Model, state.Writer.FilePath);
+            return (true, state!.Model, state.Writer.FilePath);
         }
 
         return (false, default, default);
@@ -110,53 +110,39 @@ internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<Excha
         // 文件包含曲线名称
         if (options.Value.Curve.DirIncludeCurveName && !string.IsNullOrWhiteSpace(model.CurveName))
         {
-            curveDir = Path.Combine(curveDir, model.CurveName); // root/[L1]/拧紧
+            curveDir = Path.Combine(curveDir, model.CurveName); // root/[L1]/Welding
         }
 
         // 路径包含日期
         if (options.Value.Curve.DirIncludeDate)
         {
-            curveDir = Path.Combine(curveDir, now.ToString("yyyyMMdd")); // root/[L1]/[拧紧]/20230101
+            curveDir = Path.Combine(curveDir, now.ToString("yyyyMMdd")); // root/[L1]/[Welding]/20230101
         }
 
         // 按 SN 打包
-        if (options.Value.Curve.DirIncludeSN && !string.IsNullOrWhiteSpace(model.Barcode))
+        if (options.Value.Curve.DirIncludeFirstMaster && model.Masters.Count > 0)
         {
-            curveDir = Path.Combine(curveDir, model.Barcode); // root/[L1]/[拧紧]/[20230101]/SN001/
+            curveDir = Path.Combine(curveDir, model.Masters[0].GetString()); // root/[L1]/[Welding]/[20230101]/SN001/
         }
 
         // SN 内部再分组
         if (options.Value.Curve.DirIncludeGroupName && !string.IsNullOrWhiteSpace(model.GroupName))
         {
-            curveDir = Path.Combine(curveDir, model.GroupName); // root/[L1]/[拧紧]/[20230101]/[SN001]/OP10/
+            curveDir = Path.Combine(curveDir, model.GroupName); // root/[L1]/[Welding]/[20230101]/[SN001]/OP10/
         }
 
         // 创建对应的文件夹。
         DirectoryUtils.CreateIfNotExists(curveDir);
 
-        StringBuilder sbFilename = new(model.Barcode); // 文件名称
-        if (!string.IsNullOrWhiteSpace(model.No))
+        var masters2 = model.Masters.Select(s => s.GetString()).ToList();
+        // 当还没有设置文件名称时也会使用日期作为文件名称。
+        if (masters2.Count == 0 || options.Value.Curve.SuffixIncludeDatetime)
         {
-            if (sbFilename.Length > 0)
-            {
-                sbFilename.Append(options.Value.Curve.CurveNamedSeparator);
-            }
-            sbFilename.Append(model.No); // => SN001_2
+            masters2.Add(now.ToString("yyyyMMddHHmmss"));
         }
 
-        // 当还没有设置文件名信息时，会设置日期为文件名称。
-        if (sbFilename.Length == 0 || options.Value.Curve.SuffixIncludeDatetime)
-        {
-            if (sbFilename.Length > 0)
-            {
-                sbFilename.Append(options.Value.Curve.CurveNamedSeparator);
-            }
-            sbFilename.Append(now.ToString("yyyyMMddHHmmss")); // => SN001_2_yyyyMMddHHmmss
-        }
-
-        var filepath = Path.Combine(curveDir, $"{sbFilename}.{FileExt}"); // => SN001_2_yyyyMMddHHmmss.csv
-
-        return filepath;
+        // 文件最终名称：root/[L1]/[Welding]/[20230101]/[SN001]/[OP010]/SN001_2_yyyyMMddHHmmss.csv
+        return Path.Combine(curveDir, $"{string.Join(options.Value.Curve.CurveNamedSeparator, masters2)}.{FileExt}");
     }
 
     /// <summary>
@@ -231,7 +217,7 @@ internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<Excha
            _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
        };
 
-    private static RollingFile CreateRollingFile(string? localRootDirectory, long retainedSizeLimit)
+    private static RollingFile CreateRollingFile(string? localRootDirectory, int retainedSizeLimit)
     {
         var rootDir = LocalCurveRootDirectory(localRootDirectory);
         return new RollingFile(rootDir, retainedSizeLimit);
@@ -241,7 +227,7 @@ internal sealed class CurveStorage(CurveContainer curveContainer, IOptions<Excha
     {
         if (string.IsNullOrWhiteSpace(localRootDirectory))
         {
-            return s_defaultCurveRootDirectory;
+            return Path.Combine(AppContext.BaseDirectory, "curves");
         }
 
         return Path.GetFullPath(localRootDirectory);

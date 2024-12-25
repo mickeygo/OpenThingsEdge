@@ -27,14 +27,13 @@ internal sealed class NoticeMessageHandler(
                 DeviceName = message.Device.Name,
                 TagGroupName = tagGroup?.Name,
             },
-            Flag = message.Tag.Flag,
         };
         reqMessage.Values.Add(message.Self);
 
         if (message.Tag.NormalTags.Count > 0)
         {
             // 读取触发标记下的子数据。
-            var (ok, normalPaydatas, err) = await message.Connector.ReadMultiAsync(message.Tag.NormalTags, options.Value.AllowReadMultiple).ConfigureAwait(false);
+            var (ok, normalPayloads, err) = await message.Connector.ReadMultiAsync(message.Tag.NormalTags, options.Value.AllowReadMultiple).ConfigureAwait(false);
             if (!ok)
             {
                 logger.LogError("[NoticeMessageHandler] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
@@ -42,7 +41,7 @@ internal sealed class NoticeMessageHandler(
             }
             else
             {
-                reqMessage.Values.AddRange(normalPaydatas!);
+                reqMessage.Values.AddRange(normalPayloads!);
             }
         }
 

@@ -1,5 +1,3 @@
-using ThingsEdge.Exchange.Contracts.Variables;
-
 namespace ThingsEdge.Exchange.Contracts;
 
 /// <summary>
@@ -22,12 +20,6 @@ public sealed class RequestMessage
     /// </summary>
     [NotNull]
     public Schema? Schema { get; init; }
-
-    /// <summary>
-    /// 标识。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagFlag Flag { get; init; }
 
     /// <summary>
     /// 加载的数据集合。

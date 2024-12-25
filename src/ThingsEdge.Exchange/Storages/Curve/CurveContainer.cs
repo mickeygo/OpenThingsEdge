@@ -3,7 +3,7 @@ using ThingsEdge.Exchange.Configuration;
 namespace ThingsEdge.Exchange.Storages.Curve;
 
 /// <summary>
-/// 曲线容器状态
+/// 曲线容器状态。
 /// </summary>
 /// <param name="Model">曲线模型</param>
 /// <param name="Writer">曲线写入器</param>
@@ -67,21 +67,18 @@ internal sealed class CurveContainer
     /// 从容器中移除指定的对象，在成功移除后会一并释放对象资源。
     /// </summary>
     /// <param name="key">对象唯一值。</param>
-    /// <param name="state"></param>
     /// <returns></returns>
-    public bool TrySaveAndRemove(string key, [MaybeNullWhen(false)] out CurveContainerState state)
+    public async Task<(bool ok, CurveContainerState? state)> SaveAndRemoveAsync(string key)
     {
-        state = default;
-        if (_container.TryRemove(key, out var state2))
+        if (_container.TryRemove(key, out var state))
         {
-            state = state2;
-            state.Writer.SaveAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            await state.Writer.SaveAsync().ConfigureAwait(false);
             state.Writer.Close();
 
-            return true;
+            return (true, state);
         }
 
-        return false;
+        return (false, default);
     }
 
     /// <summary>

@@ -1,40 +1,18 @@
+using ThingsEdge.Exchange.Contracts;
+
 namespace ThingsEdge.Exchange.Storages.Curve;
 
 /// <summary>
 /// 曲线存储数据模型
 /// </summary>
-internal sealed class CurveModel
-{
-    /// <summary>
-    /// 曲线条码
-    /// </summary>
-    public string? Barcode { get; set; }
-
-    /// <summary>
-    /// 曲线所属的编号
-    /// </summary>
-    public string? No { get; set; }
-
-    /// <summary>
-    /// 曲线名称
-    /// </summary>
-    [NotNull]
-    public string? CurveName { get; set; }
-
-    /// <summary>
-    /// 通道名称
-    /// </summary>
-    [NotNull]
-    public string? ChannelName { get; set; }
-
-    /// <summary>
-    /// 设备名称
-    /// </summary>
-    [NotNull]
-    public string? DeviceName { get; set; }
-
-    /// <summary>
-    /// 分组名称
-    /// </summary>
-    public string? GroupName { get; set; }
-}
+/// <param name="ChannelName">通道名称</param>
+/// <param name="DeviceName">设备名称</param>
+/// <param name="GroupName">分组名称</param>
+/// <param name="CurveName">曲线名称</param>
+/// <param name="Masters">主数据集合，顺序与按配置文件一致。</param>
+internal sealed record CurveModel(
+    string ChannelName,
+    string DeviceName,
+    string? GroupName,
+    string? CurveName,
+    IReadOnlyList<PayloadData> Masters);

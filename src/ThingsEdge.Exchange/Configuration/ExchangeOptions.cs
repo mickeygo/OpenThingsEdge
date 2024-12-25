@@ -89,12 +89,6 @@ public sealed class ExchangeOptions
     public int SwitchScanRate { get; init; } = 70;
 
     /// <summary>
-    /// 曲线数据保存的文件类型。
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public CurveFileExt CurveFileExt { get; init; } = CurveFileExt.CSV;
-
-    /// <summary>
     /// 曲线数据配置。
     /// </summary>
     public CurveOptions Curve { get; init; } = new();

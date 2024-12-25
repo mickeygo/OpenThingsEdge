@@ -20,7 +20,7 @@ internal interface ICurveWriter
     /// <summary>
     /// 保存文件路径
     /// </summary>
-    string FilePath { get; init; }
+    string FilePath { get; }
 
     /// <summary>
     /// 写入头信息

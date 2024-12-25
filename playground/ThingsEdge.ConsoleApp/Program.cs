@@ -32,9 +32,11 @@ host.AddThingsEdgeExchange(static builder =>
         .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
         .UseNativeNoticeForwarder<NoticeForwarder>()
         .UseNativeTriggerForwarder<TriggerForwader>()
+        .UseNativeSwitchForwarder<SwitchForwarder>()
         .UseOptions(options =>
         {
             options.SocketPoolSize = 5;
+            options.Curve.FileType = ThingsEdge.Exchange.Configuration.CurveFileExt.JSON;
         });
 });
 

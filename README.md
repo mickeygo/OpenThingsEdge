@@ -168,19 +168,19 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
               {
                 "Name": "PLC_Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
                 "NormalTags": [
-                  { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
-                  { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
-                  { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
-                  { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
+                  { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
+                  { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
                 ],
               },
               {
                 "Name": "PLC_Switch2", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
                 "NormalTags": [
-                  { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
-                  { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
-                  { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
-                  { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
+                  { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
+                  { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
                 ],
               },
             ],
@@ -215,16 +215,17 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
     "NoticePublishIncludeLast": true, // 通知消息发送时是否要带上一次信号点的值，默认为 true。
     "SwitchScanRate": 70, // 开关启动后数据扫码频率（单位：ms），默认为 70ms。
     "Curve": { // 曲线配置
-      "LocalRootDirectory": null, // 曲线文件本地存储根目录。可以是完整路径，也可以是相对路径，默认为根目录下的 "curves" 文件夹。
-      "FileType": "JSON", // 曲线存储文件格式，JSON / CSV，默认为 CSV 格式。
+      "LocalRootDirectory": null, // 曲线文件本地存储根目录。可以是完整路径，也可以是相对路径，默认为程序根目录下的 "curves" 文件夹。
+      "FileType": "CSV", // 曲线存储文件格式，JSON / CSV，默认为 CSV 格式。
       "CurveNamedSeparator": "_", // 曲线存储文件名称的分隔符，默认 "_"。
       "DirIncludeChannelName": true, // 目录是否包含通道名称，默认为 true。
       "DirIncludeCurveName": true, // 目录是否包含曲线名称，默认为 true。
       "DirIncludeDate": true, // 文件路径是否包含日期，格式为 "yyyyMMdd"，默认为 true。
-      "DirIncludeSN": true, // 文件路径是否包含SN，在 SN 存在的条件下为 true 时会按 SN 建立文件夹，默认为 true。
+      "DirIncludeFirstMaster": true, // 文件路径中是否包含第一个主数据，若有需要可按配置顺序将关键信息放置第一位，默认为 true。
       "DirIncludeGroupName": true, // 目录是否包含分组名称，默认为 true。
-      "SuffixIncludeDatetime": false, // 文件后缀是否包含日期，格式为 "yyyyMMddHHmmss"。
-      "AllowMaxWriteCount": 32767, // 文件中允许写入最大的次数，默认为 4096。
+      "SuffixIncludeDatetime": true, // 文件后缀是否包含日期，格式为 "yyyyMMddHHmmss"，默认为 true。
+      "AllowMaxWriteCount": 4096, // 文件中允许写入最大的次数，默认为 4096。
+      "RemoveTailCount": 0, // 曲线数据保存时要移除的尾部条数，默认为 0。
       "AllowCopy": false, // 是否要推送文件到远端服务器。
       "RemoteRootDirectory": null, // 曲线文件远端存储根目录（共享目录）。
       "RetainedDayLimit": 0 // 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除。
@@ -315,6 +316,26 @@ TryGetAsBooleanArray(bool[]?)   |尝试获取值并将值转换为 bool 数组�
 TryGetAsInt32Array(int[]?)      |尝试获取值并将值转换为 int 数组类型。
 TryGetAsDoubleArray(double[]?)  |尝试获取值并将值转换为 double 数组类型。
 
+
+## Switch 开关数据
+
+Switch 在 Tag 配置中额外添加一些配置。
+* DisplayName 在信号标记上设置，表示是该曲线的名称，配置项 "DirIncludeCurveName" 会使用此数据。
+* CurveUsage "Master" 表示是主数据，如零件码、编号、序号等，可设置多个，程序会按设置的顺序进行组合；"Data" 表示是曲线数据，该标记上的 "DisplayName" 会保存为 CSV 的 Header 或是 JSON 节点名称。
+
+示例：
+```JSON
+{
+    "Name": "PLC_Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+    "NormalTags": [
+        { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
+        { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 0, "DataType": "Int", "CurveUsage": "Master" },
+        { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
+        { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
+    ],
+},
+```
+如果按默认的配置，返回的文件为：root/Line1/Welding/20241225/SN001/OP010/SN001_2_20241225222424.csv
 
 # API
 
