@@ -58,12 +58,12 @@ public enum DriverModel
     Melsec_MCR,
 
     /// <summary>
-    /// 三菱协议，采用A兼容1E帧协议实现，使用二进制码通讯
+    /// 三菱协议，采用A兼容1E帧协议实现，使用二进制码通讯。
     /// </summary>
     Melsec_A1E,
 
     /// <summary>
-    /// 三菱 PLC EIP 协议
+    /// 三菱 PLC EIP 协议。
     /// </summary>
     Melsec_CIP,
 
@@ -88,22 +88,22 @@ public enum DriverModel
     Omron_HostLinkCModeOverTcp,
 
     /// <summary>
-    /// 罗克韦尔 CIP 协议，支持  1756，1769 等型号
+    /// 罗克韦尔 CIP 协议，支持  1756，1769 等型号。
     /// </summary>
     AllenBradley_CIP,
 
     /// <summary>
-    /// 汇川的网口通信协议，支持 AM400、AM400_800、AC800、H3U、XP、H5U 等系列
+    /// 汇川的网口通信协议，支持 AM400、AM400_800、AC800、H3U、XP、H5U 等系列。
     /// </summary>
     Inovance_Tcp,
 
     /// <summary>
-    /// 台达PLC的网口通讯类，支持 DVP-ES/EX/EC/SS型号，DVP-SA/SC/SX/EH 型号以及 AS300 型号
+    /// 台达PLC的网口通讯类，支持 DVP-ES/EX/EC/SS型号，DVP-SA/SC/SX/EH 型号以及 AS300 型号。
     /// </summary>
     Delta_Tcp,
 
     /// <summary>
-    /// 富士PLC的 SPH 通信协议
+    /// 富士PLC的 SPH 通信协议。
     /// </summary>
     Fuji_SPH,
 
@@ -113,7 +113,7 @@ public enum DriverModel
     Panasonic_Mc,
 
     /// <summary>
-    /// 信捷PLC，支持 XC、XD、XL 系列
+    /// 信捷PLC，支持 XC、XD、XL 系列。
     /// </summary>
     XinJE_Tcp,
 }

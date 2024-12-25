@@ -30,7 +30,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <!-- Version Settings -->
-    <PackageVersion>0.11.0</PackageVersion>
+    <PackageVersion>0.12.0</PackageVersion>
     <Version>$(PackageVersion)</Version>
 	  <Authors>mickeygo</Authors>
   </PropertyGroup>

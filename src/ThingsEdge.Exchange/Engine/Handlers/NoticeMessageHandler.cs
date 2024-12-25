@@ -5,7 +5,7 @@ using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Engine.Snapshot;
 using ThingsEdge.Exchange.Forwarders;
 
-namespace ThingsEdge.Exchange.Engine.Handler;
+namespace ThingsEdge.Exchange.Engine.Handlers;
 
 /// <summary>
 /// 通知消息处理器。
@@ -46,8 +46,8 @@ internal sealed class NoticeMessageHandler(
             }
         }
 
-        // 先提取上一次触发点的值
-        var lastPayload = tagDataSnapshot.Get(message.Tag.TagId)?.Data;
+        // 先提取上一次触发点的值（根据配置选项来决定是否附带上次一信号点的值）
+        var lastPayload = options.Value.NoticePublishIncludeLast ? tagDataSnapshot.Get(message.Tag.TagId)?.Data : null;
 
         // 设置标记值快照。
         tagDataSnapshot.Change(reqMessage.Values);

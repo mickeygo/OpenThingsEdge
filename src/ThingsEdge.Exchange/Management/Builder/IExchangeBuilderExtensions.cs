@@ -10,7 +10,7 @@ namespace ThingsEdge.Exchange;
 public static class IExchangeBuilderExtensions
 {
     /// <summary>
-    /// 使用设备基于本地文件的提供者，默认执行路径为 "[执行目录]/config/tags.conf"。
+    /// 使用设备基于本地JSON文件的提供者，默认目录为 "[执行目录]/config/"，可以使用单一的配置文件 tags.conf，也可以采用文件夹多层级配置，文件优先级大于目录层级。
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
@@ -87,6 +87,23 @@ public static class IExchangeBuilderExtensions
         builder.Builder.ConfigureServices((_, services) =>
         {
             services.AddTransient(typeof(ITriggerForwarder), typeof(TForwarder));
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 使用开关消息处理服务，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
+    /// </summary>
+    /// <typeparam name="TForwarder"></typeparam>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static IExchangeBuilder UseNativeSwitchForwarder<TForwarder>(this IExchangeBuilder builder)
+        where TForwarder : ISwitchForwarder
+    {
+        builder.Builder.ConfigureServices((_, services) =>
+        {
+            services.AddTransient(typeof(ISwitchForwarder), typeof(TForwarder));
         });
 
         return builder;

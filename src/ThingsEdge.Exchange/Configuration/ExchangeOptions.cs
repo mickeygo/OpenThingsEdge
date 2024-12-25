@@ -6,7 +6,7 @@ namespace ThingsEdge.Exchange.Configuration;
 public sealed class ExchangeOptions
 {
     /// <summary>
-    /// 默认的标记扫描速率，配置中不设定会使用此设置, 默认为 500ms。
+    /// 默认的标记扫描速率（单位：ms），配置中不设定会使用此设置, 默认为 500ms。
     /// </summary>
     public int DefaultScanRate { get; init; } = 500;
 
@@ -44,7 +44,7 @@ public sealed class ExchangeOptions
     public short TriggerAckCodeWhenEqual { get; set; } = -1;
 
     /// <summary>
-    /// 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。
+    /// 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用实际长度。
     /// <para>
     /// SIEMENS TIA 选项，信息系统->对 PLC 进行编程->指令->通信->S7 通信->数据一致性:
     /// </para>
@@ -69,12 +69,33 @@ public sealed class ExchangeOptions
     public int SocketPoolSize { get; set; } = 1;
 
     /// <summary>
-    /// 网络连接超时时长，默认 3s。
+    /// 网络连接超时时长（单位：ms），默认 3s。
     /// </summary>
     public int NetworkConnectTimeout { get; set; } = 3_000;
 
     /// <summary>
-    /// Socket 保活时长，只有在大于 0 时才启用，单位 ms，默认 60s。
+    /// Socket 保活时长（单位：ms），只有在大于 0 时才启用，默认 60s。
     /// </summary>
     public int NetworkKeepAliveTime { get; set; } = 60_000;
+
+    /// <summary>
+    /// 通知消息发送时是否要带上一次信号点的值，默认为 true。
+    /// </summary>
+    public bool NoticePublishIncludeLast { get; set; } = true;
+
+    /// <summary>
+    /// 开关启动后数据扫码速率（单位：ms），默认为 70ms。
+    /// </summary>
+    public int SwitchScanRate { get; init; } = 70;
+
+    /// <summary>
+    /// 曲线数据保存的文件类型。
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public CurveFileExt CurveFileExt { get; init; } = CurveFileExt.CSV;
+
+    /// <summary>
+    /// 曲线数据配置。
+    /// </summary>
+    public CurveOptions Curve { get; init; } = new();
 }

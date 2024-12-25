@@ -9,7 +9,7 @@ namespace ThingsEdge.Exchange.Engine.Workers;
 internal static class WorkerUtils
 {
     /// <summary>
-    /// 检查心跳数据是否处于 On 状态，高电平时为 True 或 1，低电平时为 False 或 0。
+    /// 检查心跳数据是否处于 On 状态，高电平时为 true 或 1，低电平时为 false 或 0。
     /// </summary>
     /// <remarks>数据类型必须为 bool、byte、ushort 或 short 类型，不能为数组。</remarks>
     /// <param name="data"></param>
@@ -34,7 +34,31 @@ internal static class WorkerUtils
     }
 
     /// <summary>
-    /// 根据心跳 Tag 创建一个 off 状态的 PayloadData，其中值在高电平时为 False 或 0，低电平时为 True 或 1。
+    /// 检查开关信号是否处于 On 状态。
+    /// </summary>
+    /// <remarks>数据类型必须为 bool、byte、ushort 或 short 类型，不能为数组。</remarks>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    internal static bool CheckSwitchOn(PayloadData data)
+    {
+        if (data.IsArray())
+        {
+            throw new InvalidOperationException("Tag 数据类型不能为数组");
+        }
+
+        return data.DataType switch
+        {
+            TagDataType.Bit => data.GetBit() == true,
+            TagDataType.Byte => data.GetByte() == 1,
+            TagDataType.Word => data.GetWord() == 1,
+            TagDataType.Int => data.GetInt() == 1,
+            _ => throw new InvalidOperationException("Tag 数据类型必须为 bool、byte、ushort 或 short。"),
+        };
+    }
+
+    /// <summary>
+    /// 根据心跳 Tag 创建一个 off 状态的 PayloadData，其中值在高电平时为 false 或 0，低电平时为 true 或 1。
     /// </summary>
     /// <remarks>数据类型必须为 bool、byte、ushort 或 short 类型，不能为数组。</remarks>
     /// <param name="tag"></param>
@@ -50,7 +74,7 @@ internal static class WorkerUtils
     }
 
     /// <summary>
-    /// 设置心跳标记为 Off 状态，高电平时设为 False 或 0 ，低电平时设为 True 或 1。
+    /// 设置心跳标记为 Off 状态，高电平时设为 false 或 0 ，低电平时设为 true 或 1。
     /// </summary>
     /// <remarks>数据类型必须为 bool、byte、ushort 或 short 类型，不能为数组。</remarks>
     /// <param name="tag"></param>
@@ -72,6 +96,33 @@ internal static class WorkerUtils
             TagDataType.Int => useHighLevel ? (short)0 : (short)1,
             _ => throw new InvalidOperationException("Tag 数据类型必须为 bool、byte、ushort 或 short。"),
         };
+    }
+
+    /// <summary>
+    /// 根据开关 Tag 创建一个 off 状态的 PayloadData。
+    /// </summary>
+    /// <remarks>数据类型必须为 bool、byte、ushort 或 short 类型，不能为数组。</remarks>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    internal static PayloadData CreateSwitchPayloadOffOff(Tag tag)
+    {
+        if (tag.IsArray())
+        {
+            throw new InvalidOperationException("Tag 数据类型不能为数组");
+        }
+
+        object obj = tag.DataType switch
+        {
+            TagDataType.Bit => false,
+            TagDataType.Byte => (byte)0,
+            TagDataType.Word => (ushort)0,
+            TagDataType.Int => (short)0,
+            _ => throw new InvalidOperationException("Tag 数据类型必须为 bool、byte、ushort 或 short。"),
+        };
+        var data = PayloadData.FromTag(tag);
+        data.Value = obj;
+        return data;
     }
 
     /// <summary>

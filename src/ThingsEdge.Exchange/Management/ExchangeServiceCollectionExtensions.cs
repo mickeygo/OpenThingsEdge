@@ -1,7 +1,7 @@
 using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Engine;
 using ThingsEdge.Exchange.Engine.Connectors;
-using ThingsEdge.Exchange.Engine.Handler;
+using ThingsEdge.Exchange.Engine.Handlers;
 using ThingsEdge.Exchange.Engine.Snapshot;
 using ThingsEdge.Exchange.Engine.Workers;
 using ThingsEdge.Exchange.Forwarders;
@@ -9,6 +9,7 @@ using ThingsEdge.Exchange.Infrastructure.Brokers;
 using ThingsEdge.Exchange.Interfaces;
 using ThingsEdge.Exchange.Interfaces.Impls;
 using ThingsEdge.Exchange.Management;
+using ThingsEdge.Exchange.Storages.Curve;
 
 namespace ThingsEdge.Exchange;
 
@@ -29,6 +30,7 @@ public static class ExchangeServiceCollectionExtensions
         EngineExecutor.Register<HeartbeatWorker>();
         EngineExecutor.Register<NoticeWorker>();
         EngineExecutor.Register<TriggerWorker>();
+        EngineExecutor.Register<SwitchWorker>();
 
         // 注册服务
         builder.ConfigureServices((hostBuilder, services) =>
@@ -54,6 +56,7 @@ public static class ExchangeServiceCollectionExtensions
             services.AddTransient<IHeartbeatMessageHandler, HeartbeatMessageHandler>();
             services.AddTransient<INoticeMessageHandler, NoticeMessageHandler>();
             services.AddTransient<ITriggerMessageHandler, TriggerMessageHandler>();
+            services.AddTransient<ISwitchMessageHandler, SwitchMessageHandler>();
 
             services.AddSingleton<IDriverConnectorManager, DriverConnectorManager>();
             services.AddSingleton<IExchange, EngineExchange>();
@@ -65,7 +68,10 @@ public static class ExchangeServiceCollectionExtensions
             services.AddTransient<IHeartbeatForwarderProxy, HeartbeatForwarderProxy>();
             services.AddTransient<INoticeForwarderProxy, NoticeForwarderProxy>();
             services.AddTransient<ITriggerForwarderProxy, TriggerForwarderProxy>();
+            services.AddTransient<ISwitchForwarderProxy, SwitchForwarderProxy>();
 
+            services.AddSingleton<CurveStorage>();
+            services.AddSingleton<CurveContainer>();
         });
 
         var builder2 = new ExchangeBuilder(builder);

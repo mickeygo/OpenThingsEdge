@@ -63,8 +63,8 @@ public sealed class PayloadData
     /// <summary>
     /// 提取扩展数据的值，不存在时则返回指定的默认值。
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="propertyName"></param>
+    /// <typeparam name="T">获取的值类型</typeparam>
+    /// <param name="propertyName">JSON 属性名称</param>
     /// <param name="defaultValue">默认值</param>
     /// <returns></returns>
     public T GetExtraValue<T>(string propertyName, T defaultValue)
@@ -73,9 +73,19 @@ public sealed class PayloadData
     }
 
     /// <summary>
+    /// 提取扩展数据的值，不存在时返回 null。
+    /// </summary>
+    /// <param name="propertyName">JSON 属性名称</param>
+    /// <returns></returns>
+    public string? GetExtraValue(string propertyName)
+    {
+        return GetExtraValue<string>(propertyName);
+    }
+
+    /// <summary>
     /// 提取扩展数据的值，不存在时返回 default。
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">JSON 属性名称</typeparam>
     /// <param name="propertyName"></param>
     /// <returns></returns>
     public T? GetExtraValue<T>(string propertyName)

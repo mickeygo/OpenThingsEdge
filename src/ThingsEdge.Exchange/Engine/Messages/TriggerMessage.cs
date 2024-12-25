@@ -6,7 +6,7 @@ using ThingsEdge.Exchange.Engine.Connectors;
 namespace ThingsEdge.Exchange.Engine.Messages;
 
 /// <summary>
-/// 通知消息。
+/// 触发消息。
 /// </summary>
 /// <param name="Connector">连接驱动</param>
 /// <param name="ChannelName">通道名称</param>

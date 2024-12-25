@@ -5,7 +5,7 @@ using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Engine.Snapshot;
 using ThingsEdge.Exchange.Forwarders;
 
-namespace ThingsEdge.Exchange.Engine.Handler;
+namespace ThingsEdge.Exchange.Engine.Handlers;
 
 /// <summary>
 /// 触发消息处理器。

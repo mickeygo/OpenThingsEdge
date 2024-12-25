@@ -1,6 +1,6 @@
 using ThingsEdge.Exchange.Engine.Messages;
 
-namespace ThingsEdge.Exchange.Engine.Handler;
+namespace ThingsEdge.Exchange.Engine.Handlers;
 
 /// <summary>
 /// 心跳消息处理器。

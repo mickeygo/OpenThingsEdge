@@ -7,7 +7,7 @@ public enum TagFlag
 {
     /// <summary>
     /// 常规标记。
-    /// 此标记没有任何行为，会随 <see cref="Trigger"/> 和 <see cref="Notice"/> 的标识的触发而随着发送。
+    /// 此标记没有任何行为，会随 <see cref="Notice"/>、<see cref="Trigger"/> 和 <see cref="Switch"/> 的标识的触发而随着发送。
     /// </summary>
     [Description("常规")]
     Normal = 0,
@@ -41,4 +41,11 @@ public enum TagFlag
     /// </remarks>
     [Description("触发")]
     Trigger = 3,
+
+    /// <summary>
+    /// 该标记用于控制触发。
+    /// 若该标记值是开启状态，其附属数据会随着设定的扫描速率不间断统一发送，可用于实时数据场景，如曲线数据。
+    /// </summary>
+    [Description("开关")]
+    Switch = 4,
 }

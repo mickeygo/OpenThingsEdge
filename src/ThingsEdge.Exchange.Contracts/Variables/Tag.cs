@@ -60,7 +60,7 @@ public partial class Tag
     public PublishMode PublishMode { get; init; } = PublishMode.OnlyDataChanged;
 
     /// <summary>
-    /// <see cref="TagFlag.Trigger"/> 和 <see cref="TagFlag.Notice"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
+    /// <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
     /// </summary>
     [NotNull]
     public List<Tag>? NormalTags { get; init; } = [];
@@ -83,5 +83,28 @@ public partial class Tag
     {
         return Length > 0
            && DataType is not (TagDataType.String or TagDataType.S7String or TagDataType.S7WString);
+    }
+
+    /// <summary>
+    /// 提取扩展数据的值，不存在时返回 null。
+    /// </summary>
+    /// <param name="propertyName">JSON 属性名称</param>
+    /// <returns></returns>
+    public string? GetExtraValue(string propertyName)
+    {
+        return GetExtraValue<string>(propertyName);
+    }
+
+    /// <summary>
+    /// 提取扩展数据的值，不存在时返回 default。
+    /// </summary>
+    /// <typeparam name="T">获取的值类型</typeparam>
+    /// <param name="propertyName">JSON 属性名称</param>
+    /// <returns></returns>
+    public T? GetExtraValue<T>(string propertyName)
+    {
+        return ExtraData != null && ExtraData.TryGetPropertyValue(propertyName, out var value) && value is not null
+            ? value.GetValue<T>()
+            : default;
     }
 }

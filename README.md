@@ -1,67 +1,117 @@
 # ThingsEdge
 IoT 边缘路由网关。
 
-# 数据 API
+# JSON 地址配置
 
-## Channel 属性
+JSON 配置整体是一个数组，可包含多个 Channel。
 
- 属性名 		| 说明
-:---------------|:--------
-ChannelId		|全局唯一值
-Name			|通道名称
-Keynote			|通道要旨，可用于设置重要信息
-Devices			|设备集合
-
-## Device 属性
+## Channel 类型
 
  属性名 		| 说明
 :---------------|:--------
-DeviceId		|全局唯一值
-Name			|设备名称
-Model			|设备驱动型号，如 S7-200、S7-1200、S7-1500 等
-Host			|服务器地址
-Port			|端口，不为 0 时表示使用该端口
-Keynote			|设备要旨，可用于设置重要信息
-TagGroups		|标记组集合
-Tags			|隶属于设备的标记集合
+ChannelId		|全局唯一值（自动生成）。
+Name			|通道名称。
+Keynote			|通道要旨，可用于设置重要信息，默认为空。
+Devices			|数组，设备集合。
+
+## Device 类型
+
+ 属性名 		| 说明
+:---------------|:--------
+DeviceId		|全局唯一值（自动生成）。
+Name			|设备名称。
+Model			|设备驱动型号，如 S7-200、S7-1200、S7-1500 等。
+Host			|服务器地址。
+Port			|端口，为 0 时会使用相应协议默认的端口，默认值为 0。
+MaxPDUSize      |允许一次性读取的最大 PDU 长度（byte数量），0 表示不指定。
+PoolSize        |设备连接使用的线程池，优先级高于全局配置，为 0 时会使用全局配置（全局配置为 0 时会使用实际长度）。
+Keynote			|设备要旨，可用于设置重要信息，默认为空。
+TagGroups		|数组，标记组集合。
+Tags			|数组，隶属于设备的标记集合。
+CallbackTags    |回写标记集合。
 
 
 ## TagGroup 属性
 
  属性名 		| 说明
 :---------------|:--------
-TagGroupId		|全局唯一值
-Name			|标记组名
-Keynote			|标记要旨，可用于设置重要信息
-Tags			|隶属于分组的标记集合
+TagGroupId		|全局唯一值（自动生成）。
+Name			|标记组名。
+Keynote			|标记要旨，可用于设置重要信息，默认为空。
+Tags			|隶属于分组的标记集合。
+CallbackTags    |回写标记集合（回写标记在 Group 中不存在时会向上从隶属的 Device 中查找）。
 
-
-## Tag 属性
+## Tag 类型
 
  属性名 		| 说明
 :---------------|:--------
-TagId			|全局唯一值
-Name			|标记名称
-Address			|地址 (字符串格式)
-Length			|数据长度。注：普通类型默认长度设置为 0，当为数组或字符串时，需指定长度。
-DataType		|数据类型，分 "Bit"、"Byte"、"Word"、"DWord"、"Int"、"DInt"、"Real"、"LReal"、"String"、"S7String"、"S7WString"
-ClientAccess	|客户端访问模式，默认可读写。
-ScanRate		|扫描速率（毫秒），默认100ms。
-Flag			|标记标识，分 "Heartbeat"、"Trigger"、"Notice"、"Switch"，其中 "Normal" 做为 "Trigger" 和 "Switch" 子标记。
-PublishMode		|是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 "OnlyDataChanged"。注：仅适用 <see cref="TagFlag.Notice"/> 标记
-Keynote			|标记要旨，可用于设置重要信息
-DisplayName		|标记显示名称
-Description		|标记说明
-Identity		|标记身份标识，默认为 "Master"
-CurveUsage		|曲线用途分类
-Group			|标记分组标识，可用于定义将多个标记数据归为同一组，为空表示不进行分组。注：分组中的数据类型要保持一致，如果是数组，组内各标记数据类型也应都为数组，且长度一致。
-ValueUsage		|标记值的用途标识
-NormalTags		|只有 "Trigger" 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送
+TagId			|全局唯一值（自动生成）。
+Name			|标记名称。
+Address			|地址 (字符串格式)。
+Length			|数据长度。注：普通类型默认长度设置为 0，大于 1 时表示为数组，为字符串时也需要指定长度。
+DataType		|数据类型，分 "Bit"、"Byte"、"Word"、"DWord"、"Int"、"DInt"、"Real"、"LReal"、"String"、"S7String"、"S7WString"。
+ScanRate		|扫描频率（毫秒），默认100ms。
+Flag			|标记标识，分 "Heartbeat"、"Notice"、"Trigger"、"Switch"，其中 "Normal" 做为 "Notice"、"Trigger" 和 "Switch" 子标记。
+PublishMode		|见 "PublishMode" 属性，默认为 "OnlyDataChanged"。注：仅适用 TagFlag.Notice 标记。
+NormalTags      |数组，TagFlag.Notice、TagFlag.Trigger 和 TagFlag.Switch 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
+ExtraData       |额外数据，通过 [JsonExtensionDataAttribute] 注解，包含 JSON 配置的额外属性。
 
-## Tag 方法
+### PublishMode 枚举
+
+ 属性名 		| 说明
+:---------------|:--------
+OnlyDataChanged |扫描后仅当数据有变动时才会推送数据。
+EveryScan       |每次扫码都会推送数据。
+
+### Tag 方法
+
+ 方法名 		| 说明 							
+:-------------------------------|:--------					
+IsArray()		                |判断标记是否为数组对象。
+GetExtraValue(string)           |从 ExtraData 中提取 JSON 扩展数据的值，返回 string，不存在时返回 null。
+GetExtraValue<T>(string)        |从 ExtraData 中提取 JSON 扩展数据的值，返回指定类型，不存在时返回 default。
+
+## DataType 枚举
  属性名 		| 说明 							
 :---------------|:--------					
-IsArray			| 判断标记是否为数组对象。	
+Bit			|对应 bool。
+Byte		|字节（8 位），对应 byte。
+Word		|字（无符号 16 位），对应 ushort。
+Int			|短整型（带符号 16 位），对应 short。
+DWord		|双字（无符号 32 位），对应 uint。
+DInt		|双整型（带符号 32 位），对应 int。
+Real		|单精度浮点型（32 位），对应 float。
+LReal		|双精度浮点型（64 位），对应 double。
+String		|字符串（ASCII 编码），对应 string。
+S7String	|西门子 S7String（ASCII 编码），对应 string。
+S7WString	|西门子 S7WString（Unicode 编码），对应 String。
+
+## DriverModel 枚举
+ 属性名 		| 说明 							
+:---------------|:--------					
+ModbusTcp			        |设备驱动型号，如西门子1200、西门子1500、三菱、欧姆龙FinsTcp、AB CIP等，地址示例：s=1;x=3;1。
+S7_1500		                |西门子 S7 协议，支持 1500 系列，地址示例：DB100.12。
+S7_1200		                |西门子 S7 协议，支持 1200 系列，地址示例：DB100.12。
+S7_400			            |西门子 S7 协议，支持 400 系列，地址示例：DB100.12。
+S7_300		                |西门子 S7 协议，支持 300 系列，地址示例：DB100.12。
+S7_S200		                |西门子 S7 协议，支持 S200 系列，地址示例：DB100.12。
+S7_S200Smart		        |西门子 S7 协议，支持 S200Smart 系列，地址示例：DB100.12。
+Melsec_MC		            |三菱 MC 协议，支持 Q、Qna 系列，地址示例：D100。
+Melsec_MCAscii		        |三菱 MC 协议，支持 Q、Qna 系列。
+Melsec_MCR	                |三菱 MC 协议，支持 R 系列。
+Melsec_A1E	                |三菱协议，采用A兼容1E帧协议实现，使用二进制码通讯。
+Melsec_CIP                  |三菱 PLC EIP 协议。
+Omron_FinsTcp               |欧姆龙 Fins-Tcp 通信协议，地址示例：D5225、D82.01。
+Omron_CIP                   |欧姆龙 CIP 协议，支持 NJ、NX、NY 系列。
+Omron_HostLinkOverTcp       |欧姆龙的 HostLink 协议，基于Tcp实现。
+Omron_HostLinkCModeOverTcp  |欧姆龙 HostLink 协议的 C-Mode 实现。
+AllenBradley_CIP            |罗克韦尔 CIP 协议，支持  1756，1769 等型号。
+Inovance_Tcp                |汇川的网口通信协议，支持 AM400、AM400_800、AC800、H3U、XP、H5U 等系列。
+Delta_Tcp                   |台达PLC的网口通讯类，支持 DVP-ES/EX/EC/SS型号，DVP-SA/SC/SX/EH 型号以及 AS300 型号。
+Fuji_SPH                    |富士PLC的 SPH 通信协议。
+Panasonic_Mc                |松下PLC，基于MC协议的实现。
+XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
+
 
 ## JSON 选项配置示例
 ```JSON
@@ -70,121 +120,201 @@ IsArray			| 判断标记是否为数组对象。
     "Name": "Line01", "Keynote": "",
     "Devices": [
       "Name": "设备01", "Model": "ModbusTcp", "Host": "127.0.0.1", "Port": 0, "Keynote": "",
+       "Tags": [
+          { "Name": "Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Heartbeat" },
+          { "Name": "PLC_Alarm", "Address": "s=1;x=3;1", "Length": 96, "DataType": "Int", "ScanRate": 5000, "Flag": "Notice" },
+          { "Name": "PLC_Energy", "Address": "s=1;x=3;1", "Length": 0, "DataType": "Int", "ScanRate": 60000, "Flag": "Notice", "PublishMode": "EveryScan" },
+          { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "ScanRate": 1000, "Flag": "Notice" },
+      ],
+      CallbackTags: [
+        { "Name": "MES_Callback_ErrorMessage", "Address": "s=1;x=3;460", "Length": 30, "DataType": "String" },
+      ],
       "TagGroups": [
         "Name": "OP101", "Keynote": "",
         "Tags": [
           {
-            "Name": "PLC_Entry_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger", "Keynote": "", "DisplayName": "进站信号", "Identity":"Master", "Description": "",
+            "Name": "PLC_Inbound_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
             "NormalTags": [
-               { "Name": "PLC_Entry_SN", "Address": "s=1;x=3;112", "Length": 20, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "SN", "Identity":"Master", "Description": "SN" },
-               { "Name": "PLC_Entry_Formual", "Address": "s=1;x=3;132", "Length": 0, "DataType": "Int", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "配方号", "Identity":"Master", "Description": "" },
-               { "Name": "PLC_Entry_Rfid", "Address": "s=1;x=3;140", "Length": 10, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "RFID", "Identity":"Master", "Description": "" },
-            ]
+               { "Name": "PLC_Inbound_SN", "Address": "s=1;x=3;112", "Length": 50, "DataType": "String" },
+               { "Name": "PLC_Inbound_ProductCode", "Address": "s=1;x=3;132", "Length": 20, "DataType": "String" },
+            ],
           },
           {
-            "Name": "PLC_Archive_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "ScanRate": 200, "Flag": "Trigger", "Keynote": "", "Identity":"Master", "Description": "",
+            "Name": "PLC_Outbound_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "ScanRate": 200, "Flag": "Trigger",
             "NormalTags": [
-              { "Name": "PLC_Archive_SN", "Address": "s=1;x=3;352", "Length": 20, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "SN", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "结果", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_Formual", "Address": "s=1;x=3;374", "Length": 0, "DataType": "Int", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "配方号", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_Operator", "Address": "s=1;x=3;376", "Length": 10, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "操作人", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_Shift", "Address": "s=1;x=3;386", "Length": 10, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "班次", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_Rfid", "Address": "s=1;x=3;396", "Length": 10, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "RFID", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_CycleTime", "Address": "s=1;x=3;410", "Length": 0, "DataType": "Real", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "节拍", "Identity":"Master", "Description": "" },
-              { "Name": "PLC_Archive_GlueWidth", "Address": "s=1;x=3;420", "Length": 0, "DataType": "Real", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "胶宽", "Identity":"Attach", "Description": "" },
-              { "Name": "PLC_Archive_GlueHeight", "Address": "s=1;x=3;424", "Length": 0, "DataType": "Real", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "胶高", "Identity":"Attach", "Description": "" },
-            ]
+              { "Name": "PLC_Outbound_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
+              { "Name": "PLC_Outbound_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
+              { "Name": "PLC_Outbound_CycleTime", "Address": "s=1;x=3;410", "Length": 0, "DataType": "Real" },           
+            ],
           },
           {
-            "Name": "PLC_Scan_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger", "Keynote": "", "DisplayName": "扫关键物料信号", "Identity":"Master", "Description": "",
+            "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
             "NormalTags": [
-              { "Name": "PLC_Scan_Barcode", "Address": "s=1;x=3;442", "Length": 20, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "Barcode", "Identity":"Master", "Description": "" },
-            ]
+              { "Name": "PLC_ScanKey_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
+              { "Name": "PLC_ScanKey_Barcode", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
+            ],
           },
-          { "Name": "MES_Callback_ReworkProc", "Address": "s=1;x=3;460", "Length": 10, "DataType": "String", "ScanRate": 0, "Flag": "Normal", "Keynote": "", "DisplayName": "", "Identity":"Master", "Description": "" },
           {
-            "Name": "Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "拧紧", "Keynote": "", "Identity":"Master", "Description": "",
+            "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
             "NormalTags": [
-              { "Name": "Switch1_SN", "Address": "s=1;x=3;41", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Normal", "CurveUsage": "SwitchSN", "DisplayName": "", "Identity":"Master", "Description": "" },
-              { "Name": "Switch1_No", "Address": "s=1;x=3;42", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Normal", "CurveUsage": "SwitchNo", "DisplayName": "","Identity":"Master", "Description": "" },
-              { "Name": "Switch1_Data1", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Normal", "CurveUsage": "SwitchCurve", "DisplayName": "x", "Identity":"Master", "Description": "" },
-              { "Name": "Switch1_Data2", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Normal", "CurveUsage": "SwitchCurve", "DisplayName": "y", "Identity":"Master", "Description": "" }
-            ]
+              { "Name": "PLC_StepTask_SN", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
+              { "Name": "PLC_StepTask_Angle", "Address": "s=1;x=3;420", "Length": 0, "DataType": "Real" },
+              { "Name": "PLC_StepTask_Torque", "Address": "s=1;x=3;424", "Length": 0, "DataType": "Real" },
+              { "Name": "PLC_StepTask_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
+            ],
           },
-        ]
+          {
+            "Name": "PLC_Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+            "NormalTags": [
+              { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
+              { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
+              { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
+              { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
+            ],
+          },
+          {
+            "Name": "PLC_Switch2", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+            "NormalTags": [
+              { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
+              { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
+              { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
+              { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
+            ],
+          },
+          CallbackTags: [
+            { "Name": "MES_Callback_ReworkOperation", "Address": "s=1;x=3;460", "Length": 10, "DataType": "String" },
+          ],
+        ],
       ],
-      "Tags": [
-          { "Name": "Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Heartbeat", "Keynote": "", "DisplayName": "心跳", "Identity":"Master", "Description": "" },
-          { "Name": "PLC_Alarm", "Address": "s=1;x=3;1", "Length": 10, "DataType": "Int", "ScanRate": 5000, "Flag": "Notice", "PublishMode": "OnlyDataChanged", "Keynote": "", "DisplayName": "警报", "Identity":"Master", "Description": "" },
-          { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Notice", "Keynote": "", "DisplayName": "设备状态", "Identity":"Master", "Description": "" },
-          { "Name": "PLC_Equipment_Mode", "Address": "s=1;x=3;62", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Notice", "Keynote": "", "DisplayName": "设备运行模式", "Identity":"Master", "Description": "" },
-      ]
     ]
   }
 ]
 ```
 
 
-# 配置
+# 全局参数配置
 
+## appsettings.json 配置参考
 ```JSON
 {
-  "Ops": {
-    "DefaultScanRate": 100, // 默认的标记扫描速率, 默认为 100ms
-    "SwitchScanRate": 100, // 开关启动后曲线数据扫描速率，默认为 100ms
-    "AllowReadMulti": true, // 是否尝试批量读取，默认为 true
-    "AckWhenCallbackError": false, // 在触发标志位值回写失败时，是否触发回执值，默认为 false
-    "AckMaxVersion": 3, // 在触发标志位值回写失败时，允许触发回执的最大次数，默认为 3
-    "Curve": {
-      "LocalRootDirectory": null, // 曲线文件本地存储根目录。可以是完整路径，也可以是相对路径，默认为根目录下的 "curves" 文件夹
-      "FileType": "JSON", // 曲线存储文件格式，JSON / CSV，默认为 CSV 格式
-      "CurveNamedSeparator": "_", // 曲线存储文件名称的分隔符，默认 "_"
-      "DirIncludeChannelName": true, // 目录是否包含通道名称，默认为 true
-      "DirIncludeCurveName": true, // 目录是否包含曲线名称，默认为 true
-      "DirIncludeDate": true, // 文件路径是否包含日期，格式为 "yyyyMMdd"，默认为 true
-      "DirIncludeSN": true, // 文件路径是否包含SN，在 SN 存在的条件下为 true 时会按 SN 建立文件夹，默认为 true
-      "DirIncludeGroupName": true, // 目录是否包含分组名称，默认为 true
-      "SuffixIncludeDatetime": false, // 文件后缀是否包含日期，格式为 "yyyyMMddHHmmss"
-      "AllowMaxWriteCount": 32767, // 文件中允许写入最大的次数，默认为 4096
-      "AllowCopy": false, // 是否要推送文件到远端服务器
-      "RemoteRootDirectory": null, // 曲线文件远端存储根目录（共享目录）
-      "RetainedDayLimit": 0 // 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除
-    }
-  },
-  "MqttBroker": {
-    "ServerUri": "127.0.0.1", // MQTT 服务器地址
-    "Port": null, // MQTT 服务器连接地址，为 null 表示使用默认端口
-    "ClientId": "ThingsEdge", // 客户端唯一 Id
-    "MaxPendingMessages": 32767, // 允许本地存储最大消息数量，默认为 "short.MaxValue"
-    "TopicFormater": null, // Topic 格式器，系统内部默认会采用 {ChannelName}/{DeviceName}/{TagGroupName} 模式匹配，匹配规则不区分大小写
-    "TopicFormatMatchLower": true, // Topic 格式化时匹配的数据是否要转为小写，默认为 true
-    "ProtocolVersion": "V311" // MQTT 协议版本，默认为 3.1.1
-  },
-  "HttpDestination": { // 基于 RESTful 格式的目标服务参数选项
-    "BaseAddress": "http://localhost:7214", // 请求服务基地址
-    "Timeout": 10000, // 请求目标超时设置，单位毫秒，默认为 10s
-    "EnableBasicAuth": false, // 目标服务是否启用 Basic Authentication 验证
-    "UserName": null, // 验证使用的用户名
-    "Password": null, // 验证使用的密码
-    "DisableCertificateValidationCheck": true, // 是否禁用凭证检测（https），默认为 true
-    "HealthRequestUrl": null, // 目标服务健康检测地址，默认为 "/api/health"
-    "RequestUrl": null // 目标服务接收数据的地址，默认为 "/api/iotgateway"
+  "Exchange": {
+    "DefaultScanRate": 500, // 默认的标记扫描频率, 默认为 500ms。
+    "AllowReadMulti": true, // 是否尝试批量读取，默认为 true。
+    "HeartbeatShouldAckZero": true, // Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
+    "HeartbeatListenUseHighLevel": true, // 监听心跳数据是否采用高电平值，默认为 true。
+    "TriggerConditionValue": 1, // 触发标记的触发条件值，值大于 0 才有效，默认为 1。
+    "TriggerAckCodeWhenEqual": -1, // 在返回值与触发值相等时，写回给设备的状态码，默认为 -1。
+    "MaxPDUSize": 0, // 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。
+    "SocketPoolSize": 1, // Socket 连接池最大数量，默认为 1。
+    "NetworkConnectTimeout": 3000, // 网络连接超时时长（单位：ms），默认 3s。
+    "NetworkKeepAliveTime": 60000, // Socket 保活时长（单位：ms），只有在大于 0 时才启用，默认 60s。
+    "NoticePublishIncludeLast": true, // 通知消息发送时是否要带上一次信号点的值，默认为 true。
+    "SwitchScanRate": 70, // 开关启动后数据扫码频率（单位：ms），默认为 70ms。
+    "Curve": { // 曲线配置
+      "LocalRootDirectory": null, // 曲线文件本地存储根目录。可以是完整路径，也可以是相对路径，默认为根目录下的 "curves" 文件夹。
+      "FileType": "JSON", // 曲线存储文件格式，JSON / CSV，默认为 CSV 格式。
+      "CurveNamedSeparator": "_", // 曲线存储文件名称的分隔符，默认 "_"。
+      "DirIncludeChannelName": true, // 目录是否包含通道名称，默认为 true。
+      "DirIncludeCurveName": true, // 目录是否包含曲线名称，默认为 true。
+      "DirIncludeDate": true, // 文件路径是否包含日期，格式为 "yyyyMMdd"，默认为 true。
+      "DirIncludeSN": true, // 文件路径是否包含SN，在 SN 存在的条件下为 true 时会按 SN 建立文件夹，默认为 true。
+      "DirIncludeGroupName": true, // 目录是否包含分组名称，默认为 true。
+      "SuffixIncludeDatetime": false, // 文件后缀是否包含日期，格式为 "yyyyMMddHHmmss"。
+      "AllowMaxWriteCount": 32767, // 文件中允许写入最大的次数，默认为 4096。
+      "AllowCopy": false, // 是否要推送文件到远端服务器。
+      "RemoteRootDirectory": null, // 曲线文件远端存储根目录（共享目录）。
+      "RetainedDayLimit": 0 // 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除。
+    },
   }
 }
 ```
 
-# 可处理事件
+## 程序启动项中设置
+```Shell
+var host = Host.CreateDefaultBuilder();
+host.AddThingsEdgeExchange(static builder =>
+{
+    builder.UseDeviceFileProvider()
+        .UseDeviceHeartbeatForwarder<MyHeartbeatForwarder>()
+        .UseNativeNoticeForwarder<MyNoticeForwarder>()
+        .UseNativeTriggerForwarder<MyTriggerForwader>()
+        .UseNativeSwitchForwarder<MySwitchForwader>()
+        .UseOptions(options =>
+        {
+            options.SocketPoolSize = 5;
+        });
+});
+```
+注：
+* UseDeviceFileProvider() 使用设备基于本地JSON文件的提供者，默认目录为 "[执行目录]/config/"，可以使用单一的配置文件 tags.conf（固定命名），也可以采用文件夹多层级配置，单一文件的优先级大于目录层级。
+* UseDeviceCustomProvider<T>() 自定义实现地址数据配置，需要实现 IAddressProvider 接口。
+* UseDeviceHeartbeatForwarder 使用设备心跳信息处理服务，需要实现 IHeartbeatForwarder 接口。
+* UseNativeNoticeForwarder 使用本地通知消息处理服务，需要实现 INoticeForwarder 接口。
+* UseNativeTriggerForwarder 使用本地的请求处理服务，需要实现 ITriggerForwarder 接口。
+* UseNativeSwitchForwarder 使用开关消息处理服务，需要实现 ISwitchForwarder 接口。
+* UseOptions() 选项中的设置级别默认高于配置文件节点 "Exchange" 设置的值。
+
+
+# 接受数据接口
 
  事件名 				| 说明
-:---------------		|:--------
-CurveFilePostedEvent	|曲线文件传送通知事件
-DeviceHeartbeatEvent	|与设备连接的心跳通知事件
-DirectMessageRequestEvent|消息请求处理通知事件 
+:---------------------------|:--------
+IHeartbeatForwarder	    |设备心跳数据推送接口。
+IHeartbeatForwarder	    |通知数据传送接口。
+ITriggerForwarder       |设备心跳数据推送接口。
+ISwitchForwarder        |开关数据传送接口。
+
+## PayloadData 对象
+
+ 属性名 		| 说明
+:---------------|:--------
+TagId			|同 Tag.TagId。
+TagName			|同 Tag.TagName。
+Address			|同 Tag.Address。
+Length			|同 Tag.Length。
+Value           |读取的地址的存储数据。
+DataType		|同 Tag.DataType。
+ExtraData       |同 Tag.ExtraData。
+
+
+### PayloadData 方法
+
+ 方法名 		| 说明 							
+:-------------------------------|:--------					
+IsArray()		                |同 Tag.IsArray() 方法，判断标记是否为数组对象。
+GetExtraValue(string)           |同 Tag.GetExtraValue(string) 方法。
+GetExtraValue<T>(string)        |同 Tag.GetExtraValue<T>(string) 方法。
+GetExtraValue<T>(string, T)     |同 GetExtraValue<T>(string) 方法，没找到值时可设定默认值。
+GetString(bool)                 |提取对象文本值，若值不为 string 类型时，会转换为字符串。
+GetStringArray(bool)            |提取对象值，并将值转换为字符串数组，若是单一值，会组合成只有一个元素的数组。
+GetRawString()                  |获取原始的字符串数据。
+GetBit()                        |获取 TagDataType.Bit 类型的值。
+GetByte()                       |获取 TagDataType.Byte 类型的值。
+GetWord()                       |获取 TagDataType.Word 类型的值。
+GetDWord()                      |获取 TagDataType.DWord 类型的值。
+GetInt()                        |获取 TagDataType.Int 类型的值。
+GetDInt()                       |获取 TagDataType.DInt 类型的值。
+GetReal()                       |获取 TagDataType.Real 类型的值。
+GetLReal()                      |获取 TagDataType.LReal 类型的值。
+GetBitArray()                   |获取 TagDataType.Bit 数组类型的值。
+GetByteArray()                  |获取 TagDataType.Byte 数组类型的值。
+GetWordArray()                  |获取 TagDataType.Word 数组类型的值。
+GetDWordArray()                 |获取 TagDataType.DWord 数组类型的值。
+GetIntArray()                   |获取 TagDataType.Int 数组类型的值。
+GetDIntArray()                  |获取 TagDataType.DInt 数组类型的值。
+GetRealArray()                  |获取 TagDataType.Real 数组类型的值。
+GetLRealArray()                 |获取 TagDataType.LReal 数组类型的值。
+TryGetAsBoolean(bool?)          |尝试获取值并将值转换为 bool 类型，仅将原始类型 Bit 转换为 Boolean 类型。
+TryGetAsInt32(int?)             |尝试获取值并将值转换为 int 类型，会将原始类型 Bit、Byte、Word、Int 和 DInt 转换为 Int32 类型。
+TryGetAsDouble(double?)         |尝试获取值并将值转换为 double 类型，会将原始类型 Bit、Byte、Word、DWord、Int、DInt、Real 和 LReal 转换为 double 类型。
+TryGetAsBooleanArray(bool[]?)   |尝试获取值并将值转换为 bool 数组类型。
+TryGetAsInt32Array(int[]?)      |尝试获取值并将值转换为 int 数组类型。
+TryGetAsDoubleArray(double[]?)  |尝试获取值并将值转换为 double 数组类型。
+
 
 # API
 
  属性名 			| 说明
-:---------------	|:--------
-IExchange			|交换机引擎
-IDeviceReadWrite	|设备数据读写接口
-IDeviceTagDataSnapshot |设备标记快照，用于读取当前的标记值。
+:---------------------------|:--------
+IExchange			        |交换机引擎开启、关闭接口，程序启动后需要调用 StartAsync() 方法开始作业。
+ITagReaderWriter	        |设备Tag数据读写接口。

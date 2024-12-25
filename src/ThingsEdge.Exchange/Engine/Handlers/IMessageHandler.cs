@@ -1,6 +1,6 @@
 using ThingsEdge.Exchange.Infrastructure.Brokers;
 
-namespace ThingsEdge.Exchange.Engine.Handler;
+namespace ThingsEdge.Exchange.Engine.Handlers;
 
 /// <summary>
 /// 消息处理器

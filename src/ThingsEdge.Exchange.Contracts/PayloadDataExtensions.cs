@@ -16,7 +16,7 @@ namespace ThingsEdge.Exchange.Contracts;
 public static partial class PayloadDataExtensions
 {
     /// <summary>
-    /// 提取对象文本值，若值不为 <see cref="string"/> 类型时，会字符串转换。
+    /// 提取对象文本值，若值不为 <see cref="string"/> 类型时，会转换为字符串。
     /// </summary>
     /// <remarks>注：对于非字符串数据，会转换为字符串；对于数组数据，进行 JSON 序列化，返回的是 JSON 数组格式文本。</remarks>
     /// <param name="payload"></param>

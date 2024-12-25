@@ -1,4 +1,4 @@
-using ThingsEdge.Exchange.Engine.Handler;
+using ThingsEdge.Exchange.Engine.Handlers;
 using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Infrastructure.Brokers;
 
@@ -16,6 +16,7 @@ internal sealed class MessageLoop(IServiceProvider serviceProvider, ILogger<Mess
         await LoopHeartbeatAsync(cancellationToken).ConfigureAwait(false);
         await LoopNoticeAsync(cancellationToken).ConfigureAwait(false);
         await LoopTriggerAsync(cancellationToken).ConfigureAwait(false);
+        await LoopSwitchAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private Task LoopHeartbeatAsync(CancellationToken cancellationToken)
@@ -34,7 +35,7 @@ internal sealed class MessageLoop(IServiceProvider serviceProvider, ILogger<Mess
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError("[MessageLoop] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                    logger.LogError("[MessageLoop-Heartbeat] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
                 }
             }
         }, default);
@@ -58,7 +59,7 @@ internal sealed class MessageLoop(IServiceProvider serviceProvider, ILogger<Mess
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError("[MessageLoop] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                    logger.LogError("[MessageLoop-Notice] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
                 }
             }
         }, default);
@@ -82,7 +83,31 @@ internal sealed class MessageLoop(IServiceProvider serviceProvider, ILogger<Mess
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError("[MessageLoop] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                    logger.LogError("[MessageLoop-Trigger] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
+                }
+            }
+        }, default);
+
+        return Task.CompletedTask;
+    }
+
+    private Task LoopSwitchAsync(CancellationToken cancellationToken)
+    {
+        _ = Task.Run(async () =>
+        {
+            var broker = serviceProvider.GetRequiredService<IMessageBroker<SwitchMessage>>();
+            var handler = serviceProvider.GetRequiredService<ISwitchMessageHandler>();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var message = await broker.PullAsync(cancellationToken).ConfigureAwait(false);
+                    await handler.HandleAsync(message, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("[MessageLoop-Switch] 轮询接收处理消息异常，异常消息：{Error}", ex.Message);
                 }
             }
         }, default);
