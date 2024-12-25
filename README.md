@@ -84,7 +84,7 @@ Real		|单精度浮点型（32 位），对应 float。
 LReal		|双精度浮点型（64 位），对应 double。
 String		|字符串（ASCII 编码），对应 string。
 S7String	|西门子 S7String（ASCII 编码），对应 string。
-S7WString	|西门子 S7WString（Unicode 编码），对应 String。
+S7WString	|西门子 S7WString（Unicode 编码），对应 string。
 
 ## DriverModel 枚举
  属性名 		| 说明 							
@@ -119,75 +119,79 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
   {
     "Name": "Line01", "Keynote": "",
     "Devices": [
-      "Name": "设备01", "Model": "ModbusTcp", "Host": "127.0.0.1", "Port": 0, "Keynote": "",
-       "Tags": [
+      {
+        "Name": "设备01", "Model": "ModbusTcp", "Host": "127.0.0.1", "Port": 0, "Keynote": "",
+        "Tags": [
           { "Name": "Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Heartbeat" },
           { "Name": "PLC_Alarm", "Address": "s=1;x=3;1", "Length": 96, "DataType": "Int", "ScanRate": 5000, "Flag": "Notice" },
           { "Name": "PLC_Energy", "Address": "s=1;x=3;1", "Length": 0, "DataType": "Int", "ScanRate": 60000, "Flag": "Notice", "PublishMode": "EveryScan" },
           { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "ScanRate": 1000, "Flag": "Notice" },
-      ],
-      CallbackTags: [
-        { "Name": "MES_Callback_ErrorMessage", "Address": "s=1;x=3;460", "Length": 30, "DataType": "String" },
-      ],
-      "TagGroups": [
-        "Name": "OP101", "Keynote": "",
-        "Tags": [
-          {
-            "Name": "PLC_Inbound_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
-            "NormalTags": [
-               { "Name": "PLC_Inbound_SN", "Address": "s=1;x=3;112", "Length": 50, "DataType": "String" },
-               { "Name": "PLC_Inbound_ProductCode", "Address": "s=1;x=3;132", "Length": 20, "DataType": "String" },
-            ],
-          },
-          {
-            "Name": "PLC_Outbound_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "ScanRate": 200, "Flag": "Trigger",
-            "NormalTags": [
-              { "Name": "PLC_Outbound_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
-              { "Name": "PLC_Outbound_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
-              { "Name": "PLC_Outbound_CycleTime", "Address": "s=1;x=3;410", "Length": 0, "DataType": "Real" },           
-            ],
-          },
-          {
-            "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
-            "NormalTags": [
-              { "Name": "PLC_ScanKey_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
-              { "Name": "PLC_ScanKey_Barcode", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
-            ],
-          },
-          {
-            "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
-            "NormalTags": [
-              { "Name": "PLC_StepTask_SN", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
-              { "Name": "PLC_StepTask_Angle", "Address": "s=1;x=3;420", "Length": 0, "DataType": "Real" },
-              { "Name": "PLC_StepTask_Torque", "Address": "s=1;x=3;424", "Length": 0, "DataType": "Real" },
-              { "Name": "PLC_StepTask_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
-            ],
-          },
-          {
-            "Name": "PLC_Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
-            "NormalTags": [
-              { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
-              { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
-              { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
-              { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
-            ],
-          },
-          {
-            "Name": "PLC_Switch2", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
-            "NormalTags": [
-              { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
-              { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
-              { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
-              { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
-            ],
-          },
-          CallbackTags: [
-            { "Name": "MES_Callback_ReworkOperation", "Address": "s=1;x=3;460", "Length": 10, "DataType": "String" },
-          ],
         ],
-      ],
-    ]
-  }
+        "CallbackTags": [
+          { "Name": "MES_Callback_ErrorMessage", "Address": "s=1;x=3;460", "Length": 30, "DataType": "String" },
+        ],
+        "TagGroups": [
+          {
+            "Name": "OP101", "Keynote": "",
+            "Tags": [
+              {
+                "Name": "PLC_Inbound_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "NormalTags": [
+                  { "Name": "PLC_Inbound_SN", "Address": "s=1;x=3;112", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_Inbound_ProductCode", "Address": "s=1;x=3;132", "Length": 20, "DataType": "String" },
+                ],
+              },
+              {
+                "Name": "PLC_Outbound_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "ScanRate": 200, "Flag": "Trigger",
+                "NormalTags": [
+                  { "Name": "PLC_Outbound_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_Outbound_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
+                  { "Name": "PLC_Outbound_CycleTime", "Address": "s=1;x=3;410", "Length": 0, "DataType": "Real" },           
+                ],
+              },
+              {
+                "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "NormalTags": [
+                  { "Name": "PLC_ScanKey_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_ScanKey_Barcode", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
+                ],
+              },
+              {
+                "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "NormalTags": [
+                  { "Name": "PLC_StepTask_SN", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_StepTask_Angle", "Address": "s=1;x=3;420", "Length": 0, "DataType": "Real" },
+                  { "Name": "PLC_StepTask_Torque", "Address": "s=1;x=3;424", "Length": 0, "DataType": "Real" },
+                  { "Name": "PLC_StepTask_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
+                ],
+              },
+              {
+                "Name": "PLC_Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "NormalTags": [
+                  { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
+                  { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
+                  { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
+                  { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
+                ],
+              },
+              {
+                "Name": "PLC_Switch2", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "NormalTags": [
+                  { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "SwitchSN" },
+                  { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "SwitchNo" },
+                  { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Current" },
+                  { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "SwitchCurve", "DisplayName": "Voltage" },
+                ],
+              },
+            ],
+            "CallbackTags": [
+              { "Name": "MES_Callback_ReworkOperation", "Address": "s=1;x=3;460", "Length": 10, "DataType": "String" },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 ]
 ```
 
