@@ -75,7 +75,7 @@ public static class ExchangeServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 设置参数。
+    /// 设置参数，其中配置的参数会覆盖配置文件 "Exchange" 选项设置。
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="optionsAction">参数选项设置</param>

@@ -61,7 +61,7 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
         {
             DeviceTcpNetOptions netOptions = new()
             {
-                SocketPoolSize = options.Value.SocketPoolSize,
+                SocketPoolSize = deviceInfo.PoolSize > 0 ? deviceInfo.PoolSize : options.Value.SocketPoolSize,
                 ConnectTimeout = options.Value.NetworkConnectTimeout,
                 KeepAliveTime = options.Value.NetworkKeepAliveTime,
             };

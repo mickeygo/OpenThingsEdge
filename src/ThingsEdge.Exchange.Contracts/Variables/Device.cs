@@ -43,6 +43,11 @@ public sealed class Device
     public int MaxPDUSize { get; init; }
 
     /// <summary>
+    /// 设备连接使用的线程池，优先级高于全局配置，为 0 时会使用全局配置。
+    /// </summary>
+    public int PoolSize { get; init; }
+
+    /// <summary>
     /// 设备要旨，可用于设置重要信息。
     /// </summary>
     [NotNull]
