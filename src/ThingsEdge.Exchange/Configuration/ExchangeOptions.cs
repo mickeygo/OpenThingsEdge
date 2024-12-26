@@ -84,9 +84,9 @@ public sealed class ExchangeOptions
     public bool NoticePublishIncludeLast { get; set; } = true;
 
     /// <summary>
-    /// 开关启动后数据扫码速率（单位：ms），默认为 70ms。
+    /// 开关启动后数据扫码速率（单位：ms），默认为 31ms。
     /// </summary>
-    public int SwitchScanRate { get; init; } = 70;
+    public int SwitchScanRate { get; init; } = 31;
 
     /// <summary>
     /// 曲线数据配置。

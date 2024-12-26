@@ -48,17 +48,22 @@ internal sealed class CurveContainer
     /// 获取对象，若集合中没找到则创建。
     /// </summary>
     /// <param name="tagId">标记 Id。</param>
-    /// <param name="path">文件路径。</param>
     /// <param name="model">曲线模型</param>
     /// <param name="curveFileExt">文件类型</param>
+    /// <param name="createPathFactory">创建文件路径工厂</param>
     /// <returns></returns>
-    public ICurveWriter GetOrCreate(string tagId, string path, CurveModel model, CurveFileExt curveFileExt)
+    /// <exception cref="InvalidOperationException"></exception>
+    public ICurveWriter GetOrCreate(string tagId, CurveModel model, CurveFileExt curveFileExt, Func<CurveModel, (string, string)> createPathFactory)
     {
-        var state = _container.GetOrAdd(tagId, _ => curveFileExt switch
+        var state = _container.GetOrAdd(tagId, _ =>
         {
-            CurveFileExt.CSV => new CurveContainerState(model, new CsvCurveWriter(path)),
-            CurveFileExt.JSON => new CurveContainerState(model, new JsonCurveWriter(path)),
-            _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
+            var (path, relativePath) = createPathFactory(model);
+            return curveFileExt switch
+            {
+                CurveFileExt.CSV => new CurveContainerState(model, new CsvCurveWriter(path, relativePath)),
+                CurveFileExt.JSON => new CurveContainerState(model, new JsonCurveWriter(path, relativePath)),
+                _ => throw new InvalidOperationException("曲线文件存储格式必须是 JSON 或 CSV"),
+            };
         });
         return state.Writer;
     }
@@ -66,12 +71,18 @@ internal sealed class CurveContainer
     /// <summary>
     /// 从容器中移除指定的对象，在成功移除后会一并释放对象资源。
     /// </summary>
-    /// <param name="key">对象唯一值。</param>
+    /// <param name="tagId">标记 Id。</param>
+    /// <param name="removeTailCountBeforeSaving">保存前要移除的尾部行数，0 表示不移除</param>
     /// <returns></returns>
-    public async Task<(bool ok, CurveContainerState? state)> SaveAndRemoveAsync(string key)
+    public async Task<(bool ok, CurveContainerState? state)> SaveAndRemoveAsync(string tagId, int removeTailCountBeforeSaving = 0)
     {
-        if (_container.TryRemove(key, out var state))
+        if (_container.TryRemove(tagId, out var state))
         {
+            if (removeTailCountBeforeSaving > 0)
+            {
+                state.Writer.RemoveLineBody(removeTailCountBeforeSaving);
+            }
+
             await state.Writer.SaveAsync().ConfigureAwait(false);
             state.Writer.Close();
 

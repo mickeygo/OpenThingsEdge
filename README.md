@@ -213,7 +213,7 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
     "NetworkConnectTimeout": 3000, // 网络连接超时时长（单位：ms），默认 3s。
     "NetworkKeepAliveTime": 60000, // Socket 保活时长（单位：ms），只有在大于 0 时才启用，默认 60s。
     "NoticePublishIncludeLast": true, // 通知消息发送时是否要带上一次信号点的值，默认为 true。
-    "SwitchScanRate": 70, // 开关启动后数据扫码频率（单位：ms），默认为 70ms。
+    "SwitchScanRate": 31, // 开关启动后数据扫码频率（单位：ms），默认为 31ms。
     "Curve": { // 曲线配置
       "LocalRootDirectory": null, // 曲线文件本地存储根目录。可以是完整路径，也可以是相对路径，默认为程序根目录下的 "curves" 文件夹。
       "FileType": "CSV", // 曲线存储文件格式，JSON / CSV，默认为 CSV 格式。
@@ -225,10 +225,11 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
       "DirIncludeGroupName": true, // 目录是否包含分组名称，默认为 true。
       "SuffixIncludeDatetime": true, // 文件后缀是否包含日期，格式为 "yyyyMMddHHmmss"，默认为 true。
       "AllowMaxWriteCount": 4096, // 文件中允许写入最大的次数，默认为 4096。
-      "RemoveTailCount": 0, // 曲线数据保存时要移除的尾部条数，默认为 0。
+      "RemoveTailCountBeforeSaving": 0, // 曲线数据保存时要移除的尾部条数，0 表示不移除，默认为 0。
+      "ReturnRelativeFilePath": true, // 是否返回曲线保存文件的相对路径，false 表示返回的文件绝对路径，默认为 true。
       "AllowCopy": false, // 是否要推送文件到远端服务器。
       "RemoteRootDirectory": null, // 曲线文件远端存储根目录（共享目录）。
-      "RetainedDayLimit": 0 // 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除。
+      "RetainedDayLimit": 0 // 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除，默认 0。
     },
   }
 }
@@ -335,7 +336,10 @@ Switch 在 Tag 配置中额外添加一些配置。
     ],
 },
 ```
-如果按默认的配置，返回的文件为：root/Line1/Welding/20241225/SN001/OP010/SN001_2_20241225222424.csv
+注：
+* 如果按默认的配置，返回的文件为：root/Line1/Welding/20241225/SN001/OP010/SN001_2_20241225222424.csv，其中 root 为设置的根目录。
+* 曲线数据的值必须可转换为 double 类型，若不能转换将会使用 0 代替。
+
 
 # API
 

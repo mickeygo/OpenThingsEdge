@@ -36,7 +36,7 @@ host.AddThingsEdgeExchange(static builder =>
         .UseOptions(options =>
         {
             options.SocketPoolSize = 5;
-            options.Curve.FileType = ThingsEdge.Exchange.Configuration.CurveFileExt.JSON;
+            options.Curve.FileType = ThingsEdge.Exchange.Configuration.CurveFileExt.CSV;
         });
 });
 

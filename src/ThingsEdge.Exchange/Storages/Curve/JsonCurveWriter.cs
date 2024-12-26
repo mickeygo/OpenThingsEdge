@@ -7,7 +7,7 @@ namespace ThingsEdge.Exchange.Storages.Curve;
 /// <summary>
 /// 曲线保存为 JSON 文件的写入器。
 /// </summary>
-internal sealed class JsonCurveWriter(string path) : ICurveWriter
+internal sealed class JsonCurveWriter(string path, string relativePath) : ICurveWriter
 {
     static readonly JsonSerializerOptions s_jsonOptions = new()
     {
@@ -18,9 +18,11 @@ internal sealed class JsonCurveWriter(string path) : ICurveWriter
 
     public bool IsClosed { get; private set; }
 
-    public long WrittenCount { get; private set; }
+    public int WrittenCount => _curveData.Body.Count;
 
     public string FilePath => path;
+
+    public string RelativePath => relativePath;
 
     public void WriteHeader(IEnumerable<string> header)
     {
@@ -39,8 +41,18 @@ internal sealed class JsonCurveWriter(string path) : ICurveWriter
             return;
         }
 
-        ++WrittenCount;
         _curveData.Body.Add(items);
+    }
+
+    public void RemoveLineBody(int count)
+    {
+        if (count >= _curveData.Body.Count)
+        {
+            _curveData.Body.Clear();
+            return;
+        }
+
+        _curveData.Body.RemoveRange(_curveData.Body.Count - count, count);
     }
 
     public async Task SaveAsync()
@@ -52,8 +64,8 @@ internal sealed class JsonCurveWriter(string path) : ICurveWriter
 
         // 转换为 json 格式：
         // {
-        //   "name1": [v1, v2],
-        //   "name2": [v1, v2],
+        //   "name1": [v1, v2, v3, v4, v5],
+        //   "name2": [v1, v2, v3, v4, v5],
         // }
 
         Dictionary<string, double[]> dict = new(_curveData.Header.Count);
@@ -62,13 +74,14 @@ internal sealed class JsonCurveWriter(string path) : ICurveWriter
             var items = _curveData.Body
                 .SelectMany(s => s)
                 .Where(s => s.GetExtraValue<string>("DisplayName") == header)
-                .Select(GetDoubleArray).ToArray();
+                .Select(GetDoubleArray)
+                .SelectMany(s => s).ToArray();
 
             dict[header] = items;
         }
 
         var content = JsonSerializer.Serialize(dict, s_jsonOptions);
-        using StreamWriter sw = new(FilePath);
+        using StreamWriter sw = new(path);
         await sw.WriteAsync(content).ConfigureAwait(false);
     }
 
@@ -80,14 +93,25 @@ internal sealed class JsonCurveWriter(string path) : ICurveWriter
         }
     }
 
-    private static double GetDoubleArray(PayloadData payload)
+    private static double[] GetDoubleArray(PayloadData payload)
     {
-        if (payload.TryGetAsDouble(out var value))
+        // 非数组
+        if (!payload.IsArray())
         {
-            return value.Value;
+            if (payload.TryGetAsDouble(out var value))
+            {
+                return [value.Value];
+            }
+        }
+        else
+        {
+            if (payload.TryGetAsDoubleArray(out var value2))
+            {
+                return value2;
+            }
         }
 
-        return 0;
+        return [0];
     }
 
     sealed class InternalCurveData

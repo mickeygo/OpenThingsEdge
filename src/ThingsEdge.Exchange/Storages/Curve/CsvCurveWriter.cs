@@ -5,16 +5,18 @@ namespace ThingsEdge.Exchange.Storages.Curve;
 /// <summary>
 /// 曲线保存为 CSV 文件格式的写入器。
 /// </summary>
-internal sealed class CsvCurveWriter(string path) : ICurveWriter
+internal sealed class CsvCurveWriter(string path, string relativePath) : ICurveWriter
 {
     private readonly List<string> _header = [];
     private readonly List<IEnumerable<PayloadData>> _body = [];
 
     public bool IsClosed { get; private set; }
 
-    public long WrittenCount { get; private set; }
+    public int WrittenCount => _body.Count;
 
     public string FilePath => path;
+
+    public string RelativePath => relativePath;
 
     public void WriteHeader(IEnumerable<string> header)
     {
@@ -33,8 +35,18 @@ internal sealed class CsvCurveWriter(string path) : ICurveWriter
             return;
         }
 
-        ++WrittenCount;
         _body.Add(items);
+    }
+
+    public void RemoveLineBody(int count)
+    {
+        if (count >= _body.Count)
+        {
+            _body.Clear();
+            return;
+        }
+
+        _body.RemoveRange(_body.Count - count, count);
     }
 
     public async Task SaveAsync()
@@ -44,20 +56,21 @@ internal sealed class CsvCurveWriter(string path) : ICurveWriter
             return;
         }
 
-        using StreamWriter sw = new(FilePath);
+        using StreamWriter sw = new(path);
         await sw.WriteLineAsync(string.Join(",", _header.Select(VaildCsv))).ConfigureAwait(false);
+
         foreach (var items in _body)
         {
             var first = items.First();
 
-            // body 非数组
+            // payload 数据非数组
             if (!first.IsArray())
             {
                 await sw.WriteLineAsync(string.Join(",", items.Select(s => VaildCsv(s.GetString())))).ConfigureAwait(false);
             }
             else
             {
-                // body 为数组
+                // payload 数据为数组
                 List<string[]> matrix = new(_header.Count);
                 foreach (var header in _header)
                 {

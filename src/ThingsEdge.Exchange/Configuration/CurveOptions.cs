@@ -57,17 +57,17 @@ public sealed class CurveOptions
     public int AllowMaxWriteCount { get; set; } = 4096;
 
     /// <summary>
-    /// 曲线数据保存时要移除的尾部条数，默认为 0。
+    /// 曲线数据保存时要移除的尾部条数，0 表示不移除，默认为 0。
     /// </summary>
     /// <remarks>
     /// 若信号点扫描频率与曲线数据扫描频率相差较大时，在发起关闭信号时可能实际已经多采集了
     /// </remarks>
-    public int RemoveTailCount { get; set; }
+    public int RemoveTailCountBeforeSaving { get; set; }
 
     /// <summary>
-    /// 当写入数量达到最大允许数量时，是否自动关闭文件，默认为 true。
+    /// 是否返回曲线保存文件的相对路径，false 表示返回的文件绝对路径，默认为 true。
     /// </summary>
-    public bool AutoSaveWhenEqualMaxCount { get; set; } = true;
+    public bool ReturnRelativeFilePath { get; set; } = true;
 
     /// <summary>
     /// 是否要推送文件到远端服务器。
@@ -80,7 +80,7 @@ public sealed class CurveOptions
     public string? RemoteRootDirectory { get; set; }
 
     /// <summary>
-    /// 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除（单位 M）。
+    /// 本地文件保存最大天数，会删除最近访问时间超过指定天数的文件和文件夹，0 表示不删除，默认 0。
     /// </summary>
     public int RetainedDayLimit { get; set; }
 }

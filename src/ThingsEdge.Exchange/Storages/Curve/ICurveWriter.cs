@@ -15,12 +15,17 @@ internal interface ICurveWriter
     /// <summary>
     /// 已写入的数量。
     /// </summary>
-    long WrittenCount { get; }
+    int WrittenCount { get; }
 
     /// <summary>
-    /// 保存文件路径
+    /// 保存文件的绝对路径
     /// </summary>
     string FilePath { get; }
+
+    /// <summary>
+    /// 保存文件的绝对路径
+    /// </summary>
+    string RelativePath { get; }
 
     /// <summary>
     /// 写入头信息
@@ -35,6 +40,12 @@ internal interface ICurveWriter
     /// <param name="items">主体信息集合</param>
     /// <returns></returns>
     void WriteLineBody(IEnumerable<PayloadData> items);
+
+    /// <summary>
+    /// 移除尾部指定数量的数据。
+    /// </summary>
+    /// <param name="count">要移除的数量，当超过总数时会情况</param>
+    void RemoveLineBody(int count);
 
     /// <summary>
     /// 保存数据
