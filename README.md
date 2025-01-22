@@ -1,5 +1,8 @@
+[![NuGet](https://img.shields.io/nuget/v/ThingsEdge.Exchange.svg)](https://www.nuget.org/packages/ThingsEdge.Exchange) [![downloads](https://img.shields.io/nuget/dt/ThingsEdge.Exchange)](https://www.nuget.org/packages/ThingsEdge.Exchange) ![Size](https://img.shields.io/github/repo-size/mickeygo/OpenThingsEdge.svg) ![License](https://img.shields.io/github/license/mickeygo/OpenThingsEdge.svg)
+
+
 # ThingsEdge
-IoT 边缘路由网关。
+IoT 边缘路由网关。 [Nuget](https://www.nuget.org/packages/ThingsEdge.Exchange)
 
 # JSON 地址配置
 
