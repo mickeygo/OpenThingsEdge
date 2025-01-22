@@ -2,7 +2,7 @@
 
 
 # ThingsEdge
-IoT 边缘路由网关。 [Nuget](https://www.nuget.org/packages/ThingsEdge.Exchange)
+IoT 边缘路由网关。
 
 # JSON 地址配置
 
