@@ -10,7 +10,7 @@ internal sealed class SwitchForwarderProxy(IServiceProvider serviceProvider) : I
         var forwarder = serviceProvider.GetService<ISwitchForwarder>();
         if (forwarder != null)
         {
-            await forwarder.PublishAsync(context, cancellationToken).ConfigureAwait(false);
+            await forwarder.ReceiveAsync(context, cancellationToken).ConfigureAwait(false);
         }
     }
 }
