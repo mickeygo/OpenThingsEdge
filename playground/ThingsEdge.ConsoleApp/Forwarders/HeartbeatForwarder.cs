@@ -7,7 +7,7 @@ namespace ThingsEdge.ConsoleApp.Forwarders;
 /// </summary>
 internal sealed class HeartbeatForwarder(ILogger<HeartbeatForwarder> logger) : IHeartbeatForwarder
 {
-    public Task ChangeAsync(HeartbeatContext context, CancellationToken cancellationToken)
+    public Task ReceiveAsync(HeartbeatContext context, CancellationToken cancellationToken)
     {
         logger.LogInformation("心跳监控，设备名称：{DeviceName}，状态：{State}", context.Device.Name, context.IsOnline ? "on" : "off");
 

@@ -11,7 +11,7 @@ internal sealed class HeartbeatForwarderProxy(IServiceProvider serviceProvider) 
         var forwarder = serviceProvider.GetService<IHeartbeatForwarder>();
         if (forwarder != null)
         {
-            await forwarder.ChangeAsync(context, cancellationToken).ConfigureAwait(false);
+            await forwarder.ReceiveAsync(context, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -10,7 +10,7 @@ internal sealed class NoticeForwarderProxy(IServiceProvider serviceProvider) : I
         var forwarder = serviceProvider.GetService<INoticeForwarder>();
         if (forwarder != null)
         {
-            await forwarder.PublishAsync(context, cancellationToken).ConfigureAwait(false);
+            await forwarder.ReceiveAsync(context, cancellationToken).ConfigureAwait(false);
         }
     }
 }

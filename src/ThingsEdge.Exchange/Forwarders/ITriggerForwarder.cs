@@ -4,7 +4,7 @@ using ThingsEdge.Exchange.Contracts.Variables;
 namespace ThingsEdge.Exchange.Forwarders;
 
 /// <summary>
-/// 表示为发送请求服务处理接口，其中 <see cref="TagFlag.Trigger"/> 会发布此事件。
+/// 表示为发送请求服务处理接口，<see cref="TagFlag.Trigger"/> 会发布此事件。
 /// </summary>
 public interface ITriggerForwarder
 {

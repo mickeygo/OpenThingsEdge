@@ -52,6 +52,6 @@ internal sealed class NoticeMessageHandler(
         tagDataSnapshot.Change(reqMessage.Values);
 
         // 发送消息
-        await forwarderProxy.PublishAsync(new NoticeContext(reqMessage, lastPayload), cancellationToken).ConfigureAwait(false);
+        await forwarderProxy.ReceiveAsync(new NoticeContext(reqMessage, lastPayload), cancellationToken).ConfigureAwait(false);
     }
 }
