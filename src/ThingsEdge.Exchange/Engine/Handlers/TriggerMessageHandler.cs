@@ -1,5 +1,6 @@
 using ThingsEdge.Exchange.Configuration;
 using ThingsEdge.Exchange.Contracts;
+using ThingsEdge.Exchange.Contracts.Variables;
 using ThingsEdge.Exchange.Engine.Connectors;
 using ThingsEdge.Exchange.Engine.Messages;
 using ThingsEdge.Exchange.Engine.Snapshot;
@@ -30,6 +31,11 @@ internal sealed class TriggerMessageHandler(
         };
         reqMessage.Values.Add(message.Self);
 
+        // 根据配置参数来指定回写状态值的标记。
+        var callbackStageTag = !options.Value.TriggerStateWriteTagUseOther
+            ? message.Tag
+            : FindTagInCallbackTags($"{message.Tag.Name}_{options.Value.TriggerStateWriteOtherTagSuffix}");
+
         // 读取触发标记下的子数据。
         var (ok, normalPayloads, err) = await message.Connector.ReadMultiAsync(message.Tag.NormalTags, options.Value.AllowReadMultiple).ConfigureAwait(false);
         if (!ok)
@@ -37,14 +43,18 @@ internal sealed class TriggerMessageHandler(
             logger.LogError("[TriggerMessageHandler] 批量读取子标记值异常, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 message.Device.Name, message.Tag.Name, message.Tag.Address, err);
 
-            // 写入错误代码到设备
-            if (message.Connector.CanConnect)
+            // 写入错误代码到设备的状态标记点
+            if (message.Connector.CanConnect && callbackStageTag is not null)
             {
-                var (ok5, _, err5) = await message.Connector.WriteAsync(message.Tag, (int)ExchangeErrorCode.MultiReadItemError).ConfigureAwait(false);
+                var (ok5, formatedData5, err5) = await message.Connector.WriteAsync(callbackStageTag, (int)ExchangeErrorCode.MultiReadItemError).ConfigureAwait(false);
                 if (!ok5)
                 {
                     logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
-                        message.Device.Name, message.Tag.Name, message.Tag.Address, err5);
+                        message.Device.Name, callbackStageTag.Name, callbackStageTag.Address, err5);
+                }
+                else
+                {
+                    tagDataSnapshot.Change(callbackStageTag, formatedData5!); // 设置回写的标记状态快照。
                 }
             }
         }
@@ -75,14 +85,18 @@ internal sealed class TriggerMessageHandler(
             logger.LogError("[TriggerMessageHandler] 推送消息失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
                 message.Device.Name, message.Tag.Name, message.Tag.Address, result.Message);
 
-            // 将错误代码写入到设备
-            if (message.Connector.CanConnect)
+            // 将错误代码写入到设备的状态标记点
+            if (message.Connector.CanConnect && callbackStageTag is not null)
             {
-                var (ok4, _, err4) = await message.Connector.WriteAsync(message.Tag, ChangeWhenEqTriggerCondValue(result.Code)).ConfigureAwait(false);
+                var (ok4, formatedData4, err4) = await message.Connector.WriteAsync(callbackStageTag, ChangeWhenEqTriggerCondValue(result.Code)).ConfigureAwait(false);
                 if (!ok4)
                 {
                     logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
-                        message.Device.Name, message.Tag.Name, message.Tag.Address, err4);
+                        message.Device.Name, callbackStageTag.Name, callbackStageTag.Address, err4);
+                }
+                else
+                {
+                    tagDataSnapshot.Change(callbackStageTag, formatedData4!); // 设置回写的标记状态快照。
                 }
             }
 
@@ -103,12 +117,11 @@ internal sealed class TriggerMessageHandler(
             {
                 // 通过 tagName 找到对应的 Tag 标记。
                 // 注意：回写标记与触发标记处于同一级别，位于设备下或是分组中。
-                var tag2 = (tagGroup?.CallbackTags ?? message.Device.CallbackTags)
-                    .FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                var tag2 = FindTagInCallbackTags(tagName);
                 if (tag2 == null)
                 {
-                    logger.LogError("[TriggerMessageHandler] 地址表中没有找到要回写的标记, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",
-                        message.Device.Name, message.Tag.Name, message.Tag.Address);
+                    logger.LogError("[TriggerMessageHandler] 地址表中没有找到要回写的标记 {TagName0}, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}",
+                        tagName, message.Device.Name, message.Tag.Name, message.Tag.Address);
 
                     hasError = true;
                     break;
@@ -118,7 +131,7 @@ internal sealed class TriggerMessageHandler(
                 if (!ok2)
                 {
                     logger.LogError("[TriggerMessageHandler] 回写标记数据失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
-                        message.Device.Name, message.Tag.Name, message.Tag.Address, err2);
+                        message.Device.Name, tag2.Name, tag2.Address, err2);
 
                     hasError = true;
                     break;
@@ -130,26 +143,39 @@ internal sealed class TriggerMessageHandler(
         }
 
         // 将返回的标记状态写入到设备
-        var tagCode = hasError ? (int)ExchangeErrorCode.CallbackItemError : result.Data!.State;
-        var (ok3, formatedData3, err3) = await message.Connector.WriteAsync(message.Tag, ChangeWhenEqTriggerCondValue(tagCode)).ConfigureAwait(false);
-        if (!ok3)
+        if (callbackStageTag is not null)
         {
-            logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
-                message.Device.Name, message.Tag.Name, message.Tag.Address, err3);
+            var tagCode = hasError ? (int)ExchangeErrorCode.CallbackItemError : result.Data!.State;
+            var (ok3, formatedData3, err3) = await message.Connector.WriteAsync(callbackStageTag, ChangeWhenEqTriggerCondValue(tagCode)).ConfigureAwait(false);
+            if (!ok3)
+            {
+                logger.LogError("[TriggerMessageHandler] 回写触发标记状态失败, 设备: {DeviceName}, 标记: {TagName}，地址: {Address}, 错误: {Err}",
+                    message.Device.Name, message.Tag.Name, message.Tag.Address, err3);
+            }
+            else
+            {
+                tagDataSnapshot.Change(callbackStageTag, formatedData3!); // 设置回写的标记状态快照。
+            }
         }
 
-        // 设置回写的标记状态快照。
-        tagDataSnapshot.Change(message.Tag, formatedData3!);
+        // 从 CallbackTags 集合中查找指定名称的标记对象。
+        Tag? FindTagInCallbackTags(string tagName)
+        {
+            return (tagGroup?.CallbackTags ?? message.Device.CallbackTags)
+                    .FirstOrDefault(s => s.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     /// <summary>
-    /// 在返回值与触发值相等时，将返回的状态值更改为 0。
+    /// 在返回值与触发值相等时，将返回的状态值更改为 0（返回状态值在使用同一地址时有效）。
     /// </summary>
     /// <param name="tagCode"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int ChangeWhenEqTriggerCondValue(int tagCode)
     {
-        return tagCode == options.Value.TriggerConditionValue ? options.Value.TriggerAckCodeWhenEqual : tagCode;
+        return tagCode == options.Value.TriggerConditionValue && !options.Value.TriggerStateWriteTagUseOther
+            ? options.Value.TriggerAckCodeWhenEqual
+            : tagCode;
     }
 }

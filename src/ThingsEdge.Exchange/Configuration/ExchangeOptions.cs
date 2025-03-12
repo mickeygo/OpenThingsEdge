@@ -8,7 +8,7 @@ public sealed class ExchangeOptions
     /// <summary>
     /// 默认的标记扫描速率（单位：ms），配置中不设定会使用此设置, 默认为 500ms。
     /// </summary>
-    public int DefaultScanRate { get; init; } = 500;
+    public int DefaultScanRate { get; set; } = 500;
 
     /// <summary>
     /// 是否尝试批量读取，默认为 true。
@@ -18,7 +18,7 @@ public sealed class ExchangeOptions
     /// <para>三菱MC协议驱动目前支持连续批量读取，只适用于连续地址，非连续地址需设置为 false；</para>
     /// <para>其他协议驱动目前还不支持批量读取，内部会采取逐一方式进行读取。</para>
     /// </remarks>
-    public bool AllowReadMultiple { get; init; } = true;
+    public bool AllowReadMultiple { get; set; } = true;
 
     /// <summary>
     /// Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
@@ -39,7 +39,23 @@ public sealed class ExchangeOptions
     public short TriggerConditionValue { get; set; } = 1;
 
     /// <summary>
-    /// 在返回值与触发值相等时，写回给设备的状态码，默认为 -1。
+    /// 使用其他标记地址来回写返回状态值，默认为 false。
+    /// </summary>
+    /// <remarks>
+    /// 使用另外的标记来存储回写值时，该标记只能位于数据回写集合 CallbackTags 中。
+    /// </remarks>
+    public bool TriggerStateWriteTagUseOther { get; set; }
+
+    /// <summary>
+    /// 回写状态标记的后缀名，在参数 <see cref="TriggerStateWriteTagUseOther"/> 为 true 时有效果，默认为 "Response"。
+    /// </summary>
+    /// <remarks>
+    /// 若状态触发标记为 "PLC_Inbound_Sign"，回写状态标记则为 "PLC_Inbound_Sign_Response"。
+    /// </remarks>
+    public string? TriggerStateWriteOtherTagSuffix { get; set; } = "Response";
+
+    /// <summary>
+    /// 在返回状态值与触发值相等时，写回给设备的状态码，默认为 -1（返回状态值在使用同一地址时有效）。
     /// </summary>
     public short TriggerAckCodeWhenEqual { get; set; } = -1;
 
@@ -86,7 +102,7 @@ public sealed class ExchangeOptions
     /// <summary>
     /// 开关启动后数据扫码速率（单位：ms），默认为 31ms。
     /// </summary>
-    public int SwitchScanRate { get; init; } = 31;
+    public int SwitchScanRate { get; set; } = 31;
 
     /// <summary>
     /// 曲线数据配置。

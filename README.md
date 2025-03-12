@@ -114,6 +114,8 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
 
 
 ## JSON 选项配置示例
+
+地址表配置示例：
 ```JSON
 [
   {
@@ -122,13 +124,13 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
       {
         "Name": "设备01", "Model": "ModbusTcp", "Host": "127.0.0.1", "Port": 0, "Keynote": "",
         "Tags": [
-          { "Name": "Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Heartbeat" },
-          { "Name": "PLC_Alarm", "Address": "s=1;x=3;1", "Length": 96, "DataType": "Int", "ScanRate": 5000, "Flag": "Notice" },
-          { "Name": "PLC_Energy", "Address": "s=1;x=3;1", "Length": 0, "DataType": "Int", "ScanRate": 60000, "Flag": "Notice", "PublishMode": "EveryScan" },
-          { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "ScanRate": 1000, "Flag": "Notice" },
+          { "Name": "PLC_Device_Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Heartbeat" },
+          { "Name": "PLC_Equipment_Alarm", "Address": "s=1;x=3;2", "Length": 96, "DataType": "Int", "ScanRate": 5000, "Flag": "Notice" },
+          { "Name": "PLC_Equipment_Energy", "Address": "s=1;x=3;3", "Length": 0, "DataType": "Int", "ScanRate": 60000, "Flag": "Notice", "PublishMode": "EveryScan" },
+          { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;4", "Length": 0, "DataType": "Int", "ScanRate": 1000, "Flag": "Notice" },
         ],
         "CallbackTags": [
-          { "Name": "MES_Callback_ErrorMessage", "Address": "s=1;x=3;460", "Length": 30, "DataType": "String" },
+          { "Name": "MES_Callback_ErrorMessage", "Address": "s=1;x=3;5", "Length": 30, "DataType": "String" },
         ],
         "TagGroups": [
           {
@@ -137,55 +139,67 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
               {
                 "Name": "PLC_Inbound_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
                 "NormalTags": [
-                  { "Name": "PLC_Inbound_SN", "Address": "s=1;x=3;112", "Length": 50, "DataType": "String" },
-                  { "Name": "PLC_Inbound_ProductCode", "Address": "s=1;x=3;132", "Length": 20, "DataType": "String" },
+                  { "Name": "PLC_Inbound_SN", "Address": "s=1;x=3;21", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_Inbound_ProductCode", "Address": "s=1;x=3;22", "Length": 20, "DataType": "String" },
                 ],
               },
               {
                 "Name": "PLC_Outbound_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "ScanRate": 200, "Flag": "Trigger",
                 "NormalTags": [
-                  { "Name": "PLC_Outbound_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
-                  { "Name": "PLC_Outbound_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
-                  { "Name": "PLC_Outbound_CycleTime", "Address": "s=1;x=3;410", "Length": 0, "DataType": "Real" },           
+                  { "Name": "PLC_Outbound_SN", "Address": "s=1;x=3;31", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_Outbound_PassResult", "Address": "s=1;x=3;32", "Length": 0, "DataType": "Int" },
+                  { "Name": "PLC_Outbound_CycleTime", "Address": "s=1;x=3;33", "Length": 0, "DataType": "Real" },           
                 ],
               },
               {
-                "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
                 "NormalTags": [
-                  { "Name": "PLC_ScanKey_SN", "Address": "s=1;x=3;352", "Length": 50, "DataType": "String" },
-                  { "Name": "PLC_ScanKey_Barcode", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_ScanKey_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_ScanKey_Barcode", "Address": "s=1;x=3;42", "Length": 50, "DataType": "String" },
                 ],
               },
               {
-                "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;440", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "Name": "PLC_ScanBatch_Sign", "Address": "s=1;x=3;50", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
                 "NormalTags": [
-                  { "Name": "PLC_StepTask_SN", "Address": "s=1;x=3;442", "Length": 50, "DataType": "String" },
-                  { "Name": "PLC_StepTask_Angle", "Address": "s=1;x=3;420", "Length": 0, "DataType": "Real" },
-                  { "Name": "PLC_StepTask_Torque", "Address": "s=1;x=3;424", "Length": 0, "DataType": "Real" },
-                  { "Name": "PLC_StepTask_PassResult", "Address": "s=1;x=3;372", "Length": 0, "DataType": "Int" },
+                  { "Name": "PLC_ScanBatch_Barcode", "Address": "s=1;x=3;51", "Length": 50, "DataType": "String" },
                 ],
               },
               {
-                "Name": "PLC_Switch1", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
                 "NormalTags": [
-                  { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
-                  { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
-                  { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
-                  { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
+                  { "Name": "PLC_StepTask_SN", "Address": "s=1;x=3;62", "Length": 50, "DataType": "String" },
+                  { "Name": "PLC_StepTask_Angle", "Address": "s=1;x=3;62", "Length": 0, "DataType": "Real" },
+                  { "Name": "PLC_StepTask_Torque", "Address": "s=1;x=3;63", "Length": 0, "DataType": "Real" },
+                  { "Name": "PLC_StepTask_PassResult", "Address": "s=1;x=3;64", "Length": 0, "DataType": "Int" },
                 ],
               },
               {
-                "Name": "PLC_Switch2", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "Name": "PLC_Switch1", "Address": "s=1;x=3;70", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
                 "NormalTags": [
-                  { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
-                  { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;42", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
-                  { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;43", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
-                  { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;44", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
+                  { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;71", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;72", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch1_Current", "Address": "s=1;x=3;73", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
+                  { "Name": "PLC_Switch1_Voltage", "Address": "s=1;x=3;74", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
+                ],
+              },
+              {
+                "Name": "PLC_Switch2", "Address": "s=1;x=3;80", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "NormalTags": [
+                  { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;81", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;82", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
+                  { "Name": "PLC_Switch2_Current", "Address": "s=1;x=3;83", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Current" },
+                  { "Name": "PLC_Switch2_Voltage", "Address": "s=1;x=3;84", "Length": 0, "DataType": "Int", "CurveUsage": "Data", "DisplayName": "Voltage" },
                 ],
               },
             ],
             "CallbackTags": [
-              { "Name": "MES_Callback_ReworkOperation", "Address": "s=1;x=3;460", "Length": 10, "DataType": "String" },
+              { "Name": "PLC_Inbound_Sign_Response", "Address": "s=1;x=3;101", "Length": 0, "DataType": "Int" },
+		      { "Name": "PLC_Outbound_Sign_Response", "Address": "s=1;x=3;102", "Length": 0, "DataType": "Int" },
+              { "Name": "PLC_ScanKey_Sign_Response", "Address": "s=1;x=3;103", "Length": 0, "DataType": "Int" },
+              { "Name": "PLC_ScanBatch_Sign_Response", "Address": "s=1;x=3;104", "Length": 0, "DataType": "Int" },
+              { "Name": "PLC_StepTask_Sign_Response", "Address": "s=1;x=3;105", "Length": 0, "DataType": "Int" },
+              { "Name": "MES_Callback_ReworkOperation", "Address": "s=1;x=3;110", "Length": 10, "DataType": "String" },
+              { "Name": "MES_Callback_Error", "Address": "s=1;x=3;120", "Length": 10, "DataType": "String" },
             ],
           },
         ],
@@ -195,6 +209,7 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
 ]
 ```
 
+注：上述仅示例，地址不准确。
 
 # 全局参数配置
 
@@ -207,7 +222,10 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
     "HeartbeatShouldAckZero": true, // Heartbeat 心跳收到值后，是否要重置值并回写给设备，默认为 true。
     "HeartbeatListenUseHighLevel": true, // 监听心跳数据是否采用高电平值，默认为 true。
     "TriggerConditionValue": 1, // 触发标记的触发条件值，值大于 0 才有效，默认为 1。
-    "TriggerAckCodeWhenEqual": -1, // 在返回值与触发值相等时，写回给设备的状态码，默认为 -1。
+    "TriggerTagWriteCallbackState": true, // 返回状态值回写到触发标记地址中，默认为 true。
+    "TriggerStateWriteTagUseOther": false, // 使用其他标记地址来回写返回状态值，默认为 true（使用另外的标记来存储回写值时，该标记只能位于数据回写集合 CallbackTags 中）。
+    "TriggerStateWriteOtherTagSuffix": "Response", // 回写状态标记的后缀名，在参数 "TriggerStateWriteTagUseOther" 为 true 时有效果，默认为 "Response"。
+    "TriggerAckCodeWhenEqual": -1, // 在返回值与触发值相等时，写回给设备的状态码，默认为 -1（返回状态值在使用同一地址时有效）。
     "MaxPDUSize": 0, // 针对于 S7 等协议，PLC 一起读取运行的最多 PDU 长度（byte数量），为 0 时会使用默认长度。
     "SocketPoolSize": 1, // Socket 连接池最大数量，默认为 1。
     "NetworkConnectTimeout": 3000, // 网络连接超时时长（单位：ms），默认 3s。

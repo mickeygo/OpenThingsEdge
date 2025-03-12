@@ -20,7 +20,7 @@ internal sealed class TriggerForwader(IServiceScopeFactory serviceScopeFactory, 
         };
 
         Dictionary<string, Type> map = new() {
-            { "PLC_Archive_Sign", typeof(ArchiveHandler) },
+            { "PLC_Inbound_Sign", typeof(ArchiveHandler) },
         };
 
         HandleResult result;

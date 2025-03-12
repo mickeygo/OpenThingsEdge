@@ -33,7 +33,7 @@ public enum TagFlag
 
     /// <summary>
     /// 该标记用于触发数据发送。
-    /// 该标记值改变时，只会触发一次数据发送行为。此行为会接收响应结果，同时响应状态会更新此标记值。
+    /// 该标记值改变时，只会触发一次数据发送行为。此行为会接收响应结果，同时响应状态会更新此标记值或指定的其他回写状态标记。
     /// </summary>
     /// <remarks>
     /// Trigger 会监听信号标识的变化，信号标识的数据类型必须 <see cref="TagDataType.Int"/> 或 <see cref="TagDataType.Byte"/>，

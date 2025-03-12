@@ -1,5 +1,4 @@
 using Serilog;
-using ThingsEdge.ConsoleApp.Addresses;
 using ThingsEdge.ConsoleApp.Configuration;
 using ThingsEdge.ConsoleApp.Forwarders;
 using ThingsEdge.ConsoleApp.Handlers;
@@ -28,7 +27,9 @@ host.ConfigureServices((context, services) =>
 
 host.AddThingsEdgeExchange(static builder =>
 {
-    builder.UseDeviceCustomProvider<ModbusTcpAddressProvider>()
+    builder
+        //.UseDeviceCustomProvider<ModbusTcpAddressProvider>()
+        .UseDeviceFileProvider()
         .UseDeviceHeartbeatForwarder<HeartbeatForwarder>()
         .UseNativeNoticeForwarder<NoticeForwarder>()
         .UseNativeTriggerForwarder<TriggerForwader>()
@@ -36,6 +37,7 @@ host.AddThingsEdgeExchange(static builder =>
         .UseOptions(options =>
         {
             options.SocketPoolSize = 5;
+            options.TriggerStateWriteTagUseOther = true;
             options.Curve.FileType = ThingsEdge.Exchange.Configuration.CurveFileExt.CSV;
         });
 });

@@ -14,7 +14,7 @@ public sealed class ResponseMessage
     public RequestMessage? Request { get; set; }
 
     /// <summary>
-    /// 响应状态，由 <see cref="TagFlag.Trigger"/> 触发标记产生的数据在响应时会将此状态回写给触发标记。
+    /// 响应状态，由 <see cref="TagFlag.Trigger"/> 触发标记产生的数据在响应时会将此状态回写给触发标记或指定的其他回写状态标记。
     /// </summary>
     public int State { get; set; }
 
@@ -23,6 +23,9 @@ public sealed class ResponseMessage
     /// Key 为标记名称，Value 为值。
     /// 在没有要回写的数据时，可返回null或空集合。
     /// </summary>
-    /// <remarks>回写时会检查标记名称在对应的变量表中有无设定；值会根据标记设定的类型进行转换，转换失败时会产生异常。</remarks>
+    /// <remarks>
+    /// 回写时会检查标记名称在对应的变量表中有无设定；值会根据标记设定的类型进行转换，转换失败时会产生异常。
+    /// 要回写的数据只能位于数据回写集合 CallbackTags 中。
+    /// </remarks>
     public Dictionary<string, object>? CallbackItems { get; set; }
 }
