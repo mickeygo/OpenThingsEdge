@@ -72,28 +72,27 @@ public sealed class Device
     public List<Tag>? CallbackTags { get; init; } = [];
 
     /// <summary>
-    /// 从所有标记分组中获取指定标识的标记集合。
+    /// 从所有顶层标记分组中获取指定标识的标记集合。
     /// </summary>
     /// <param name="flag">标识</param>
     /// <returns></returns>
     public List<Tag> GetTagsFromGroups(TagFlag flag)
     {
-        return TagGroups
-            .SelectMany(s => s.Tags.Where(t => t.Flag == flag))
-            .ToList();
+        return [.. TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag))];
     }
 
     /// <summary>
-    /// 从设备的所有标记（包括设备标记和分组标记）中获取指定标识的标记集合。
+    /// 从设备的所有顶层标记中（包括设备标记和分组标记）中获取指定标识的标记集合。
     /// </summary>
     /// <param name="flag">标识</param>
     /// <returns></returns>
     public List<Tag> GetAllTags(TagFlag flag)
     {
-        return TagGroups
-            .SelectMany(s => s.Tags.Where(t => t.Flag == flag))
-            .Concat(Tags.Where(s => s.Flag == flag))
-            .ToList();
+        return
+        [
+            .. TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag)),
+            .. Tags.Where(s => s.Flag == flag),
+        ];
     }
 
     /// <summary>

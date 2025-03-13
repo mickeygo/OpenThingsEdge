@@ -3,7 +3,7 @@ using ThingsEdge.Exchange.Contracts.Variables;
 namespace ThingsEdge.Exchange.Forwarders;
 
 /// <summary>
-/// 开关数据传送接口，<see cref="TagFlag.Switch"/> 会发布此事件。
+/// 开关数据传送接口，其中 <see cref="TagFlag.Switch"/> 会发布此事件。
 /// </summary>
 public interface ISwitchForwarder
 {

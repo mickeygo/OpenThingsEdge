@@ -3,7 +3,7 @@ using ThingsEdge.Exchange.Contracts.Variables;
 namespace ThingsEdge.Exchange.Forwarders;
 
 /// <summary>
-/// 设备心跳数据推送接口，<see cref="TagFlag.Heartbeat"/> 会发布此事件。
+/// 设备心跳数据推送接口，其中 <see cref="TagFlag.Heartbeat"/> 会发布此事件。
 /// </summary>
 public interface IHeartbeatForwarder
 {
