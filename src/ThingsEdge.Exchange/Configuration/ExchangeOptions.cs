@@ -95,11 +95,6 @@ public sealed class ExchangeOptions
     public int NetworkKeepAliveTime { get; set; } = 60_000;
 
     /// <summary>
-    /// 通知消息发送时是否要带上一次信号点的值，默认为 true。
-    /// </summary>
-    public bool NoticePublishIncludeLast { get; set; } = true;
-
-    /// <summary>
     /// 开关启动后数据扫码速率（单位：ms），默认为 31ms。
     /// </summary>
     public int SwitchScanRate { get; set; } = 31;

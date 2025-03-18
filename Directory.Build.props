@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <!-- Style Settings -->
     <LangVersion>preview</LangVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -30,7 +30,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <!-- Version Settings -->
-    <PackageVersion>0.15.0</PackageVersion>
+    <PackageVersion>0.16.0</PackageVersion>
     <Version>$(PackageVersion)</Version>
 	  <Authors>mickeygo</Authors>
   </PropertyGroup>

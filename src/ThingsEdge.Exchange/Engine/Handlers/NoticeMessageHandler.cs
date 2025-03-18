@@ -45,13 +45,10 @@ internal sealed class NoticeMessageHandler(
             }
         }
 
-        // 先提取上一次触发点的值（根据配置选项来决定是否附带上次一信号点的值）
-        var lastPayload = options.Value.NoticePublishIncludeLast ? tagDataSnapshot.Get(message.Tag.TagId)?.Data : null;
-
         // 设置标记值快照。
         tagDataSnapshot.Change(reqMessage.Values);
 
         // 发送消息
-        await forwarderProxy.ReceiveAsync(new NoticeContext(reqMessage, lastPayload), cancellationToken).ConfigureAwait(false);
+        await forwarderProxy.ReceiveAsync(new NoticeContext(reqMessage), cancellationToken).ConfigureAwait(false);
     }
 }

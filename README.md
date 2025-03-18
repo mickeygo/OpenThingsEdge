@@ -233,7 +233,6 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
     "SocketPoolSize": 1, // Socket 连接池最大数量，默认为 1。
     "NetworkConnectTimeout": 3000, // 网络连接超时时长（单位：ms），默认 3s。
     "NetworkKeepAliveTime": 60000, // Socket 保活时长（单位：ms），只有在大于 0 时才启用，默认 60s。
-    "NoticePublishIncludeLast": true, // 通知消息发送时是否要带上一次信号点的值，默认为 true。
     "SwitchScanRate": 31, // 开关启动后数据扫码频率（单位：ms），默认为 31ms。
     "Curve": { // 曲线配置
       "LocalRootDirectory": null, // 曲线文件本地存储根目录。可以是完整路径，也可以是相对路径，默认为程序根目录下的 "curves" 文件夹。
