@@ -16,4 +16,10 @@ public enum TagIdentity
     /// </summary>
     [Description("附加数据")]
     Attach = 2,
+
+    /// <summary>
+    /// 其他数据
+    /// </summary>
+    [Description("其他数据")]
+    Other = 3,
 }
