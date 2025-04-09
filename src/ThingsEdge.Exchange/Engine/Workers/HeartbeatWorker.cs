@@ -35,7 +35,7 @@ internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
                         // 第二次检测
                         if (cancellationToken.IsCancellationRequested)
                         {
-                            if (TagHoldDataCache.CompareExchange(tag.TagId, false))
+                            if (TagDataAccesstor.CompareAndExchange(tag.TagId, false))
                             {
                                 // 任务取消时，发布设备心跳断开事件。
                                 await broker.PushAsync(
@@ -48,7 +48,7 @@ internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
 
                         if (!connector.CanConnect)
                         {
-                            if (TagHoldDataCache.CompareExchange(tag.TagId, false))
+                            if (TagDataAccesstor.CompareAndExchange(tag.TagId, false))
                             {
                                 // 连接断开时，发布设备心跳断开事件。
                                 await broker.PushAsync(
@@ -77,7 +77,7 @@ internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
                                 await connector.WriteAsync(tag, WorkerUtils.SetHeartbeatOff(tag, options.Value.HeartbeatListenUseHighLevel)).ConfigureAwait(false);
                             }
 
-                            if (TagHoldDataCache.CompareExchange(tag.TagId, true))
+                            if (TagDataAccesstor.CompareAndExchange(tag.TagId, true))
                             {
                                 // 发布心跳正常事件。
                                 await broker.PushAsync(new HeartbeatMessage(channelName!, device, tag, data!, true), cancellationToken).ConfigureAwait(false);

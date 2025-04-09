@@ -50,7 +50,7 @@ internal sealed class EngineExchange(IAddressFactory addressFactory,
         IsRunning = false;
 
         // 清空缓存与快照
-        TagHoldDataCache.Clear();
+        TagDataAccesstor.Clear();
         tagDataSnapshot.Clear();
 
         var cts = _cts;

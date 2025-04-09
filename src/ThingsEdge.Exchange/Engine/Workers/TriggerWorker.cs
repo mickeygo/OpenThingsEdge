@@ -57,7 +57,7 @@ internal sealed class TriggerWorker(IMessageBroker<TriggerMessage> broker,
                         var state = WorkerUtils.GetTriggerState(data!);
 
                         // 必须先检测并更新标记状态值（开启回执校验），若值有变动且达到触发标记条件时则推送数据。
-                        if (TagHoldDataCache.CompareExchange(tag.TagId, state) && state == options.Value.TriggerConditionValue)
+                        if (TagDataAccesstor.CompareAndExchange(tag.TagId, state) && state == options.Value.TriggerConditionValue)
                         {
                             // 发布触发事件
                             await broker.PushAsync(new TriggerMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
