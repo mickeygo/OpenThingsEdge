@@ -5,7 +5,7 @@ namespace ThingsEdge.Communication;
 /// <summary>
 /// 通信库错误代码，错误代码区间为 [800, 999]。
 /// </summary>
-public enum CommErrorCode
+public enum ErrorCode
 {
     [Description("错误")]
     Error = 800,

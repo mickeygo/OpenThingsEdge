@@ -5,20 +5,18 @@ namespace ThingsEdge.Exchange.Engine.Connectors;
 /// <summary>
 /// 驱动连接器。
 /// </summary>
-internal sealed class DriverConnector : IDriverConnector
+internal sealed class DriverConnector(string id, string host, int port, IReadWriteNet driver) : IDriverConnector
 {
     [NotNull]
-    public string? Id { get; }
+    public string? Id { get; } = id;
 
     [NotNull]
-    public string? Host { get; }
+    public string? Host { get; } = host;
 
-    public int Port { get; }
-
-    public int MaxPDUSize { get; }
+    public int Port { get; } = port;
 
     [NotNull]
-    public IReadWriteNet? Driver { get; }
+    public IReadWriteNet? Driver { get; } = driver;
 
     public ConnectionStatus ConnectedStatus { get; set; } = ConnectionStatus.Wait;
 
@@ -27,13 +25,4 @@ internal sealed class DriverConnector : IDriverConnector
     public DriverStatus DriverStatus { get; set; } = DriverStatus.Normal;
 
     public bool CanConnect => Available && DriverStatus == DriverStatus.Normal && ConnectedStatus == ConnectionStatus.Connected;
-
-    public DriverConnector(string id, string host, int port, IReadWriteNet driver, int maxPDUSize)
-    {
-        Id = id;
-        Host = host;
-        Port = port;
-        Driver = driver;
-        MaxPDUSize = maxPDUSize;
-    }
 }

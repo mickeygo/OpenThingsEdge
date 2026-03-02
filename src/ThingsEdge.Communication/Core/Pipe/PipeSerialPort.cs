@@ -6,7 +6,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 串口管道信息
 /// </summary>
-public class PipeSerialPort : NetworkPipeBase, IDisposable
+public class PipeSerialPort : CommunicationPipe, IDisposable
 {
     private readonly SerialPort _serialPort;
 
@@ -158,7 +158,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
         }
         catch (Exception ex)
         {
-            return new OperateResult<bool>((int)CommErrorCode.OpenSerialPortException, "OpenCommunication failed: " + ex.Message);
+            return new OperateResult<bool>((int)ErrorCode.OpenSerialPortException, "OpenCommunication failed: " + ex.Message);
         }
     }
 
@@ -200,7 +200,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
             }
             catch (Exception ex)
             {
-                return new OperateResult((int)CommErrorCode.SerialPortSendException, ex.Message);
+                return new OperateResult((int)ErrorCode.SerialPortSendException, ex.Message);
             }
         }
         return OperateResult.CreateSuccessResult();
@@ -242,7 +242,7 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
                     }
                     if ((DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
                     {
-                        return new OperateResult<byte[]>((int)CommErrorCode.SerialPortReceiveException, $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
+                        return new OperateResult<byte[]>((int)ErrorCode.SerialPortReceiveException, $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
                     }
                     if (memoryStream.Length >= AtLeastReceiveLength)
                     {
@@ -271,13 +271,13 @@ public class PipeSerialPort : NetworkPipeBase, IDisposable
                 }
                 if (ReceiveTimeout > 0 && (DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
                 {
-                    return new OperateResult<byte[]>((int)CommErrorCode.SerialPortReceiveException, $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
+                    return new OperateResult<byte[]>((int)ErrorCode.SerialPortReceiveException, $"Time out: {ReceiveTimeout}, received: {memoryStream.ToArray().ToHexString(' ')}");
                 }
                 continue;
             }
             catch (Exception ex2)
             {
-                return new OperateResult<byte[]>((int)CommErrorCode.SerialPortReceiveException, ex2.Message);
+                return new OperateResult<byte[]>((int)ErrorCode.SerialPortReceiveException, ex2.Message);
             }
         }
         return OperateResult.CreateSuccessResult(memoryStream.ToArray());

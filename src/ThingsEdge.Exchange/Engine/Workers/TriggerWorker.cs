@@ -9,7 +9,8 @@ namespace ThingsEdge.Exchange.Engine.Workers;
 /// <summary>
 /// 监控触发的工作者。
 /// </summary>
-internal sealed class TriggerWorker(IMessageBroker<TriggerMessage> broker,
+internal sealed class TriggerWorker(
+    IMessageBroker<TriggerMessage> broker,
     IOptions<ExchangeOptions> options,
     ILogger<NoticeWorker> logger) : IWorker
 {
@@ -20,57 +21,57 @@ internal sealed class TriggerWorker(IMessageBroker<TriggerMessage> broker,
             return Task.CompletedTask;
         }
 
-        var tags = device.GetAllTags(TagFlag.Trigger);
+        var tags = device.GetAllSignalTags(TagFlag.Trigger);
         foreach (var tag in tags)
         {
             _ = Task.Run(async () =>
             {
                 var pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : options.Value.DefaultScanRate;
-                while (!cancellationToken.IsCancellationRequested)
+                using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(pollingInterval));
+
+                try
                 {
-                    try
+                    while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
                     {
-                        await Task.Delay(pollingInterval, cancellationToken).ConfigureAwait(false);
-
-                        // 第一次检测
-                        if (cancellationToken.IsCancellationRequested)
+                        try
                         {
-                            break;
+                            if (!connector.CanConnect)
+                            {
+                                continue;
+                            }
+
+                            // 若读取失败，该信号点不会复位，下次会继续读取执行。
+                            var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
+                            if (!ok)
+                            {
+                                logger.LogError("[TriggerWorker] Trigger 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{Address}，错误：{err}",
+                                    device.Name, tag.Name, tag.Address, err);
+
+                                continue;
+                            }
+
+                            // 获取触发标记值。
+                            var state = WorkerUtils.GetTriggerState(data!);
+
+                            // 必须先检测并更新标记状态值（开启回执校验），若值有变动且达到触发标记条件时则推送数据。
+                            if (TagDataAccesstor.CompareAndExchange(tag.TagId, state) && state == options.Value.TriggerConditionValue)
+                            {
+                                // 发布触发事件
+                                await broker.PushAsync(new TriggerMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
+                            }
                         }
-
-                        if (!connector.CanConnect)
+                        catch (OperationCanceledException)
                         {
-                            continue;
                         }
-
-                        // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false); // short 类型
-                        if (!ok)
+                        catch (Exception ex)
                         {
-                            logger.LogError("[TriggerWorker] Trigger 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{Address}，错误：{err}",
-                                device.Name, tag.Name, tag.Address, err);
-
-                            continue;
-                        }
-
-                        // 获取触发标记值。
-                        var state = WorkerUtils.GetTriggerState(data!);
-
-                        // 必须先检测并更新标记状态值（开启回执校验），若值有变动且达到触发标记条件时则推送数据。
-                        if (TagDataAccesstor.CompareAndExchange(tag.TagId, state) && state == options.Value.TriggerConditionValue)
-                        {
-                            // 发布触发事件
-                            await broker.PushAsync(new TriggerMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
+                            logger.LogError(ex, "[TriggerWorker] Trigger 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{Address}",
+                                device.Name, tag.Name, tag.Address);
                         }
                     }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "[TriggerWorker] Trigger 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{Address}",
-                            device.Name, tag.Name, tag.Address);
-                    }
+                }
+                catch (OperationCanceledException)
+                {
                 }
             }, default);
         }

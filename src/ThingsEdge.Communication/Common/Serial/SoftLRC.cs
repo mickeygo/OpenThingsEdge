@@ -17,6 +17,7 @@ public static class SoftLRC
         {
             num += value[i];
         }
+
         num %= 256;
         num = 256 - num;
         var array = new byte[1] { (byte)num };
@@ -37,6 +38,7 @@ public static class SoftLRC
         {
             num += value[i];
         }
+
         num %= 256;
         num = 256 - num;
         return (byte)num;
@@ -62,6 +64,7 @@ public static class SoftLRC
         {
             return true;
         }
+
         return false;
     }
 
@@ -89,6 +92,7 @@ public static class SoftLRC
         {
             num += buffer[i];
         }
+
         return num;
     }
 
@@ -130,6 +134,7 @@ public static class SoftLRC
         {
             num ^= source[i];
         }
+
         return
         [
             ByteExtensions.BuildAsciiBytesFrom((byte)num)[0],

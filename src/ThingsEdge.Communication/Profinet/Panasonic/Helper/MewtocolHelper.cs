@@ -21,9 +21,9 @@ public static class MewtocolHelper
     {
         if (CheckBoolOnWordAddress(address))
         {
-            return ByteTransformHelper.GetResultFromArray(await CommHelper.ReadBoolAsync(plc, address, 1).ConfigureAwait(continueOnCapturedContext: false));
+            return ByteTransformHelper.GetResultFromArray(await CommunicationHelper.ReadBoolAsync(plc, address, 1).ConfigureAwait(continueOnCapturedContext: false));
         }
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var command = PanasonicHelper.BuildReadOneCoil(station, address);
         if (!command.IsSuccess)
         {
@@ -49,10 +49,10 @@ public static class MewtocolHelper
     {
         if (CheckBoolOnWordAddress(address))
         {
-            return await CommHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(continueOnCapturedContext: false);
+            return await CommunicationHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(continueOnCapturedContext: false);
         }
 
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var analysis = PanasonicHelper.AnalysisAddress(address);
         if (!analysis.IsSuccess)
         {
@@ -123,7 +123,7 @@ public static class MewtocolHelper
     /// <returns>返回是否成功的结果对象</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, byte station, string address, bool value)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var command = PanasonicHelper.BuildWriteOneCoil(station, address, value);
         if (!command.IsSuccess)
         {
@@ -147,7 +147,7 @@ public static class MewtocolHelper
     /// <returns>返回是否成功的结果对象</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, byte station, string address, bool[] values)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var analysis = PanasonicHelper.AnalysisAddress(address);
         if (!analysis.IsSuccess)
         {
@@ -215,7 +215,7 @@ public static class MewtocolHelper
     /// <returns>原始的字节数据的信息</returns>
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, byte station, string address, ushort length)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var command = PanasonicHelper.BuildReadCommand(station, address, length, isBit: false);
         if (!command.IsSuccess)
         {
@@ -249,7 +249,7 @@ public static class MewtocolHelper
     /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, byte station, string address, byte[] value)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var command = PanasonicHelper.BuildWriteCommand(station, address, value);
         if (!command.IsSuccess)
         {

@@ -29,7 +29,7 @@ public static class PanasonicHelper
         }
         var num = Convert.ToInt32(address[..address.IndexOf('.')]) * fromBase;
         var bit = address[(address.IndexOf('.') + 1)..];
-        return num + CommHelper.CalculateBitStartIndex(bit);
+        return num + CommunicationHelper.CalculateBitStartIndex(bit);
     }
 
     /// <summary>

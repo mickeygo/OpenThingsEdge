@@ -48,7 +48,7 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public DeviceSerialPort()
     {
-        NetworkPipe = _pipe = new PipeSerialPort();
+        CommunicationPipe = _pipe = new PipeSerialPort();
     }
 
     /// <inheritdoc cref="PipeSerialPort.SerialPortInni(string)" />
@@ -88,7 +88,7 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// </summary>
     public virtual async Task<OperateResult> OpenAsync()
     {
-        var operateResult = await NetworkPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
+        var operateResult = await CommunicationPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
         if (!operateResult.IsSuccess)
         {
             return operateResult;
@@ -96,9 +96,9 @@ public abstract class DeviceSerialPort : DeviceCommunication
         return await InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
-    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        using (await pipe.Lock.LockAsync(ReceiveTimeout).ConfigureAwait(false))
+        using (await pipe.AsyncLock.LockAsync(ReceiveTimeout).ConfigureAwait(false))
         {
             return await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         }
@@ -127,6 +127,6 @@ public abstract class DeviceSerialPort : DeviceCommunication
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceSerialPort<{ByteTransform}>{{{NetworkPipe}}}";
+        return $"DeviceSerialPort<{ByteTransform}>{{{CommunicationPipe}}}";
     }
 }

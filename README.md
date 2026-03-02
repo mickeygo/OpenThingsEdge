@@ -127,10 +127,10 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
       {
         "Name": "设备01", "Model": "ModbusTcp", "Host": "127.0.0.1", "Port": 0, "Keynote": "",
         "Tags": [
-          { "Name": "PLC_Device_Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Heartbeat" },
-          { "Name": "PLC_Equipment_Alarm", "Address": "s=1;x=3;2", "Length": 96, "DataType": "Int", "ScanRate": 5000, "Flag": "Notice" },
-          { "Name": "PLC_Equipment_Energy", "Address": "s=1;x=3;3", "Length": 0, "DataType": "Int", "ScanRate": 60000, "Flag": "Notice", "PublishMode": "EveryScan" },
-          { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;4", "Length": 0, "DataType": "Int", "ScanRate": 1000, "Flag": "Notice" },
+          { "Name": "PLC_Device_Heartbeat", "Address": "s=1;x=3;0", "Length": 0, "DataType": "Int", "Flag": "Heartbeat", "ScanRate": 500 },
+          { "Name": "PLC_Equipment_Alarm", "Address": "s=1;x=3;2", "Length": 96, "DataType": "Int", "Flag": "Notice", "ScanRate": 500 },
+          { "Name": "PLC_Equipment_Energy", "Address": "s=1;x=3;3", "Length": 0, "DataType": "Int", "Flag": "Notice", "ScanRate": 500, "PublishMode": "EveryScan" },
+          { "Name": "PLC_Equipment_State", "Address": "s=1;x=3;4", "Length": 0, "DataType": "Int", "Flag": "Notice", "ScanRate": 1000 },
         ],
         "CallbackTags": [
           { "Name": "MES_Callback_ErrorMessage", "Address": "s=1;x=3;5", "Length": 30, "DataType": "String" },
@@ -140,14 +140,14 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
             "Name": "OP101", "Keynote": "",
             "Tags": [
               {
-                "Name": "PLC_Inbound_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "Name": "PLC_Inbound_Sign", "Address": "s=1;x=3;20", "Length": 0, "DataType": "Int", "Flag": "Trigger", "ScanRate": 500,
                 "NormalTags": [
                   { "Name": "PLC_Inbound_SN", "Address": "s=1;x=3;21", "Length": 50, "DataType": "String" },
                   { "Name": "PLC_Inbound_ProductCode", "Address": "s=1;x=3;22", "Length": 20, "DataType": "String" },
                 ],
               },
               {
-                "Name": "PLC_Outbound_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "ScanRate": 200, "Flag": "Trigger",
+                "Name": "PLC_Outbound_Sign", "Address": "s=1;x=3;30", "Length": 0, "DataType": "Int", "Flag": "Trigger", "ScanRate": 200,
                 "NormalTags": [
                   { "Name": "PLC_Outbound_SN", "Address": "s=1;x=3;31", "Length": 50, "DataType": "String" },
                   { "Name": "PLC_Outbound_PassResult", "Address": "s=1;x=3;32", "Length": 0, "DataType": "Int" },
@@ -155,20 +155,20 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
                 ],
               },
               {
-                "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "Name": "PLC_ScanKey_Sign", "Address": "s=1;x=3;40", "Length": 0, "DataType": "Int", "Flag": "Trigger", "ScanRate": 500,
                 "NormalTags": [
                   { "Name": "PLC_ScanKey_SN", "Address": "s=1;x=3;41", "Length": 50, "DataType": "String" },
                   { "Name": "PLC_ScanKey_Barcode", "Address": "s=1;x=3;42", "Length": 50, "DataType": "String" },
                 ],
               },
               {
-                "Name": "PLC_ScanBatch_Sign", "Address": "s=1;x=3;50", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "Name": "PLC_ScanBatch_Sign", "Address": "s=1;x=3;50", "Length": 0, "DataType": "Int", "Flag": "Trigger", "ScanRate": 500,
                 "NormalTags": [
                   { "Name": "PLC_ScanBatch_Barcode", "Address": "s=1;x=3;51", "Length": 50, "DataType": "String" },
                 ],
               },
               {
-                "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "ScanRate": 500, "Flag": "Trigger",
+                "Name": "PLC_StepTask_Sign", "Address": "s=1;x=3;60", "Length": 0, "DataType": "Int", "Flag": "Trigger", "ScanRate": 500,
                 "NormalTags": [
                   { "Name": "PLC_StepTask_SN", "Address": "s=1;x=3;62", "Length": 50, "DataType": "String" },
                   { "Name": "PLC_StepTask_Angle", "Address": "s=1;x=3;62", "Length": 0, "DataType": "Real" },
@@ -177,7 +177,7 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
                 ],
               },
               {
-                "Name": "PLC_Switch1", "Address": "s=1;x=3;70", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "Name": "PLC_Switch1", "Address": "s=1;x=3;70", "Length": 0, "DataType": "Int", "Flag": "Switch", "ScanRate": 100, "DisplayName": "ArcWelding",
                 "NormalTags": [
                   { "Name": "PLC_Switch1_SN", "Address": "s=1;x=3;71", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
                   { "Name": "PLC_Switch1_No", "Address": "s=1;x=3;72", "Length": 10, "DataType": "String", "CurveUsage": "Master" },
@@ -186,7 +186,7 @@ XinJE_Tcp                   |信捷PLC，支持 XC、XD、XL 系列。
                 ],
               },
               {
-                "Name": "PLC_Switch2", "Address": "s=1;x=3;80", "Length": 0, "DataType": "Int", "ScanRate": 100, "Flag": "Switch", "DisplayName": "ArcWelding",
+                "Name": "PLC_Switch2", "Address": "s=1;x=3;80", "Length": 0, "DataType": "Int", "Flag": "Switch", "ScanRate": 100, "DisplayName": "ArcWelding",
                 "NormalTags": [
                   { "Name": "PLC_Switch2_SN", "Address": "s=1;x=3;81", "Length": 50, "DataType": "String", "CurveUsage": "Master" },
                   { "Name": "PLC_Switch2_No", "Address": "s=1;x=3;82", "Length": 10, "DataType": "String", "CurveUsage": "Master" },

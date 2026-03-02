@@ -65,15 +65,17 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
                 ConnectTimeout = options.Value.NetworkConnectTimeout,
                 KeepAliveTime = options.Value.NetworkKeepAliveTime,
             };
+
+            var maxPDUSize = deviceInfo.MaxPDUSize > 0 ? deviceInfo.MaxPDUSize : options.Value.MaxPDUSize;
             DeviceTcpNet driverNet = deviceInfo.Model switch
             {
                 DriverModel.ModbusTcp => new ModbusTcpNet(deviceInfo.Host, options: netOptions),
-                DriverModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host, options: netOptions),
-                DriverModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host, options: netOptions),
-                DriverModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host, options: netOptions),
-                DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host, options: netOptions),
-                DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host, options: netOptions),
-                DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host, options: netOptions),
+                DriverModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, deviceInfo.Host, options: netOptions) { PDUCustomLength = maxPDUSize },
+                DriverModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, deviceInfo.Host, options: netOptions) { PDUCustomLength = maxPDUSize },
+                DriverModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, deviceInfo.Host, options: netOptions) { PDUCustomLength = maxPDUSize },
+                DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, deviceInfo.Host, options: netOptions) { PDUCustomLength = maxPDUSize },
+                DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, deviceInfo.Host, options: netOptions) { PDUCustomLength = maxPDUSize },
+                DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, deviceInfo.Host, options: netOptions) { PDUCustomLength = maxPDUSize },
                 DriverModel.Melsec_MC => new MelsecMcNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
                 DriverModel.Melsec_MCAscii => new MelsecMcAsciiNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
                 DriverModel.Melsec_MCR => new MelsecMcRNet(deviceInfo.Host, deviceInfo.Port, options: netOptions),
@@ -92,8 +94,7 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
                 _ => throw new NotImplementedException("没有找到指定的设备驱动"),
             };
 
-            var maxPDUSize = deviceInfo.MaxPDUSize > 0 ? deviceInfo.MaxPDUSize : options.Value.MaxPDUSize;
-            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, driverNet.Port, driverNet, maxPDUSize));
+            _connectors.Add(deviceInfo.DeviceId, new DriverConnector(deviceInfo.DeviceId, deviceInfo.Host, driverNet.Port, driverNet));
         }
     }
 
@@ -119,13 +120,13 @@ internal sealed class DriverConnectorManager(IOptions<ExchangeOptions> options, 
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
 
-                            if (code is (int)CommErrorCode.SocketConnectException
-                                    or (int)CommErrorCode.SocketConnectTimeoutException
-                                    or (int)CommErrorCode.RemoteClosedConnection
-                                    or (int)CommErrorCode.ReceiveDataTimeout
-                                    or (int)CommErrorCode.SocketSendException
-                                    or (int)CommErrorCode.SocketReceiveException
-                                    or (int)CommErrorCode.SocketException)
+                            if (code is (int)ErrorCode.SocketConnectException
+                                    or (int)ErrorCode.SocketConnectTimeoutException
+                                    or (int)ErrorCode.RemoteClosedConnection
+                                    or (int)ErrorCode.ReceiveDataTimeout
+                                    or (int)ErrorCode.SocketSendException
+                                    or (int)ErrorCode.SocketReceiveException
+                                    or (int)ErrorCode.SocketException)
                             {
                                 logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
                             }

@@ -60,33 +60,23 @@ public sealed class Device
     public List<TagGroup>? TagGroups { get; init; } = [];
 
     /// <summary>
-    /// 隶属于设备的标记集合。
+    /// 隶属于设备的信号标记集合。
     /// </summary>
     [NotNull]
-    public List<Tag>? Tags { get; init; } = [];
+    public List<SignalTag>? Tags { get; init; } = [];
 
     /// <summary>
-    /// 隶属于设备的回写标记集合。
+    /// 隶属于设备的数据回写标记集合。
     /// </summary>
     [NotNull]
     public List<Tag>? CallbackTags { get; init; } = [];
 
     /// <summary>
-    /// 从所有顶层标记分组中获取指定标识的标记集合。
+    /// 从设备的所有信号标记中（包括设备以及其分组）中获取指定的信号标识集合。
     /// </summary>
     /// <param name="flag">标识</param>
     /// <returns></returns>
-    public List<Tag> GetTagsFromGroups(TagFlag flag)
-    {
-        return [.. TagGroups.SelectMany(s => s.Tags.Where(t => t.Flag == flag))];
-    }
-
-    /// <summary>
-    /// 从设备的所有顶层标记中（包括设备标记和分组标记）中获取指定标识的标记集合。
-    /// </summary>
-    /// <param name="flag">标识</param>
-    /// <returns></returns>
-    public List<Tag> GetAllTags(TagFlag flag)
+    public List<SignalTag> GetAllSignalTags(TagFlag flag)
     {
         return
         [
@@ -96,18 +86,12 @@ public sealed class Device
     }
 
     /// <summary>
-    /// 获取标记属于的分组，若未找到标记或是标记不属于分组，返回 null。
+    /// 通过信号标记查找属于的分组。
     /// </summary>
-    /// <param name="tagId">标记Id</param>
+    /// <param name="signalTagId">信号标记Id</param>
     /// <returns></returns>
-    public TagGroup? GetTagGroup(string tagId)
+    public TagGroup? GetTagGroup(string signalTagId)
     {
-        if (Tags.Any(s => s.TagId == tagId))
-        {
-            return null;
-        }
-
-        var tagGroup = TagGroups.FirstOrDefault(s => s.Tags.Any(t => t.TagId == tagId));
-        return tagGroup;
+        return TagGroups.FirstOrDefault(s => s.Tags.Any(t => t.TagId == signalTagId));
     }
 }

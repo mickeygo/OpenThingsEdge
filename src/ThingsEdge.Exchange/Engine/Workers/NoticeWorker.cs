@@ -20,55 +20,55 @@ internal sealed class NoticeWorker(IMessageBroker<NoticeMessage> broker,
             return Task.CompletedTask;
         }
 
-        var tags = device.GetAllTags(TagFlag.Notice);
+        var tags = device.GetAllSignalTags(TagFlag.Notice);
         foreach (var tag in tags)
         {
             _ = Task.Run(async () =>
             {
                 var pollingInterval = tag.ScanRate > 0 ? tag.ScanRate : options.Value.DefaultScanRate;
-                while (!cancellationToken.IsCancellationRequested)
+                using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(pollingInterval));
+
+                try
                 {
-                    try
+                    while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
                     {
-                        await Task.Delay(pollingInterval, cancellationToken).ConfigureAwait(false);
-
-                        // 第一次检测
-                        if (cancellationToken.IsCancellationRequested)
+                        try
                         {
-                            break;
+                            if (!connector.CanConnect)
+                            {
+                                continue;
+                            }
+
+                            // 若读取失败，该信号点不会复位，下次会继续读取执行。
+                            var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
+                            if (!ok)
+                            {
+                                logger.LogError("[NoticeWorker] Notice 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
+                                    device.Name, tag.Name, tag.Address, err);
+
+                                continue;
+                            }
+
+                            // EveryScan 模式下时每次都会发送， OnlyDataChanged 模式下在仅数据有跳变时才会发送。
+                            if (tag.PublishMode is PublishMode.EveryScan
+                                || (tag.PublishMode is PublishMode.OnlyDataChanged && TagDataAccesstor.CompareAndExchange(tag.TagId, data!.Value)))
+                            {
+                                // 发布通知事件
+                                await broker.PushAsync(new NoticeMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
+                            }
                         }
-
-                        if (!connector.CanConnect)
+                        catch (OperationCanceledException)
                         {
-                            continue;
                         }
-
-                        // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var (ok, data, err) = await connector.ReadAsync(tag).ConfigureAwait(false);
-                        if (!ok)
+                        catch (Exception ex)
                         {
-                            logger.LogError("[NoticeWorker] Notice 数据读取异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}，错误：{Err}",
-                                device.Name, tag.Name, tag.Address, err);
-
-                            continue;
-                        }
-
-                        // EveryScan 模式下时每次都会发送， OnlyDataChanged 模式下在仅数据有跳变时才会发送。
-                        if (tag.PublishMode is PublishMode.EveryScan
-                            || (tag.PublishMode is PublishMode.OnlyDataChanged && TagDataAccesstor.CompareAndExchange(tag.TagId, data!.Value)))
-                        {
-                            // 发布通知事件
-                            await broker.PushAsync(new NoticeMessage(connector, channelName, device, tag, data!), cancellationToken).ConfigureAwait(false);
+                            logger.LogError(ex, "[NoticeWorker] Notice 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
+                                    device.Name, tag.Name, tag.Address);
                         }
                     }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "[NoticeWorker] Notice 数据处理异常，设备：{DeviceName}，标记：{TagName}, 地址：{TagAddress}",
-                                device.Name, tag.Name, tag.Address);
-                    }
+                }
+                catch (OperationCanceledException)
+                {
                 }
             }, default);
         }

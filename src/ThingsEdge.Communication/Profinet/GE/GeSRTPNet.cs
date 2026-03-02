@@ -39,7 +39,7 @@ public class GeSRTPNet : DeviceTcpNet
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(NetworkPipe, new byte[56], hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
+        var read = await ReadFromCoreServerAsync(CommunicationPipe, new byte[56], hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(continueOnCapturedContext: false);
         if (!read.IsSuccess)
         {
             return read;

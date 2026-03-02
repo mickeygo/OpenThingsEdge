@@ -131,7 +131,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         return base.UnpackResponseContent(send, response);
     }
 
-    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
     {
         var read = await base.ReadFromCoreServerAsync(pipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
         if (!read.IsSuccess)
@@ -160,7 +160,7 @@ public class MelsecFxSerialOverTcp : DeviceTcpNet, IMelsecFxSerial, IReadWriteNe
         {
             for (var i = 0; i < _inis.Count; i++)
             {
-                OperateResult ini1 = await ReadFromCoreServerAsync(NetworkPipe, _inis[i].ToHexBytes(), true, false).ConfigureAwait(false);
+                OperateResult ini1 = await ReadFromCoreServerAsync(CommunicationPipe, _inis[i].ToHexBytes(), true, false).ConfigureAwait(false);
                 if (!ini1.IsSuccess)
                 {
                     return ini1;

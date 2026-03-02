@@ -3,7 +3,7 @@ namespace ThingsEdge.Communication.Core;
 /// <summary>
 /// 通信对象的异步锁接口。
 /// </summary>
-public interface ICommAsyncLock
+public interface ICommunicationAsyncLock
 {
     /// <summary>
     /// 进入锁。
@@ -13,7 +13,7 @@ public interface ICommAsyncLock
     Task<IDisposable> LockAsync(CancellationToken cancellationToken = default);
 }
 
-public static class ICommAsyncLockExtensions
+public static class ICommunicationAsyncLockExtensions
 {
     /// <summary>
     /// 进入锁。
@@ -21,7 +21,7 @@ public static class ICommAsyncLockExtensions
     /// <param name="asyncLock">异步锁</param>
     /// <param name="timeout">超时时间，单位ms</param>
     /// <returns></returns>
-    public static Task<IDisposable> LockAsync(this ICommAsyncLock asyncLock, int timeout)
+    public static Task<IDisposable> LockAsync(this ICommunicationAsyncLock asyncLock, int timeout)
     {
         CancellationTokenSource cts = new(timeout);
         return asyncLock.LockAsync(cts.Token);

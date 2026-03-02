@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace ThingsEdge.Communication.Common.Extensions;
 
-internal static class SerialPortExtensions
+internal static partial class SerialPortExtensions
 {
     /// <summary>
     /// 使用格式化的串口参数信息来初始化串口的参数，举例：9600-8-N-1，分别表示波特率，数据位，奇偶校验，停止位，当然也可以携带串口名称，例如：COM3-9600-8-N-1，linux环境也是支持的。
@@ -19,7 +19,7 @@ internal static class SerialPortExtensions
         if (array.Length != 0)
         {
             var num = 0;
-            if (!Regex.IsMatch(array[0], "^[0-9]+$"))
+            if (!DigitRegex().IsMatch(array[0]))
             {
                 serialPort.PortName = array[0];
                 num = 1;
@@ -108,4 +108,7 @@ internal static class SerialPortExtensions
         }
         return stringBuilder.ToString();
     }
+
+    [GeneratedRegex("^[0-9]+$")]
+    private static partial Regex DigitRegex();
 }

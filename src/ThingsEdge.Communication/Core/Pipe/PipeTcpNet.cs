@@ -8,7 +8,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 用于TCP/IP协议的传输管道信息。
 /// </summary>
-public class PipeTcpNet : NetworkPipeBase
+public class PipeTcpNet : CommunicationPipe
 {
     private readonly SocketPool _socketPool;
 
@@ -67,14 +67,14 @@ public class PipeTcpNet : NetworkPipeBase
         catch (OperationCanceledException)
         {
             IsSocketError = true;
-            var errorCode1 = (int)CommErrorCode.SocketConnectTimeoutException;
+            var errorCode1 = (int)ErrorCode.SocketConnectTimeoutException;
             SocketErrorAndClosedDelegate?.Invoke(errorCode1);
             return new OperateResult<bool>(errorCode1, string.Format(StringResources.Language.ConnectTimeout, $"{Host}:{Port}", ConnectTimeout) + " ms");
         }
         catch (SocketException ex)
         {
             IsSocketError = true;
-            var errorCode2 = (int)CommErrorCode.SocketConnectException;
+            var errorCode2 = (int)ErrorCode.SocketConnectException;
             SocketErrorAndClosedDelegate?.Invoke(errorCode2);
             return new OperateResult<bool>(errorCode2, $"Socket Connect Exception -> {ex.Message}");
         }
@@ -88,7 +88,7 @@ public class PipeTcpNet : NetworkPipeBase
             if (!result.IsSuccess)
             {
                 // 参考 NetSupport.SocketSendAsync 错误代码
-                IsSocketError = result.ErrorCode is (int)CommErrorCode.SocketSendException;
+                IsSocketError = result.ErrorCode is (int)ErrorCode.SocketSendException;
                 SocketErrorAndClosedDelegate?.Invoke(result.ErrorCode);
             }
 
@@ -104,7 +104,7 @@ public class PipeTcpNet : NetworkPipeBase
             if (!result.IsSuccess)
             {
                 // 参考 NetSupport.SocketReceiveAsync 错误代码
-                IsSocketError = result.ErrorCode is (int)CommErrorCode.RemoteClosedConnection or (int)CommErrorCode.ReceiveDataTimeout or (int)CommErrorCode.SocketException;
+                IsSocketError = result.ErrorCode is (int)ErrorCode.RemoteClosedConnection or (int)ErrorCode.ReceiveDataTimeout or (int)ErrorCode.SocketException;
                 SocketErrorAndClosedDelegate?.Invoke(result.ErrorCode);
             }
             return result;
@@ -114,25 +114,25 @@ public class PipeTcpNet : NetworkPipeBase
     /// <summary>
     /// 创建一个副本
     /// </summary>
-    internal async Task<OperateResult<NetworkPipeBase>> CreateCopyAsync()
+    internal async Task<OperateResult<CommunicationPipe>> CreateCopyAsync()
     {
         try
         {
             var socket = await _socketPool.GetConnectionAsync().ConfigureAwait(false);
-            NetworkPipeBase pipe2 = new PipeTcpNetCopy(this, socket);
+            CommunicationPipe pipe2 = new PipeTcpNetCopy(this, socket);
             return OperateResult.CreateSuccessResult(pipe2);
         }
         catch (OperationCanceledException)
         {
-            var errorCode1 = (int)CommErrorCode.SocketConnectTimeoutException;
+            var errorCode1 = (int)ErrorCode.SocketConnectTimeoutException;
             SocketErrorAndClosedDelegate?.Invoke(errorCode1);
-            return new OperateResult<NetworkPipeBase>(errorCode1, string.Format(StringResources.Language.ConnectTimeout, $"{Host}:{Port}", ConnectTimeout) + " ms");
+            return new OperateResult<CommunicationPipe>(errorCode1, string.Format(StringResources.Language.ConnectTimeout, $"{Host}:{Port}", ConnectTimeout) + " ms");
         }
         catch (SocketException ex)
         {
-            var errorCode2 = (int)CommErrorCode.SocketConnectException;
+            var errorCode2 = (int)ErrorCode.SocketConnectException;
             SocketErrorAndClosedDelegate?.Invoke(errorCode2);
-            return new OperateResult<NetworkPipeBase>(errorCode2, $"Socket Connect Exception -> {ex.Message}");
+            return new OperateResult<CommunicationPipe>(errorCode2, $"Socket Connect Exception -> {ex.Message}");
         }
     }
 

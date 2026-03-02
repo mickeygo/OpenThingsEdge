@@ -4,7 +4,7 @@ using ThingsEdge.Exchange.Contracts.Variables;
 namespace ThingsEdge.Exchange.Contracts;
 
 /// <summary>
-/// 主体数据。
+/// 负载数据。
 /// </summary>
 public sealed class PayloadData
 {
@@ -47,6 +47,7 @@ public sealed class PayloadData
     /// <summary>
     /// Tag 的扩展数据。
     /// </summary>
+    [JsonExtensionData]
     public JsonObject? ExtraData { get; init; }
 
     /// <summary>
@@ -96,9 +97,9 @@ public sealed class PayloadData
     }
 
     /// <summary>
-    /// 复制 Tag 数据到此对象。
+    /// 通过标记实体中生成负载对象。
     /// </summary>
-    /// <param name="tag"></param>
+    /// <param name="tag">标记实体</param>
     /// <returns></returns>
     public static PayloadData FromTag(Tag tag)
     {

@@ -47,7 +47,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
     /// <inheritdoc />
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read1 = await ReadFromCoreServerAsync(NetworkPipe,
+        var read1 = await ReadFromCoreServerAsync(CommunicationPipe,
             AllenBradleyHelper.RegisterSessionHandle(BitConverter.GetBytes(Interlocked.Increment(ref _context))), true, false)
             .ConfigureAwait(continueOnCapturedContext: false);
         if (!read1.IsSuccess)
@@ -70,7 +70,7 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
                 sessionHandle,
                 GetLargeForwardOpen(i < 7 ? (ushort)i : (ushort)RandomExtensions.Random.Next(7, 200)),
                 ByteTransform.TransByte(id));
-            var read2 = await ReadFromCoreServerAsync(NetworkPipe, send, true, false).ConfigureAwait(false);
+            var read2 = await ReadFromCoreServerAsync(CommunicationPipe, send, true, false).ConfigureAwait(false);
             if (!read2.IsSuccess)
             {
                 return read2;
@@ -112,13 +112,13 @@ public abstract class NetworkConnectedCip : DeviceTcpNet
         var forwardClose = GetLargeForwardClose();
         if (forwardClose != null)
         {
-            var close = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, forwardClose), true, false).ConfigureAwait(false);
+            var close = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, forwardClose), true, false).ConfigureAwait(false);
             if (!close.IsSuccess)
             {
                 return close;
             }
         }
-        var read = await ReadFromCoreServerAsync(NetworkPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(CommunicationPipe, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

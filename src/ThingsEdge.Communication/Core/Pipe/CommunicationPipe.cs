@@ -6,7 +6,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// 基于网络的通信管道基类。
 /// </summary>
- public abstract class NetworkPipeBase : IDisposable
+ public abstract class CommunicationPipe : IDisposable
 {
     private bool _disposed;
 
@@ -18,7 +18,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
     /// <summary>
     /// 获取当前实例的异步锁对象。
     /// </summary>
-    public ICommAsyncLock Lock { get; } = new CommAsyncLock();
+    public ICommunicationAsyncLock AsyncLock { get; } = new CommunicationAsyncLock();
 
     /// <summary>
     /// 接收固定长度的字节数组，允许指定超时时间，默认为60秒，当length大于0时，接收固定长度的数据内容，当length小于0时，buffer长度的缓存数据。
@@ -164,10 +164,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 
     protected async Task<OperateResult<byte[]>> ReadFromCoreServerHelperAsync(INetMessage? netMessage, byte[] sendValue, bool hasResponseData)
     {
-        if (netMessage != null)
-        {
-            netMessage.SendBytes = sendValue;
-        }
+        netMessage?.SendBytes = sendValue;
 
         var sendResult = await SendAsync(sendValue).ConfigureAwait(continueOnCapturedContext: false);
         if (!sendResult.IsSuccess)
@@ -225,7 +222,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
         }
         if (netMessage != null && !netMessage.CheckHeadBytesLegal())
         {
-            return new OperateResult<byte[]>((int)CommErrorCode.CommandHeadCodeCheckFailed, StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine
+            return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, StringResources.Language.CommandHeadCodeCheckFailed + Environment.NewLine
                 + StringResources.Language.Send + ": " + sendValue.RemoveBegin(' ') + Environment.NewLine
                 + StringResources.Language.Receive + ": " + resultReceive.Content.ToHexString(' '));
         }
@@ -292,7 +289,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
             };
             if (receive == null)
             {
-                return new OperateResult<byte[]>((int)CommErrorCode.CommandLengthCheckFailed, "Receive by specified code failed, length check failed");
+                return new OperateResult<byte[]>((int)ErrorCode.CommandLengthCheckFailed, "Receive by specified code failed, length check failed");
             }
             if (!receive.IsSuccess)
             {

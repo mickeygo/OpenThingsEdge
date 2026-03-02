@@ -30,7 +30,7 @@ internal sealed class TagReaderWriterImpl(ITagDataSnapshot tagDataSnapshot,
         return await driver.ReadAsync(tag).ConfigureAwait(false);
     }
 
-    public async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(string deviceId, IEnumerable<Tag> tags, bool mulitple)
+    public async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(string deviceId, IEnumerable<SignalTag> tags, bool mulitple)
     {
         // 无法判断快照中是否是最新的数据，因此会直接从设备中读取。
         var driver = driverConnectorManager.GetConnector(deviceId);
@@ -108,7 +108,7 @@ internal sealed class TagReaderWriterImpl(ITagDataSnapshot tagDataSnapshot,
     {
         foreach (var device in deviceFactory.GetDevices())
         {
-            var tag = device.Tags.SingleOrDefault(t => t.TagId == tagId);
+            Tag? tag = device.Tags.SingleOrDefault(t => t.TagId == tagId);
             if (tag != null)
             {
                 return (tag, device.DeviceId);

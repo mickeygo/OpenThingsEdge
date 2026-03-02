@@ -1,0 +1,6 @@
+@ThingsEdge.Silos.Server_HostAddress = http://localhost:5055
+
+GET {{ThingsEdge.Silos.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

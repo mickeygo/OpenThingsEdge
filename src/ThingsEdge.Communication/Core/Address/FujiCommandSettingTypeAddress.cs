@@ -6,7 +6,7 @@ namespace ThingsEdge.Communication.Core.Address;
 /// <summary>
 /// 富士CommandSettingsType的协议信息。
 /// </summary>
-public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
+public partial class FujiCommandSettingTypeAddress : DeviceAddressDataBase
 {
     /// <summary>
     /// 数据的代号信息
@@ -43,7 +43,7 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
             var empty2 = string.Empty;
             if (address.IndexOf('.') < 0)
             {
-                var match = Regex.Match(address, "^[A-Z]+");
+                var match = WordUpperRegex().Match(address);
                 if (!match.Success)
                 {
                     return new OperateResult<FujiCommandSettingTypeAddress>(StringResources.Language.NotSupportedDataType);
@@ -145,4 +145,7 @@ public class FujiCommandSettingTypeAddress : DeviceAddressDataBase
             return new OperateResult<FujiCommandSettingTypeAddress>(GetUnsupportedAddressInfo(address, ex));
         }
     }
+
+    [GeneratedRegex("^[A-Z]+")]
+    private static partial Regex WordUpperRegex();
 }

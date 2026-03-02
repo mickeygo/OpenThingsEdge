@@ -77,7 +77,7 @@ public static class OmronHostLinkHelper
     /// </remarks>
     public static async Task<OperateResult<byte[]>> ReadAsync(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: false, hostLink.ReadSplits);
         if (!command.IsSuccess)
         {
@@ -99,7 +99,7 @@ public static class OmronHostLinkHelper
 
     public static async Task<OperateResult> WriteAsync(IHostLink hostLink, string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, value, isBit: false);
         if (!command.IsSuccess)
         {
@@ -118,7 +118,7 @@ public static class OmronHostLinkHelper
         var station = hostLink.UnitNumber;
         if (address.Length != 0)
         {
-            station = (byte)CommHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
+            station = (byte)CommunicationHelper.ExtractParameter(ref address[0], "s", hostLink.UnitNumber);
         }
         var command = OmronFinsNetHelper.BuildReadCommand(address, hostLink.PlcType);
         if (!command.IsSuccess)
@@ -140,7 +140,7 @@ public static class OmronHostLinkHelper
 
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IHostLink hostLink, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildReadCommand(hostLink.PlcType, address, length, isBit: true);
         if (!command.IsSuccess)
         {
@@ -162,7 +162,7 @@ public static class OmronHostLinkHelper
 
     public static async Task<OperateResult> WriteAsync(IHostLink hostLink, string address, bool[] values)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", hostLink.UnitNumber);
         var command = OmronFinsNetHelper.BuildWriteWordCommand(hostLink.PlcType, address, values.Select((m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
         if (!command.IsSuccess)
         {

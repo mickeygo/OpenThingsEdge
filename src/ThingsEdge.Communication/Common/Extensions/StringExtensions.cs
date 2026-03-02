@@ -21,6 +21,7 @@ internal static class StringExtensions
                 i++;
             }
         }
+
         var result = memoryStream.ToArray();
         return result;
 
@@ -148,6 +149,7 @@ internal static class StringExtensions
             {
                 return -1;
             }
+
             var value = match.Value[1..^1];
             var result = Convert.ToInt32(value);
             address = address.Remove(address.Length - match.Value.Length);

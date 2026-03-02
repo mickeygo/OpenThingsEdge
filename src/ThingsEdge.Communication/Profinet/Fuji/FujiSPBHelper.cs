@@ -46,7 +46,7 @@ public static class FujiSPBHelper
     /// <returns>是否成功的结果对象</returns>
     public static OperateResult<byte[]> BuildReadCommand(byte station, string address, ushort length)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -93,7 +93,7 @@ public static class FujiSPBHelper
         }
         if (address.Length != length.Length)
         {
-            return new OperateResult<byte[]>((int)CommErrorCode.TwoParametersLengthIsNotSame, StringResources.Language.TwoParametersLengthIsNotSame);
+            return new OperateResult<byte[]>((int)ErrorCode.TwoParametersLengthIsNotSame, StringResources.Language.TwoParametersLengthIsNotSame);
         }
 
         var stringBuilder = new StringBuilder();
@@ -107,7 +107,7 @@ public static class FujiSPBHelper
         stringBuilder.Append(address.Length.ToString("X2"));
         for (var i = 0; i < address.Length; i++)
         {
-            station = (byte)CommHelper.ExtractParameter(ref address[i], "s", station);
+            station = (byte)CommunicationHelper.ExtractParameter(ref address[i], "s", station);
             var operateResult = FujiSPBAddress.ParseFrom(address[i]);
             if (!operateResult.IsSuccess)
             {
@@ -132,7 +132,7 @@ public static class FujiSPBHelper
     /// <returns>是否创建成功</returns>
     public static OperateResult<byte[]> BuildWriteByteCommand(byte station, string address, byte[] value)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -163,7 +163,7 @@ public static class FujiSPBHelper
     /// <returns>是否创建成功</returns>
     public static OperateResult<byte[]> BuildWriteBoolCommand(byte station, string address, bool value)
     {
-        station = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = FujiSPBAddress.ParseFrom(address);
         if (!operateResult.IsSuccess)
         {
@@ -288,7 +288,7 @@ public static class FujiSPBHelper
     /// <returns>Bool[]的结果对象</returns>
     public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice device, byte station, string address, ushort length)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var addressAnalysis = FujiSPBAddress.ParseFrom(address);
         if (!addressAnalysis.IsSuccess)
         {

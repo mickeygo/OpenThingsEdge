@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/playground/">
+    <Project Path="playground/ThingsEdge.Silos.Server/ThingsEdge.Silos.Server.csproj" />
+    <Project Path="playground/ThingsEdge.ConsoleApp/ThingsEdge.ConsoleApp.csproj" />
+    <Project Path="playground/ThingsEdge.Desktop/ThingsEdge.Desktop.csproj" />
+    <Project Path="playground/ThingsEdge.Silos.Client/ThingsEdge.Silos.Client.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ThingsEdge.Communication/ThingsEdge.Communication.csproj" />
+    <Project Path="src/ThingsEdge.Exchange.Contracts/ThingsEdge.Exchange.Contracts.csproj" />
+    <Project Path="src/ThingsEdge.Exchange/ThingsEdge.Exchange.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ThingsEdge.Communication.Tests/ThingsEdge.Communication.Tests.csproj" />
+    <Project Path="tests/ThingsEdge.Exchange.BenchmarkTests/ThingsEdge.Exchange.BenchmarkTests.csproj" />
+    <Project Path="tests/ThingsEdge.Exchange.Tests/ThingsEdge.Exchange.Tests.csproj" />
+  </Folder>
+</Solution>

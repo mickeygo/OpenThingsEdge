@@ -88,6 +88,7 @@ public static class SoftCRC16
                 }
             }
         }
+
         array[^2] = b;
         array[^1] = b2;
         return array;
@@ -128,6 +129,7 @@ public static class SoftCRC16
                 }
             }
         }
+
         return [b, b2];
     }
 }

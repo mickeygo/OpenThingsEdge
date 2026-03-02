@@ -48,7 +48,7 @@ internal static class DriverConnectorExtensions
         {
             if (connector.Driver is SiemensS7Net siemensS7Net)
             {
-                return await siemensS7Net.ReadMultiAsync(tags, connector.MaxPDUSize).ConfigureAwait(false);
+                return await siemensS7Net.ReadMultiAsync(tags).ConfigureAwait(false);
             }
 
             if (connector.Driver is MelsecMcNet melsecMcNet)

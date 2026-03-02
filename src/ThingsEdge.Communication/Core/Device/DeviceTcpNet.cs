@@ -23,15 +23,15 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <summary>
     /// 是否为 Socket 的异常，出现该异常时 Socket 会被关闭。
     /// </summary>
-    public bool IsSocketError => ((PipeTcpNet)NetworkPipe)?.IsSocketError ?? false;
+    public bool IsSocketError => ((PipeTcpNet)CommunicationPipe)?.IsSocketError ?? false;
 
     /// <summary>
     /// Socket 在异常时关闭的委托对象，其中参数为错误状态码。
     /// </summary>
     public Action<int>? SocketErrorAndClosedDelegate
     {
-        get => ((PipeTcpNet)NetworkPipe).SocketErrorAndClosedDelegate;
-        set => ((PipeTcpNet)NetworkPipe).SocketErrorAndClosedDelegate = value;
+        get => ((PipeTcpNet)CommunicationPipe).SocketErrorAndClosedDelegate;
+        set => ((PipeTcpNet)CommunicationPipe).SocketErrorAndClosedDelegate = value;
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public abstract class DeviceTcpNet : DeviceCommunication
             ConnectTimeout = 3_000,
             KeepAliveTime = 60_000,
         };
-        NetworkPipe = new PipeTcpNet(host, port, options);
+        CommunicationPipe = new PipeTcpNet(host, port, options);
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <returns>返回连接是否和初始化成功</returns>
     public async Task<OperateResult> ConnectServerAsync()
     {
-        var open = await NetworkPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
+        var open = await CommunicationPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
         if (!open.IsSuccess)
         {
             return open;
@@ -87,7 +87,7 @@ public abstract class DeviceTcpNet : DeviceCommunication
         return await InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
-    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         var pipeRet = await ((PipeTcpNet)pipe).CreateCopyAsync().ConfigureAwait(false);
         if (!pipeRet.IsSuccess)
@@ -113,6 +113,6 @@ public abstract class DeviceTcpNet : DeviceCommunication
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceTcpNet<{ByteTransform}>{{{NetworkPipe}}}";
+        return $"DeviceTcpNet<{ByteTransform}>{{{CommunicationPipe}}}";
     }
 }

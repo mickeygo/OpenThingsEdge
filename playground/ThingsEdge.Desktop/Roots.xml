@@ -1,0 +1,3 @@
+<linker>
+  <assembly fullname="ThingsEdge.Desktop" preserve="All"/>
+</linker>

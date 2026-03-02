@@ -13,7 +13,7 @@ public static class DeltaASHelper
         var num = address.IndexOf('.');
         if (num > 0)
         {
-            return Convert.ToInt32(address[..num]) * 16 + CommHelper.CalculateBitStartIndex(address[(num + 1)..]);
+            return Convert.ToInt32(address[..num]) * 16 + CommunicationHelper.CalculateBitStartIndex(address[(num + 1)..]);
         }
         return Convert.ToInt32(address) * 16;
     }
@@ -29,7 +29,7 @@ public static class DeltaASHelper
         try
         {
             var text = string.Empty;
-            var operateResult = CommHelper.ExtractParameter(ref address, "s");
+            var operateResult = CommunicationHelper.ExtractParameter(ref address, "s");
             if (operateResult.IsSuccess)
             {
                 text = $"s={operateResult.Content};";

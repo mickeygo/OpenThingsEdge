@@ -51,9 +51,9 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <returns>是否读取成功的结果对象</returns>
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", Station);
-        var dstNode = (byte)CommHelper.ExtractParameter(ref address, "dst", DstNode);
-        var srcNode = (byte)CommHelper.ExtractParameter(ref address, "src", SrcNode);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
+        var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
+        var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
         var operateResult = BuildProtectedTypedLogicalReadWithThreeAddressFields(dstNode, srcNode, (int)_counter.OnNext(), address, length);
         if (!operateResult.IsSuccess)
         {
@@ -80,9 +80,9 @@ public class AllenBradleyDF1Serial : DeviceSerialPort
     /// <returns>是否写入成功</returns>
     public override async Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", Station);
-        var dstNode = (byte)CommHelper.ExtractParameter(ref address, "dst", DstNode);
-        var srcNode = (byte)CommHelper.ExtractParameter(ref address, "src", SrcNode);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", Station);
+        var dstNode = (byte)CommunicationHelper.ExtractParameter(ref address, "dst", DstNode);
+        var srcNode = (byte)CommunicationHelper.ExtractParameter(ref address, "src", SrcNode);
         var operateResult = BuildProtectedTypedLogicalWriteWithThreeAddressFields(dstNode, srcNode, (int)_counter.OnNext(), address, data);
         if (!operateResult.IsSuccess)
         {

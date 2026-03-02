@@ -16,7 +16,7 @@ public class OmronHostLinkCModeHelper
     /// </remarks>
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice omron, byte unitNumber, string address, ushort length)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
         var command = BuildReadCommand(address, length);
         if (!command.IsSuccess)
         {
@@ -48,7 +48,7 @@ public class OmronHostLinkCModeHelper
     /// </remarks>
     public static async Task<OperateResult> WriteAsync(IReadWriteDevice omron, byte unitNumber, string address, byte[] value)
     {
-        var station = (byte)CommHelper.ExtractParameter(ref address, "s", unitNumber);
+        var station = (byte)CommunicationHelper.ExtractParameter(ref address, "s", unitNumber);
         var command = BuildWriteWordCommand(address, value);
         if (!command.IsSuccess)
         {

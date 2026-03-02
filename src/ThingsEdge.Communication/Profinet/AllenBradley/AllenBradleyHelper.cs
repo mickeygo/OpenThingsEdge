@@ -172,7 +172,7 @@ public static class AllenBradleyHelper
     private static byte[] BuildRequestPathCommand(string address, bool isConnectedAddress = false)
     {
         using var memoryStream = new MemoryStream();
-        var num = CommHelper.ExtractParameter(ref address, "class", -1);
+        var num = CommunicationHelper.ExtractParameter(ref address, "class", -1);
         if (num != -1)
         {
             var num2 = address.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? Convert.ToInt32(address[2..], 16) : Convert.ToInt32(address);

@@ -3,7 +3,7 @@ namespace ThingsEdge.Communication.Core.Pipe;
 /// <summary>
 /// PipeTcpNet 的副本，用于连接池访问。
 /// </summary>
-internal sealed class PipeTcpNetCopy(PipeTcpNet pipeTcpNet, SocketWrapper activeSocket) : NetworkPipeBase
+internal sealed class PipeTcpNetCopy(PipeTcpNet pipeTcpNet, SocketWrapper activeSocket) : CommunicationPipe
 {
     public override async Task<OperateResult> SendAsync(byte[] data)
     {
@@ -11,7 +11,7 @@ internal sealed class PipeTcpNetCopy(PipeTcpNet pipeTcpNet, SocketWrapper active
         if (!result.IsSuccess)
         {
             // 参考 NetSupport.SocketSendAsync 错误代码
-            pipeTcpNet.IsSocketError = result.ErrorCode is (int)CommErrorCode.SocketSendException;
+            pipeTcpNet.IsSocketError = result.ErrorCode is (int)ErrorCode.SocketSendException;
             pipeTcpNet.SocketErrorAndClosedDelegate?.Invoke(result.ErrorCode);
         }
 
@@ -24,7 +24,7 @@ internal sealed class PipeTcpNetCopy(PipeTcpNet pipeTcpNet, SocketWrapper active
         if (!result.IsSuccess)
         {
             // 参考 NetSupport.SocketReceiveAsync 错误代码
-            pipeTcpNet.IsSocketError = result.ErrorCode is (int)CommErrorCode.RemoteClosedConnection or (int)CommErrorCode.ReceiveDataTimeout or (int)CommErrorCode.SocketException;
+            pipeTcpNet.IsSocketError = result.ErrorCode is (int)ErrorCode.RemoteClosedConnection or (int)ErrorCode.ReceiveDataTimeout or (int)ErrorCode.SocketException;
             pipeTcpNet.SocketErrorAndClosedDelegate?.Invoke(result.ErrorCode);
         }
         return result;

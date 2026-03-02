@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>ThingsEdge.Exchange</RootNamespace>
+    <PackageId>ThingsEdge.Exchange</PackageId>
     <AssemblyName>ThingsEdge.Exchange</AssemblyName>
+    <RootNamespace>ThingsEdge.Exchange</RootNamespace>
   </PropertyGroup>
   
   <ItemGroup>

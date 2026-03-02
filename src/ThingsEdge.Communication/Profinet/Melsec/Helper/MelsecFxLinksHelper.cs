@@ -276,7 +276,7 @@ public static class MelsecFxLinksHelper
     /// <returns>读取结果信息</returns>
     public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteFxLinks plc, string address, ushort length)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildReadCommand(stat, address, length, isBool: false, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -315,7 +315,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, byte[] values)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildWriteByteCommand(stat, address, values, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -345,10 +345,10 @@ public static class MelsecFxLinksHelper
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
+            return await CommunicationHelper.ReadBoolAsync(plc, address, length).ConfigureAwait(false);
         }
 
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildReadCommand(stat, address, length, isBool: true, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -381,7 +381,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否写入成功</returns>
     public static async Task<OperateResult> WriteAsync(IReadWriteFxLinks plc, string address, bool[] values)
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref address, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref address, "s", plc.Station);
         var command = BuildWriteBoolCommand(stat, address, values, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -408,7 +408,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否启动成功</returns>
     public static async Task<OperateResult> StartPLCAsync(IReadWriteFxLinks plc, string parameter = "")
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref parameter, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
         var command = BuildStart(stat, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -436,7 +436,7 @@ public static class MelsecFxLinksHelper
     /// <returns>是否停止成功</returns>
     public static async Task<OperateResult> StopPLCAsync(IReadWriteFxLinks plc, string parameter = "")
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref parameter, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
         var command = BuildStop(stat, plc.WaittingTime);
         if (!command.IsSuccess)
         {
@@ -463,7 +463,7 @@ public static class MelsecFxLinksHelper
     /// <returns>带PLC型号的结果信息</returns>
     public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteFxLinks plc, string parameter = "")
     {
-        var stat = (byte)CommHelper.ExtractParameter(ref parameter, "s", plc.Station);
+        var stat = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", plc.Station);
         var command = BuildReadPlcType(stat, plc.WaittingTime);
         if (!command.IsSuccess)
         {

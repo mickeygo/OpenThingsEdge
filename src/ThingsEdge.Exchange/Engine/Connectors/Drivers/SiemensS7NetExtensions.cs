@@ -14,11 +14,10 @@ internal static class SiemensS7NetExtensions
     /// </summary>
     /// <param name="siemensS7Net"></param>
     /// <param name="tags">要批量读取的标记集合</param>
-    /// <param name="maxPDUSize">允许最大的 PDU 长度，为 0 时采用全局设定值。</param>
-    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this SiemensS7Net siemensS7Net, IEnumerable<Tag> tags, int maxPDUSize = 0)
+    public static async Task<(bool ok, List<PayloadData>? data, string? err)> ReadMultiAsync(this SiemensS7Net siemensS7Net, IEnumerable<Tag> tags)
     {
         // 取最短的长度。
-        var allowMaxByte = maxPDUSize > 0 ? Math.Min(maxPDUSize, siemensS7Net.PDULength) : siemensS7Net.PDULength;
+        var allowMaxByte = siemensS7Net.PDUCustomLength > 0 ? siemensS7Net.PDUCustomLength : siemensS7Net.PDULength;
 
         List<PayloadData> list = new(tags.Count());
         List<List<Tag>> matrix = [];

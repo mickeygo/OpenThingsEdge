@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <RootNamespace>ThingsEdge.Communication</RootNamespace>
+    <PackageId>ThingsEdge.Communication</PackageId>
     <AssemblyName>ThingsEdge.Communication</AssemblyName>
+    <RootNamespace>ThingsEdge.Communication</RootNamespace>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Nito.AsyncEx.Coordination" />
     <PackageReference Include="System.IO.Ports" />
   </ItemGroup>

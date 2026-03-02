@@ -14,24 +14,19 @@ public abstract class BinaryCommunication
     public string ConnectionId { get; }
 
     /// <summary>
-    /// 获取当前的管道信息，管道类型为 <see cref="NetworkPipeBase" /> 的继承类，
+    /// 获取当前的连接管道，管道类型为 <see cref="Pipe.CommunicationPipe" /> 的继承类，
     /// 内置 <see cref="PipeTcpNet" /> 管道和 <see cref="PipeSerialPort" /> 管道。
     /// </summary>
     [NotNull]
-    protected NetworkPipeBase? NetworkPipe { get; init; }
-
-    /// <summary>
-    /// 组件的日志工具。
-    /// </summary>
-    public ILogger? Logger { get; set; }
+    protected CommunicationPipe? CommunicationPipe { get; init; }
 
     /// <summary>
     /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈。
     /// </summary>
     public int ReceiveTimeout
     {
-        get => NetworkPipe.ReceiveTimeout;
-        set => NetworkPipe.ReceiveTimeout = value;
+        get => CommunicationPipe.ReceiveTimeout;
+        set => CommunicationPipe.ReceiveTimeout = value;
     }
 
     /// <summary>
@@ -128,7 +123,7 @@ public abstract class BinaryCommunication
     /// <returns>接收的完整的报文信息</returns>
     protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
-        return await ReadFromCoreServerAsync(NetworkPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
+        return await ReadFromCoreServerAsync(CommunicationPipe, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -139,7 +134,7 @@ public abstract class BinaryCommunication
     /// <param name="hasResponseData">是否有等待的数据返回</param>
     /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写 <see cref="PackCommandWithHeader" /> 方法后才会有影响</param>
     /// <returns>是否成功的结果对象</returns>
-    protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         // HACK: 优化，此方法逻辑可以移至上述方法并移除
 

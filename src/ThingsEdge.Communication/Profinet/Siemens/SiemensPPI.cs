@@ -46,42 +46,42 @@ public class SiemensPPI : DeviceSerialPort, ISiemensPPI, IReadWriteNet
 
     public override Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        return SiemensPPIHelper.ReadAsync(this, address, length, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.ReadAsync(this, address, length, Station, CommunicationPipe.AsyncLock);
     }
 
     public override Task<OperateResult<bool>> ReadBoolAsync(string address)
     {
-        return SiemensPPIHelper.ReadBoolAsync(this, address, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.ReadBoolAsync(this, address, Station, CommunicationPipe.AsyncLock);
     }
 
     public override Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
     {
-        return SiemensPPIHelper.ReadBoolAsync(this, address, length, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.ReadBoolAsync(this, address, length, Station, CommunicationPipe.AsyncLock);
     }
 
     public override Task<OperateResult> WriteAsync(string address, byte[] data)
     {
-        return SiemensPPIHelper.WriteAsync(this, address, data, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.WriteAsync(this, address, data, Station, CommunicationPipe.AsyncLock);
     }
 
     public override Task<OperateResult> WriteAsync(string address, bool[] values)
     {
-        return SiemensPPIHelper.WriteAsync(this, address, values, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.WriteAsync(this, address, values, Station, CommunicationPipe.AsyncLock);
     }
   
     public Task<OperateResult> StartAsync(string parameter = "")
     {
-        return SiemensPPIHelper.StartAsync(this, parameter, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.StartAsync(this, parameter, Station, CommunicationPipe.AsyncLock);
     }
 
     public Task<OperateResult> StopAsync(string parameter = "")
     {
-        return SiemensPPIHelper.StopAsync(this, parameter, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.StopAsync(this, parameter, Station, CommunicationPipe.AsyncLock);
     }
 
     public Task<OperateResult<string>> ReadPlcTypeAsync(string parameter = "")
     {
-        return SiemensPPIHelper.ReadPlcTypeAsync(this, parameter, Station, NetworkPipe.Lock);
+        return SiemensPPIHelper.ReadPlcTypeAsync(this, parameter, Station, CommunicationPipe.AsyncLock);
     }
 
     /// <inheritdoc />

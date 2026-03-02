@@ -5,7 +5,7 @@ namespace ThingsEdge.Communication.Core;
 /// <summary>
 /// Communication的一些静态辅助方法。
 /// </summary>
-public static class CommHelper
+public static class CommunicationHelper
 {
     /// <summary>
     /// 解析地址的附加参数方法，比如你的地址是s=100;D100，可以提取出"s"的值的同时，修改地址本身，如果"s"不存在的话，返回给定的默认值。
@@ -30,7 +30,7 @@ public static class CommHelper
     {
         try
         {
-            var match = Regex.Match(address, paraName + "=[0-9A-Fa-fxX]+;", RegexOptions.IgnoreCase);
+            var match = Regex.Match(address, $"{paraName}=[0-9A-Fa-fxX]+;", RegexOptions.IgnoreCase);
             if (!match.Success)
             {
                 return new OperateResult<int>("Address [" + address + "] can't find [" + paraName + "] Parameters. for example : " + paraName + "=1;100");

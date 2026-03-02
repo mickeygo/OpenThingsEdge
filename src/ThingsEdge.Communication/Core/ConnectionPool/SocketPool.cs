@@ -15,7 +15,7 @@ internal sealed class SocketPool(string host, int port, int maxSize) : IDisposab
     private readonly SemaphoreSlim _semaphore = new(maxSize, maxSize); // 设置初始信号和并发访问数量都为 maxSize
     private int _currentSize;
 
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     /// <summary>
     /// 获取当前连接池连成功创建接数的数量。

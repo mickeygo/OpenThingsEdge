@@ -43,14 +43,14 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
     {
         if (AutoChangeBaudRate)
         {
-            return await NetworkPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
+            return await CommunicationPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
         }
         return await base.InitializationOnConnectAsync().ConfigureAwait(false);
     }
 
     public override async Task<OperateResult> OpenAsync()
     {
-        if (NetworkPipe is not PipeSerialPort pipeSerialPort)
+        if (CommunicationPipe is not PipeSerialPort pipeSerialPort)
         {
             return new OperateResult("PipeSerialPort get failed");
         }
@@ -61,14 +61,14 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
         {
             // 先切换到波特率 9600 进行处理。
             pipeSerialPort.GetPipe().BaudRate = 9600;
-            OperateResult operateResult = await NetworkPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
+            OperateResult operateResult = await CommunicationPipe.CreateAndConnectPipeAsync().ConfigureAwait(false);
             if (!operateResult.IsSuccess)
             {
                 return operateResult;
             }
             for (var i = 0; i < 3; i++)
             {
-                var operateResult2 = await NetworkPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
+                var operateResult2 = await CommunicationPipe.ReadFromCoreServerAsync(GetNewNetMessage(), [5], hasResponseData: true).ConfigureAwait(false);
                 if (!operateResult2.IsSuccess)
                 {
                     return operateResult2;
@@ -91,7 +91,7 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
                 19200 => [2, 65, 49, 3, 55, 53],
                 _ => [2, 65, 53, 3, 55, 57],
             };
-            var operateResult3 = await NetworkPipe.ReadFromCoreServerAsync(GetNewNetMessage(), sendValue, hasResponseData: true).ConfigureAwait(false);
+            var operateResult3 = await CommunicationPipe.ReadFromCoreServerAsync(GetNewNetMessage(), sendValue, hasResponseData: true).ConfigureAwait(false);
             if (!operateResult3.IsSuccess)
             {
                 return operateResult3;
@@ -100,7 +100,7 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
             {
                 return new OperateResult("check 0x06 back after send data failed!");
             }
-            NetworkPipe.ClosePipe();
+            CommunicationPipe.ClosePipe();
 
             // 处理后关闭连接，再切换到原有的波特率。
             pipeSerialPort.GetPipe().BaudRate = baudRate;
@@ -146,6 +146,6 @@ public class MelsecFxSerial : DeviceSerialPort, IMelsecFxSerial, IReadWriteNet
 
     public override string ToString()
     {
-        return $"MelsecFxSerial[{NetworkPipe}]";
+        return $"MelsecFxSerial[{CommunicationPipe}]";
     }
 }

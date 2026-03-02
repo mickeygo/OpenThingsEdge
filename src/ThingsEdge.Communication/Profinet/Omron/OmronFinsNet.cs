@@ -162,7 +162,7 @@ public class OmronFinsNet : DeviceTcpNet, IOmronFins, IReadWriteDevice, IReadWri
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read = await ReadFromCoreServerAsync(NetworkPipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
+        var read = await ReadFromCoreServerAsync(CommunicationPipe, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return read;

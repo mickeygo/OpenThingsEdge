@@ -5,8 +5,7 @@ namespace ThingsEdge.Exchange.Contracts.Variables;
 /// <summary>
 /// 标记。
 /// </summary>
-/// <remarks>此处定义了 Tag 的必要属性，根据不同使用场景，可通过扩展该类定义一下自定义属性。</remarks>
-public partial class Tag
+public class Tag
 {
     /// <summary>
     /// 全局唯一值。
@@ -36,34 +35,6 @@ public partial class Tag
     /// </summary>
     [JsonRequired, JsonConverter(typeof(JsonStringEnumConverter))]
     public TagDataType DataType { get; init; }
-
-    /// <summary>
-    /// 扫描速率（毫秒），默认100ms。
-    /// </summary>
-    /// <remarks>只有作为触发信号时才有效。</remarks>
-    public int ScanRate { get; init; } = 100;
-
-    /// <summary>
-    /// 标记标识。
-    /// </summary>
-    /// <remarks>只有作为触发型号时才有效。</remarks>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagFlag Flag { get; init; } = TagFlag.Normal;
-
-    /// <summary>
-    /// 是否每次扫描后推送数据，为 true 时表示只有在数据有变化的情况下才会推送数据，默认为 <see cref="PublishMode.OnlyDataChanged"/>。
-    /// </summary>
-    /// <remarks>
-    /// 注：仅适用 <see cref="TagFlag.Notice"/> 标记。
-    /// </remarks>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public PublishMode PublishMode { get; init; } = PublishMode.OnlyDataChanged;
-
-    /// <summary>
-    /// <see cref="TagFlag.Notice"/> 和 <see cref="TagFlag.Trigger"/> 类型的标记集合，在该标记触发时集合中的标记数据也同时一起随着推送。
-    /// </summary>
-    [NotNull]
-    public List<Tag>? NormalTags { get; init; } = [];
 
     /// <summary>
     /// 扩展数据。

@@ -7,6 +7,5 @@ public sealed class UnconnectedException : CommunicationException
 {
     public UnconnectedException() : base("还未连接服务器，不能进行数据读写操作")
     {
-        
     }
 }

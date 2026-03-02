@@ -58,7 +58,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
             return ini;
         }
 
-        var read = await ReadFromCoreServerAsync(NetworkPipe,
+        var read = await ReadFromCoreServerAsync(CommunicationPipe,
             AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
@@ -167,7 +167,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
     /// <inheritdoc />
     public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
     {
-        CommHelper.ExtractParameter(ref address, "type", 0);
+        CommunicationHelper.ExtractParameter(ref address, "type", 0);
         if (length == 1)
         {
             var read = await ReadWithTypeAsync([address], [length]).ConfigureAwait(false);
@@ -269,7 +269,7 @@ public class OmronConnectedCipNet : NetworkConnectedCip, IReadWriteCip, IReadWri
 
     public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] data, int length = 1)
     {
-        typeCode = (ushort)CommHelper.ExtractParameter(ref address, "type", typeCode);
+        typeCode = (ushort)CommunicationHelper.ExtractParameter(ref address, "type", typeCode);
         var command = BuildWriteCommand(address, typeCode, data, length);
         if (!command.IsSuccess)
         {

@@ -27,7 +27,7 @@ public static class ByteTransformHelper
         catch (Exception ex)
         {
             var operateResult = new OperateResult<TResult>(
-                (int)CommErrorCode.DataTransformError,
+                (int)ErrorCode.DataTransformError,
                 $"{StringResources.Language.DataTransformError} {result.Content.ToHexString()} : Length({result.Content?.Length}) {ex.Message}");
             return operateResult;
         }
@@ -66,7 +66,7 @@ public static class ByteTransformHelper
         }
         catch (Exception ex)
         {
-            return new OperateResult<TResult>((int)CommErrorCode.DataTransformError, StringResources.Language.DataTransformError + " " + ex.Message);
+            return new OperateResult<TResult>((int)ErrorCode.DataTransformError, StringResources.Language.DataTransformError + " " + ex.Message);
         }
     }
 

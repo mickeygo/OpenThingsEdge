@@ -1,5 +1,3 @@
-using ThingsEdge.Communication.Common.Extensions;
-
 namespace ThingsEdge.Communication.Core.IMessage;
 
 /// <summary>

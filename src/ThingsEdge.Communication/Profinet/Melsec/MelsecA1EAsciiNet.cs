@@ -67,7 +67,7 @@ public class MelsecA1EAsciiNet : DeviceTcpNet
     {
         if (address.IndexOf('.') > 0)
         {
-            return await CommHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
+            return await CommunicationHelper.ReadBoolAsync(this, address, length).ConfigureAwait(false);
         }
         var command = BuildReadCommand(address, length, isBit: true, PLCNumber);
         if (!command.IsSuccess)

@@ -343,8 +343,8 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
     {
         if (!_isClosed)
         {
-            NetworkPipe.ClosePipe();
-            NetworkPipe.Dispose();
+            CommunicationPipe.ClosePipe();
+            CommunicationPipe.Dispose();
 
             _isClosed = true;
         }
@@ -366,12 +366,14 @@ public abstract class DeviceCommunication : BinaryCommunication, IReadWriteDevic
         {
             Dispose(disposing: true);
             _disposedValue = true;
+
+            GC.SuppressFinalize(this);
         }
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"DeviceCommunication<{ByteTransform}>{{{NetworkPipe}}}";
+        return $"DeviceCommunication<{ByteTransform}>{{{CommunicationPipe}}}";
     }
 }

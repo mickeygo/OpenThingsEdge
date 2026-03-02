@@ -271,9 +271,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, string address, ushort length, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, string address, ushort length, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
@@ -290,9 +290,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult<bool>> ReadBoolAsync(IReadWriteDevice plc, string address, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult<bool>> ReadBoolAsync(IReadWriteDevice plc, string address, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildReadCommand(station2, address, 1, isBit: true);
         if (!operateResult.IsSuccess)
         {
@@ -329,16 +329,16 @@ public static class SiemensPPIHelper
         }
     }
 
-    public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice plc, string address, ushort length, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult<bool[]>> ReadBoolAsync(IReadWriteDevice plc, string address, ushort length, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = AnalysisAddress(address);
         if (!operateResult.IsSuccess)
         {
             return OperateResult.CreateFailedResult<bool[]>(operateResult);
         }
 
-        CommHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommunicationHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         operateResult.Content.AddressStart = newStart;
         operateResult.Content.Length = byteLength;
         var operateResult2 = await ReadAsync(plc, operateResult.Content, operateResult.Content.Length, station2, asyncLock).ConfigureAwait(false);
@@ -349,7 +349,7 @@ public static class SiemensPPIHelper
         return OperateResult.CreateSuccessResult(operateResult2.Content.ToBoolArray().SelectMiddle(offset, length));
     }
 
-    private static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, S7AddressData address, ushort length, byte station, ICommAsyncLock asyncLock)
+    private static async Task<OperateResult<byte[]>> ReadAsync(IReadWriteDevice plc, S7AddressData address, ushort length, byte station, ICommunicationAsyncLock asyncLock)
     {
         var operateResult = BuildReadCommand(station, address, length, isBit: false);
         if (!operateResult.IsSuccess)
@@ -392,9 +392,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, byte[] value, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, byte[] value, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildWriteCommand(station2, address, value);
         if (!operateResult.IsSuccess)
         {
@@ -435,9 +435,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>带返回结果的结果对象</returns>
-    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, bool[] value, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult> WriteAsync(IReadWriteDevice plc, string address, bool[] value, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref address, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref address, "s", station);
         var operateResult = BuildWriteCommand(station2, address, value);
         if (!operateResult.IsSuccess)
         {
@@ -477,9 +477,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>是否启动成功</returns>
-    public static async Task<OperateResult> StartAsync(IReadWriteDevice plc, string parameter, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult> StartAsync(IReadWriteDevice plc, string parameter, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
         var obj = new byte[39]
         {
             104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
@@ -518,9 +518,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>是否停止成功</returns>
-    public static async Task<OperateResult> StopAsync(IReadWriteDevice plc, string parameter, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult> StopAsync(IReadWriteDevice plc, string parameter, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
         var obj = new byte[35]
         {
             104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
@@ -559,9 +559,9 @@ public static class SiemensPPIHelper
     /// <param name="station">当前的站号信息</param>
     /// <param name="asyncLock">当前的同通信锁</param>
     /// <returns>包含是否成功的结果对象</returns>
-    public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteDevice plc, string parameter, byte station, ICommAsyncLock asyncLock)
+    public static async Task<OperateResult<string>> ReadPlcTypeAsync(IReadWriteDevice plc, string parameter, byte station, ICommunicationAsyncLock asyncLock)
     {
-        var station2 = (byte)CommHelper.ExtractParameter(ref parameter, "s", station);
+        var station2 = (byte)CommunicationHelper.ExtractParameter(ref parameter, "s", station);
         var operateResult = BuildReadCommand(station2, "SYS0", 20, isBit: false);
         if (!operateResult.IsSuccess)
         {

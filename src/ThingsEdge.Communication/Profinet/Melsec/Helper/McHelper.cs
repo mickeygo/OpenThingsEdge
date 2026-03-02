@@ -125,7 +125,7 @@ public static class McHelper
     {
         if (supportWordAdd && address.IndexOf('.') > 0)
         {
-            return await CommHelper.ReadBoolAsync(mc, address, length).ConfigureAwait(false);
+            return await CommunicationHelper.ReadBoolAsync(mc, address, length).ConfigureAwait(false);
         }
         var addressResult = mc.McAnalysisAddress(address, length, isBit: true);
         if (!addressResult.IsSuccess)
@@ -258,7 +258,7 @@ public static class McHelper
     {
         if (length.Length != address.Length)
         {
-            return new OperateResult<byte[]>((int)CommErrorCode.TwoParametersLengthIsNotSame, StringResources.Language.TwoParametersLengthIsNotSame);
+            return new OperateResult<byte[]>((int)ErrorCode.TwoParametersLengthIsNotSame, StringResources.Language.TwoParametersLengthIsNotSame);
         }
         var mcAddressDatas = new McAddressData[address.Length];
         for (var i = 0; i < address.Length; i++)

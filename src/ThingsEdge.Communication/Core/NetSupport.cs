@@ -46,7 +46,7 @@ internal static class NetSupport
         catch (SocketException ex)
         {
             socket.Close();
-            return new OperateResult<byte[]>((int)CommErrorCode.SocketSendException, ex.Message);
+            return new OperateResult<byte[]>((int)ErrorCode.SocketSendException, ex.Message);
         }
     }
 
@@ -91,7 +91,7 @@ internal static class NetSupport
             if (count == 0)
             {
                 socket.Close();
-                return new OperateResult<int>((int)CommErrorCode.RemoteClosedConnection, StringResources.Language.RemoteClosedConnection);
+                return new OperateResult<int>((int)ErrorCode.RemoteClosedConnection, StringResources.Language.RemoteClosedConnection);
             }
             return OperateResult.CreateSuccessResult(count);
         }
@@ -99,13 +99,13 @@ internal static class NetSupport
         {
             Debug.WriteLine("超时取消，关闭 Socket");
             socket.Close();
-            return new OperateResult<int>((int)CommErrorCode.ReceiveDataTimeout, StringResources.Language.ReceiveDataTimeout + timeout);
+            return new OperateResult<int>((int)ErrorCode.ReceiveDataTimeout, StringResources.Language.ReceiveDataTimeout + timeout);
         }
         catch (SocketException ex)
         {
             Debug.WriteLine($"Socket异常，关闭 Socket，{ex.Message}");
             socket.Close();
-            return new OperateResult<int>((int)CommErrorCode.SocketException, "Socket Exception -> " + ex.Message);
+            return new OperateResult<int>((int)ErrorCode.SocketException, "Socket Exception -> " + ex.Message);
         }
     }
 }

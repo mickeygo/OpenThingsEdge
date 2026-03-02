@@ -9,11 +9,6 @@ namespace ThingsEdge.Communication.Core;
 public interface IReadWriteNet
 {
     /// <summary>
-    /// 组件的日志工具。
-    /// </summary>
-    ILogger? Logger { get; set; }
-
-    /// <summary>
     /// 当前连接的唯一ID号，默认为长度20的guid码加随机数组成，方便列表管理，也可以自己指定。
     /// </summary>
     /// <remarks>

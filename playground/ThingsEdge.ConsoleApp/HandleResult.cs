@@ -18,7 +18,7 @@ public sealed class HandleResult
     /// <summary>
     /// 内部错误代码。
     /// </summary>
-    public int InnerErrorCode { get; set; }
+    public int InnerErrorCode { get; init; }
 
     /// <summary>
     /// 要后续处理的数据。

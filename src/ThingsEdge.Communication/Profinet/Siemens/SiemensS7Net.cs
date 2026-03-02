@@ -217,9 +217,22 @@ public sealed class SiemensS7Net : DeviceTcpNet
     }
 
     /// <summary>
-    /// 获取当前西门子的PDU的长度信息，不同型号PLC的值会不一样。
+    /// 获取当前西门子的PDU的协商长度，该长度指定 PLC 一次可发送多少byte数据，不同型号PLC的值会不一样。
     /// </summary>
-    public int PDULength { get; private set; } = 200;
+    /// <remarks>
+    /// 并不是所有 Siemens S7-1500 都支持 960，使用老版本固件，或为了兼容旧协议栈，或受连接方式影响（VPN、防火墙、NAT等）都有可能导致 PDU 下降，
+    /// 同时连接数多时 PLC 会动态降低每个连接的 PDU。
+    /// </remarks>
+    public int PDULength { get; private set; }
+
+    /// <summary>
+    /// 获取或设置PDU长度。
+    /// </summary>
+    /// <remarks>
+    /// 允许一次性读取的最大 PDU 长度（byte数量），0 表示不指定。
+    /// 西门子 S7 协议批量读取时 PDU 超过最大长度会出现异常，这时可指定最大长度，一次批量读取时内部按最大长度切分到多次读取。
+    /// </remarks>
+    public int PDUCustomLength { get; init; }
 
     /// <summary>
     /// 实例化一个西门子的S7协议的通讯对象并指定Ip地址。
@@ -276,12 +289,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
 
     protected override async Task<OperateResult> InitializationOnConnectAsync()
     {
-        var read_first = await ReadFromCoreServerAsync(NetworkPipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
+        var read_first = await ReadFromCoreServerAsync(CommunicationPipe, _plcHead1, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
         if (!read_first.IsSuccess)
         {
             return read_first;
         }
-        var read_second = await ReadFromCoreServerAsync(NetworkPipe, _plcHead2, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
+        var read_second = await ReadFromCoreServerAsync(CommunicationPipe, _plcHead2, hasResponseData: true, usePackAndUnpack: true).ConfigureAwait(false);
         if (!read_second.IsSuccess)
         {
             return read_second;
@@ -292,11 +305,12 @@ public sealed class SiemensS7Net : DeviceTcpNet
         {
             PDULength = 200;
         }
+
         _incrementCount = new IncrementCounter(65535L, 1L);
         return OperateResult.CreateSuccessResult();
     }
 
-    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(NetworkPipeBase pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
+    protected override async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(CommunicationPipe pipe, byte[] send, bool hasResponseData, bool usePackAndUnpack)
     {
         OperateResult<byte[]> read;
         byte[] content;
@@ -492,7 +506,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
         }
         return OperateResult.CreateSuccessResult();
     }
-  
+
     public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
     {
         return ByteTransformHelper.GetResultFromBytes(await ReadBitFromPLCAsync(address).ConfigureAwait(false), (m) => m[0] != 0);
@@ -506,7 +520,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
 
-        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+        CommunicationHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
@@ -596,7 +610,7 @@ public sealed class SiemensS7Net : DeviceTcpNet
             return OperateResult.CreateFailedResult<bool[]>(analysis);
         }
 
-        CommHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
+        CommunicationHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, (ushort)values.Length, out var newStart, out var byteLength, out var offset);
         analysis.Content.AddressStart = newStart;
         analysis.Content.Length = byteLength;
         var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);

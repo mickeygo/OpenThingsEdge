@@ -1,5 +1,4 @@
 using ThingsEdge.Communication.Common;
-using ThingsEdge.Communication.Common.Extensions;
 using ThingsEdge.Communication.Core;
 using ThingsEdge.Communication.Core.Address;
 
@@ -96,7 +95,7 @@ internal static class SiemensS7Helper
             s7AddressData.Length = num;
             list.Add(s7AddressData);
         }
-        return list.ToArray();
+        return [.. list];
     }
 
     /// <summary>

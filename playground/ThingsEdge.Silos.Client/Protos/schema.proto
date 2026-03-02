@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package ThinsEdge.Silos.Grpc;
+
+message Schema {
+  string channelName = 1;
+  string deviceName = 2;
+  string tagGroupName = 3;
+}
