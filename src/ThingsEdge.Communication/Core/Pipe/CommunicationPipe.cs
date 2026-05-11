@@ -371,8 +371,9 @@ namespace ThingsEdge.Communication.Core.Pipe;
         if (!_disposed)
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
             _disposed = true;
+
+            GC.SuppressFinalize(this);
         }
     }
 }
