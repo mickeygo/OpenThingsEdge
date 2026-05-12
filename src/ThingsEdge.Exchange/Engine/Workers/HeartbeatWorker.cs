@@ -9,7 +9,8 @@ namespace ThingsEdge.Exchange.Engine.Workers;
 /// <summary>
 /// 监控心跳的工作者。
 /// </summary>
-internal sealed class HeartbeatWorker(IMessageBroker<HeartbeatMessage> broker,
+internal sealed class HeartbeatWorker(
+    IMessageBroker<HeartbeatMessage> broker,
     IOptions<ExchangeOptions> options,
     ILogger<HeartbeatWorker> logger) : IWorker
 {

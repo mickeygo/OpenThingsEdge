@@ -9,7 +9,8 @@ namespace ThingsEdge.Exchange.Engine.Workers;
 /// <summary>
 /// 监控通知的工作者。
 /// </summary>
-internal sealed class NoticeWorker(IMessageBroker<NoticeMessage> broker,
+internal sealed class NoticeWorker(
+    IMessageBroker<NoticeMessage> broker,
     IOptions<ExchangeOptions> options,
     ILogger<NoticeWorker> logger) : IWorker
 {

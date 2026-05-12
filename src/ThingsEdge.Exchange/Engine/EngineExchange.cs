@@ -8,7 +8,8 @@ namespace ThingsEdge.Exchange.Engine;
 /// <summary>
 /// 数据交换引擎。
 /// </summary>
-internal sealed class EngineExchange(IAddressFactory addressFactory,
+internal sealed class EngineExchange(
+    IAddressFactory addressFactory,
     ITagDataSnapshot tagDataSnapshot,
     IDriverConnectorManager driverConnectorManager,
     EngineExecutor engineExcutor,
