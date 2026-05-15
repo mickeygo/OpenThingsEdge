@@ -20,18 +20,19 @@
     <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.80.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.80.0" />
     <PackageVersion Include="Humanizer.Core" Version="3.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageVersion Include="Moq" Version="4.20.70" />
     <PackageVersion Include="MQTTnet" Version="5.1.0.1559" />
     <PackageVersion Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
+    <PackageVersion Include="Proto.Actor" Version="1.8.0" />
     <PackageVersion Include="Serilog" Version="4.3.1" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageVersion Include="System.IO.Ports" Version="10.0.7" />
+    <PackageVersion Include="System.IO.Ports" Version="10.0.8" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="xunit.v3" Version="3.2.2" />
   </ItemGroup>

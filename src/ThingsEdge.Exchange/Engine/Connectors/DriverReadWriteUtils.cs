@@ -112,7 +112,7 @@ internal static class DriverReadWriteUtils
             return tag.DataType switch
             {
                 TagDataType.Bit => MakeResult(await driver.WriteAsync(tag.Address, (bool)data).ConfigureAwait(false)),
-                TagDataType.Byte => MakeResult(await driver.WriteAsync(tag.Address, new byte[] { (byte)data }).ConfigureAwait(false)),
+                TagDataType.Byte => MakeResult(await driver.WriteAsync(tag.Address, [(byte)data]).ConfigureAwait(false)),
                 TagDataType.Word => MakeResult(await driver.WriteAsync(tag.Address, (ushort)data).ConfigureAwait(false)),
                 TagDataType.DWord => MakeResult(await driver.WriteAsync(tag.Address, (uint)data).ConfigureAwait(false)),
                 TagDataType.Int => MakeResult(await driver.WriteAsync(tag.Address, (short)data).ConfigureAwait(false)),

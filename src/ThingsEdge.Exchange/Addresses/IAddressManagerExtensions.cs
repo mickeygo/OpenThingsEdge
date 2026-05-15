@@ -9,7 +9,7 @@ public static class IAddressManagerExtensions
     /// </summary>
     /// <param name="addressFactory"></param>
     /// <returns></returns>
-    public static List<Device> ReloadAddress(this IAddressFactory addressFactory)
+    public static IReadOnlyCollection<Device> ReloadAddress(this IAddressFactory addressFactory)
     {
         addressFactory.Refresh();
         return addressFactory.GetDevices();
@@ -20,10 +20,10 @@ public static class IAddressManagerExtensions
     /// </summary>
     /// <param name="addressFactory"></param>
     /// <returns></returns>
-    public static List<Device> GetDevices(this IAddressFactory addressFactory)
+    public static IReadOnlyCollection<Device> GetDevices(this IAddressFactory addressFactory)
     {
         var channels = addressFactory.GetChannels();
-        return channels.SelectMany(s => s.Devices).ToList();
+        return [.. channels.SelectMany(s => s.Devices)];
     }
 
     /// <summary>
